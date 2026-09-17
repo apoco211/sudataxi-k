@@ -1,7 +1,7 @@
 {
   "name": "수다택시 K",
   "short_name": "수다택시K",
-  "description": "v10 복귀경로 검색 - 현재 위치 + 안양 복귀 경로 주변 콜 많은 곳, 카카오내비만",
+  "description": "v11 아이폰 대응 - 카카오내비 intent/kakaonavi, 복귀경로 검색",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#121212",
