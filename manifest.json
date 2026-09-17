@@ -1,7 +1,7 @@
 {
   "name": "수다택시 K",
   "short_name": "수다택시K",
-  "description": "v17 최종 - 모드1 위수지역 안에서 콜 많은 곳(군포가장가까운), 모드2 복귀경로, 아이폰 카카오맵 유니버설로 URL오류 해결",
+  "description": "v18 네비 직접 - kakaonavi:// a.click() 방식으로 URL오류 해결, 모드1 위수지역 안, 모드2 복귀경로",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#121212",
