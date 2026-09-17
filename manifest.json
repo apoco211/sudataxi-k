@@ -1,7 +1,7 @@
 {
   "name": "수다택시 K",
   "short_name": "수다택시K",
-  "description": "하차 후 콜 많은 곳 TOP3 + 바로 카카오내비 + 탑승 위치 3중 백업",
+  "description": "하차 후 콜 많은 곳 TOP3 + 카카오내비 + 탑승 3중 백업 - v7 현재위치표시 모드2수정",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#121212",
