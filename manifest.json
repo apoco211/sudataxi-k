@@ -1,7 +1,7 @@
 {
   "name": "수다택시 K",
   "short_name": "수다택시K",
-  "description": "하차 후 콜 많은 곳 TOP3 + 카카오내비 + 탑승 3중 백업 - v7 현재위치표시 모드2수정",
+  "description": "v10 복귀경로 검색 - 현재 위치 + 안양 복귀 경로 주변 콜 많은 곳, 카카오내비만",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#121212",
