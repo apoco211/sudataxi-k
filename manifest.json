@@ -1,24 +1,9 @@
 {
-  "name": "수다택시 K",
+  "name": "수다택시 K v31",
   "short_name": "수다택시K",
-  "description": "v18 네비 직접 - kakaonavi:// a.click() 방식으로 URL오류 해결, 모드1 위수지역 안, 모드2 복귀경로",
-  "start_url": "./",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#121212",
-  "theme_color": "#FFC800",
-  "orientation": "portrait",
-  "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ]
+  "background_color": "#ffffff",
+  "theme_color": "#facc15",
+  "icons": []
 }
