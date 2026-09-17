@@ -1,0 +1,24 @@
+{
+  "name": "수다택시 K",
+  "short_name": "수다택시K",
+  "description": "하차 후 콜 많은 곳 TOP3 + 바로 카카오내비 + 탑승 위치 3중 백업",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#FFC800",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
