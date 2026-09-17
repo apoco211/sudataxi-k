@@ -1,23 +1,20 @@
-# 수다택시 K v18 - 네비 직접 연결 최종
+# 수다택시 K v31 - 군포·안양·과천·의왕
 
-## v18 핵심 - 카카오내비 직접 (맵 아님)
-- iPhone "유효하지 않은 URL" 해결: iframe → <a> 태그 click() 방식
-  const a = document.createElement('a');
-  a.href = `kakaonavi://navigate?name=...&x=...&y=...`;
-  a.target = '_blank';
-  a.click();
-- App Store 자동 이동 삭제, 팝업 삭제
-- 버튼: [카카오내비로 가기] 하나만 (네비 직접)
-- Android: intent:// 그대로
+택시 위수지역 전용 네비게이션
 
-## 모드 로직 (유지)
-- 모드1 = 위수지역 안에서 콜 많은 곳 (안양 10km 이내 30곳만, 수원에서 군포/금정이 가장 가까운 곳)
-- 모드2 = 복귀 경로 (cur+spot_home <= cur_home*1.3 AND spot_home < cur_home = +30)
-- 거리 표시: "가장 가까운 곳: 군포역 11km" / "현재서 2.8km · 군포역까지 5.4km"
-- 나머지 절대 안바꿈
+- **위수지역:** 군포·안양·과천·의왕 (중심 37.3823,126.9619 반경 12km)
+- **모드1:** 위수지역 안 → 현재서 거리순 3개
+- **모드2:** 위수지역 밖 → 복귀 경로상 위수지역 내 3개
+- **실시간:** 주변 5km 실시간 검색 (Overpass)
+- **네비:** 지명 복사로 카카오내비 연동
 
-## 배포
-1. github.com/new → sudataxi-k Public
-2. 6개 파일 업로드
-3. Settings > Pages > main / root
-4. iPhone 사파리 → https://YOUR_ID.github.io/sudataxi-k/ → 공유 → 홈 화면에 추가
+## GitHub Pages 배포 방법
+
+1. 깃허브에서 새 레포 만들기 `sudataxi-k` (Public)
+2. 이 폴더 내용 전부 업로드
+3. Settings > Pages > Source: GitHub Actions 선택
+4. main 브랜치에 push 하면 자동 배포
+5. 주소: `https://계정명.github.io/sudataxi-k/`
+
+## 로컬 테스트
+`index.html` 더블클릭으로 바로 실행 가능
