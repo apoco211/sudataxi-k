@@ -1,7 +1,7 @@
 {
   "name": "수다택시 K",
   "short_name": "수다택시K",
-  "description": "v11 아이폰 대응 - 카카오내비 intent/kakaonavi, 복귀경로 검색",
+  "description": "v13 아이폰 유니버설링크 - https://kakaonavi.kakao.com/launch/ 로 URL오류 해결, 복귀경로 검색",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#121212",
