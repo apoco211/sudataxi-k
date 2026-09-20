@@ -1,9 +1,9 @@
 {
-  "name": "수다택시K v53.7",
+  "name": "수다택시K v54.3",
   "short_name": "수다택시K",
-  "description": "콜 많은 곳 찾기 - v53.7 taxi icon",
-  "version": "53.7",
-  "start_url": "./?v=537",
+  "description": "콜 많은 곳 찾기 - v54.3 taxi icon",
+  "version": "54.3",
+  "start_url": "./?v=543",
   "display": "standalone",
   "background_color": "#FFC800",
   "theme_color": "#FFC800",
