@@ -1,27 +1,37 @@
 {
-  "name": "수다택시K v54.3",
-  "short_name": "수다택시K",
-  "description": "콜 많은 곳 찾기 - v54.3 taxi icon",
-  "version": "54.3",
-  "start_url": "./?v=543",
+  "background_color": "#121212",
+  "categories": [
+    "navigation",
+    "travel",
+    "utilities"
+  ],
+  "description": "안양·군포·의왕·과천 통합사업구역 택시 콜 많은 곳 찾기 - 모드1 최종 5역 고정(범계/안양/산본/인덕원/금정) + 길목 3곳",
   "display": "standalone",
-  "background_color": "#FFC800",
-  "theme_color": "#FFC800",
   "icons": [
     {
-      "src": "./icon-180.png",
-      "sizes": "180x180",
-      "type": "image/png"
-    },
-    {
-      "src": "./icon-192.png",
+      "purpose": "any maskable",
       "sizes": "192x192",
+      "src": "./icon-192.png",
       "type": "image/png"
     },
     {
-      "src": "./icon-512.png",
+      "purpose": "any maskable",
       "sizes": "512x512",
+      "src": "./icon-512.png",
+      "type": "image/png"
+    },
+    {
+      "purpose": "any",
+      "sizes": "180x180",
+      "src": "./icon-180.png",
       "type": "image/png"
     }
-  ]
+  ],
+  "lang": "ko-KR",
+  "name": "수다택시K v56.3",
+  "orientation": "portrait",
+  "scope": "./",
+  "short_name": "수다택시",
+  "start_url": "./?v=563",
+  "theme_color": "#FFC800"
 }
