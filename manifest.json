@@ -1,37 +1,37 @@
 {
-  "background_color": "#121212",
-  "categories": [
-    "navigation",
-    "travel",
-    "utilities"
-  ],
-  "description": "안양·군포·의왕·과천 통합사업구역 택시 콜 많은 곳 찾기 - 모드1 최종 5역 고정(범계/안양/산본/인덕원/금정) + 길목 3곳",
+  "name": "수다택시 K - 주변 콜 많은 곳 찾기",
+  "short_name": "수다택시K",
+  "description": "안양·군포·의왕·과천 통합사업구역 콜 많은 곳 TOP3 + 탑승장소 저장",
+  "start_url": "./?v=59",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#121212",
+  "theme_color": "#FFC800",
   "icons": [
     {
-      "purpose": "any maskable",
-      "sizes": "192x192",
-      "src": "./icon-192.png",
-      "type": "image/png"
-    },
-    {
-      "purpose": "any maskable",
-      "sizes": "512x512",
-      "src": "./icon-512.png",
-      "type": "image/png"
-    },
-    {
-      "purpose": "any",
-      "sizes": "180x180",
       "src": "./icon-180.png",
-      "type": "image/png"
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ],
-  "lang": "ko-KR",
-  "name": "수다택시K v56.3",
-  "orientation": "portrait",
-  "scope": "./",
-  "short_name": "수다택시",
-  "start_url": "./?v=563",
-  "theme_color": "#FFC800"
+  ]
 }
