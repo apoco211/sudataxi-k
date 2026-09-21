@@ -2,66 +2,122 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>수다택시 K v60.7</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>수다택시 K v60.10</title>
 <link rel="apple-touch-icon" href="./icon-180.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png">
-<link rel="manifest" href="./manifest.json?v=607">
+<link rel="manifest" href="./manifest.json?v=610">
 <meta name="theme-color" content="#FFC800">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <script src="https://cdn.tailwindcss.com"></script>
-<style>body{background:#121212;font-family:-apple-system,BlinkMacSystemFont,sans-serif}::-webkit-scrollbar{display:none}</style>
+<style>
+body{background:#121212;font-family:-apple-system,BlinkMacSystemFont,Apple SD Gothic Neo,sans-serif;-webkit-tap-highlight-color:transparent}
+::-webkit-scrollbar{display:none}
+*{scrollbar-width:none}
+</style>
 </head>
 <body class="bg-[#121212] text-white pb-[90px]">
 <div class="max-w-[430px] mx-auto px-4 pt-4">
+  <!-- header -->
   <div class="flex justify-between items-center">
-    <h1 class="text-[22px] font-black text-[#FFC800]">주변 콜 많은 곳 찾기</h1>
-    <span class="bg-[#1E1E1E] border border-[#2A2A2A] text-[11px] font-mono text-[#666] px-2 py-1 rounded-full">수다택시 K v60.7</span>
+    <h1 class="text-[22px] font-black text-[#FFC800] tracking-tight">주변 콜 많은 곳 찾기</h1>
+    <span class="bg-[#1E1E1E] border border-[#2A2A2A] text-[11px] font-mono text-[#666] px-2.5 py-1 rounded-full">수다택시 K v60.10</span>
   </div>
+  <!-- pills -->
   <div class="flex gap-2.5 mt-4">
-    <button id="mode1" class="flex-1 h-[38px] rounded-xl text-[11px] font-extrabold bg-[#FFC800] text-black">모드1 위수지역</button>
-    <button id="mode2" class="flex-1 h-[38px] rounded-xl text-[11px] font-extrabold bg-[#2A2A2A] text-[#8A8A8A]">모드2 복귀경로</button>
+    <button id="mode1" class="flex-1 h-[38px] rounded-[12px] text-[11px] font-extrabold bg-[#FFC800] text-black">모드1 위수지역</button>
+    <button id="mode2" class="flex-1 h-[38px] rounded-[12px] text-[11px] font-extrabold bg-[#2A2A2A] text-[#8A8A8A]">모드2 복귀경로</button>
   </div>
-  <div id="locBar" class="mt-3 bg-[#2A2210] border border-[#3A2E0A] h-11 rounded-xl px-3 flex items-center text-[13px] font-mono text-[#FFC800]"></div>
-  <button id="searchBtn" class="mt-3 w-full h-[72px] rounded-[20px] bg-[#FFC800] text-black font-black text-[19px] shadow-[0_0_20px_rgba(255,200,0,0.3)]">📍 주변 콜 많은 곳 찾기</button>
-  <div id="pipeline" class="mt-2 mb-3 text-[11px] font-mono text-[#8A8A8A]"></div>
-  <div class="flex items-center gap-2 mt-2"><span class="text-[18px] font-black">🔥 TOP3</span><span id="timeBadge" class="bg-[#1E1E1E] border border-[#2A2A2A] text-[11px] text-[#777] px-2 py-1 rounded-full"></span></div>
+  <!-- locBar -->
+  <div id="locBar" class="mt-3 bg-[#2A2210] border border-[#3A2E0A] h-11 rounded-xl px-3 flex items-center text-[13px] font-mono text-[#FFC800] truncate">📍 37.3959,126.9672 위수 밖 · FINAL 인덕원역까지 1.3km</div>
+  <!-- bigBtn -->
+  <button id="searchBtn" class="mt-3 w-full h-[72px] rounded-[20px] bg-[#FFC800] text-black font-black text-[19px] shadow-[0_0_20px_rgba(255,200,0,0.25)] active:scale-[0.98] transition">📍 주변 콜 많은 곳 찾기</button>
+  <!-- pipeline -->
+  <div id="pipeline" class="mt-2 mb-1 text-[11px] font-mono text-[#8A8A8A] leading-4"></div>
+  <!-- TOP3 header -->
+  <div class="flex items-center gap-2 mt-3">
+    <span class="text-[18px] font-black">🔥 TOP3</span>
+    <span id="timeBadge" class="bg-[#1E1E1E] border border-[#2A2A2A] text-[11px] text-[#777] px-2.5 py-1 rounded-full"></span>
+  </div>
   <div id="cards" class="mt-3 flex flex-col gap-3"></div>
-  <div class="mt-4 bg-[#1E1E1E] border border-[#2A2A2A] rounded-2xl p-3">
+  <!-- call log -->
+  <div class="mt-5 bg-[#1E1E1E] border border-[#2A2A2A] rounded-[20px] p-3.5">
     <div class="text-[14px] font-extrabold">콜 로그·백업</div>
-    <div class="flex gap-2 mt-2">
+    <div class="flex gap-2 mt-3">
       <button id="exportBtn" class="flex-1 h-9 rounded-xl bg-[#2A2A2A] border border-[#333] text-[12px] font-bold">내보내기 JSON</button>
       <button id="importBtn" class="flex-1 h-9 rounded-xl bg-[#2A2A2A] border border-[#333] text-[12px] font-bold">가져오기 JSON</button>
     </div>
-    <div id="logList" class="mt-2 text-[11px] font-mono text-[#666] max-h-24 overflow-auto"></div>
+    <div id="logList" class="mt-2.5 text-[11px] font-mono text-[#666] max-h-24 overflow-auto leading-5"></div>
   </div>
+  <div class="mt-4 text-[11px] font-mono text-[#5A5A5A] text-center pb-2">v60.10 - 디자인원복 + 모드1=5역고정 / 모드2=고득점핫플</div>
 </div>
-<div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 bg-[#2A2A2A] text-white px-5 py-2.5 rounded-full text-[13px] font-bold hidden z-50"></div>
-<div class="fixed bottom-0 left-0 right-0 p-3 bg-[#121212]/95 backdrop-blur border-t-2 border-[#FFC800] z-40">
+<div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 bg-[#2A2A2A] text-white px-5 py-2.5 rounded-full text-[13px] font-bold hidden z-50 shadow-xl"></div>
+<div class="fixed bottom-0 left-0 right-0 p-3 bg-[#121212]/95 backdrop-blur-md border-t-2 border-[#FFC800] z-40">
   <div class="max-w-[430px] mx-auto h-[70px] flex items-center">
-    <button id="saveBtn" class="w-full h-16 rounded-2xl bg-[#1A1A1A] border border-[#2A2A2A] text-[#FFC800] font-black text-[16px]">📍 고객 탑승 위치 저장</button>
+    <button id="saveBtn" class="w-full h-16 rounded-[16px] bg-[#1A1A1A] border border-[#2A2A2A] text-[#FFC800] font-black text-[16px]">📍 고객 탑승 위치 저장</button>
   </div>
 </div>
 <script>
-const MAJOR_HUBS=[{name:"범계역(안양중심)",lat:37.3917,lng:126.9145,addr:"안양시 동안구 시민대로 180"},{name:"안양역(만안)",lat:37.4013,lng:126.9222,addr:"안양시 만안구 안양로 303"},{name:"산본역(군포)",lat:37.3554,lng:126.9331,addr:"군포시 번영로 30"},{name:"인덕원역(과천/안양)",lat:37.4048,lng:126.9767,addr:"안양시 동안구 인덕원로 159"},{name:"금정역(군포/안양경계)",lat:37.3721,lng:126.9438,addr:"군포시 금정동 710"}];
-const FIXED=[{name:"평촌역 먹자골목",lat:37.3905,lng:126.925,base:88,type:"station",addr:"안양시 동안구 시민대로 200"},{name:"범계역 로데오거리",lat:37.391,lng:126.914,base:90,type:"station",addr:"안양시 동안구 평촌대로 130"},{name:"산본역 중심상가",lat:37.356,lng:126.9335,base:82,type:"station",addr:"군포시 산본로 336"},{name:"인덕원역 4번출구",lat:37.405,lng:126.976,base:84,type:"station",addr:"안양시 동안구 인덕원로 159"},{name:"금정역",lat:37.3725,lng:126.944,base:78,type:"station",addr:"군포시 금정동 710"},{name:"롯데백화점 평촌점",lat:37.389,lng:126.923,base:86,type:"mart",addr:"안양시 동안구 시민대로 180"},{name:"홈플러스 안양점",lat:37.398,lng:126.926,base:76,type:"mart",addr:"안양시 만안구 안양로 303"},{name:"한림대 평촌성심병원",lat:37.3925,lng:126.9275,base:92,type:"hospital",addr:"안양시 동안구 관평로 170번길 22"},{name:"평촌 더샵",lat:37.3895,lng:126.924,base:72,type:"apartment",addr:"안양시 동안구 평촌대로 40"},{name:"안양시청",lat:37.394,lng:126.919,base:76,type:"office",addr:"안양시 동안구 시민대로 235"}];
+const MAJOR_HUBS=[
+{name:"범계역(안양중심)",lat:37.3917,lng:126.9145,addr:"안양시 동안구 시민대로 180"},
+{name:"안양역(만안)",lat:37.4013,lng:126.9222,addr:"안양시 만안구 안양로 303"},
+{name:"산본역(군포)",lat:37.3554,lng:126.9331,addr:"군포시 번영로 30"},
+{name:"인덕원역(과천/안양)",lat:37.4048,lng:126.9767,addr:"안양시 동안구 인덕원로 159"},
+{name:"금정역(군포/안양경계)",lat:37.3721,lng:126.9438,addr:"군포시 금정동 710"}
+];
+const FIXED=[
+{name:"평촌역 먹자골목",lat:37.3905,lng:126.925,base:88,type:"station",addr:"안양시 동안구 시민대로 200"},
+{name:"범계역 로데오거리",lat:37.391,lng:126.914,base:90,type:"station",addr:"안양시 동안구 평촌대로 130"},
+{name:"산본역 중심상가",lat:37.356,lng:126.9335,base:82,type:"station",addr:"군포시 산본로 336"},
+{name:"인덕원역 4번출구",lat:37.405,lng:126.976,base:84,type:"station",addr:"안양시 동안구 인덕원로 159"},
+{name:"금정역",lat:37.3725,lng:126.944,base:78,type:"station",addr:"군포시 금정동 710"},
+{name:"롯데백화점 평촌점",lat:37.389,lng:126.923,base:86,type:"mart",addr:"안양시 동안구 시민대로 180"},
+{name:"홈플러스 안양점",lat:37.398,lng:126.926,base:76,type:"mart",addr:"안양시 만안구 안양로 303"},
+{name:"이마트 산본점",lat:37.3565,lng:126.929,base:74,type:"mart",addr:"군포시 산본동 1146"},
+{name:"한림대 평촌성심병원",lat:37.3925,lng:126.9275,base:92,type:"hospital",addr:"안양시 동안구 관평로 170번길 22"},
+{name:"안양샘병원",lat:37.401,lng:126.921,base:84,type:"hospital",addr:"안양시 만안구 삼덕로 9"},
+{name:"평촌 더샵",lat:37.3895,lng:126.924,base:72,type:"apartment",addr:"안양시 동안구 평촌대로 40"},
+{name:"안양시청",lat:37.394,lng:126.919,base:76,type:"office",addr:"안양시 동안구 시민대로 235"},
+{name:"군포시청",lat:37.361,lng:126.926,base:72,type:"office",addr:"군포시 청백리길 6"},
+{name:"범계 술집거리",lat:37.3908,lng:126.9155,base:60,type:"bar",addr:"안양시 동안구 평촌대로 130"}
+];
 function hav(a,b){const R=6371,dLat=(b.lat-a.lat)*Math.PI/180,dLng=(b.lng-a.lng)*Math.PI/180,la1=a.lat*Math.PI/180,la2=b.lat*Math.PI/180;const x=Math.sin(dLat/2)**2+Math.cos(la1)*Math.cos(la2)*Math.sin(dLng/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
 function bearing(a,b){const la1=a.lat*Math.PI/180,la2=b.lat*Math.PI/180,dLng=(b.lng-a.lng)*Math.PI/180;const y=Math.sin(dLng)*Math.cos(la2),x=Math.cos(la1)*Math.sin(la2)-Math.sin(la1)*Math.cos(la2)*Math.cos(dLng);return (Math.atan2(y,x)*180/Math.PI+360)%360;}
-function isInside(lat,lng){if(lat>=37.38&&lat<=37.43&&lng>=126.90&&lng<=126.96)return true;if(lat>=37.33&&lat<=37.38&&lng>=126.90&&lng<=126.96)return true;if(lat>=37.32&&lat<=37.38&&lng>=126.93&&lng<=126.99)return true;if(lat>=37.41&&lat<=37.45&&lng>=126.97&&lng<=127.03)return true;return false;}
-function timeBonus(type,h){if(h>=5&&h<10){if(["station","hospital","mart","apartment","office"].includes(type))return 25; if(["bar","pub"].includes(type))return -100;}if(h>=10&&h<16){if(type==="hospital")return 25; if(type==="mart")return 20; if(["apartment","office","station"].includes(type))return 15; if(["bar","pub"].includes(type))return -100;}if(h>=16&&h<20){if(type==="station")return 25; if(["mart","apartment"].includes(type))return 15;}if(h>=20&&h<22){if(["bar","pub"].includes(type))return 15; if(type==="station")return 15;}if(h>=22||h<2){if(["bar","pub"].includes(type))return 25; if(type==="station")return 15;}return 0;}
+function isInside(lat,lng){
+ if(lat>=37.375&&lat<=37.435&&lng>=126.895&&lng<=126.965) return true;
+ if(lat>=37.325&&lat<=37.385&&lng>=126.895&&lng<=126.965) return true;
+ if(lat>=37.315&&lat<=37.385&&lng>=126.925&&lng<=126.995) return true;
+ if(lat>=37.405&&lat<=37.455&&lng>=126.965&&lng<=127.035) return true;
+ return false;
+}
+function timeBonus(type,h){
+ if(h>=5&&h<10){if(["station","bus","hospital","mart","apartment","office"].includes(type))return 25; if(["bar","pub","karaoke","nightclub"].includes(type))return -100;}
+ if(h>=10&&h<16){if(type==="hospital")return 25; if(type==="mart")return 20; if(["apartment","office","station"].includes(type))return 15; if(type==="bus")return 10; if(["bar","pub","karaoke","nightclub"].includes(type))return -100;}
+ if(h>=16&&h<20){if(type==="station")return 25; if(["mart","apartment"].includes(type))return 15; if(type==="bar")return 5;}
+ if(h>=20&&h<22){if(["bar","pub"].includes(type))return 15; if(type==="karaoke")return 10; if(type==="station")return 15;}
+ if(h>=22||h<2){if(["bar","pub","nightclub","karaoke"].includes(type))return 25; if(type==="station")return 15;}
+ if(h>=2&&h<5){if(type==="station")return 15; if(type==="hospital")return 10; if(["bar","pub"].includes(type))return -100;}
+ return 0;
+}
 let cur={lat:37.3959,lng:126.9672,mode:1};
-function getFinal(){let best=MAJOR_HUBS[0],md=Infinity; for(let h of MAJOR_HUBS){let d=hav(cur,h); if(d<md){md=d; best=h;}} return {...best,dist:md};}
-function gen(){const hour=new Date().getHours(); const finalHub=getFinal(); const cands=[]; for(let i=0;i<50;i++){const t=0.15+Math.random()*0.7; const lat=cur.lat+(finalHub.lat-cur.lat)*t+(Math.random()-0.5)*0.016; const lng=cur.lng+(finalHub.lng-cur.lng)*t+(Math.random()-0.5)*0.016; let nearest=FIXED[0],md=Infinity; for(let f of FIXED){let d=hav({lat,lng},f); if(d<md){md=d; nearest=f;}} if(!isInside(lat,lng)) continue; const tb=timeBonus(nearest.type,hour); if(tb<=-50) continue; const d=hav(cur,{lat,lng}); const fd=finalHub.dist; if(d>=fd*0.95) continue; if(cur.mode===2&&d<2.0) continue; if(cur.mode===1&&d<0.3) continue; const b1=bearing(cur,{lat,lng}); const b2=bearing(cur,finalHub); let delta=Math.abs(b1-b2); if(delta>180) delta=360-delta; let gil=0; if(cur.mode===1){if(delta<=60) gil=30; else if(delta>=120) gil=-50;} else {if(delta<=45) gil=30; else if(delta>=120) gil=-50;} const score=50+tb+nearest.base*0.2+10+gil-d*4+Math.random()*3; cands.push({lat,lng,name:nearest.name,addr:nearest.addr,type:nearest.type,base:nearest.base,score,d,delta,gil,tb}); } let filtered=cands.filter(c=>hav(c,finalHub)>0.1&&c.name!==finalHub.name); filtered.sort((a,b)=>b.score-a.score); const sel=[]; for(let c of filtered){if(sel.some(s=>hav(s,c)<(cur.mode===1?2.0:0.5))) continue; if(sel.filter(s=>s.type==="hospital").length>=1&&c.type==="hospital") continue; sel.push(c); if(sel.length===3) break;} sel.sort((a,b)=>a.d-b.d); return {finalHub,cands:filtered,top:sel,hour};}
-function render(){const {finalHub,top,hour,cands}=gen(); document.getElementById('locBar').innerText=`📍 ${cur.lat.toFixed(4)},${cur.lng.toFixed(4)} ${isInside(cur.lat,cur.lng)?'위수 안':'위수 밖'} · FINAL ${finalHub.name}까지 ${finalHub.dist.toFixed(1)}km`; document.getElementById('pipeline').innerText=`방금 · 5km 이내 · 위수 안 ${cands.length}곳 · 길목 ${top.length}곳 · FINAL ${finalHub.name} ${finalHub.dist.toFixed(1)}km · MODE${cur.mode} · ${hour}시`; document.getElementById('timeBadge').innerText=`${cur.mode===1?'2km':'500m'} 분리 · ${hour}시 기준`; const cards=document.getElementById('cards'); cards.innerHTML=''; top.forEach((c,i)=>{const el=document.createElement('div'); el.className='bg-[#1E1E1E] border border-[#2A2A2A] rounded-[20px] p-3.5'; el.innerHTML=`<div class="flex justify-between items-center"><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full bg-[#FFC800] text-[#121212] font-black text-[13px] flex items-center justify-center">${i+1}</div><div class="text-[19px] font-black text-white">${c.name}</div></div><div class="text-[12px] font-mono font-extrabold text-[#FFC800]">${c.d.toFixed(1)}km · ${Math.round(c.score)}점</div></div><div class="mt-1.5 text-[13px] text-[#A0A0A0]">${c.addr}</div><div class="mt-2 flex gap-1 flex-wrap"><span class="text-[11px] px-2 py-1 rounded-full bg-[#2A2A2A] border border-[#333]">#${c.type}</span>${c.gil?`<span class="text-[11px] px-2 py-1 rounded-full bg-[#14331A] text-[#4ADE80]">길목 +${c.gil}</span>`:''}<span class="text-[11px] px-2 py-1 rounded-full bg-[#3A2F0A] text-[#FFC800]">위수 +10</span></div><button class="mt-3 w-full h-11 rounded-xl bg-[#2A2A2A] border border-[#333] text-[14px] font-bold" onclick="copyNavi('${c.addr}',${c.lat},${c.lng},'${c.name}')">카카오내비</button>`; cards.appendChild(el);}); const fEl=document.createElement('div'); fEl.className=cur.mode===1?'bg-[#2B2505] border border-[#FFC800] shadow-[0_0_12px_rgba(255,200,0,0.15)] rounded-[20px] p-3.5':'bg-[#2A1A0A] border border-[#FF6B00] shadow-[0_0_12px_rgba(255,107,0,0.15)] rounded-[20px] p-3.5'; fEl.innerHTML=`<div class="flex justify-between items-center"><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full bg-[#FF6B00] text-white font-black text-[13px] flex items-center justify-center">F</div><div class="text-[19px] font-black text-white">FINAL ${finalHub.name} ${finalHub.dist.toFixed(1)}km · HUB</div></div><div class="text-[12px] font-mono font-extrabold text-[#FFC800]">${finalHub.dist.toFixed(1)}km</div></div><div class="mt-1.5 text-[13px] text-[#A0A0A0]">${finalHub.addr} · 위수 안 최종 · MAJOR_HUBS 5 중 최근접</div><button class="mt-3 w-full h-11 rounded-xl bg-[#FFC800] text-black font-black text-[14px]" onclick="copyNavi('${finalHub.addr}',${finalHub.lat},${finalHub.lng},'${finalHub.name}')">카카오내비</button>`; cards.appendChild(fEl);}
-function copyNavi(addr,lat,lng,name){navigator.clipboard.writeText(addr); location.href=`kakaonavi://navigate?name=${encodeURIComponent(name)}&x=${lng}&y=${lat}&coord_type=wgs84`; setTimeout(()=>{window.open(`https://map.kakao.com/link/to/${encodeURIComponent(name)},${lat},${lng}`,'_blank');},1200); toast(`${name} 복사 + 내비`);}
-function toast(m){const t=document.getElementById('toast'); t.innerText=m; t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'),1500);}
-document.getElementById('mode1').onclick=()=>{cur.mode=1; document.getElementById('mode1').className='flex-1 h-[38px] rounded-xl text-[11px] font-extrabold bg-[#FFC800] text-black'; document.getElementById('mode2').className='flex-1 h-[38px] rounded-xl text-[11px] font-extrabold bg-[#2A2A2A] text-[#8A8A8A]'; render();};
-document.getElementById('mode2').onclick=()=>{cur.mode=2; document.getElementById('mode2').className='flex-1 h-[38px] rounded-xl text-[11px] font-extrabold bg-[#FFC800] text-black'; document.getElementById('mode1').className='flex-1 h-[38px] rounded-xl text-[11px] font-extrabold bg-[#2A2A2A] text-[#8A8A8A]'; render();};
-document.getElementById('searchBtn').onclick=()=>{const btn=document.getElementById('searchBtn'); btn.innerText='📍 현재 위치 확인 중...'; if(navigator.geolocation){navigator.geolocation.getCurrentPosition(p=>{cur.lat=p.coords.latitude; cur.lng=p.coords.longitude; btn.innerText='📍 주변 콜 많은 곳 찾기'; render();},{}, {enableHighAccuracy:true,timeout:12000,maximumAge:0});} else {render();}};
-document.getElementById('saveBtn').onclick=()=>{const logs=JSON.parse(localStorage.getItem('callLogs')||'[]'); const finalHub=getFinal(); logs.push({timestamp:new Date().toISOString(),lat:cur.lat,lng:cur.lng,placeName:finalHub.name,mode:cur.mode}); localStorage.setItem('callLogs',JSON.stringify(logs)); toast(`기록 완료! ${finalHub.name} +1`); renderLog();};
-function renderLog(){const logs=JSON.parse(localStorage.getItem('callLogs')||'[]'); document.getElementById('logList').innerText=logs.slice(-5).map(l=>`${l.timestamp.slice(11,19)} ${l.placeName}`).join('\n');}
-document.getElementById('exportBtn').onclick=()=>{navigator.clipboard.writeText(localStorage.getItem('callLogs')||'[]'); toast('JSON 복사됨');};
-document.getElementById('importBtn').onclick=()=>{const s=prompt('JSON 붙여넣기'); if(s){try{JSON.parse(s); localStorage.setItem('callLogs',s); toast('가져오기 완료'); renderLog();}catch(e){toast('JSON 오류');}}};
-render(); renderLog();
-</script>
-</body>
-</html>
+function getFinalMode1(){let best=MAJOR_HUBS[0],md=Infinity;for(let h of MAJOR_HUBS){let d=hav(cur,h); if(d<md){md=d; best=h;}} return {...best,dist:md};}
+function getFinalMode2(){const hour=new Date().getHours(); let best=null,bs=-999; for(let f of [...FIXED,...MAJOR_HUBS]){if(!isInside(f.lat,f.lng)) continue; const tb=timeBonus(f.type||"station",hour); if(tb<=-50) continue; const score=(f.base||75)*0.3+tb*2+Math.random()*2; if(score>bs){bs=score; best=f;}} if(!best) return getFinalMode1(); return {...best,dist:hav(cur,best)};}
+function gen(){
+ const hour=new Date().getHours();
+ const finalHub=cur.mode===1?getFinalMode1():getFinalMode2();
+ const cands=[];
+ for(let i=0;i<60;i++){
+  const t=0.15+Math.random()*0.75;
+  const lat=cur.lat+(finalHub.lat-cur.lat)*t+(Math.random()-0.5)*0.018;
+  const lng=cur.lng+(finalHub.lng-cur.lng)*t+(Math.random()-0.5)*0.018;
+  let nearest=FIXED[0],md=Infinity;
+  for(let f of FIXED){let d=hav({lat,lng},f); if(d<md){md=d; nearest=f;}}
+  if(!isInside(lat,lng)) continue;
+  const tb=timeBonus(nearest.type,hour); if(tb<=-50) continue;
+  const d=hav(cur,{lat,lng}); const fd=finalHub.dist;
+  if(d>=fd*0.98) continue;
+  const minD=cur.mode===1?(fd>=3?2.0:0.3):0.3;
+  if(d<minD) continue;
+  const b1=bearing(cur,{lat,lng}); const b2=bearing(cur,finalHub);
+  let delta=Math.abs(b1-b2); if(delta>180) delta=360-delta;
+  let gil=0; if(cur.mode===1){if(delta<=60) gil=30; else if(delta>=120)
