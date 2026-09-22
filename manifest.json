@@ -1,38 +1,21 @@
 {
-  "name": "수다택시 K - 위수지역 길목 찾기",
+  "name": "수다택시 K",
   "short_name": "수다택시K",
-  "description": "안양·군포·의왕·과천 위수지역 택시 콜 많은 지역 실시간 검색 - Overpass + 전국 범용 알고리즘",
-  "start_url": "./index.html",
+  "description": "실시간 공공데이터 및 알고리즘 기반 택시 콜 밀집 지역 추천 시스템",
+  "start_url": "./?v=628",
   "display": "standalone",
-  "orientation": "portrait",
   "background_color": "#121212",
   "theme_color": "#FFC800",
-  "scope": "./",
-  "lang": "ko",
   "icons": [
-    {
-      "src": "icon-180.png",
-      "sizes": "180x180",
-      "type": "image/png",
-      "purpose": "any"
-    },
     {
       "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "icon-1024.png",
-      "sizes": "1024x1024",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }
