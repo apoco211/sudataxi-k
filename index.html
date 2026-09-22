@@ -46,6 +46,8 @@
     .tag { font-size: 11px; padding: 2px 6px; border-radius: 6px; background: #2A2A2A; color: #A0A0A0; }
     .tag.gilmok { background: #14331A; color: #4ADE80; }
     .tag.wisu { background: #3A2F0A; color: #FFC800; }
+    .tag.weather { background: #1A2A3A; color: #60A5FA; }
+    .tag.logmatch { background: #2B1F3D; color: #C084FC; }
     .sub-info { font-size: 12px; color: #8A8A8A; margin-top: 8px; border-top: 1px solid #2A2A2A; padding-top: 8px; }
 
     /* Card 4 (FINAL Target Highlight) */
@@ -116,7 +118,7 @@
   </div>
 
 <script>
-  // Global State Variables
+  // Global State
   let currentMode = 1;
   let currentPos = null;
 
@@ -142,11 +144,11 @@
 
   // Preset Fallback Hotspots
   const PRESET_HOTSPOTS = [
-    { name: "역전할맥 평촌점", lat: 37.3914, lng: 126.9199, address: "경기 안양시 동안구 관평로182번길 30", isWisu: true },
-    { name: "평촌 학원가 먹자골목", lat: 37.3831, lng: 126.9285, address: "경기 안양시 동안구 평촌대로 110", isWisu: true },
-    { name: "대야미역 역전시장", lat: 37.3281, lng: 126.9168, address: "경기 군포시 대야미동 640-1", isWisu: true },
-    { name: "의왕 계원예대 앞", lat: 37.3712, lng: 126.9754, address: "경기 의왕시 계원대학로 16", isWisu: true },
-    { name: "과천 정부청사역 포차", lat: 37.4261, lng: 126.9898, address: "경기 과천시 별양상가2로 14", isWisu: true }
+    { name: "역전할맥 평촌점", lat: 37.3914, lng: 126.9199, amenity: "pub", address: "경기 안양시 동안구 관평로182번길 30", isWisu: true },
+    { name: "평촌 학원가 먹자골목", lat: 37.3831, lng: 126.9285, amenity: "restaurant", address: "경기 안양시 동안구 평촌대로 110", isWisu: true },
+    { name: "대야미역 역전시장", lat: 37.3281, lng: 126.9168, amenity: "pub", address: "경기 군포시 대야미동 640-1", isWisu: true },
+    { name: "의왕 계원예대 앞", lat: 37.3712, lng: 126.9754, amenity: "pub", address: "경기 의왕시 계원대학로 16", isWisu: true },
+    { name: "과천 정부청사역 포차", lat: 37.4261, lng: 126.9898, amenity: "pub", address: "경기 과천시 별양상가2로 14", isWisu: true }
   ];
 
   // Haversine Distance Helper (km)
@@ -176,6 +178,20 @@
     if (currentPos) calculateAndRender();
   }
 
+  // [Phase 1] Real-time Weather Fetching via Open-Meteo API
+  async function fetchRealtimeWeather(lat, lng) {
+    try {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=precipitation,rain,showers,snowfall&timezone=Asia%2FTokyo`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const current = data.current || {};
+      const isRainOrSnow = (current.precipitation > 0 || current.rain > 0 || current.showers > 0 || current.snowfall > 0);
+      return { isRainOrSnow, precip: current.precipitation || 0 };
+    } catch (e) {
+      return { isRainOrSnow: false, precip: 0 };
+    }
+  }
+
   // Overpass POI Fetching
   async function fetchOverpassPOIs(lat, lng, radiusMeter) {
     const query = `[out:json][timeout:8];(node(around:${radiusMeter},${lat},${lng})["amenity"~"bar|pub|nightclub|karaoke_box"]["name"];node(around:${radiusMeter},${lat},${lng})["shop"="alcohol"]["name"];);out 40;`;
@@ -186,12 +202,81 @@
         name: e.tags.name,
         lat: e.lat,
         lng: e.lon,
+        amenity: e.tags.amenity || '',
+        shop: e.tags.shop || '',
         address: e.tags['addr:full'] || `${e.tags['addr:street'] || ''} ${e.tags['addr:housenumber'] || ''}`.trim() || e.tags.name,
         isWisu: isInsideWisu(e.lat, e.lon)
       }));
     } catch (err) {
       return [];
     }
+  }
+
+  // [Phase 1] Dynamic Category & Time Matrix Scoring
+  function getDynamicTimeCategoryBonus(amenity, shop, nowHour) {
+    let bonus = 0;
+    const isNightlifePOI = ['bar', 'pub', 'nightclub', 'karaoke_box'].includes(amenity) || shop === 'alcohol';
+
+    if (nowHour >= 21 || nowHour < 2) {
+      // 심야 유흥시간 (21:00 ~ 02:00)
+      if (isNightlifePOI) bonus += 35;
+      else bonus += 15;
+    } else if (nowHour >= 18 && nowHour < 21) {
+      // 퇴근/식사 (18:00 ~ 21:00)
+      if (isNightlifePOI) bonus += 20;
+      else bonus += 15;
+    } else if (nowHour >= 7 && nowHour < 9) {
+      // 출근 시간 (07:00 ~ 09:00)
+      if (['hospital', 'university', 'bus_station'].includes(amenity)) bonus += 20;
+      else bonus += 10;
+    } else {
+      bonus += 5;
+    }
+    return bonus;
+  }
+
+  // [Phase 1] Call Log Time-Decay & Cyclic Matching Algorithm
+  function calculateCallLogScore(candLat, candLng) {
+    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+    if (logs.length === 0) return { bonus: 0, matched: false };
+
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentDay = now.getDay();
+
+    let maxBonus = 0;
+    let isMatched = false;
+
+    logs.forEach(log => {
+      const dist = getDistanceKm(candLat, candLng, log.lat, log.lng);
+      if (dist <= 0.3) { // 300m 이내 과거 성공 이력
+        const logDate = new Date(log.timestamp);
+        const daysPassed = Math.max(0, (now - logDate) / (1000 * 60 * 60 * 24));
+        
+        // 1. Time-decay: 반감기 약 30일 (e^-0.023*t)
+        const decayFactor = Math.exp(-0.023 * daysPassed);
+
+        // 2. Cyclic Matching (시간대 및 평일/주말 동기화)
+        const logHour = logDate.getHours();
+        const logDay = logDate.getDay();
+        const hourDiff = Math.abs(currentHour - logHour);
+
+        const isHourMatched = (hourDiff <= 1 || hourDiff >= 23);
+        const isDayTypeMatched = (currentDay === 0 || currentDay === 6) === (logDay === 0 || logDay === 6);
+
+        let matchMultiplier = 1.0;
+        if (isHourMatched) matchMultiplier += 0.5;
+        if (isDayTypeMatched) matchMultiplier += 0.3;
+
+        const score = 25 * decayFactor * matchMultiplier;
+        if (score > maxBonus) {
+          maxBonus = score;
+          isMatched = true;
+        }
+      }
+    });
+
+    return { bonus: Math.round(maxBonus), matched: isMatched };
   }
 
   // Execute GPS Search
@@ -222,10 +307,15 @@
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
-    logEl.innerText = '실시간 POI 및 스코어 계산 중...';
+    logEl.innerText = '실시간 기상 및 POI 스코어 계산 중...';
 
     const radius = currentMode === 1 ? 5000 : 10000;
-    const overpassData = await fetchOverpassPOIs(currentPos.lat, currentPos.lng, radius);
+    
+    // Parallel Fetching: Overpass POI + Open-Meteo Weather
+    const [overpassData, weatherData] = await Promise.all([
+      fetchOverpassPOIs(currentPos.lat, currentPos.lng, radius),
+      fetchRealtimeWeather(currentPos.lat, currentPos.lng)
+    ]);
     
     let pool = [...overpassData, ...PRESET_HOTSPOTS];
     if (currentMode === 1) {
@@ -252,7 +342,7 @@
       }
     }
 
-    // Score Calculation
+    // Integrated Scoring Engine (Phase 1 Logic)
     const nowHour = new Date().getHours();
     const finalBearing = getBearing(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
 
@@ -260,21 +350,35 @@
       const dist = getDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       let score = 50;
 
-      // Time Bonus
-      if (nowHour >= 18 && nowHour < 20) score += 15;
-      if (nowHour >= 21 && nowHour < 24) score += 25;
-      if (nowHour >= 23 || nowHour < 2) score += 35;
+      // 1. Dynamic Time & POI Category Bonus
+      score += getDynamicTimeCategoryBonus(item.amenity, item.shop, nowHour);
 
-      // Bearing & Direction Bonus
+      // 2. Real-time Weather Bonus
+      if (weatherData.isRainOrSnow) {
+        score += 20;
+      }
+
+      // 3. Call Log Time-Decay & Cyclic Bonus
+      const logResult = calculateCallLogScore(item.lat, item.lng);
+      score += logResult.bonus;
+
+      // 4. Bearing & Direction Bonus
       const itemBearing = getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const delta = Math.abs(finalBearing - itemBearing);
       if (delta <= 45) score += 30;
       if (delta >= 120) score -= 50;
 
-      // Distance Penalty
+      // 5. Distance Penalty
       score -= (dist * 4);
 
-      return { ...item, dist, score: Math.round(score), delta };
+      return { 
+        ...item, 
+        dist, 
+        score: Math.round(score), 
+        delta, 
+        hasWeatherBonus: weatherData.isRainOrSnow,
+        hasLogBonus: logResult.matched
+      };
     });
 
     // Separation & Filtering Logic
@@ -294,7 +398,8 @@
 
     selectedRoute.sort((a, b) => a.dist - b.dist);
 
-    logEl.innerText = `방금 · ${radius/1000}km 이내 · ${scoredPool.length}곳 검출 · FINAL: ${finalTarget.name}`;
+    const weatherText = weatherData.isRainOrSnow ? ' · 비/눈(+20점)' : '';
+    logEl.innerText = `방금 · ${radius/1000}km 이내 · ${scoredPool.length}곳 검출${weatherText} · FINAL: ${finalTarget.name}`;
 
     renderCards(selectedRoute, finalTarget);
   }
@@ -322,6 +427,8 @@
         <div class="tag-group">
           ${item.delta <= 45 ? '<span class="tag gilmok">#길목우선</span>' : ''}
           ${item.isWisu ? '<span class="tag wisu">#위수지역</span>' : ''}
+          ${item.hasWeatherBonus ? '<span class="tag weather">#강수보너스</span>' : ''}
+          ${item.hasLogBonus ? '<span class="tag logmatch">#이력학습</span>' : ''}
         </div>
       `;
       listEl.appendChild(card);
@@ -383,7 +490,7 @@
     };
     logs.push(newLog);
     localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
-    alert('🎉 고객 탑승 위치가 성공적으로 저장되었습니다! (+25점 학습 반영)');
+    alert('🎉 고객 탑승 위치가 성공적으로 저장되었습니다! (+시간대 학습 반영)');
     updateCallLogStats();
   }
 
