@@ -1,4 +1,304 @@
-  // Scoring Engine & Pipeline Execution (길목 보완 안전장치 추가)
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>수다택시 K</title>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#FFC800">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: #121212; color: #FFFFFF; max-width: 430px; margin: 0 auto; padding: 16px 16px 110px 16px; min-height: 100vh; }
+    
+    /* Header & Mode Pills */
+    .header { text-align: center; font-size: 22px; font-weight: 900; color: #FFC800; margin-bottom: 12px; }
+    .mode-container { display: flex; gap: 8px; margin-bottom: 12px; }
+    .mode-pill { flex: 1; height: 38px; border-radius: 12px; background: #2A2A2A; color: #8A8A8A; font-size: 13px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .mode-pill.active { background: #FFC800; color: #000000; }
+
+    /* Location & Status Bar */
+    .loc-bar { background: #2A2210; height: 44px; border: 1px solid #3A2E0A; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-size: 12px; color: #FFC800; margin-bottom: 12px; }
+    .refresh-btn { background: none; border: none; color: #FFC800; font-size: 16px; cursor: pointer; }
+
+    /* Big CTA Button */
+    .big-btn { width: 100%; height: 72px; background: #FFC800; color: #000000; font-size: 19px; font-weight: 900; border: none; border-radius: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(255,200,0,0.2); }
+    .big-btn:active { opacity: 0.9; transform: scale(0.99); }
+
+    /* Pipeline Log Line */
+    .pipeline-log { font-family: monospace; font-size: 11px; color: #8A8A8A; margin: 10px 0 16px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Cards Stack */
+    .card-list { display: flex; flex-direction: column; gap: 12px; }
+    .card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 20px; padding: 14px; position: relative; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .card-title-group { display: flex; align-items: center; gap: 8px; flex: 1; }
+    .num-badge { width: 28px; height: 28px; border-radius: 50%; background: #FFC800; color: #121212; font-weight: 900; font-size: 15px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .place-name { font-size: 18px; font-weight: 900; color: #FFFFFF; word-break: keep-all; }
+    .score-dist { font-size: 13px; font-weight: 800; color: #FFC800; font-family: monospace; margin-top: 2px; }
+    
+    /* Navigation Button */
+    .navi-btn { height: 44px; padding: 0 14px; background: #FFC800; color: #000000; font-weight: 800; font-size: 13px; border: none; border-radius: 12px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+
+    /* Tags & Subtext */
+    .tag-group { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+    .tag { font-size: 11px; padding: 2px 6px; border-radius: 6px; background: #2A2A2A; color: #A0A0A0; }
+    .tag.gilmok { background: #14331A; color: #4ADE80; }
+    .tag.wisu { background: #3A2F0A; color: #FFC800; }
+    .tag.weather { background: #1A2A3A; color: #60A5FA; }
+    .tag.logmatch { background: #2B1F3D; color: #C084FC; }
+    .tag.fallback { background: #3A221A; color: #FB923C; }
+    .sub-info { font-size: 12px; color: #8A8A8A; margin-top: 8px; border-top: 1px solid #2A2A2A; padding-top: 8px; }
+
+    /* Card 4 (FINAL Target Highlight) */
+    .card.final-mode1 { background: #2B2505; border: 1px solid #FFC800; box-shadow: 0 0 12px rgba(255,200,0,0.15); }
+    .card.final-mode2 { background: #2A1A0A; border: 1px solid #FF6B00; box-shadow: 0 0 12px rgba(255,107,0,0.15); }
+    .card.final-mode2 .num-badge { background: #FF6B00; color: #FFFFFF; }
+    .card.final-mode2 .score-dist { color: #FF6B00; }
+    .card.final-mode2 .navi-btn { background: #FF6B00; color: #FFFFFF; }
+
+    /* Backup & Data Section */
+    .backup-section { margin-top: 20px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 16px; padding: 14px; }
+    .backup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .backup-title { font-size: 14px; font-weight: 800; color: #FFC800; }
+    .backup-count { font-size: 12px; color: #8A8A8A; }
+    .backup-btn-group { display: flex; gap: 8px; }
+    .backup-btn { flex: 1; height: 40px; background: #2A2A2A; color: #FFFFFF; font-weight: 800; border: 1px solid #3A3A3A; border-radius: 10px; cursor: pointer; font-size: 13px; }
+    .backup-btn:active { background: #333333; }
+
+    /* Fixed Bottom Bar */
+    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: rgba(26,26,26,0.95); backdrop-filter: blur(10px); border-top: 2px solid #FFC800; display: flex; align-items: center; justify-content: center; padding: 0 16px; z-index: 100; max-width: 430px; margin: 0 auto; }
+    .save-call-btn { width: 100%; height: 48px; background: #FFC800; color: #000000; font-weight: 900; font-size: 16px; border: none; border-radius: 12px; cursor: pointer; }
+    .save-call-btn:active { opacity: 0.9; }
+  </style>
+</head>
+<body>
+
+  <div class="header">주변 콜 많은 곳 찾기</div>
+
+  <!-- Mode Selector Pills -->
+  <div class="mode-container">
+    <button class="mode-pill active" id="btn-mode1" onclick="setMode(1)">[모드1]</button>
+    <button class="mode-pill" id="btn-mode2" onclick="setMode(2)">[모드2]</button>
+  </div>
+
+  <!-- Location Bar -->
+  <div class="loc-bar">
+    <span id="loc-text">📍 GPS 대기 중 - 아래 버튼을 눌러 위치 확인</span>
+    <button class="refresh-btn" onclick="executeSearch()">⟳</button>
+  </div>
+
+  <!-- Main Action Button -->
+  <button class="big-btn" onclick="executeSearch()">
+    <span>📍 주변 콜 많은 곳 찾기</span>
+  </button>
+
+  <!-- Pipeline Status Log -->
+  <div class="pipeline-log" id="pipeline-log">대기 중 · 버튼을 누르면 검색을 시작합니다.</div>
+
+  <!-- Cards Container -->
+  <div class="card-list" id="card-list"></div>
+
+  <!-- Data Backup & Sync Section -->
+  <div class="backup-section">
+    <div class="backup-header">
+      <span class="backup-title">📊 고객 탑승 기록 백업</span>
+      <span class="backup-count" id="log-count-text">저장된 기록: 0개</span>
+    </div>
+    <div class="backup-btn-group">
+      <button class="backup-btn" onclick="exportCallLogs()">📤 JSON 내보내기</button>
+      <button class="backup-btn" onclick="document.getElementById('import-file-input').click()">📥 JSON 가져오기</button>
+      <input type="file" id="import-file-input" accept=".json" style="display: none;" onchange="importCallLogs(event)">
+    </div>
+  </div>
+
+  <!-- Fixed Bottom Floating Bar -->
+  <div class="bottom-bar">
+    <button class="save-call-btn" onclick="saveCurrentCallLocation()">📍 고객 탑승 위치 저장</button>
+  </div>
+
+<script>
+  // Global State Variables
+  let currentMode = 1;
+  let currentPos = null;
+
+  // Wisu Bounding Boxes (통합사업구역: 안양·군포·의왕·과천)
+  function isInsideWisu(lat, lng) {
+    const wisuBoxes = [
+      { minLat: 37.38, maxLat: 37.43, minLng: 126.90, maxLng: 126.96 }, // Anyang
+      { minLat: 37.33, maxLat: 37.38, minLng: 126.90, maxLng: 126.96 }, // Gunpo
+      { minLat: 37.32, maxLat: 37.38, minLng: 126.93, maxLng: 126.99 }, // Uiwang
+      { minLat: 37.41, maxLat: 37.45, minLng: 126.97, maxLng: 127.03 }  // Gwacheon
+    ];
+    return wisuBoxes.some(b => lat >= b.minLat && lat <= b.maxLat && lng >= b.minLng && lng <= b.maxLng);
+  }
+
+  // Major Wisu Hubs (Mode 1 Fixed Targets)
+  const MAJOR_HUBS = [
+    { name: "범계역 로데오거리", lat: 37.3917, lng: 126.9145, address: "경기 안양시 동안구 평촌대로223번길 42" },
+    { name: "안양역 일번가", lat: 37.4013, lng: 126.9222, address: "경기 안양시 만안구 장내로139번길 7" },
+    { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331, address: "경기 군포시 산본로323번길 16-1" },
+    { name: "인덕원역 먹자골목", lat: 37.4048, lng: 126.9767, address: "경기 안양시 동안구 흥안대로 519" },
+    { name: "금정역 먹자골목", lat: 37.3721, lng: 126.9438, address: "경기 군포시 군포로745번길 11" }
+  ];
+
+  // Preset Fallback Hotspots
+  const PRESET_HOTSPOTS = [
+    { name: "역전할맥 평촌점", lat: 37.3914, lng: 126.9199, amenity: "pub", address: "경기 안양시 동안구 관평로182번길 30", isWisu: true },
+    { name: "평촌 학원가 먹자골목", lat: 37.3831, lng: 126.9285, amenity: "restaurant", address: "경기 안양시 동안구 평촌대로 110", isWisu: true },
+    { name: "대야미역 역전시장", lat: 37.3281, lng: 126.9168, amenity: "pub", address: "경기 군포시 대야미동 640-1", isWisu: true },
+    { name: "의왕 계원예대 앞", lat: 37.3712, lng: 126.9754, amenity: "pub", address: "경기 의왕시 계원대학로 16", isWisu: true },
+    { name: "과천 정부청사역 포차", lat: 37.4261, lng: 126.9898, amenity: "pub", address: "경기 과천시 별양상가2로 14", isWisu: true }
+  ];
+
+  // Haversine Distance Helper (km)
+  function getDistanceKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  // Bearing Angle Helper
+  function getBearing(lat1, lon1, lat2, lon2) {
+    const y = Math.sin((lon2 - lon1) * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180);
+    const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
+              Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos((lon2 - lon1) * Math.PI / 180);
+    return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+  }
+
+  // Set Search Mode
+  function setMode(mode) {
+    currentMode = mode;
+    document.getElementById('btn-mode1').classList.toggle('active', mode === 1);
+    document.getElementById('btn-mode2').classList.toggle('active', mode === 2);
+    if (currentPos) calculateAndRender();
+  }
+
+  // Real-time Weather Fetching via Open-Meteo API
+  async function fetchRealtimeWeather(lat, lng) {
+    try {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=precipitation,rain,showers,snowfall&timezone=Asia%2FTokyo`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const current = data.current || {};
+      const isRainOrSnow = (current.precipitation > 0 || current.rain > 0 || current.showers > 0 || current.snowfall > 0);
+      return { isRainOrSnow, precip: current.precipitation || 0 };
+    } catch (e) {
+      return { isRainOrSnow: false, precip: 0 };
+    }
+  }
+
+  // Overpass POI Fetching
+  async function fetchOverpassPOIs(lat, lng, radiusMeter) {
+    const query = `[out:json][timeout:8];(node(around:${radiusMeter},${lat},${lng})["amenity"~"bar|pub|nightclub|karaoke_box"]["name"];node(around:${radiusMeter},${lat},${lng})["shop"="alcohol"]["name"];);out 40;`;
+    try {
+      const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query });
+      const data = await res.json();
+      return (data.elements || []).map(e => ({
+        name: e.tags.name,
+        lat: e.lat,
+        lng: e.lon,
+        amenity: e.tags.amenity || '',
+        shop: e.tags.shop || '',
+        address: e.tags['addr:full'] || `${e.tags['addr:street'] || ''} ${e.tags['addr:housenumber'] || ''}`.trim() || e.tags.name,
+        isWisu: isInsideWisu(e.lat, e.lon)
+      }));
+    } catch (err) {
+      return [];
+    }
+  }
+
+  // Dynamic Category & Time Matrix Scoring
+  function getDynamicTimeCategoryBonus(amenity, shop, nowHour) {
+    let bonus = 0;
+    const isNightlifePOI = ['bar', 'pub', 'nightclub', 'karaoke_box'].includes(amenity) || shop === 'alcohol';
+
+    if (nowHour >= 21 || nowHour < 2) {
+      if (isNightlifePOI) bonus += 35;
+      else bonus += 15;
+    } else if (nowHour >= 18 && nowHour < 21) {
+      if (isNightlifePOI) bonus += 20;
+      else bonus += 15;
+    } else if (nowHour >= 7 && nowHour < 9) {
+      if (['hospital', 'university', 'bus_station'].includes(amenity)) bonus += 20;
+      else bonus += 10;
+    } else {
+      bonus += 5;
+    }
+    return bonus;
+  }
+
+  // Call Log Time-Decay & Cyclic Matching Algorithm
+  function calculateCallLogScore(candLat, candLng) {
+    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+    if (logs.length === 0) return { bonus: 0, matched: false };
+
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentDay = now.getDay();
+
+    let maxBonus = 0;
+    let isMatched = false;
+
+    logs.forEach(log => {
+      const dist = getDistanceKm(candLat, candLng, log.lat, log.lng);
+      if (dist <= 0.3) {
+        const logDate = new Date(log.timestamp);
+        const daysPassed = Math.max(0, (now - logDate) / (1000 * 60 * 60 * 24));
+        const decayFactor = Math.exp(-0.023 * daysPassed);
+
+        const logHour = logDate.getHours();
+        const logDay = logDate.getDay();
+        const hourDiff = Math.abs(currentHour - logHour);
+
+        const isHourMatched = (hourDiff <= 1 || hourDiff >= 23);
+        const isDayTypeMatched = (currentDay === 0 || currentDay === 6) === (logDay === 0 || logDay === 6);
+
+        let matchMultiplier = 1.0;
+        if (isHourMatched) matchMultiplier += 0.5;
+        if (isDayTypeMatched) matchMultiplier += 0.3;
+
+        const score = 25 * decayFactor * matchMultiplier;
+        if (score > maxBonus) {
+          maxBonus = score;
+          isMatched = true;
+        }
+      }
+    });
+
+    return { bonus: Math.round(maxBonus), matched: isMatched };
+  }
+
+  // Execute GPS Search
+  function executeSearch() {
+    const locText = document.getElementById('loc-text');
+    locText.innerText = '📍 현재 위치 확인 중...';
+    
+    if (!navigator.geolocation) {
+      alert('GPS를 지원하지 않는 브라우저입니다.');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        currentPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        const inWisu = isInsideWisu(currentPos.lat, currentPos.lng);
+        locText.innerText = `📍 ${currentPos.lat.toFixed(4)}, ${currentPos.lng.toFixed(4)} (${inWisu ? '위수 안' : '위수 밖'})`;
+        await calculateAndRender();
+      },
+      (err) => {
+        locText.innerText = '📍 GPS 수신 실패 (권한을 확인해 주세요)';
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  }
+
+  // Scoring Engine & Pipeline Execution
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
@@ -64,7 +364,8 @@
         score: Math.round(score), 
         delta, 
         hasWeatherBonus: weatherData.isRainOrSnow,
-        hasLogBonus: logResult.matched
+        hasLogBonus: logResult.matched,
+        isFallback: false
       };
     });
 
@@ -83,11 +384,11 @@
       if (selectedRoute.length === 3) break;
     }
 
-    // [보완 안전장치] 길목 후보가 3개 미만일 때 경로 보간(Interpolation)으로 주요 거점 생성
+    // [경로 보간 안전장치] 길목 후보가 3개 미만일 때(하남 등 장거리 위치) 복귀 경로상 주요 거점 자동 생성
     if (selectedRoute.length < 3 && currentMode === 2) {
       const needed = 3 - selectedRoute.length;
       const ratios = [0.25, 0.5, 0.75];
-      const fallbackNames = ["복귀 길목 거점 A", "복귀 길목 거점 B", "복귀 길목 거점 C"];
+      const fallbackNames = ["1차 복귀 거점", "2차 복귀 거점", "3차 복귀 거점"];
 
       for (let i = 0; i < needed; i++) {
         const ratio = ratios[i % ratios.length];
@@ -100,9 +401,10 @@
           lat: interLat,
           lng: interLng,
           dist: interDist,
-          score: 70 - i * 5,
+          score: Math.round(75 - i * 5),
           delta: 0,
           isWisu: false,
+          isFallback: true,
           address: "귀가 주요 이동 경로"
         });
       }
@@ -115,3 +417,181 @@
 
     renderCards(selectedRoute, finalTarget);
   }
+
+  // Render HTML Cards
+  function renderCards(routeCards, finalTarget) {
+    const listEl = document.getElementById('card-list');
+    listEl.innerHTML = '';
+
+    // Route Cards 1 to 3
+    routeCards.forEach((item, index) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="card-header">
+          <div class="card-title-group">
+            <div class="num-badge">${index + 1}</div>
+            <div>
+              <div class="place-name">${item.name}</div>
+              <div class="score-dist">${item.dist.toFixed(1)}km · ${item.score}점</div>
+            </div>
+          </div>
+          <button class="navi-btn" onclick="openKakaoNavi('${item.name}', '${item.address}')">카카오내비</button>
+        </div>
+        <div class="tag-group">
+          ${item.delta <= 45 ? '<span class="tag gilmok">#길목우선</span>' : ''}
+          ${item.isWisu ? '<span class="tag wisu">#위수지역</span>' : ''}
+          ${item.hasWeatherBonus ? '<span class="tag weather">#강수보너스</span>' : ''}
+          ${item.hasLogBonus ? '<span class="tag logmatch">#이력학습</span>' : ''}
+          ${item.isFallback ? '<span class="tag fallback">#복귀경로거점</span>' : ''}
+        </div>
+      `;
+      listEl.appendChild(card);
+    });
+
+    // Card 4 (FINAL Target)
+    const finalCard = document.createElement('div');
+    finalCard.className = `card ${currentMode === 1 ? 'final-mode1' : 'final-mode2'}`;
+    const targetLabel = currentMode === 1 ? '최종번화가' : '최종위수';
+    finalCard.innerHTML = `
+      <div class="card-header">
+        <div class="card-title-group">
+          <div class="num-badge">4</div>
+          <div>
+            <div class="place-name">${finalTarget.name}</div>
+            <div class="score-dist">${finalTarget.dist.toFixed(1)}km · [${targetLabel}]</div>
+          </div>
+        </div>
+        <button class="navi-btn" onclick="openKakaoNavi('${finalTarget.name}', '${finalTarget.address}')">카카오내비</button>
+      </div>
+      <div class="sub-info">
+        현재→핫스팟 ${routeCards[0] ? routeCards[0].dist.toFixed(1) : 0}km · ${targetLabel} ${finalTarget.dist.toFixed(1)}km
+      </div>
+    `;
+    listEl.appendChild(finalCard);
+  }
+
+  // Open KakaoNavi with Clipboard Copy
+  function openKakaoNavi(name, address) {
+    const query = address || name;
+    navigator.clipboard.writeText(query);
+    alert(`📋 [${query}] 주소가 복사되었습니다.\n카카오내비로 연결합니다.`);
+    
+    const naviUrl = `kakaonavi://search?q=${encodeURIComponent(query)}`;
+    const fallbackUrl = `https://map.kakao.com/link/search/${encodeURIComponent(query)}`;
+
+    const startTime = Date.now();
+    window.location.href = naviUrl;
+
+    setTimeout(() => {
+      if (Date.now() - startTime < 1500) {
+        window.open(fallbackUrl, '_blank');
+      }
+    }, 1200);
+  }
+
+  // Save Call Location Log
+  function saveCurrentCallLocation() {
+    if (!currentPos) {
+      alert('GPS 위치 확인 후 저장 가능합니다.');
+      return;
+    }
+    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+    const newLog = {
+      timestamp: new Date().toISOString(),
+      lat: currentPos.lat,
+      lng: currentPos.lng,
+      mode: currentMode
+    };
+    logs.push(newLog);
+    localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
+    alert('🎉 고객 탑승 위치가 성공적으로 저장되었습니다! (+시간대 학습 반영)');
+    updateCallLogStats();
+  }
+
+  // Update Data Log Count Stats
+  function updateCallLogStats() {
+    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+    const countText = document.getElementById('log-count-text');
+    if (countText) {
+      countText.innerText = `저장된 기록: ${logs.length}개`;
+    }
+  }
+
+  // Export Call Logs to JSON File
+  function exportCallLogs() {
+    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+
+    if (logs.length === 0) {
+      alert('내보낼 탑승 기록 데이터가 없습니다.');
+      return;
+    }
+
+    const blob = new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    
+    const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    a.href = url;
+    a.download = `sudataxi_call_logs_${today}.json`;
+    a.click();
+    
+    URL.revokeObjectURL(url);
+  }
+
+  // Import Call Logs from JSON File
+  function importCallLogs(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const importedLogs = JSON.parse(e.target.result);
+
+        if (!Array.isArray(importedLogs)) {
+          throw new Error('올바르지 않은 데이터 형식입니다.');
+        }
+
+        const existingLogs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+        
+        // Deduplicate using timestamp as unique key
+        const logMap = new Map();
+        [...existingLogs, ...importedLogs].forEach(item => {
+          if (item.timestamp) logMap.set(item.timestamp, item);
+        });
+
+        const mergedLogs = Array.from(logMap.values());
+        localStorage.setItem('sudataxi_call_logs', JSON.stringify(mergedLogs));
+
+        alert(`🎉 성공적으로 기록을 불러왔습니다! (총 ${mergedLogs.length}개)`);
+        updateCallLogStats();
+      } catch (err) {
+        alert('⚠️ 올바른 수다택시 K 백업 JSON 파일이 아닙니다.');
+      } finally {
+        event.target.value = '';
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // Register PWA Service Worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      const swCode = `
+        self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
+        self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+        self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
+      `;
+      const blob = new Blob([swCode], { type: 'text/javascript' });
+      navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+    });
+  }
+
+  // Initial Load Trigger
+  window.addEventListener('DOMContentLoaded', () => {
+    updateCallLogStats();
+  });
+</script>
+</body>
+</html>
