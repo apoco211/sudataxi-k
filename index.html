@@ -175,7 +175,7 @@
 
   <!-- Location Bar -->
   <div class="loc-bar">
-    <span id="loc-text">📍 GPS 대기 중 - 위치 확인 중...</span>
+    <span id="loc-text">📍 GPS 위치 확인 중...</span>
     <button class="refresh-btn" onclick="executeSearch()">⟳</button>
   </div>
 
@@ -190,7 +190,7 @@
   </div>
 
   <!-- Pipeline Status Log -->
-  <div class="pipeline-log" id="pipeline-log">대기 중 · 버튼을 누르면 검색을 시작합니다.</div>
+  <div class="pipeline-log" id="pipeline-log">대기 중 · 위치 검색 진행 중입니다.</div>
 
   <!-- Cards Container -->
   <div class="card-list" id="card-list"></div>
@@ -350,9 +350,16 @@
   function parseDateSafely(dateStr) {
     if (!dateStr) return new Date(0);
     if (dateStr instanceof Date) return dateStr;
-    let s = String(dateStr).trim().replace(' ', 'T');
+    if (typeof dateStr === 'number') return new Date(dateStr);
+    
+    let s = String(dateStr).trim();
     let d = new Date(s);
     if (!isNaN(d.getTime())) return d;
+    
+    s = s.replace(' ', 'T');
+    d = new Date(s);
+    if (!isNaN(d.getTime())) return d;
+    
     let nums = s.match(/\d+/g);
     if (nums && nums.length >= 3) {
       let y = parseInt(nums[0], 10);
@@ -431,10 +438,10 @@
 
   function executeSearch() {
     const locText = document.getElementById('loc-text');
-    locText.innerText = '📍 현재 위치 확인 중...';
+    if (locText) locText.innerText = '📍 현재 위치 확인 중...';
     
     if (!navigator.geolocation) {
-      alert('GPS를 지원하지 않는 브라우저입니다.');
+      if (locText) locText.innerText = '📍 GPS를 지원하지 않는 브라우저';
       return;
     }
 
@@ -442,13 +449,13 @@
       async (pos) => {
         currentPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         const inWisu = isInsideWisu(currentPos.lat, currentPos.lng);
-        locText.innerText = `📍 ${currentPos.lat.toFixed(4)}, ${currentPos.lng.toFixed(4)} (${inWisu ? '위수 안' : '위수 밖'})`;
+        if (locText) locText.innerText = `📍 ${currentPos.lat.toFixed(4)}, ${currentPos.lng.toFixed(4)} (${inWisu ? '위수 안' : '위수 밖'})`;
         await calculateAndRender();
       },
       (err) => {
-        locText.innerText = '📍 GPS 수신 실패 (권한을 확인해 주세요)';
+        if (locText) locText.innerText = '📍 GPS 수신 대기 중 (⟳ 버튼 클릭)';
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
     );
   }
 
@@ -743,7 +750,9 @@
   function saveCurrentCallLocation() {
     const doSave = (targetPos) => {
       const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+      const uniqueId = 'log_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
       const newLog = {
+        id: uniqueId,
         timestamp: new Date().toISOString(),
         lat: Number(targetPos.lat),
         lng: Number(targetPos.lng),
@@ -752,26 +761,36 @@
       logs.push(newLog);
       localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
       
+      // 화면 먼저 업데이트
       updateCallLogStats();
-      alert('🎉 고객 탑승 위치가 성공적으로 저장되었습니다!');
+      
+      setTimeout(() => {
+        alert('🎉 고객 탑승 위치가 성공적으로 저장되었습니다!');
+      }, 50);
     };
 
     if (currentPos) {
       doSave(currentPos);
     } else {
+      const locText = document.getElementById('loc-text');
+      if (locText) locText.innerText = '📍 실시간 GPS 조회 후 저장 중...';
+      
       if (!navigator.geolocation) {
         alert('GPS를 지원하지 않는 브라우저입니다.');
         return;
       }
+      
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           currentPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          const inWisu = isInsideWisu(currentPos.lat, currentPos.lng);
+          if (locText) locText.innerText = `📍 ${currentPos.lat.toFixed(4)}, ${currentPos.lng.toFixed(4)} (${inWisu ? '위수 안' : '위수 밖'})`;
           doSave(currentPos);
         },
         (err) => {
-          alert('📍 GPS 위치를 확인할 수 없어 저장이 실패했습니다.');
+          alert('📍 GPS 위치 수신 실패로 저장되지 않았습니다. 상단 [⟳] 버튼을 누른 후 다시 시도해 주세요.');
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 10000 }
       );
     }
   }
@@ -788,10 +807,13 @@
     return `${month}.${date}(${dayName}) ${hours}:${minutes}`;
   }
 
-  function deleteCallLog(timestamp) {
+  function deleteCallLog(logId, timestampStr) {
     if (!confirm('이 탑승 기록을 삭제하시겠습니까?')) return;
     let logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
-    logs = logs.filter(item => item.timestamp !== timestamp);
+    logs = logs.filter(item => {
+      if (logId && item.id) return item.id !== logId;
+      return item.timestamp !== timestampStr;
+    });
     localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
     updateCallLogStats();
   }
@@ -812,9 +834,11 @@
       return;
     }
 
-    // 아이폰 Safari 대응 안전 날짜 정렬 (.getTime() 사용)
-    const sorted = [...logs].sort((a, b) => {
-      return parseDateSafely(b.timestamp).getTime() - parseDateSafely(a.timestamp).getTime();
+    // 최신 항목이 무조건 최상단에 뜨도록 안전 시간 정렬
+    const sorted = [...logs].reverse().sort((a, b) => {
+      const timeA = parseDateSafely(a.timestamp).getTime();
+      const timeB = parseDateSafely(b.timestamp).getTime();
+      return timeB - timeA;
     }).slice(0, 5);
 
     sorted.forEach(item => {
@@ -828,12 +852,14 @@
         ? `${latNum.toFixed(3)},${lngNum.toFixed(3)}` 
         : '좌표 없음';
       
+      const itemId = item.id || '';
+      
       itemDiv.innerHTML = `
         <div class="recent-log-info">
           <span class="recent-log-time">📍 ${formattedTime} [M${item.mode || 1}]</span>
           <span class="recent-log-coords">(${latLngStr})</span>
         </div>
-        <button class="delete-log-btn" onclick="deleteCallLog('${item.timestamp}')">삭제</button>
+        <button class="delete-log-btn" onclick="deleteCallLog('${itemId}', '${item.timestamp}')">삭제</button>
       `;
       listEl.appendChild(itemDiv);
     });
@@ -866,7 +892,10 @@
         const existingLogs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
         const logMap = new Map();
         [...existingLogs, ...importedLogs].forEach(item => {
-          if (item.timestamp) logMap.set(item.timestamp, item);
+          if (item.timestamp) {
+            if (!item.id) item.id = 'log_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+            logMap.set(item.timestamp, item);
+          }
         });
         const mergedLogs = Array.from(logMap.values());
         localStorage.setItem('sudataxi_call_logs', JSON.stringify(mergedLogs));
@@ -895,7 +924,9 @@
 
   window.addEventListener('DOMContentLoaded', () => {
     updateCallLogStats();
-    executeSearch(); // 앱 실행 즉시 1회 자동 위치 검색
+    setTimeout(() => {
+      executeSearch(); // 앱 구동 즉시 1회 자동 현재위치 검색
+    }, 200);
   });
 </script>
 </body>
