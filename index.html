@@ -65,6 +65,12 @@
     .place-name { font-size: 18px; font-weight: 900; color: #FFFFFF; word-break: keep-all; }
     .score-dist { font-size: 13px; font-weight: 800; color: var(--theme-accent); font-family: monospace; margin-top: 2px; transition: color 0.3s; }
     
+    /* Score Level Badges */
+    .level-badge { font-weight: 900; padding: 2px 6px; border-radius: 6px; font-size: 12px; margin-left: 4px; }
+    .level-high { background: rgba(74, 222, 128, 0.2); color: #4ADE80; border: 1px solid #4ADE80; }
+    .level-mid { background: rgba(255, 200, 0, 0.2); color: #FFC800; border: 1px solid #FFC800; }
+    .level-low { background: rgba(255, 107, 107, 0.2); color: #FF6B6B; border: 1px solid #FF6B6B; }
+
     /* Navigation Button */
     .navi-btn { height: 44px; padding: 0 14px; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 800; font-size: 13px; border: none; border-radius: 12px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
 
@@ -74,9 +80,10 @@
     .tag.gilmok { background: #14331A; color: #4ADE80; }
     .tag.wisu { background: var(--theme-bg-dark); color: var(--theme-accent); border: 1px solid var(--theme-border); }
     .tag.weather { background: #1A2A3A; color: #60A5FA; }
-    .tag.logmatch { background: #2B1F3D; color: #C084FC; }
+    .tag.logmatch { background: #2B1F3D; color: #C084FC; border: 1px solid #5B21B6; font-weight: 700; }
     .tag.fallback { background: #3A221A; color: #FB923C; }
     .tag.traffic { background: #3A1A1A; color: #FF6B6B; border: 1px solid #5A2A2A; }
+    .tag.returncall { background: #1E293B; color: #38BDF8; border: 1px solid #0284C7; font-weight: 700; }
     .sub-info { font-size: 12px; color: #8A8A8A; margin-top: 8px; border-top: 1px solid #2A2A2A; padding-top: 8px; }
 
     /* Card 4 (FINAL Target Highlight) */
@@ -316,6 +323,17 @@
     if (currentPos) calculateAndRender();
   }
 
+  /* 콜 가능성 등급 계산 함수 (높음 / 보통 / 낮음) */
+  function getScoreLevelBadge(score) {
+    if (score >= 70) {
+      return '<span class="level-badge level-high">🔥 높음</span>';
+    } else if (score >= 45) {
+      return '<span class="level-badge level-mid">⚡ 보통</span>';
+    } else {
+      return '<span class="level-badge level-low">💧 낮음</span>';
+    }
+  }
+
   async function fetchRealtimeWeather(lat, lng) {
     try {
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=precipitation,rain,showers,snowfall&timezone=Asia%2FTokyo`;
@@ -374,12 +392,11 @@
     return new Date(0);
   }
 
-  /* 시간대별 도로 정체 계수 계산 */
   function getTrafficCongestionMultiplier(nowHour) {
-    if (nowHour >= 7 && nowHour <= 9) return 1.6;  // 출근
-    if (nowHour >= 17 && nowHour <= 20) return 1.5; // 퇴근
-    if (nowHour >= 22 || nowHour <= 1) return 1.3;  // 심야
-    return 1.0;                                     // 평시
+    if (nowHour >= 7 && nowHour <= 9) return 1.6;  
+    if (nowHour >= 17 && nowHour <= 20) return 1.5; 
+    if (nowHour >= 22 || nowHour <= 1) return 1.3;  
+    return 1.0;                                     
   }
 
   function getDynamicTimeCategoryBonus(amenity, shop, nowHour) {
@@ -401,9 +418,10 @@
     return bonus;
   }
 
+  /* 탑승 이력 점수 및 매칭 건수 계산 */
   function calculateCallLogScore(candLat, candLng) {
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
-    if (logs.length === 0) return { bonus: 0, matched: false };
+    if (logs.length === 0) return { bonus: 0, matched: false, count: 0 };
 
     const now = new Date();
     const currentHour = now.getHours();
@@ -411,6 +429,7 @@
 
     let maxBonus = 0;
     let isMatched = false;
+    let matchCount = 0;
 
     logs.forEach(log => {
       const logLat = Number(log.lat);
@@ -419,6 +438,7 @@
 
       const dist = getDistanceKm(candLat, candLng, logLat, logLng);
       if (dist <= 0.3) {
+        matchCount++;
         const logDate = parseDateSafely(log.timestamp);
         const daysPassed = Math.max(0, (now - logDate) / (1000 * 60 * 60 * 24));
         const decayFactor = Math.exp(-0.023 * daysPassed);
@@ -434,6 +454,11 @@
         if (isHourMatched) matchMultiplier += 0.5;
         if (isDayTypeMatched) matchMultiplier += 0.3;
 
+        // 외곽 지점 이력 가중치 (보수적 1.2배 적용)
+        if (!isInsideWisu(logLat, logLng)) {
+          matchMultiplier *= 1.2;
+        }
+
         const score = 25 * decayFactor * matchMultiplier;
         if (score > maxBonus) {
           maxBonus = score;
@@ -442,7 +467,7 @@
       }
     });
 
-    return { bonus: Math.round(maxBonus), matched: isMatched };
+    return { bonus: Math.round(maxBonus), matched: isMatched, count: matchCount };
   }
 
   function executeSearch() {
@@ -507,7 +532,6 @@
     const nowHour = new Date().getHours();
     const trafficMultiplier = getTrafficCongestionMultiplier(nowHour);
 
-    // 4번 카드(최종거점) 소요시간 계산
     const finalEstTimeMin = Math.round((finalTarget.dist / (25 / trafficMultiplier)) * 60);
     finalTarget.estimatedTimeMin = finalEstTimeMin;
 
@@ -515,6 +539,7 @@
 
     const scoredPool = pool.map(item => {
       const dist = getDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
+      const isItemWisu = isInsideWisu(item.lat, item.lng);
       
       const avgSpeed = 25 / trafficMultiplier; 
       const estimatedTimeMin = Math.round((dist / avgSpeed) * 60);
@@ -523,6 +548,13 @@
 
       const isMetroHub = METRO_ROUTE_HUBS.some(h => h.name === item.name);
       if (currentMode === 2 && isMetroHub) score += 30;
+
+      // [귀로콜 보수적 가중치 반영] 외곽 거점 +10점 보너스
+      let isReturnCallBonus = false;
+      if (!isItemWisu) {
+        score += 10;
+        isReturnCallBonus = true;
+      }
 
       score += getDynamicTimeCategoryBonus(item.amenity, item.shop, nowHour);
       if (weatherData.isRainOrSnow) score += 20;
@@ -552,7 +584,9 @@
         delta, 
         hasWeatherBonus: weatherData.isRainOrSnow,
         hasLogBonus: logResult.matched,
+        logCount: logResult.count,
         isTrafficHeavy: trafficMultiplier > 1.2,
+        isReturnCallBonus,
         isFallback: false
       };
     });
@@ -577,13 +611,25 @@
       ).map(hub => {
         const dist = getDistanceKm(currentPos.lat, currentPos.lng, hub.lat, hub.lng);
         const estimatedTimeMin = Math.round((dist / (25 / trafficMultiplier)) * 60);
+        const isItemWisu = isInsideWisu(hub.lat, hub.lng);
+        const logResult = calculateCallLogScore(hub.lat, hub.lng);
+        
+        let score = 65 - estimatedTimeMin * 1.5;
+        let isReturnCallBonus = false;
+        if (!isItemWisu) {
+          score += 10;
+          isReturnCallBonus = true;
+        }
+
         return {
           ...hub,
           dist,
           estimatedTimeMin,
-          score: Math.round(65 - estimatedTimeMin * 1.5),
+          score: Math.round(score),
           delta: Math.abs(finalBearing - getBearing(currentPos.lat, currentPos.lng, hub.lat, hub.lng)),
           isTrafficHeavy: trafficMultiplier > 1.2,
+          isReturnCallBonus,
+          logCount: logResult.count,
           isFallback: true
         };
       });
@@ -622,13 +668,15 @@
     routeCards.forEach((item, index) => {
       const card = document.createElement('div');
       card.className = 'card';
+      const levelBadgeHtml = getScoreLevelBadge(item.score);
+
       card.innerHTML = `
         <div class="card-header">
           <div class="card-title-group">
             <div class="num-badge">${index + 1}</div>
             <div>
               <div class="place-name">${item.name}</div>
-              <div class="score-dist">${item.dist.toFixed(1)}km (약 ${item.estimatedTimeMin}분) · ${item.score}점</div>
+              <div class="score-dist">${item.dist.toFixed(1)}km (약 ${item.estimatedTimeMin}분) · ${item.score}점 ${levelBadgeHtml}</div>
             </div>
           </div>
           <button class="navi-btn" onclick="openKakaoNavi('${item.name}', '${item.address || ''}')">카카오내비</button>
@@ -636,9 +684,10 @@
         <div class="tag-group">
           ${item.delta <= 45 ? '<span class="tag gilmok">#길목우선</span>' : ''}
           ${item.isWisu ? '<span class="tag wisu">#위수지역</span>' : ''}
+          ${item.isReturnCallBonus ? '<span class="tag returncall">#귀로콜우선</span>' : ''}
           ${item.isTrafficHeavy ? '<span class="tag traffic">#정체주의반영</span>' : ''}
           ${item.hasWeatherBonus ? '<span class="tag weather">#강수보너스</span>' : ''}
-          ${item.hasLogBonus ? '<span class="tag logmatch">#이력학습</span>' : ''}
+          ${item.logCount > 0 ? `<span class="tag logmatch">#누적콜 ${item.logCount}건</span>` : ''}
           ${item.isFallback ? '<span class="tag fallback">#복귀거점</span>' : ''}
         </div>
       `;
