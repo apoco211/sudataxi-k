@@ -8,6 +8,10 @@
   <meta name="theme-color" content="#FFC800">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
+  <!-- Leaflet Lightweight Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
   <style>
     /* Mode Color Theme Variables */
     body.mode-1 {
@@ -41,12 +45,16 @@
     .loc-bar { background: var(--theme-bg-dark); height: 44px; border: 1px solid var(--theme-border); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-size: 12px; color: var(--theme-accent); margin-bottom: 12px; transition: all 0.3s; }
     .refresh-btn { background: none; border: none; color: var(--theme-accent); font-size: 16px; cursor: pointer; }
 
-    /* Big CTA Button */
-    .big-btn { width: 100%; height: 72px; background: var(--theme-accent); color: var(--theme-text-on-accent); font-size: 19px; font-weight: 900; border: none; border-radius: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px var(--theme-border); transition: all 0.3s; }
+    /* Big CTA Buttons Group */
+    .btn-group-main { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    .big-btn { width: 100%; height: 60px; background: var(--theme-accent); color: var(--theme-text-on-accent); font-size: 18px; font-weight: 900; border: none; border-radius: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px var(--theme-border); transition: all 0.3s; }
     .big-btn:active { opacity: 0.9; transform: scale(0.99); }
+    
+    .map-btn { width: 100%; height: 44px; background: #2A2A2A; color: #FFFFFF; font-size: 14px; font-weight: 800; border: 1px solid var(--theme-border); border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s; }
+    .map-btn:active { background: #333333; }
 
     /* Pipeline Log Line */
-    .pipeline-log { font-family: monospace; font-size: 11px; color: #8A8A8A; margin: 10px 0 16px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pipeline-log { font-family: monospace; font-size: 11px; color: #8A8A8A; margin: 4px 0 16px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     /* Cards Stack */
     .card-list { display: flex; flex-direction: column; gap: 12px; }
@@ -86,6 +94,26 @@
     .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: rgba(26,26,26,0.95); backdrop-filter: blur(10px); border-top: 2px solid var(--theme-accent); display: flex; align-items: center; justify-content: center; padding: 0 16px; z-index: 100; max-width: 430px; margin: 0 auto; transition: border-color 0.3s; }
     .save-call-btn { width: 100%; height: 48px; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 16px; border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s; }
     .save-call-btn:active { opacity: 0.9; }
+
+    /* Full Route Map Modal / Bottom Sheet */
+    .map-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
+    .map-modal-overlay.active { display: flex; }
+    .map-modal-content { width: 100%; max-width: 430px; height: 75vh; background: #1E1E1E; border-top-left-radius: 24px; border-top-right-radius: 24px; border-top: 2px solid var(--theme-accent); display: flex; flex-direction: column; overflow: hidden; animation: slideUp 0.3s ease-out; }
+    
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .map-modal-header { padding: 14px 16px; background: #121212; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2A2A2A; }
+    .map-modal-title { font-size: 16px; font-weight: 800; color: var(--theme-accent); }
+    .map-modal-close { background: none; border: none; color: #8A8A8A; font-size: 20px; font-weight: 900; cursor: pointer; }
+    #route-map { width: 100%; flex: 1; background: #121212; }
+
+    /* Custom Leaflet Dark Marker Icons */
+    .leaflet-tile { filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7); }
+    .custom-map-marker { width: 26px; height: 26px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 13px; display: flex; align-items: center; justify-content: center; border: 2px solid #FFFFFF; box-shadow: 0 2px 6px rgba(0,0,0,0.5); }
+    .custom-map-marker.current { background: #4ADE80; color: #000000; }
   </style>
 </head>
 <body class="mode-1">
@@ -104,10 +132,15 @@
     <button class="refresh-btn" onclick="executeSearch()">⟳</button>
   </div>
 
-  <!-- Main Action Button -->
-  <button class="big-btn" onclick="executeSearch()">
-    <span>📍 주변 콜 많은 곳 찾기</span>
-  </button>
+  <!-- Main Action Buttons -->
+  <div class="btn-group-main">
+    <button class="big-btn" onclick="executeSearch()">
+      <span>📍 주변 콜 많은 곳 찾기</span>
+    </button>
+    <button class="map-btn" id="btn-show-map" onclick="openRouteMapModal()" style="display: none;">
+      <span>🗺️ 전체 동선 지도 보기</span>
+    </button>
+  </div>
 
   <!-- Pipeline Status Log -->
   <div class="pipeline-log" id="pipeline-log">대기 중 · 버튼을 누르면 검색을 시작합니다.</div>
@@ -133,10 +166,26 @@
     <button class="save-call-btn" onclick="saveCurrentCallLocation()">📍 고객 탑승 위치 저장</button>
   </div>
 
+  <!-- Route Map Modal / Bottom Sheet -->
+  <div class="map-modal-overlay" id="map-modal" onclick="closeRouteMapModal(event)">
+    <div class="map-modal-content" onclick="event.stopPropagation()">
+      <div class="map-modal-header">
+        <span class="map-modal-title">🗺️ 전체 이동 동선 약도</span>
+        <button class="map-modal-close" onclick="closeRouteMapModal()">✕</button>
+      </div>
+      <div id="route-map"></div>
+    </div>
+  </div>
+
+  <!-- Leaflet Lightweight Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
   // Global State Variables
   let currentMode = 1;
   let currentPos = null;
+  let leafletMap = null;
+  let currentRouteData = [];
 
   // Wisu Bounding Boxes (통합사업구역: 안양·군포·의왕·과천)
   function isInsideWisu(lat, lng) {
@@ -356,7 +405,6 @@
 
     const radius = currentMode === 1 ? 5000 : 10000;
     
-    // Parallel Fetching: Overpass POI + Open-Meteo Weather
     const [overpassData, weatherData] = await Promise.all([
       fetchOverpassPOIs(currentPos.lat, currentPos.lng, radius),
       fetchRealtimeWeather(currentPos.lat, currentPos.lng)
@@ -434,7 +482,7 @@
       if (selectedRoute.length === 3) break;
     }
 
-    // [경로 보간 및 실제 지명 매칭]
+    // Route Interpolation
     if (selectedRoute.length < 3 && currentMode === 2) {
       const needed = 3 - selectedRoute.length;
       const ratios = [0.25, 0.5, 0.75];
@@ -485,6 +533,15 @@
 
     selectedRoute.sort((a, b) => a.dist - b.dist);
 
+    // Save current route dataset for map visualization
+    currentRouteData = [
+      { name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true },
+      ...selectedRoute,
+      { ...finalTarget, isFinal: true }
+    ];
+
+    document.getElementById('btn-show-map').style.display = 'flex';
+
     const weatherText = weatherData.isRainOrSnow ? ' · 비/눈(+20점)' : '';
     logEl.innerText = `방금 · ${radius/1000}km 이내 · ${scoredPool.length}곳 검출${weatherText} · FINAL: ${finalTarget.name}`;
 
@@ -496,7 +553,6 @@
     const listEl = document.getElementById('card-list');
     listEl.innerHTML = '';
 
-    // Route Cards 1 to 3
     routeCards.forEach((item, index) => {
       const card = document.createElement('div');
       card.className = 'card';
@@ -522,7 +578,6 @@
       listEl.appendChild(card);
     });
 
-    // Card 4 (FINAL Target)
     const finalCard = document.createElement('div');
     finalCard.className = 'card final-card';
     const targetLabel = currentMode === 1 ? '최종번화가' : '최종위수';
@@ -544,7 +599,77 @@
     listEl.appendChild(finalCard);
   }
 
-  // Open KakaoNavi with Clipboard Copy
+  // Open & Draw Single Connected Route Map Modal
+  function openRouteMapModal() {
+    if (currentRouteData.length === 0) return;
+
+    const modal = document.getElementById('map-modal');
+    modal.classList.add('active');
+
+    setTimeout(() => {
+      if (!leafletMap) {
+        leafletMap = L.map('route-map', { zoomControl: false });
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 18,
+          attribution: ''
+        }).addTo(leafletMap);
+      } else {
+        leafletMap.invalidateSize();
+      }
+
+      // Clear existing markers/lines
+      leafletMap.eachLayer(layer => {
+        if (layer instanceof L.Marker || layer instanceof L.Polyline) {
+          leafletMap.removeLayer(layer);
+        }
+      });
+
+      const routeCoords = [];
+      const themeColor = currentMode === 1 ? '#FFC800' : '#FF6B00';
+
+      currentRouteData.forEach((pt, idx) => {
+        const latLng = [pt.lat, pt.lng];
+        routeCoords.push(latLng);
+
+        let iconHtml = '';
+        if (pt.isCurrent) {
+          iconHtml = `<div class="custom-map-marker current">📍</div>`;
+        } else if (pt.isFinal) {
+          iconHtml = `<div class="custom-map-marker" style="background:${themeColor};">4</div>`;
+        } else {
+          iconHtml = `<div class="custom-map-marker" style="background:${themeColor};">${idx}</div>`;
+        }
+
+        const customIcon = L.divIcon({
+          html: iconHtml,
+          className: '',
+          iconSize: [26, 26],
+          iconAnchor: [13, 13]
+        });
+
+        L.marker(latLng, { icon: customIcon })
+          .addTo(leafletMap)
+          .bindPopup(`<b>${pt.name}</b>`);
+      });
+
+      // Draw Polyline Connecting Current -> 1 -> 2 -> 3 -> 4
+      L.polyline(routeCoords, {
+        color: themeColor,
+        weight: 4,
+        opacity: 0.85,
+        dashArray: '6, 8'
+      }).addTo(leafletMap);
+
+      // Auto fit map bounds to include all 5 points
+      leafletMap.fitBounds(L.latLngBounds(routeCoords), { padding: [40, 40] });
+    }, 100);
+  }
+
+  function closeRouteMapModal(e) {
+    document.getElementById('map-modal').classList.remove('active');
+  }
+
+  // Open KakaoNavi
   function openKakaoNavi(name, address) {
     const query = address || name;
     navigator.clipboard.writeText(query);
@@ -628,7 +753,6 @@
 
         const existingLogs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
         
-        // Deduplicate using timestamp as unique key
         const logMap = new Map();
         [...existingLogs, ...importedLogs].forEach(item => {
           if (item.timestamp) logMap.set(item.timestamp, item);
