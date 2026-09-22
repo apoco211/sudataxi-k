@@ -105,14 +105,13 @@
       to { transform: translateY(0); }
     }
 
-    .map-modal-header { padding: 14px 16px; background: #121212; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2A2A2A; }
+    .map-modal-header { padding: 14px 16px; background: #121212; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2A2A2A; flex-shrink: 0; }
     .map-modal-title { font-size: 16px; font-weight: 800; color: var(--theme-accent); }
     .map-modal-close { background: none; border: none; color: #8A8A8A; font-size: 20px; font-weight: 900; cursor: pointer; }
-    #route-map { width: 100%; flex: 1; background: #121212; }
+    #route-map { width: 100%; height: 100%; min-height: 350px; flex: 1; background: #121212; z-index: 1; }
 
-    /* Custom Leaflet Dark Marker Icons */
-    .leaflet-tile { filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7); }
-    .custom-map-marker { width: 26px; height: 26px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 13px; display: flex; align-items: center; justify-content: center; border: 2px solid #FFFFFF; box-shadow: 0 2px 6px rgba(0,0,0,0.5); }
+    /* Custom Map Marker Styling */
+    .custom-map-marker { width: 28px; height: 28px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 13px; display: flex; align-items: center; justify-content: center; border: 2px solid #FFFFFF; box-shadow: 0 2px 6px rgba(0,0,0,0.6); }
     .custom-map-marker.current { background: #4ADE80; color: #000000; }
   </style>
 </head>
@@ -170,7 +169,7 @@
   <div class="map-modal-overlay" id="map-modal" onclick="closeRouteMapModal(event)">
     <div class="map-modal-content" onclick="event.stopPropagation()">
       <div class="map-modal-header">
-        <span class="map-modal-title">🗺️ 전체 이동 동선 약도</span>
+        <span class="map-modal-title">🗺️ 실제 도로 이동 동선 지도</span>
         <button class="map-modal-close" onclick="closeRouteMapModal()">✕</button>
       </div>
       <div id="route-map"></div>
@@ -187,18 +186,16 @@
   let leafletMap = null;
   let currentRouteData = [];
 
-  // Wisu Bounding Boxes (통합사업구역: 안양·군포·의왕·과천)
   function isInsideWisu(lat, lng) {
     const wisuBoxes = [
-      { minLat: 37.38, maxLat: 37.43, minLng: 126.90, maxLng: 126.96 }, // Anyang
-      { minLat: 37.33, maxLat: 37.38, minLng: 126.90, maxLng: 126.96 }, // Gunpo
-      { minLat: 37.32, maxLat: 37.38, minLng: 126.93, maxLng: 126.99 }, // Uiwang
-      { minLat: 37.41, maxLat: 37.45, minLng: 126.97, maxLng: 127.03 }  // Gwacheon
+      { minLat: 37.38, maxLat: 37.43, minLng: 126.90, maxLng: 126.96 },
+      { minLat: 37.33, maxLat: 37.38, minLng: 126.90, maxLng: 126.96 },
+      { minLat: 37.32, maxLat: 37.38, minLng: 126.93, maxLng: 126.99 },
+      { minLat: 37.41, maxLat: 37.45, minLng: 126.97, maxLng: 127.03 }
     ];
     return wisuBoxes.some(b => lat >= b.minLat && lat <= b.maxLat && lng >= b.minLng && lng <= b.maxLng);
   }
 
-  // Major Wisu Hubs (Mode 1 Fixed Targets)
   const MAJOR_HUBS = [
     { name: "범계역 로데오거리", lat: 37.3917, lng: 126.9145, address: "경기 안양시 동안구 평촌대로223번길 42" },
     { name: "안양역 일번가", lat: 37.4013, lng: 126.9222, address: "경기 안양시 만안구 장내로139번길 7" },
@@ -207,7 +204,6 @@
     { name: "금정역 먹자골목", lat: 37.3721, lng: 126.9438, address: "경기 군포시 군포로745번길 11" }
   ];
 
-  // 수도권 주요 귀가/복귀 길목 거점 DB
   const METRO_ROUTE_HUBS = [
     { name: "잠실역 사거리", lat: 37.5133, lng: 127.1001, address: "서울 송파구 올림픽로 265", amenity: "subway" },
     { name: "송파구 장지역/가락시장", lat: 37.4782, lng: 127.1221, address: "서울 송파구 송파대로 111", amenity: "subway" },
@@ -225,7 +221,6 @@
     { name: "안산 중앙역 로데오", lat: 37.3182, lng: 126.8384, address: "경기 안산시 단원구 고잔1길 16", amenity: "pub" }
   ];
 
-  // Preset Fallback Hotspots
   const PRESET_HOTSPOTS = [
     { name: "역전할맥 평촌점", lat: 37.3914, lng: 126.9199, amenity: "pub", address: "경기 안양시 동안구 관평로182번길 30", isWisu: true },
     { name: "평촌 학원가 먹자골목", lat: 37.3831, lng: 126.9285, amenity: "restaurant", address: "경기 안양시 동안구 평촌대로 110", isWisu: true },
@@ -234,7 +229,6 @@
     { name: "과천 정부청사역 포차", lat: 37.4261, lng: 126.9898, amenity: "pub", address: "경기 과천시 별양상가2로 14", isWisu: true }
   ];
 
-  // Haversine Distance Helper (km)
   function getDistanceKm(lat1, lon1, lat2, lon2) {
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -245,7 +239,6 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
 
-  // Bearing Angle Helper
   function getBearing(lat1, lon1, lat2, lon2) {
     const y = Math.sin((lon2 - lon1) * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180);
     const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
@@ -253,7 +246,6 @@
     return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
   }
 
-  // Dynamic Theme Mode Switcher
   function setMode(mode) {
     currentMode = mode;
     document.body.className = `mode-${mode}`;
@@ -262,7 +254,6 @@
     if (currentPos) calculateAndRender();
   }
 
-  // Real-time Weather Fetching via Open-Meteo API
   async function fetchRealtimeWeather(lat, lng) {
     try {
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=precipitation,rain,showers,snowfall&timezone=Asia%2FTokyo`;
@@ -276,7 +267,6 @@
     }
   }
 
-  // Overpass POI Fetching
   async function fetchOverpassPOIs(lat, lng, radiusMeter) {
     const query = `[out:json][timeout:8];(node(around:${radiusMeter},${lat},${lng})["amenity"~"bar|pub|nightclub|karaoke_box"]["name"];node(around:${radiusMeter},${lat},${lng})["shop"="alcohol"]["name"];);out 40;`;
     try {
@@ -296,7 +286,6 @@
     }
   }
 
-  // Reverse Geocoding via Nominatim API
   async function fetchReverseGeocodeName(lat, lng) {
     try {
       const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=ko`;
@@ -312,7 +301,6 @@
     return null;
   }
 
-  // Dynamic Category & Time Matrix Scoring
   function getDynamicTimeCategoryBonus(amenity, shop, nowHour) {
     let bonus = 0;
     const isNightlifePOI = ['bar', 'pub', 'nightclub', 'karaoke_box'].includes(amenity) || shop === 'alcohol';
@@ -332,7 +320,6 @@
     return bonus;
   }
 
-  // Call Log Time-Decay & Cyclic Matching Algorithm
   function calculateCallLogScore(candLat, candLng) {
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     if (logs.length === 0) return { bonus: 0, matched: false };
@@ -373,7 +360,6 @@
     return { bonus: Math.round(maxBonus), matched: isMatched };
   }
 
-  // Execute GPS Search
   function executeSearch() {
     const locText = document.getElementById('loc-text');
     locText.innerText = '📍 현재 위치 확인 중...';
@@ -397,7 +383,6 @@
     );
   }
 
-  // Scoring Engine & Pipeline Execution
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
@@ -415,7 +400,6 @@
       pool = pool.filter(p => isInsideWisu(p.lat, p.lng));
     }
 
-    // Determine FINAL Target
     let finalTarget = null;
     if (currentMode === 1) {
       let minD = Infinity;
@@ -435,7 +419,6 @@
       }
     }
 
-    // Integrated Scoring Engine
     const nowHour = new Date().getHours();
     const finalBearing = getBearing(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
 
@@ -467,7 +450,6 @@
       };
     });
 
-    // Separation & Filtering Logic
     const minSeparation = currentMode === 1 ? 2.0 : 0.5;
     let selectedRoute = [];
 
@@ -482,7 +464,6 @@
       if (selectedRoute.length === 3) break;
     }
 
-    // Route Interpolation
     if (selectedRoute.length < 3 && currentMode === 2) {
       const needed = 3 - selectedRoute.length;
       const ratios = [0.25, 0.5, 0.75];
@@ -533,7 +514,6 @@
 
     selectedRoute.sort((a, b) => a.dist - b.dist);
 
-    // Save current route dataset for map visualization
     currentRouteData = [
       { name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true },
       ...selectedRoute,
@@ -548,7 +528,6 @@
     renderCards(selectedRoute, finalTarget);
   }
 
-  // Render HTML Cards
   function renderCards(routeCards, finalTarget) {
     const listEl = document.getElementById('card-list');
     listEl.innerHTML = '';
@@ -599,37 +578,45 @@
     listEl.appendChild(finalCard);
   }
 
-  // Open & Draw Single Connected Route Map Modal
+  // OSRM Real Road Routing Map Drawer
   function openRouteMapModal() {
-    if (currentRouteData.length === 0) return;
+    if (typeof L === 'undefined') {
+      alert('지도 인프라(Leaflet) 로딩 중입니다. 잠시 후 다시 시도해 주세요.');
+      return;
+    }
+    if (currentRouteData.length === 0) {
+      alert('먼저 [주변 콜 많은 곳 찾기] 버튼을 눌러 위치 검색을 진행해 주세요.');
+      return;
+    }
 
     const modal = document.getElementById('map-modal');
     modal.classList.add('active');
 
-    setTimeout(() => {
+    setTimeout(async () => {
       if (!leafletMap) {
         leafletMap = L.map('route-map', { zoomControl: false });
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
           maxZoom: 18,
+          subdomains: 'abcd',
           attribution: ''
         }).addTo(leafletMap);
-      } else {
-        leafletMap.invalidateSize();
       }
+      
+      leafletMap.invalidateSize();
 
-      // Clear existing markers/lines
       leafletMap.eachLayer(layer => {
         if (layer instanceof L.Marker || layer instanceof L.Polyline) {
           leafletMap.removeLayer(layer);
         }
       });
 
-      const routeCoords = [];
       const themeColor = currentMode === 1 ? '#FFC800' : '#FF6B00';
+      const markerCoords = [];
 
       currentRouteData.forEach((pt, idx) => {
         const latLng = [pt.lat, pt.lng];
-        routeCoords.push(latLng);
+        markerCoords.push(latLng);
 
         let iconHtml = '';
         if (pt.isCurrent) {
@@ -643,8 +630,8 @@
         const customIcon = L.divIcon({
           html: iconHtml,
           className: '',
-          iconSize: [26, 26],
-          iconAnchor: [13, 13]
+          iconSize: [28, 28],
+          iconAnchor: [14, 14]
         });
 
         L.marker(latLng, { icon: customIcon })
@@ -652,24 +639,41 @@
           .bindPopup(`<b>${pt.name}</b>`);
       });
 
-      // Draw Polyline Connecting Current -> 1 -> 2 -> 3 -> 4
-      L.polyline(routeCoords, {
-        color: themeColor,
-        weight: 4,
-        opacity: 0.85,
-        dashArray: '6, 8'
-      }).addTo(leafletMap);
+      // Fetch Real Road Routing from OSRM API
+      try {
+        const coordsStr = currentRouteData.map(pt => `${pt.lng},${pt.lat}`).join(';');
+        const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson`;
+        const res = await fetch(osrmUrl);
+        const data = await res.json();
 
-      // Auto fit map bounds to include all 5 points
-      leafletMap.fitBounds(L.latLngBounds(routeCoords), { padding: [40, 40] });
-    }, 100);
+        if (data.routes && data.routes.length > 0) {
+          const roadCoords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+          L.polyline(roadCoords, {
+            color: themeColor,
+            weight: 5,
+            opacity: 0.9
+          }).addTo(leafletMap);
+        } else {
+          throw new Error("No OSRM Route");
+        }
+      } catch (err) {
+        // Fallback to straight dashed polyline if network fails
+        L.polyline(markerCoords, {
+          color: themeColor,
+          weight: 4,
+          opacity: 0.85,
+          dashArray: '6, 8'
+        }).addTo(leafletMap);
+      }
+
+      leafletMap.fitBounds(L.latLngBounds(markerCoords), { padding: [50, 50] });
+    }, 250);
   }
 
   function closeRouteMapModal(e) {
     document.getElementById('map-modal').classList.remove('active');
   }
 
-  // Open KakaoNavi
   function openKakaoNavi(name, address) {
     const query = address || name;
     navigator.clipboard.writeText(query);
@@ -688,7 +692,6 @@
     }, 1200);
   }
 
-  // Save Call Location Log
   function saveCurrentCallLocation() {
     if (!currentPos) {
       alert('GPS 위치 확인 후 저장 가능합니다.');
@@ -703,11 +706,10 @@
     };
     logs.push(newLog);
     localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
-    alert('🎉 고객 탑승 위치가 성공적으로 저장되었습니다! (+시간대 학습 반영)');
+    alert('🎉 고객 탑승 위치가 성공적으로 저장되었습니다!');
     updateCallLogStats();
   }
 
-  // Update Data Log Count Stats
   function updateCallLogStats() {
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     const countText = document.getElementById('log-count-text');
@@ -716,52 +718,38 @@
     }
   }
 
-  // Export Call Logs to JSON File
   function exportCallLogs() {
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
-
     if (logs.length === 0) {
       alert('내보낼 탑승 기록 데이터가 없습니다.');
       return;
     }
-
     const blob = new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    
     const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     a.href = url;
     a.download = `sudataxi_call_logs_${today}.json`;
     a.click();
-    
     URL.revokeObjectURL(url);
   }
 
-  // Import Call Logs from JSON File
   function importCallLogs(event) {
     const file = event.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = function(e) {
       try {
         const importedLogs = JSON.parse(e.target.result);
-
-        if (!Array.isArray(importedLogs)) {
-          throw new Error('올바르지 않은 데이터 형식입니다.');
-        }
-
+        if (!Array.isArray(importedLogs)) throw new Error('잘못된 형식입니다.');
         const existingLogs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
-        
         const logMap = new Map();
         [...existingLogs, ...importedLogs].forEach(item => {
           if (item.timestamp) logMap.set(item.timestamp, item);
         });
-
         const mergedLogs = Array.from(logMap.values());
         localStorage.setItem('sudataxi_call_logs', JSON.stringify(mergedLogs));
-
-        alert(`🎉 성공적으로 기록을 불러왔습니다! (총 ${mergedLogs.length}개)`);
+        alert(`🎉 기록을 가져왔습니다! (총 ${mergedLogs.length}개)`);
         updateCallLogStats();
       } catch (err) {
         alert('⚠️ 올바른 수다택시 K 백업 JSON 파일이 아닙니다.');
@@ -772,7 +760,6 @@
     reader.readAsText(file);
   }
 
-  // Register PWA Service Worker
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       const swCode = `
@@ -785,7 +772,6 @@
     });
   }
 
-  // Initial Load Trigger
   window.addEventListener('DOMContentLoaded', () => {
     updateCallLogStats();
   });
