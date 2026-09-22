@@ -55,9 +55,19 @@
     .card.final-mode2 .score-dist { color: #FF6B00; }
     .card.final-mode2 .navi-btn { background: #FF6B00; color: #FFFFFF; }
 
+    /* Backup & Data Section */
+    .backup-section { margin-top: 20px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 16px; padding: 14px; }
+    .backup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .backup-title { font-size: 14px; font-weight: 800; color: #FFC800; }
+    .backup-count { font-size: 12px; color: #8A8A8A; }
+    .backup-btn-group { display: flex; gap: 8px; }
+    .backup-btn { flex: 1; height: 40px; background: #2A2A2A; color: #FFFFFF; font-weight: 800; border: 1px solid #3A3A3A; border-radius: 10px; cursor: pointer; font-size: 13px; }
+    .backup-btn:active { background: #333333; }
+
     /* Fixed Bottom Bar */
     .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: rgba(26,26,26,0.95); backdrop-filter: blur(10px); border-top: 2px solid #FFC800; display: flex; align-items: center; justify-content: center; padding: 0 16px; z-index: 100; max-width: 430px; margin: 0 auto; }
     .save-call-btn { width: 100%; height: 48px; background: #FFC800; color: #000000; font-weight: 900; font-size: 16px; border: none; border-radius: 12px; cursor: pointer; }
+    .save-call-btn:active { opacity: 0.9; }
   </style>
 </head>
 <body>
@@ -87,17 +97,30 @@
   <!-- Cards Container -->
   <div class="card-list" id="card-list"></div>
 
+  <!-- Data Backup & Sync Section -->
+  <div class="backup-section">
+    <div class="backup-header">
+      <span class="backup-title">📊 고객 탑승 기록 백업</span>
+      <span class="backup-count" id="log-count-text">저장된 기록: 0개</span>
+    </div>
+    <div class="backup-btn-group">
+      <button class="backup-btn" onclick="exportCallLogs()">📤 JSON 내보내기</button>
+      <button class="backup-btn" onclick="document.getElementById('import-file-input').click()">📥 JSON 가져오기</button>
+      <input type="file" id="import-file-input" accept=".json" style="display: none;" onchange="importCallLogs(event)">
+    </div>
+  </div>
+
   <!-- Fixed Bottom Floating Bar -->
   <div class="bottom-bar">
     <button class="save-call-btn" onclick="saveCurrentCallLocation()">📍 고객 탑승 위치 저장</button>
   </div>
 
 <script>
-  // Global State
+  // Global State Variables
   let currentMode = 1;
   let currentPos = null;
 
-  // Wisu (통합사업구역: 안양·군포·의왕·과천) Box Check
+  // Wisu Bounding Boxes (통합사업구역: 안양·군포·의왕·과천)
   function isInsideWisu(lat, lng) {
     const wisuBoxes = [
       { minLat: 37.38, maxLat: 37.43, minLng: 126.90, maxLng: 126.96 }, // Anyang
@@ -108,11 +131,11 @@
     return wisuBoxes.some(b => lat >= b.minLat && lat <= b.maxLat && lng >= b.minLng && lng <= b.maxLng);
   }
 
-  // Major Wisu Hubs (Mode 1 Fixed FINALs)
+  // Major Wisu Hubs (Mode 1 Fixed Targets)
   const MAJOR_HUBS = [
     { name: "범계역 로데오거리", lat: 37.3917, lng: 126.9145, address: "경기 안양시 동안구 평촌대로223번길 42" },
     { name: "안양역 일번가", lat: 37.4013, lng: 126.9222, address: "경기 안양시 만안구 장내로139번길 7" },
-    { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331, address: "경기 군포시 산본로323번길 16.1" },
+    { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331, address: "경기 군포시 산본로323번길 16-1" },
     { name: "인덕원역 먹자골목", lat: 37.4048, lng: 126.9767, address: "경기 안양시 동안구 흥안대로 519" },
     { name: "금정역 먹자골목", lat: 37.3721, lng: 126.9438, address: "경기 군포시 군포로745번길 11" }
   ];
@@ -126,7 +149,7 @@
     { name: "과천 정부청사역 포차", lat: 37.4261, lng: 126.9898, address: "경기 과천시 별양상가2로 14", isWisu: true }
   ];
 
-  // Distance Utility (Haversine)
+  // Haversine Distance Helper (km)
   function getDistanceKm(lat1, lon1, lat2, lon2) {
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -137,7 +160,7 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
 
-  // Bearing Angle Calculation
+  // Bearing Angle Helper
   function getBearing(lat1, lon1, lat2, lon2) {
     const y = Math.sin((lon2 - lon1) * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180);
     const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
@@ -145,7 +168,7 @@
     return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
   }
 
-  // Toggle Mode
+  // Set Search Mode
   function setMode(mode) {
     currentMode = mode;
     document.getElementById('btn-mode1').classList.toggle('active', mode === 1);
@@ -153,7 +176,7 @@
     if (currentPos) calculateAndRender();
   }
 
-  // Fetch Overpass POIs
+  // Overpass POI Fetching
   async function fetchOverpassPOIs(lat, lng, radiusMeter) {
     const query = `[out:json][timeout:8];(node(around:${radiusMeter},${lat},${lng})["amenity"~"bar|pub|nightclub|karaoke_box"]["name"];node(around:${radiusMeter},${lat},${lng})["shop"="alcohol"]["name"];);out 40;`;
     try {
@@ -171,7 +194,7 @@
     }
   }
 
-  // Main Search Controller (Manual Trigger Only)
+  // Execute GPS Search
   function executeSearch() {
     const locText = document.getElementById('loc-text');
     locText.innerText = '📍 현재 위치 확인 중...';
@@ -195,7 +218,7 @@
     );
   }
 
-  // Core Scoring Engine & Rendering
+  // Scoring Engine & Pipeline Execution
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
@@ -212,14 +235,12 @@
     // Determine FINAL Target
     let finalTarget = null;
     if (currentMode === 1) {
-      // Mode 1: Nearest Major Hub
       let minD = Infinity;
       MAJOR_HUBS.forEach(h => {
         const d = getDistanceKm(currentPos.lat, currentPos.lng, h.lat, h.lng);
         if (d < minD) { minD = d; finalTarget = { ...h, dist: d }; }
       });
     } else {
-      // Mode 2: Real-time Nearest Wisu Hotspot
       const wisuPool = pool.filter(p => isInsideWisu(p.lat, p.lng));
       let minD = Infinity;
       wisuPool.forEach(p => {
@@ -231,7 +252,7 @@
       }
     }
 
-    // Score Candidates
+    // Score Calculation
     const nowHour = new Date().getHours();
     const finalBearing = getBearing(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
 
@@ -244,7 +265,7 @@
       if (nowHour >= 21 && nowHour < 24) score += 25;
       if (nowHour >= 23 || nowHour < 2) score += 35;
 
-      // Direction Bonus
+      // Bearing & Direction Bonus
       const itemBearing = getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const delta = Math.abs(finalBearing - itemBearing);
       if (delta <= 45) score += 30;
@@ -256,11 +277,10 @@
       return { ...item, dist, score: Math.round(score), delta };
     });
 
-    // Filtering & Clustering Strategy
+    // Separation & Filtering Logic
     const minSeparation = currentMode === 1 ? 2.0 : 0.5;
     let selectedRoute = [];
 
-    // Sort by score descending
     scoredPool.sort((a, b) => b.score - a.score);
 
     for (let candidate of scoredPool) {
@@ -272,7 +292,6 @@
       if (selectedRoute.length === 3) break;
     }
 
-    // Sort 1-3 Route Cards by Distance
     selectedRoute.sort((a, b) => a.dist - b.dist);
 
     logEl.innerText = `방금 · ${radius/1000}km 이내 · ${scoredPool.length}곳 검출 · FINAL: ${finalTarget.name}`;
@@ -280,12 +299,12 @@
     renderCards(selectedRoute, finalTarget);
   }
 
-  // UI Render Function
+  // Render HTML Cards
   function renderCards(routeCards, finalTarget) {
     const listEl = document.getElementById('card-list');
     listEl.innerHTML = '';
 
-    // Render Cards 1 to 3
+    // Route Cards 1 to 3
     routeCards.forEach((item, index) => {
       const card = document.createElement('div');
       card.className = 'card';
@@ -308,7 +327,7 @@
       listEl.appendChild(card);
     });
 
-    // Render Card 4 (FINAL Target)
+    // Card 4 (FINAL Target)
     const finalCard = document.createElement('div');
     finalCard.className = `card ${currentMode === 1 ? 'final-mode1' : 'final-mode2'}`;
     const targetLabel = currentMode === 1 ? '최종번화가' : '최종위수';
@@ -330,7 +349,7 @@
     listEl.appendChild(finalCard);
   }
 
-  // KakaoNavi Launcher & Address Clipboard Copy
+  // Open KakaoNavi with Clipboard Copy
   function openKakaoNavi(name, address) {
     const query = address || name;
     navigator.clipboard.writeText(query);
@@ -349,7 +368,7 @@
     }, 1200);
   }
 
-  // Save Current Pickup Location to LocalStorage
+  // Save Call Location Log
   function saveCurrentCallLocation() {
     if (!currentPos) {
       alert('GPS 위치 확인 후 저장 가능합니다.');
@@ -365,9 +384,76 @@
     logs.push(newLog);
     localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
     alert('🎉 고객 탑승 위치가 성공적으로 저장되었습니다! (+25점 학습 반영)');
+    updateCallLogStats();
   }
 
-  // Service Worker Registration
+  // Update Data Log Count Stats
+  function updateCallLogStats() {
+    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+    const countText = document.getElementById('log-count-text');
+    if (countText) {
+      countText.innerText = `저장된 기록: ${logs.length}개`;
+    }
+  }
+
+  // Export Call Logs to JSON File
+  function exportCallLogs() {
+    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+
+    if (logs.length === 0) {
+      alert('내보낼 탑승 기록 데이터가 없습니다.');
+      return;
+    }
+
+    const blob = new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    
+    const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    a.href = url;
+    a.download = `sudataxi_call_logs_${today}.json`;
+    a.click();
+    
+    URL.revokeObjectURL(url);
+  }
+
+  // Import Call Logs from JSON File
+  function importCallLogs(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const importedLogs = JSON.parse(e.target.result);
+
+        if (!Array.isArray(importedLogs)) {
+          throw new Error('올바르지 않은 데이터 형식입니다.');
+        }
+
+        const existingLogs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+        
+        // Deduplicate using timestamp as unique key
+        const logMap = new Map();
+        [...existingLogs, ...importedLogs].forEach(item => {
+          if (item.timestamp) logMap.set(item.timestamp, item);
+        });
+
+        const mergedLogs = Array.from(logMap.values());
+        localStorage.setItem('sudataxi_call_logs', JSON.stringify(mergedLogs));
+
+        alert(`🎉 성공적으로 기록을 불러왔습니다! (총 ${mergedLogs.length}개)`);
+        updateCallLogStats();
+      } catch (err) {
+        alert('⚠️ 올바른 수다택시 K 백업 JSON 파일이 아닙니다.');
+      } finally {
+        event.target.value = '';
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // Register PWA Service Worker
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       const swCode = `
@@ -379,6 +465,11 @@
       navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
     });
   }
+
+  // Initial Load Trigger
+  window.addEventListener('DOMContentLoaded', () => {
+    updateCallLogStats();
+  });
 </script>
 </body>
 </html>
