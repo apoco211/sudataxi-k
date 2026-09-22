@@ -142,9 +142,109 @@
       background: #4A2020;
     }
 
-    /* Fixed Bottom Bar */
-    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: rgba(26,26,26,0.95); backdrop-filter: blur(10px); border-top: 2px solid var(--theme-accent); display: flex; align-items: center; justify-content: center; padding: 0 16px; z-index: 100; max-width: 430px; margin: 0 auto; transition: border-color 0.3s; }
-    .save-call-btn { width: 100%; height: 48px; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 16px; border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s; }
+    /* Fixed Bottom Bar & Timer Redesign */
+    .bottom-bar { 
+      position: fixed; 
+      bottom: 0; 
+      left: 0; 
+      right: 0; 
+      height: 74px; 
+      background: rgba(26,26,26,0.95); 
+      backdrop-filter: blur(10px); 
+      border-top: 2px solid var(--theme-accent); 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+      padding: 8px 12px; 
+      z-index: 100; 
+      max-width: 430px; 
+      margin: 0 auto; 
+      transition: border-color 0.3s; 
+    }
+
+    .timer-container {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .timer-mode-selector {
+      display: flex;
+      gap: 4px;
+      height: 20px;
+    }
+
+    .timer-mode-btn {
+      flex: 1;
+      background: #2A2A2A;
+      color: #8A8A8A;
+      font-size: 10px;
+      font-weight: 800;
+      border: 1px solid #3A3A3A;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .timer-mode-btn.active {
+      background: var(--theme-accent);
+      color: var(--theme-text-on-accent);
+      border-color: var(--theme-accent);
+    }
+
+    .timer-display-btn {
+      flex: 1;
+      background: #2A2A2A;
+      border: 1px solid #3A3A3A;
+      color: #FFFFFF;
+      font-size: 13px;
+      font-weight: 900;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .timer-display-btn.running {
+      background: #3A2E0A;
+      color: var(--theme-accent);
+      border-color: var(--theme-accent);
+    }
+
+    .timer-display-btn.finished {
+      background: #4A1A1A;
+      color: #FF5555;
+      border-color: #FF5555;
+      animation: alertBlink 1s infinite;
+    }
+
+    @keyframes alertBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .save-call-btn { 
+      flex: 1; 
+      height: 100%; 
+      background: var(--theme-accent); 
+      color: var(--theme-text-on-accent); 
+      font-weight: 900; 
+      font-size: 14px; 
+      border: none; 
+      border-radius: 12px; 
+      cursor: pointer; 
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      line-height: 1.2;
+      word-break: keep-all;
+    }
     .save-call-btn:active { opacity: 0.9; }
 
     /* Full Route Map Modal / Bottom Sheet */
@@ -223,9 +323,16 @@
     </div>
   </div>
 
-  <!-- Fixed Bottom Floating Bar -->
+  <!-- Fixed Bottom Split Bar (Left: Waiting Timer / Right: Save Location) -->
   <div class="bottom-bar">
-    <button class="save-call-btn" onclick="saveCurrentCallLocation()">📍 고객 탑승 위치 저장</button>
+    <div class="timer-container">
+      <div class="timer-mode-selector">
+        <button class="timer-mode-btn active" id="timer-btn-5m" onclick="setTimerPreset(5)">5분 대기</button>
+        <button class="timer-mode-btn" id="timer-btn-10m" onclick="setTimerPreset(10)">10분 대기</button>
+      </div>
+      <button class="timer-display-btn" id="timer-display-btn" onclick="toggleTimer()">⏱️ 05:00 시작</button>
+    </div>
+    <button class="save-call-btn" onclick="saveCurrentCallLocation()">📍 고객 탑승<br>위치 저장</button>
   </div>
 
   <!-- Route Map Modal / Bottom Sheet -->
@@ -248,12 +355,18 @@
   let leafletMap = null;
   let currentRouteData = [];
 
+  /* 타이머 변수 */
+  let timerPresetMin = 5;
+  let timerRemainingSec = 300;
+  let timerInterval = null;
+  let isTimerRunning = false;
+
+  /* 위수지역 좌표 판별 (인덕원역 포함 완벽 보정) */
   function isInsideWisu(lat, lng) {
     const wisuBoxes = [
-      { minLat: 37.38, maxLat: 37.43, minLng: 126.90, maxLng: 126.96 },
-      { minLat: 37.33, maxLat: 37.38, minLng: 126.90, maxLng: 126.96 },
-      { minLat: 37.32, maxLat: 37.38, minLng: 126.93, maxLng: 126.99 },
-      { minLat: 37.41, maxLat: 37.45, minLng: 126.97, maxLng: 127.03 }
+      { minLat: 37.38, maxLat: 37.43, minLng: 126.90, maxLng: 127.01 }, // 안양, 평촌, 인덕원, 의왕 포일
+      { minLat: 37.32, maxLat: 37.38, minLng: 126.89, maxLng: 126.99 }, // 군포, 산본, 금정, 의왕 내손
+      { minLat: 37.40, maxLat: 37.46, minLng: 126.96, maxLng: 127.03 }  // 과천 전체 및 인덕원 북부
     ];
     return wisuBoxes.some(b => lat >= b.minLat && lat <= b.maxLat && lng >= b.minLng && lng <= b.maxLng);
   }
@@ -331,6 +444,82 @@
       return '<span class="level-badge level-mid">⚡ 보통</span>';
     } else {
       return '<span class="level-badge level-low">💧 낮음</span>';
+    }
+  }
+
+  /* 타이머 컨트롤 로직 */
+  function formatMMSS(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
+
+  function setTimerPreset(min) {
+    if (isTimerRunning) {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+    }
+    timerPresetMin = min;
+    timerRemainingSec = min * 60;
+
+    document.getElementById('timer-btn-5m').classList.toggle('active', min === 5);
+    document.getElementById('timer-btn-10m').classList.toggle('active', min === 10);
+
+    const btn = document.getElementById('timer-display-btn');
+    btn.className = 'timer-display-btn';
+    btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 시작`;
+  }
+
+  function toggleTimer() {
+    const btn = document.getElementById('timer-display-btn');
+
+    if (timerRemainingSec <= 0) {
+      timerRemainingSec = timerPresetMin * 60;
+      btn.className = 'timer-display-btn';
+    }
+
+    if (isTimerRunning) {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+      btn.classList.remove('running');
+      btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 재개`;
+    } else {
+      isTimerRunning = true;
+      btn.classList.add('running');
+      btn.classList.remove('finished');
+      
+      timerInterval = setInterval(() => {
+        timerRemainingSec--;
+        if (timerRemainingSec <= 0) {
+          clearInterval(timerInterval);
+          isTimerRunning = false;
+          timerRemainingSec = 0;
+          btn.className = 'timer-display-btn finished';
+          btn.innerText = `⏱️ 00:00 이동 추천!`;
+          playTimerAlarm();
+        } else {
+          btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)}`;
+        }
+      }, 1000);
+    }
+  }
+
+  function playTimerAlarm() {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 비프음
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.8);
+    } catch(e) {}
+
+    if (navigator.vibrate) {
+      navigator.vibrate([300, 150, 300, 150, 300]);
     }
   }
 
@@ -512,7 +701,7 @@
     const trafficMultiplier = getTrafficCongestionMultiplier(nowHour);
     const isLastTrainPeakTime = (nowHour >= 23 || nowHour < 1);
 
-    // [개선] 모드2 목적지 결정 로직: 고득점 위수지역 핫플 중 최단 이동시간 거점 선발
+    // [모드2 목적지 결정] 위수지역 내부 핫플 중 콜점수 상위권 + 최단 이동시간 거점 선택
     let finalTarget = null;
     if (currentMode === 1) {
       let minD = Infinity;
@@ -542,9 +731,7 @@
 
       if (evaluatedWisuPool.length > 0) {
         const maxCallScore = Math.max(...evaluatedWisuPool.map(p => p.callScore));
-        // 상위 80% 이상의 고득점 위수지역 후보군 추출
         const highScoreCandidates = evaluatedWisuPool.filter(p => p.callScore >= maxCallScore * 0.8);
-        // 이동시간(estimatedTimeMin)이 가장 짧은 거점 선택
         highScoreCandidates.sort((a, b) => a.estimatedTimeMin - b.estimatedTimeMin);
         finalTarget = highScoreCandidates[0];
       }
