@@ -508,6 +508,11 @@
       pool = pool.filter(p => isInsideWisu(p.lat, p.lng));
     }
 
+    const nowHour = new Date().getHours();
+    const trafficMultiplier = getTrafficCongestionMultiplier(nowHour);
+    const isLastTrainPeakTime = (nowHour >= 23 || nowHour < 1);
+
+    // [개선] 모드2 목적지 결정 로직: 고득점 위수지역 핫플 중 최단 이동시간 거점 선발
     let finalTarget = null;
     if (currentMode === 1) {
       let minD = Infinity;
@@ -517,26 +522,42 @@
       });
     } else {
       const wisuPool = pool.filter(p => isInsideWisu(p.lat, p.lng));
-      let minD = Infinity;
-      wisuPool.forEach(p => {
-        const d = getDistanceKm(currentPos.lat, currentPos.lng, p.lat, p.lng);
-        if (d < minD) { minD = d; finalTarget = { ...p, dist: d }; }
+      
+      const evaluatedWisuPool = wisuPool.map(p => {
+        const dist = getDistanceKm(currentPos.lat, currentPos.lng, p.lat, p.lng);
+        const estimatedTimeMin = Math.round((dist / (25 / trafficMultiplier)) * 60);
+        
+        let callScore = 50;
+        const isMetroHub = METRO_ROUTE_HUBS.some(h => h.name === p.name) || MAJOR_HUBS.some(h => h.name === p.name);
+        if (isMetroHub) callScore += 20;
+        if (isLastTrainPeakTime && isMetroHub) callScore += 20;
+        callScore += getDynamicTimeCategoryBonus(p.amenity, p.shop, nowHour);
+        if (weatherData.isRainOrSnow) callScore += 20;
+        
+        const logResult = calculateCallLogScore(p.lat, p.lng);
+        callScore += logResult.bonus;
+
+        return { ...p, dist, estimatedTimeMin, callScore };
       });
+
+      if (evaluatedWisuPool.length > 0) {
+        const maxCallScore = Math.max(...evaluatedWisuPool.map(p => p.callScore));
+        // 상위 80% 이상의 고득점 위수지역 후보군 추출
+        const highScoreCandidates = evaluatedWisuPool.filter(p => p.callScore >= maxCallScore * 0.8);
+        // 이동시간(estimatedTimeMin)이 가장 짧은 거점 선택
+        highScoreCandidates.sort((a, b) => a.estimatedTimeMin - b.estimatedTimeMin);
+        finalTarget = highScoreCandidates[0];
+      }
+
       if (!finalTarget) {
         finalTarget = { ...MAJOR_HUBS[0], dist: getDistanceKm(currentPos.lat, currentPos.lng, MAJOR_HUBS[0].lat, MAJOR_HUBS[0].lng) };
       }
     }
 
-    const nowHour = new Date().getHours();
-    const trafficMultiplier = getTrafficCongestionMultiplier(nowHour);
-
     const finalEstTimeMin = Math.round((finalTarget.dist / (25 / trafficMultiplier)) * 60);
     finalTarget.estimatedTimeMin = finalEstTimeMin;
 
     const finalBearing = getBearing(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
-
-    // [신규] 막차 피크 시간대(23시~01시) 여부 판별
-    const isLastTrainPeakTime = (nowHour >= 23 || nowHour < 1);
 
     const scoredPool = pool.map(item => {
       const dist = getDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
@@ -550,14 +571,12 @@
       const isMetroHub = METRO_ROUTE_HUBS.some(h => h.name === item.name) || MAJOR_HUBS.some(h => h.name === item.name);
       if (currentMode === 2 && isMetroHub) score += 30;
 
-      // [막차 피크 알고리즘] 23시~01시 주요 환승역 거점에 +20점 보너스
       let isLastTrainPeak = false;
       if (isLastTrainPeakTime && isMetroHub) {
         score += 20;
         isLastTrainPeak = true;
       }
 
-      // [귀로콜 보수적 가중치] 외곽 거점 +10점 보너스
       let isReturnCallBonus = false;
       if (!isItemWisu) {
         score += 10;
@@ -896,7 +915,7 @@
           doSave(currentPos);
         },
         (err) => {
-          alert('📍 GPS 위치 수신 실패로 저장되지 않았습니나. 상단 [⟳] 버튼을 누른 후 다시 시도해 주세요.');
+          alert('📍 GPS 위치 수신 실패로 저장되지 않았습니다. 상단 [⟳] 버튼을 누른 후 다시 시도해 주세요.');
         },
         { enableHighAccuracy: true, timeout: 8000, maximumAge: 10000 }
       );
