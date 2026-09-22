@@ -9,21 +9,40 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <style>
+    /* Mode Color Theme Variables */
+    body.mode-1 {
+      --theme-accent: #FFC800;
+      --theme-bg-dark: #2A2210;
+      --theme-border: #3A2E0A;
+      --theme-text-on-accent: #000000;
+      --final-card-bg: #2B2505;
+      --final-card-glow: rgba(255, 200, 0, 0.2);
+    }
+
+    body.mode-2 {
+      --theme-accent: #FF6B00;
+      --theme-bg-dark: #2A1A0A;
+      --theme-border: #3A1F0A;
+      --theme-text-on-accent: #FFFFFF;
+      --final-card-bg: #2A1A0A;
+      --final-card-glow: rgba(255, 107, 0, 0.2);
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background-color: #121212; color: #FFFFFF; max-width: 430px; margin: 0 auto; padding: 16px 16px 110px 16px; min-height: 100vh; }
+    body { background-color: #121212; color: #FFFFFF; max-width: 430px; margin: 0 auto; padding: 16px 16px 110px 16px; min-height: 100vh; transition: all 0.3s ease; }
     
     /* Header & Mode Pills */
-    .header { text-align: center; font-size: 22px; font-weight: 900; color: #FFC800; margin-bottom: 12px; }
+    .header { text-align: center; font-size: 22px; font-weight: 900; color: var(--theme-accent); margin-bottom: 12px; transition: color 0.3s; }
     .mode-container { display: flex; gap: 8px; margin-bottom: 12px; }
-    .mode-pill { flex: 1; height: 38px; border-radius: 12px; background: #2A2A2A; color: #8A8A8A; font-size: 13px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .mode-pill.active { background: #FFC800; color: #000000; }
+    .mode-pill { flex: 1; height: 38px; border-radius: 12px; background: #2A2A2A; color: #8A8A8A; font-size: 13px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+    .mode-pill.active { background: var(--theme-accent); color: var(--theme-text-on-accent); }
 
     /* Location & Status Bar */
-    .loc-bar { background: #2A2210; height: 44px; border: 1px solid #3A2E0A; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-size: 12px; color: #FFC800; margin-bottom: 12px; }
-    .refresh-btn { background: none; border: none; color: #FFC800; font-size: 16px; cursor: pointer; }
+    .loc-bar { background: var(--theme-bg-dark); height: 44px; border: 1px solid var(--theme-border); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-size: 12px; color: var(--theme-accent); margin-bottom: 12px; transition: all 0.3s; }
+    .refresh-btn { background: none; border: none; color: var(--theme-accent); font-size: 16px; cursor: pointer; }
 
     /* Big CTA Button */
-    .big-btn { width: 100%; height: 72px; background: #FFC800; color: #000000; font-size: 19px; font-weight: 900; border: none; border-radius: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(255,200,0,0.2); }
+    .big-btn { width: 100%; height: 72px; background: var(--theme-accent); color: var(--theme-text-on-accent); font-size: 19px; font-weight: 900; border: none; border-radius: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px var(--theme-border); transition: all 0.3s; }
     .big-btn:active { opacity: 0.9; transform: scale(0.99); }
 
     /* Pipeline Log Line */
@@ -31,49 +50,45 @@
 
     /* Cards Stack */
     .card-list { display: flex; flex-direction: column; gap: 12px; }
-    .card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 20px; padding: 14px; position: relative; }
+    .card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 20px; padding: 14px; position: relative; transition: all 0.3s; }
     .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
     .card-title-group { display: flex; align-items: center; gap: 8px; flex: 1; }
-    .num-badge { width: 28px; height: 28px; border-radius: 50%; background: #FFC800; color: #121212; font-weight: 900; font-size: 15px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .num-badge { width: 28px; height: 28px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 15px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.3s; }
     .place-name { font-size: 18px; font-weight: 900; color: #FFFFFF; word-break: keep-all; }
-    .score-dist { font-size: 13px; font-weight: 800; color: #FFC800; font-family: monospace; margin-top: 2px; }
+    .score-dist { font-size: 13px; font-weight: 800; color: var(--theme-accent); font-family: monospace; margin-top: 2px; transition: color 0.3s; }
     
     /* Navigation Button */
-    .navi-btn { height: 44px; padding: 0 14px; background: #FFC800; color: #000000; font-weight: 800; font-size: 13px; border: none; border-radius: 12px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .navi-btn { height: 44px; padding: 0 14px; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 800; font-size: 13px; border: none; border-radius: 12px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
 
     /* Tags & Subtext */
     .tag-group { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
     .tag { font-size: 11px; padding: 2px 6px; border-radius: 6px; background: #2A2A2A; color: #A0A0A0; }
     .tag.gilmok { background: #14331A; color: #4ADE80; }
-    .tag.wisu { background: #3A2F0A; color: #FFC800; }
+    .tag.wisu { background: var(--theme-bg-dark); color: var(--theme-accent); border: 1px solid var(--theme-border); }
     .tag.weather { background: #1A2A3A; color: #60A5FA; }
     .tag.logmatch { background: #2B1F3D; color: #C084FC; }
     .tag.fallback { background: #3A221A; color: #FB923C; }
     .sub-info { font-size: 12px; color: #8A8A8A; margin-top: 8px; border-top: 1px solid #2A2A2A; padding-top: 8px; }
 
     /* Card 4 (FINAL Target Highlight) */
-    .card.final-mode1 { background: #2B2505; border: 1px solid #FFC800; box-shadow: 0 0 12px rgba(255,200,0,0.15); }
-    .card.final-mode2 { background: #2A1A0A; border: 1px solid #FF6B00; box-shadow: 0 0 12px rgba(255,107,0,0.15); }
-    .card.final-mode2 .num-badge { background: #FF6B00; color: #FFFFFF; }
-    .card.final-mode2 .score-dist { color: #FF6B00; }
-    .card.final-mode2 .navi-btn { background: #FF6B00; color: #FFFFFF; }
+    .card.final-card { background: var(--final-card-bg); border: 1.5px solid var(--theme-accent); box-shadow: 0 0 12px var(--final-card-glow); }
 
     /* Backup & Data Section */
     .backup-section { margin-top: 20px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 16px; padding: 14px; }
     .backup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .backup-title { font-size: 14px; font-weight: 800; color: #FFC800; }
+    .backup-title { font-size: 14px; font-weight: 800; color: var(--theme-accent); transition: color 0.3s; }
     .backup-count { font-size: 12px; color: #8A8A8A; }
     .backup-btn-group { display: flex; gap: 8px; }
     .backup-btn { flex: 1; height: 40px; background: #2A2A2A; color: #FFFFFF; font-weight: 800; border: 1px solid #3A3A3A; border-radius: 10px; cursor: pointer; font-size: 13px; }
     .backup-btn:active { background: #333333; }
 
     /* Fixed Bottom Bar */
-    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: rgba(26,26,26,0.95); backdrop-filter: blur(10px); border-top: 2px solid #FFC800; display: flex; align-items: center; justify-content: center; padding: 0 16px; z-index: 100; max-width: 430px; margin: 0 auto; }
-    .save-call-btn { width: 100%; height: 48px; background: #FFC800; color: #000000; font-weight: 900; font-size: 16px; border: none; border-radius: 12px; cursor: pointer; }
+    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: rgba(26,26,26,0.95); backdrop-filter: blur(10px); border-top: 2px solid var(--theme-accent); display: flex; align-items: center; justify-content: center; padding: 0 16px; z-index: 100; max-width: 430px; margin: 0 auto; transition: border-color 0.3s; }
+    .save-call-btn { width: 100%; height: 48px; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 16px; border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s; }
     .save-call-btn:active { opacity: 0.9; }
   </style>
 </head>
-<body>
+<body class="mode-1">
 
   <div class="header">주변 콜 많은 곳 찾기</div>
 
@@ -143,7 +158,7 @@
     { name: "금정역 먹자골목", lat: 37.3721, lng: 126.9438, address: "경기 군포시 군포로745번길 11" }
   ];
 
-  // 수도권 주요 귀가/복귀 길목 거점 (하남, 성남, 강남, 송파, 용인 등 외곽 대응용 실재 지명 DB)
+  // 수도권 주요 귀가/복귀 길목 거점 DB
   const METRO_ROUTE_HUBS = [
     { name: "잠실역 사거리", lat: 37.5133, lng: 127.1001, address: "서울 송파구 올림픽로 265", amenity: "subway" },
     { name: "송파구 장지역/가락시장", lat: 37.4782, lng: 127.1221, address: "서울 송파구 송파대로 111", amenity: "subway" },
@@ -189,9 +204,10 @@
     return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
   }
 
-  // Set Search Mode
+  // Dynamic Theme Mode Switcher
   function setMode(mode) {
     currentMode = mode;
+    document.body.className = `mode-${mode}`;
     document.getElementById('btn-mode1').classList.toggle('active', mode === 1);
     document.getElementById('btn-mode2').classList.toggle('active', mode === 2);
     if (currentPos) calculateAndRender();
@@ -231,7 +247,7 @@
     }
   }
 
-  // Reverse Geocoding via Nominatim API for real place names on coordinates
+  // Reverse Geocoding via Nominatim API
   async function fetchReverseGeocodeName(lat, lng) {
     try {
       const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=ko`;
@@ -346,7 +362,6 @@
       fetchRealtimeWeather(currentPos.lat, currentPos.lng)
     ]);
     
-    // Pool includes Overpass, Presets, and Metro Route Hub DB
     let pool = [...overpassData, ...PRESET_HOTSPOTS, ...METRO_ROUTE_HUBS];
     if (currentMode === 1) {
       pool = pool.filter(p => isInsideWisu(p.lat, p.lng));
@@ -419,7 +434,7 @@
       if (selectedRoute.length === 3) break;
     }
 
-    // [개선된 실재 지명 경로 보완] 후보가 3개 미만일 때 경로 선상에서 가장 가까운 실제 거점 또는 역지명 매칭
+    // [경로 보간 및 실제 지명 매칭]
     if (selectedRoute.length < 3 && currentMode === 2) {
       const needed = 3 - selectedRoute.length;
       const ratios = [0.25, 0.5, 0.75];
@@ -428,9 +443,7 @@
         const ratio = ratios[i % ratios.length];
         const interLat = currentPos.lat + (finalTarget.lat - currentPos.lat) * ratio;
         const interLng = currentPos.lng + (finalTarget.lng - currentPos.lng) * ratio;
-        const interDist = getDistanceKm(currentPos.lat, currentPos.lng, interLat, interLng);
 
-        // 1. METRO_ROUTE_HUBS 중 해당 보간 좌표와 가장 가까운 실제 거점 찾기
         let closestHub = null;
         let minHubDist = Infinity;
         METRO_ROUTE_HUBS.forEach(hub => {
@@ -447,13 +460,11 @@
         let targetLng = interLng;
 
         if (closestHub && minHubDist < 5.0) {
-          // 5km 이내에 매칭되는 실제 거점이 있는 경우
           realName = closestHub.name;
           realAddress = closestHub.address;
           targetLat = closestHub.lat;
           targetLng = closestHub.lng;
         } else {
-          // 역지오코딩 시도
           const geoName = await fetchReverseGeocodeName(interLat, interLng);
           realName = geoName || `${finalTarget.name.split(' ')[0]} 방향 이동길목`;
         }
@@ -513,7 +524,7 @@
 
     // Card 4 (FINAL Target)
     const finalCard = document.createElement('div');
-    finalCard.className = `card ${currentMode === 1 ? 'final-mode1' : 'final-mode2'}`;
+    finalCard.className = 'card final-card';
     const targetLabel = currentMode === 1 ? '최종번화가' : '최종위수';
     finalCard.innerHTML = `
       <div class="card-header">
