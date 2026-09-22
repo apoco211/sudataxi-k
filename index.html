@@ -143,6 +143,24 @@
     { name: "금정역 먹자골목", lat: 37.3721, lng: 126.9438, address: "경기 군포시 군포로745번길 11" }
   ];
 
+  // 수도권 주요 귀가/복귀 길목 거점 (하남, 성남, 강남, 송파, 용인 등 외곽 대응용 실재 지명 DB)
+  const METRO_ROUTE_HUBS = [
+    { name: "잠실역 사거리", lat: 37.5133, lng: 127.1001, address: "서울 송파구 올림픽로 265", amenity: "subway" },
+    { name: "송파구 장지역/가락시장", lat: 37.4782, lng: 127.1221, address: "서울 송파구 송파대로 111", amenity: "subway" },
+    { name: "성남 복정역 사거리", lat: 37.4701, lng: 127.1267, address: "서울 송파구 성남대로 1489", amenity: "subway" },
+    { name: "성남 모란역 먹자골목", lat: 37.4321, lng: 127.1291, address: "경기 성남시 중원구 성남대로 1137", amenity: "pub" },
+    { name: "판교역 중심상업지구", lat: 37.3948, lng: 127.1112, address: "경기 성남시 분당구 판교역로 160", amenity: "pub" },
+    { name: "강남역 사거리", lat: 37.4979, lng: 127.0276, address: "서울 강남구 강남대로 396", amenity: "pub" },
+    { name: "서초 양재역 환승거점", lat: 37.4842, lng: 127.0346, address: "서울 서초구 남부순환로 2585", amenity: "subway" },
+    { name: "사당역 4번출구 먹자골목", lat: 37.4765, lng: 126.9816, address: "서울 관악구 과천대로 950", amenity: "pub" },
+    { name: "천호역 로데오거리", lat: 37.5386, lng: 127.1235, address: "서울 강동구 천호대로 1005", amenity: "pub" },
+    { name: "하남시청역 환승거리", lat: 37.5393, lng: 127.2147, address: "경기 하남시 하남대로 778", amenity: "subway" },
+    { name: "수지구청역 먹자골목", lat: 37.3224, lng: 127.0978, address: "경기 용인시 수지구 포은대로 435", amenity: "pub" },
+    { name: "구리역 중심상가", lat: 37.6034, lng: 127.1438, address: "경기 구리시 경춘로 230", amenity: "pub" },
+    { name: "수원역 환승센터", lat: 37.2657, lng: 127.0002, address: "경기 수원시 팔달구 덕영대로 924", amenity: "pub" },
+    { name: "안산 중앙역 로데오", lat: 37.3182, lng: 126.8384, address: "경기 안산시 단원구 고잔1길 16", amenity: "pub" }
+  ];
+
   // Preset Fallback Hotspots
   const PRESET_HOTSPOTS = [
     { name: "역전할맥 평촌점", lat: 37.3914, lng: 126.9199, amenity: "pub", address: "경기 안양시 동안구 관평로182번길 30", isWisu: true },
@@ -211,6 +229,22 @@
     } catch (err) {
       return [];
     }
+  }
+
+  // Reverse Geocoding via Nominatim API for real place names on coordinates
+  async function fetchReverseGeocodeName(lat, lng) {
+    try {
+      const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=ko`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data && data.address) {
+        const addr = data.address;
+        const mainName = addr.suburb || addr.borough || addr.city_district || addr.quarter || addr.town || addr.village || '주요';
+        const road = addr.road || addr.pedestrian || '';
+        return `${mainName} ${road}`.trim() + ' 부근';
+      }
+    } catch (e) {}
+    return null;
   }
 
   // Dynamic Category & Time Matrix Scoring
@@ -312,7 +346,8 @@
       fetchRealtimeWeather(currentPos.lat, currentPos.lng)
     ]);
     
-    let pool = [...overpassData, ...PRESET_HOTSPOTS];
+    // Pool includes Overpass, Presets, and Metro Route Hub DB
+    let pool = [...overpassData, ...PRESET_HOTSPOTS, ...METRO_ROUTE_HUBS];
     if (currentMode === 1) {
       pool = pool.filter(p => isInsideWisu(p.lat, p.lng));
     }
@@ -384,11 +419,10 @@
       if (selectedRoute.length === 3) break;
     }
 
-    // [경로 보간 안전장치] 길목 후보가 3개 미만일 때(하남 등 장거리 위치) 복귀 경로상 주요 거점 자동 생성
+    // [개선된 실재 지명 경로 보완] 후보가 3개 미만일 때 경로 선상에서 가장 가까운 실제 거점 또는 역지명 매칭
     if (selectedRoute.length < 3 && currentMode === 2) {
       const needed = 3 - selectedRoute.length;
       const ratios = [0.25, 0.5, 0.75];
-      const fallbackNames = ["1차 복귀 거점", "2차 복귀 거점", "3차 복귀 거점"];
 
       for (let i = 0; i < needed; i++) {
         const ratio = ratios[i % ratios.length];
@@ -396,16 +430,44 @@
         const interLng = currentPos.lng + (finalTarget.lng - currentPos.lng) * ratio;
         const interDist = getDistanceKm(currentPos.lat, currentPos.lng, interLat, interLng);
 
+        // 1. METRO_ROUTE_HUBS 중 해당 보간 좌표와 가장 가까운 실제 거점 찾기
+        let closestHub = null;
+        let minHubDist = Infinity;
+        METRO_ROUTE_HUBS.forEach(hub => {
+          const d = getDistanceKm(interLat, interLng, hub.lat, hub.lng);
+          if (d < minHubDist) {
+            minHubDist = d;
+            closestHub = hub;
+          }
+        });
+
+        let realName = "";
+        let realAddress = "귀가 주요 이동 경로";
+        let targetLat = interLat;
+        let targetLng = interLng;
+
+        if (closestHub && minHubDist < 5.0) {
+          // 5km 이내에 매칭되는 실제 거점이 있는 경우
+          realName = closestHub.name;
+          realAddress = closestHub.address;
+          targetLat = closestHub.lat;
+          targetLng = closestHub.lng;
+        } else {
+          // 역지오코딩 시도
+          const geoName = await fetchReverseGeocodeName(interLat, interLng);
+          realName = geoName || `${finalTarget.name.split(' ')[0]} 방향 이동길목`;
+        }
+
         selectedRoute.push({
-          name: `${finalTarget.name.split(' ')[0]} 방향 ${fallbackNames[i]}`,
-          lat: interLat,
-          lng: interLng,
-          dist: interDist,
+          name: realName,
+          lat: targetLat,
+          lng: targetLng,
+          dist: getDistanceKm(currentPos.lat, currentPos.lng, targetLat, targetLng),
           score: Math.round(75 - i * 5),
           delta: 0,
-          isWisu: false,
+          isWisu: isInsideWisu(targetLat, targetLng),
           isFallback: true,
-          address: "귀가 주요 이동 경로"
+          address: realAddress
         });
       }
     }
@@ -443,7 +505,7 @@
           ${item.isWisu ? '<span class="tag wisu">#위수지역</span>' : ''}
           ${item.hasWeatherBonus ? '<span class="tag weather">#강수보너스</span>' : ''}
           ${item.hasLogBonus ? '<span class="tag logmatch">#이력학습</span>' : ''}
-          ${item.isFallback ? '<span class="tag fallback">#복귀경로거점</span>' : ''}
+          ${item.isFallback ? '<span class="tag fallback">#복귀거점</span>' : ''}
         </div>
       `;
       listEl.appendChild(card);
