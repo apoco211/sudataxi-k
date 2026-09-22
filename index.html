@@ -250,6 +250,17 @@
     return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
   }
 
+  // Strict Place Deduplication Helper
+  function isDuplicatePlace(candName, candLat, candLng, existingList) {
+    return existingList.some(item => {
+      const nameA = item.name.trim();
+      const nameB = candName.trim();
+      const sameName = nameA === nameB || nameA.includes(nameB) || nameB.includes(nameA);
+      const closeDist = getDistanceKm(item.lat, item.lng, candLat, candLng) < 1.5;
+      return sameName || closeDist;
+    });
+  }
+
   function setMode(mode) {
     currentMode = mode;
     document.body.className = `mode-${mode}`;
@@ -454,36 +465,36 @@
       };
     });
 
-    const minSeparation = currentMode === 1 ? 2.0 : 0.5;
     let selectedRoute = [];
-
     scoredPool.sort((a, b) => b.score - a.score);
 
+    // 1st Pass: Main POI Selection with Strict Separation & Deduplication
     for (let candidate of scoredPool) {
       if (candidate.dist >= finalTarget.dist * 0.95) continue;
       if (getDistanceKm(candidate.lat, candidate.lng, finalTarget.lat, finalTarget.lng) < 0.2) continue;
       
-      const isSeparated = selectedRoute.every(s => getDistanceKm(candidate.lat, candidate.lng, s.lat, s.lng) >= minSeparation);
-      if (isSeparated) selectedRoute.push(candidate);
+      const isDuplicate = isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedRoute);
+      if (!isDuplicate) {
+        selectedRoute.push(candidate);
+      }
       if (selectedRoute.length === 3) break;
     }
 
-    // Fallback Interpolation for Mode 2 (With Duplicate Check)
+    // 2nd Pass: Fallback Interpolation for Mode 2
     if (selectedRoute.length < 3 && currentMode === 2) {
-      const needed = 3 - selectedRoute.length;
       const ratios = [0.25, 0.5, 0.75];
 
-      for (let i = 0; i < needed; i++) {
-        const ratio = ratios[i % ratios.length];
+      for (let i = 0; i < ratios.length; i++) {
+        if (selectedRoute.length >= 3) break;
+
+        const ratio = ratios[i];
         const interLat = currentPos.lat + (finalTarget.lat - currentPos.lat) * ratio;
         const interLng = currentPos.lng + (finalTarget.lng - currentPos.lng) * ratio;
 
-        // Filter hubs that are not already in selectedRoute (distance >= 1.0km & name mismatch)
-        const availableHubs = METRO_ROUTE_HUBS.filter(hub => {
-          return selectedRoute.every(s => 
-            s.name !== hub.name && getDistanceKm(s.lat, s.lng, hub.lat, hub.lng) >= 1.0
-          );
-        });
+        // Filter hubs that are not duplicated in selectedRoute
+        const availableHubs = METRO_ROUTE_HUBS.filter(hub => 
+          !isDuplicatePlace(hub.name, hub.lat, hub.lng, selectedRoute)
+        );
 
         let closestHub = null;
         let minHubDist = Infinity;
@@ -510,9 +521,7 @@
           realName = geoName || `${finalTarget.name.split(' ')[0]} 방향 이동길목`;
         }
 
-        // Final Safety Check for Name & Distance Duplicate
-        const isDuplicate = selectedRoute.some(s => s.name === realName || getDistanceKm(s.lat, s.lng, targetLat, targetLng) < 1.0);
-        if (!isDuplicate) {
+        if (!isDuplicatePlace(realName, targetLat, targetLng, selectedRoute)) {
           selectedRoute.push({
             name: realName,
             lat: targetLat,
@@ -527,6 +536,15 @@
         }
       }
     }
+
+    // 3rd Pass: Final Strict Deduplication Safeguard
+    const finalCleanRoute = [];
+    selectedRoute.forEach(item => {
+      if (!isDuplicatePlace(item.name, item.lat, item.lng, finalCleanRoute)) {
+        finalCleanRoute.push(item);
+      }
+    });
+    selectedRoute = finalCleanRoute;
 
     selectedRoute.sort((a, b) => a.dist - b.dist);
 
