@@ -250,7 +250,6 @@
     return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
   }
 
-  // Strict Place Deduplication Helper
   function isDuplicatePlace(candName, candLat, candLng, existingList) {
     return existingList.some(item => {
       const nameA = item.name.trim();
@@ -441,6 +440,10 @@
       const dist = getDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       let score = 50;
 
+      // Check if item is a Metro Hub
+      const isMetroHub = METRO_ROUTE_HUBS.some(h => h.name === item.name);
+      if (currentMode === 2 && isMetroHub) score += 25; // Base Bonus for Metro Hubs
+
       score += getDynamicTimeCategoryBonus(item.amenity, item.shop, nowHour);
       if (weatherData.isRainOrSnow) score += 20;
 
@@ -450,7 +453,14 @@
       const itemBearing = getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const delta = Math.abs(finalBearing - itemBearing);
       if (delta <= 45) score += 30;
-      if (delta >= 120) score -= 50;
+      
+      if (delta >= 120) {
+        if (currentMode === 2 && isMetroHub && dist <= 3.0) {
+          score -= 15; // Milder penalty for nearby major hubs
+        } else {
+          score -= 50;
+        }
+      }
 
       score -= (dist * 4);
 
@@ -468,7 +478,7 @@
     let selectedRoute = [];
     scoredPool.sort((a, b) => b.score - a.score);
 
-    // 1st Pass: Main POI Selection with Strict Separation & Deduplication
+    // 1st Pass: Main POI Selection
     for (let candidate of scoredPool) {
       if (candidate.dist >= finalTarget.dist * 0.95) continue;
       if (getDistanceKm(candidate.lat, candidate.lng, finalTarget.lat, finalTarget.lng) < 0.2) continue;
@@ -491,7 +501,6 @@
         const interLat = currentPos.lat + (finalTarget.lat - currentPos.lat) * ratio;
         const interLng = currentPos.lng + (finalTarget.lng - currentPos.lng) * ratio;
 
-        // Filter hubs that are not duplicated in selectedRoute
         const availableHubs = METRO_ROUTE_HUBS.filter(hub => 
           !isDuplicatePlace(hub.name, hub.lat, hub.lng, selectedRoute)
         );
@@ -507,7 +516,7 @@
         });
 
         let realName = "";
-        let realAddress = "귀가 주요 이동 경로";
+        let realAddress = "";
         let targetLat = interLat;
         let targetLng = interLng;
 
@@ -519,6 +528,7 @@
         } else {
           const geoName = await fetchReverseGeocodeName(interLat, interLng);
           realName = geoName || `${finalTarget.name.split(' ')[0]} 방향 이동길목`;
+          realAddress = realName; // Correct address mapping for KakaoNavi
         }
 
         if (!isDuplicatePlace(realName, targetLat, targetLng, selectedRoute)) {
@@ -527,7 +537,7 @@
             lat: targetLat,
             lng: targetLng,
             dist: getDistanceKm(currentPos.lat, currentPos.lng, targetLat, targetLng),
-            score: Math.round(75 - i * 5),
+            score: Math.max(30, Math.round(50 - i * 5)), // Realistic score (50~40 pts)
             delta: 0,
             isWisu: isInsideWisu(targetLat, targetLng),
             isFallback: true,
@@ -537,7 +547,7 @@
       }
     }
 
-    // 3rd Pass: Final Strict Deduplication Safeguard
+    // 3rd Pass: Strict Deduplication Safeguard
     const finalCleanRoute = [];
     selectedRoute.forEach(item => {
       if (!isDuplicatePlace(item.name, item.lat, item.lng, finalCleanRoute)) {
@@ -578,7 +588,7 @@
               <div class="score-dist">${item.dist.toFixed(1)}km · ${item.score}점</div>
             </div>
           </div>
-          <button class="navi-btn" onclick="openKakaoNavi('${item.name}', '${item.address}')">카카오내비</button>
+          <button class="navi-btn" onclick="openKakaoNavi('${item.name}', '${item.address || item.name}')">카카오내비</button>
         </div>
         <div class="tag-group">
           ${item.delta <= 45 ? '<span class="tag gilmok">#길목우선</span>' : ''}
@@ -603,7 +613,7 @@
             <div class="score-dist">${finalTarget.dist.toFixed(1)}km · [${targetLabel}]</div>
           </div>
         </div>
-        <button class="navi-btn" onclick="openKakaoNavi('${finalTarget.name}', '${finalTarget.address}')">카카오내비</button>
+        <button class="navi-btn" onclick="openKakaoNavi('${finalTarget.name}', '${finalTarget.address || finalTarget.name}')">카카오내비</button>
       </div>
       <div class="sub-info">
         현재→핫스팟 ${routeCards[0] ? routeCards[0].dist.toFixed(1) : 0}km · ${targetLabel} ${finalTarget.dist.toFixed(1)}km
