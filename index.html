@@ -80,6 +80,7 @@
     .tag.gilmok { background: #14331A; color: #4ADE80; }
     .tag.wisu { background: var(--theme-bg-dark); color: var(--theme-accent); border: 1px solid var(--theme-border); }
     .tag.weather { background: #1A2A3A; color: #60A5FA; }
+    .tag.lasttrain { background: #831843; color: #F472B6; border: 1px solid #9D174D; font-weight: 700; }
     .tag.logmatch { background: #2B1F3D; color: #C084FC; border: 1px solid #5B21B6; font-weight: 700; }
     .tag.fallback { background: #3A221A; color: #FB923C; }
     .tag.traffic { background: #3A1A1A; color: #FF6B6B; border: 1px solid #5A2A2A; }
@@ -323,7 +324,6 @@
     if (currentPos) calculateAndRender();
   }
 
-  /* 콜 가능성 등급 계산 함수 (높음 / 보통 / 낮음) */
   function getScoreLevelBadge(score) {
     if (score >= 70) {
       return '<span class="level-badge level-high">🔥 높음</span>';
@@ -418,7 +418,6 @@
     return bonus;
   }
 
-  /* 탑승 이력 점수 및 매칭 건수 계산 */
   function calculateCallLogScore(candLat, candLng) {
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     if (logs.length === 0) return { bonus: 0, matched: false, count: 0 };
@@ -454,7 +453,6 @@
         if (isHourMatched) matchMultiplier += 0.5;
         if (isDayTypeMatched) matchMultiplier += 0.3;
 
-        // 외곽 지점 이력 가중치 (보수적 1.2배 적용)
         if (!isInsideWisu(logLat, logLng)) {
           matchMultiplier *= 1.2;
         }
@@ -537,6 +535,9 @@
 
     const finalBearing = getBearing(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
 
+    // [신규] 막차 피크 시간대(23시~01시) 여부 판별
+    const isLastTrainPeakTime = (nowHour >= 23 || nowHour < 1);
+
     const scoredPool = pool.map(item => {
       const dist = getDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const isItemWisu = isInsideWisu(item.lat, item.lng);
@@ -546,10 +547,17 @@
 
       let score = 50;
 
-      const isMetroHub = METRO_ROUTE_HUBS.some(h => h.name === item.name);
+      const isMetroHub = METRO_ROUTE_HUBS.some(h => h.name === item.name) || MAJOR_HUBS.some(h => h.name === item.name);
       if (currentMode === 2 && isMetroHub) score += 30;
 
-      // [귀로콜 보수적 가중치 반영] 외곽 거점 +10점 보너스
+      // [막차 피크 알고리즘] 23시~01시 주요 환승역 거점에 +20점 보너스
+      let isLastTrainPeak = false;
+      if (isLastTrainPeakTime && isMetroHub) {
+        score += 20;
+        isLastTrainPeak = true;
+      }
+
+      // [귀로콜 보수적 가중치] 외곽 거점 +10점 보너스
       let isReturnCallBonus = false;
       if (!isItemWisu) {
         score += 10;
@@ -587,6 +595,7 @@
         logCount: logResult.count,
         isTrafficHeavy: trafficMultiplier > 1.2,
         isReturnCallBonus,
+        isLastTrainPeak,
         isFallback: false
       };
     });
@@ -621,6 +630,12 @@
           isReturnCallBonus = true;
         }
 
+        let isLastTrainPeak = false;
+        if (isLastTrainPeakTime) {
+          score += 20;
+          isLastTrainPeak = true;
+        }
+
         return {
           ...hub,
           dist,
@@ -629,6 +644,7 @@
           delta: Math.abs(finalBearing - getBearing(currentPos.lat, currentPos.lng, hub.lat, hub.lng)),
           isTrafficHeavy: trafficMultiplier > 1.2,
           isReturnCallBonus,
+          isLastTrainPeak,
           logCount: logResult.count,
           isFallback: true
         };
@@ -656,7 +672,8 @@
 
     const weatherText = weatherData.isRainOrSnow ? ' · 비/눈(+20점)' : '';
     const trafficText = trafficMultiplier > 1.2 ? ` · 정체반영(${trafficMultiplier}x)` : '';
-    logEl.innerText = `방금 · ${radius/1000}km 이내 · ${scoredPool.length}곳 검출${weatherText}${trafficText} · FINAL: ${finalTarget.name}`;
+    const lastTrainText = isLastTrainPeakTime ? ' · 막차피크시간' : '';
+    logEl.innerText = `방금 · ${radius/1000}km 이내 · ${scoredPool.length}곳 검출${weatherText}${trafficText}${lastTrainText} · FINAL: ${finalTarget.name}`;
 
     renderCards(selectedRoute, finalTarget);
   }
@@ -684,6 +701,7 @@
         <div class="tag-group">
           ${item.delta <= 45 ? '<span class="tag gilmok">#길목우선</span>' : ''}
           ${item.isWisu ? '<span class="tag wisu">#위수지역</span>' : ''}
+          ${item.isLastTrainPeak ? '<span class="tag lasttrain">#막차피크</span>' : ''}
           ${item.isReturnCallBonus ? '<span class="tag returncall">#귀로콜우선</span>' : ''}
           ${item.isTrafficHeavy ? '<span class="tag traffic">#정체주의반영</span>' : ''}
           ${item.hasWeatherBonus ? '<span class="tag weather">#강수보너스</span>' : ''}
@@ -878,7 +896,7 @@
           doSave(currentPos);
         },
         (err) => {
-          alert('📍 GPS 위치 수신 실패로 저장되지 않았습니다. 상단 [⟳] 버튼을 누른 후 다시 시도해 주세요.');
+          alert('📍 GPS 위치 수신 실패로 저장되지 않았습니나. 상단 [⟳] 버튼을 누른 후 다시 시도해 주세요.');
         },
         { enableHighAccuracy: true, timeout: 8000, maximumAge: 10000 }
       );
