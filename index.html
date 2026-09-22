@@ -90,6 +90,46 @@
     .backup-btn { flex: 1; height: 40px; background: #2A2A2A; color: #FFFFFF; font-weight: 800; border: 1px solid #3A3A3A; border-radius: 10px; cursor: pointer; font-size: 13px; }
     .backup-btn:active { background: #333333; }
 
+    /* Recent Logs Item Styling */
+    .recent-log-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #262626;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 12px;
+    }
+    .recent-log-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .recent-log-time {
+      font-weight: 800;
+      color: #FFFFFF;
+    }
+    .recent-log-coords {
+      font-size: 10px;
+      color: #8A8A8A;
+      font-family: monospace;
+    }
+    .delete-log-btn {
+      background: #3A1F1A;
+      color: #FF6B6B;
+      border: 1px solid #5A2A2A;
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .delete-log-btn:active {
+      background: #5A2A2A;
+    }
+
     /* Fixed Bottom Bar */
     .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: rgba(26,26,26,0.95); backdrop-filter: blur(10px); border-top: 2px solid var(--theme-accent); display: flex; align-items: center; justify-content: center; padding: 0 16px; z-index: 100; max-width: 430px; margin: 0 auto; transition: border-color 0.3s; }
     .save-call-btn { width: 100%; height: 48px; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 16px; border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s; }
@@ -163,6 +203,12 @@
       <button class="backup-btn" onclick="document.getElementById('import-file-input').click()">📥 JSON 가져오기</button>
       <input type="file" id="import-file-input" accept=".json" style="display: none;" onchange="importCallLogs(event)">
     </div>
+
+    <!-- Recent Logs Delete Container -->
+    <div style="margin-top: 14px; border-top: 1px dashed #3A3A3A; padding-top: 10px;">
+      <div style="font-size: 12px; font-weight: 800; color: #A0A0A0; margin-bottom: 8px;">🕒 최근 저장 목록 (최신 5개)</div>
+      <div id="recent-logs-list" style="display: flex; flex-direction: column; gap: 6px;"></div>
+    </div>
   </div>
 
   <!-- Fixed Bottom Floating Bar -->
@@ -208,7 +254,6 @@
     { name: "금정역 먹자골목", lat: 37.3721, lng: 126.9438, address: "경기 군포시 군포로745번길 11" }
   ];
 
-  // 수도권 및 복귀 주요 실제 상권/역사 거점 DB
   const METRO_ROUTE_HUBS = [
     { name: "수원 성균관대역 상업지구", lat: 37.3003, lng: 126.9708, address: "경기 수원시 장안구 율전동 291", amenity: "pub" },
     { name: "수원 정자중심상가", lat: 37.2991, lng: 126.9912, address: "경기 수원시 장안구 정자동 877", amenity: "pub" },
@@ -461,7 +506,6 @@
     let selectedRoute = [];
     scoredPool.sort((a, b) => b.score - a.score);
 
-    // 1st Pass: Pick top real hotspots/hubs from pool
     for (let candidate of scoredPool) {
       if (candidate.dist >= finalTarget.dist * 0.95) continue;
       if (getDistanceKm(candidate.lat, candidate.lng, finalTarget.lat, finalTarget.lng) < 0.2) continue;
@@ -473,7 +517,6 @@
       if (selectedRoute.length === 3) break;
     }
 
-    // 2nd Pass: Fill remaining spots ONLY from real Metro Hubs if available (No fake generic road fallbacks)
     if (selectedRoute.length < 3 && currentMode === 2) {
       const remainingHubs = METRO_ROUTE_HUBS.filter(hub => 
         !isDuplicatePlace(hub.name, hub.lat, hub.lng, selectedRoute)
@@ -689,54 +732,59 @@
     updateCallLogStats();
   }
 
+  function formatKoreanDateTime(isoString) {
+    const d = new Date(isoString);
+    if (isNaN(d.getTime())) return "날짜 정보 없음";
+    const days = ['일', '월', '화', '수', '목', '금', '토'];
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const date = String(d.getDate()).padStart(2, '0');
+    const dayName = days[d.getDay()];
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${month}.${date}(${dayName}) ${hours}:${minutes}`;
+  }
+
+  function deleteCallLog(timestamp) {
+    if (!confirm('이 탑승 기록을 삭제하시겠습니까?')) return;
+    let logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+    logs = logs.filter(item => item.timestamp !== timestamp);
+    localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
+    updateCallLogStats();
+  }
+
   function updateCallLogStats() {
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     const countText = document.getElementById('log-count-text');
     if (countText) {
       countText.innerText = `저장된 기록: ${logs.length}개`;
     }
-  }
 
-  function exportCallLogs() {
-    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+    const listEl = document.getElementById('recent-logs-list');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+
     if (logs.length === 0) {
-      alert('내보낼 탑승 기록 데이터가 없습니다.');
+      listEl.innerHTML = '<div style="font-size: 11px; color: #666; text-align: center; padding: 6px 0;">저장된 기록이 없습니다.</div>';
       return;
     }
-    const blob = new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    a.href = url;
-    a.download = `sudataxi_call_logs_${today}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
 
-  function importCallLogs(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      try {
-        const importedLogs = JSON.parse(e.target.result);
-        if (!Array.isArray(importedLogs)) throw new Error('잘못된 형식입니다.');
-        const existingLogs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
-        const logMap = new Map();
-        [...existingLogs, ...importedLogs].forEach(item => {
-          if (item.timestamp) logMap.set(item.timestamp, item);
-        });
-        const mergedLogs = Array.from(logMap.values());
-        localStorage.setItem('sudataxi_call_logs', JSON.stringify(mergedLogs));
-        alert(`🎉 기록을 가져왔습니다! (총 ${mergedLogs.length}개)`);
-        updateCallLogStats();
-      } catch (err) {
-        alert('⚠️ 올바른 수다택시 K 백업 JSON 파일이 아닙니다.');
-      } finally {
-        event.target.value = '';
-      }
-    };
-    reader.readAsText(file);
+    const sorted = [...logs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 5);
+
+    sorted.forEach(item => {
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'recent-log-item';
+      const formattedTime = formatKoreanDateTime(item.timestamp);
+      const latLngStr = `${item.lat ? item.lat.toFixed(4) : ''}, ${item.lng ? item.lng.toFixed(4) : ''}`;
+      
+      itemDiv.innerHTML = `
+        <div class="recent-log-info">
+          <span class="recent-log-time">📍 ${formattedTime} [모드${item.mode || 1}]</span>
+          <span class="recent-log-coords">좌표: ${latLngStr}</span>
+        </div>
+        <button class="delete-log-btn" onclick="deleteCallLog('${item.timestamp}')">삭제</button>
+      `;
+      listEl.appendChild(itemDiv);
+    });
   }
 
   if ('serviceWorker' in navigator) {
