@@ -374,16 +374,12 @@
     return new Date(0);
   }
 
-  /* 시간대별 교통 정체 계수 계산 */
+  /* 시간대별 도로 정체 계수 계산 */
   function getTrafficCongestionMultiplier(nowHour) {
-    // 출근 러시 (07:00 ~ 09:30)
-    if (nowHour >= 7 && nowHour <= 9) return 1.6;
-    // 퇴근 러시 (17:30 ~ 20:30)
-    if (nowHour >= 17 && nowHour <= 20) return 1.5;
-    // 야간 유흥/번화가 피크 (22:00 ~ 01:00)
-    if (nowHour >= 22 || nowHour <= 1) return 1.3;
-    // 평시
-    return 1.0;
+    if (nowHour >= 7 && nowHour <= 9) return 1.6;  // 출근
+    if (nowHour >= 17 && nowHour <= 20) return 1.5; // 퇴근
+    if (nowHour >= 22 || nowHour <= 1) return 1.3;  // 심야
+    return 1.0;                                     // 평시
   }
 
   function getDynamicTimeCategoryBonus(amenity, shop, nowHour) {
@@ -510,12 +506,16 @@
 
     const nowHour = new Date().getHours();
     const trafficMultiplier = getTrafficCongestionMultiplier(nowHour);
+
+    // 4번 카드(최종거점) 소요시간 계산
+    const finalEstTimeMin = Math.round((finalTarget.dist / (25 / trafficMultiplier)) * 60);
+    finalTarget.estimatedTimeMin = finalEstTimeMin;
+
     const finalBearing = getBearing(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
 
     const scoredPool = pool.map(item => {
       const dist = getDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       
-      // 도심 평균 속도(약 25km/h) + 시간대별 정체 가중치 적용하여 소요시간(분) 계산
       const avgSpeed = 25 / trafficMultiplier; 
       const estimatedTimeMin = Math.round((dist / avgSpeed) * 60);
 
@@ -542,7 +542,6 @@
         }
       }
 
-      // 거리 대신 [소요시간(분)] 기반 감점 체계로 개편 (소요시간 1분당 1.5점 감점)
       score -= (estimatedTimeMin * 1.5);
 
       return { 
@@ -655,7 +654,7 @@
           <div class="num-badge">4</div>
           <div>
             <div class="place-name">${finalTarget.name}</div>
-            <div class="score-dist">${finalTarget.dist.toFixed(1)}km · [${targetLabel}]</div>
+            <div class="score-dist">${finalTarget.dist.toFixed(1)}km (약 ${finalTarget.estimatedTimeMin || 0}분) · [${targetLabel}]</div>
           </div>
         </div>
         <button class="navi-btn" onclick="openKakaoNavi('${finalTarget.name}', '${finalTarget.address || ''}')">카카오내비</button>
