@@ -175,7 +175,7 @@
 
   <!-- Location Bar -->
   <div class="loc-bar">
-    <span id="loc-text">📍 GPS 대기 중 - 아래 버튼을 눌러 위치 확인</span>
+    <span id="loc-text">📍 GPS 대기 중 - 위치 확인 중...</span>
     <button class="refresh-btn" onclick="executeSearch()">⟳</button>
   </div>
 
@@ -347,6 +347,25 @@
     }
   }
 
+  function parseDateSafely(dateStr) {
+    if (!dateStr) return new Date(0);
+    if (dateStr instanceof Date) return dateStr;
+    let s = String(dateStr).trim().replace(' ', 'T');
+    let d = new Date(s);
+    if (!isNaN(d.getTime())) return d;
+    let nums = s.match(/\d+/g);
+    if (nums && nums.length >= 3) {
+      let y = parseInt(nums[0], 10);
+      let m = parseInt(nums[1], 10) - 1;
+      let day = parseInt(nums[2], 10);
+      let h = nums[3] ? parseInt(nums[3], 10) : 0;
+      let min = nums[4] ? parseInt(nums[4], 10) : 0;
+      let sec = nums[5] ? parseInt(nums[5], 10) : 0;
+      return new Date(y, m, day, h, min, sec);
+    }
+    return new Date(0);
+  }
+
   function getDynamicTimeCategoryBonus(amenity, shop, nowHour) {
     let bonus = 0;
     const isNightlifePOI = ['bar', 'pub', 'nightclub', 'karaoke_box'].includes(amenity) || shop === 'alcohol';
@@ -384,7 +403,7 @@
 
       const dist = getDistanceKm(candLat, candLng, logLat, logLng);
       if (dist <= 0.3) {
-        const logDate = new Date(log.timestamp);
+        const logDate = parseDateSafely(log.timestamp);
         const daysPassed = Math.max(0, (now - logDate) / (1000 * 60 * 60 * 24));
         const decayFactor = Math.exp(-0.023 * daysPassed);
 
@@ -722,27 +741,44 @@
   }
 
   function saveCurrentCallLocation() {
-    if (!currentPos) {
-      alert('GPS 위치 확인 후 저장 가능합니다.');
-      return;
-    }
-    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
-    const newLog = {
-      timestamp: new Date().toISOString(),
-      lat: Number(currentPos.lat),
-      lng: Number(currentPos.lng),
-      mode: currentMode
+    const doSave = (targetPos) => {
+      const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+      const newLog = {
+        timestamp: new Date().toISOString(),
+        lat: Number(targetPos.lat),
+        lng: Number(targetPos.lng),
+        mode: currentMode
+      };
+      logs.push(newLog);
+      localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
+      
+      updateCallLogStats();
+      alert('🎉 고객 탑승 위치가 성공적으로 저장되었습니다!');
     };
-    logs.push(newLog);
-    localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
-    
-    updateCallLogStats();
-    alert('🎉 고객 탑승 위치가 성공적으로 저장되었습니다!');
+
+    if (currentPos) {
+      doSave(currentPos);
+    } else {
+      if (!navigator.geolocation) {
+        alert('GPS를 지원하지 않는 브라우저입니다.');
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          currentPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          doSave(currentPos);
+        },
+        (err) => {
+          alert('📍 GPS 위치를 확인할 수 없어 저장이 실패했습니다.');
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    }
   }
 
   function formatKoreanDateTime(isoString) {
-    const d = new Date(isoString);
-    if (isNaN(d.getTime())) return "날짜 정보 없음";
+    const d = parseDateSafely(isoString);
+    if (isNaN(d.getTime()) || d.getTime() === 0) return "날짜 정보 없음";
     const days = ['일', '월', '화', '수', '목', '금', '토'];
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const date = String(d.getDate()).padStart(2, '0');
@@ -776,7 +812,10 @@
       return;
     }
 
-    const sorted = [...logs].sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0)).slice(0, 5);
+    // 아이폰 Safari 대응 안전 날짜 정렬 (.getTime() 사용)
+    const sorted = [...logs].sort((a, b) => {
+      return parseDateSafely(b.timestamp).getTime() - parseDateSafely(a.timestamp).getTime();
+    }).slice(0, 5);
 
     sorted.forEach(item => {
       const itemDiv = document.createElement('div');
@@ -856,6 +895,7 @@
 
   window.addEventListener('DOMContentLoaded', () => {
     updateCallLogStats();
+    executeSearch(); // 앱 실행 즉시 1회 자동 위치 검색
   });
 </script>
 </body>
