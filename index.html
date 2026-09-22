@@ -110,6 +110,11 @@
     .map-modal-close { background: none; border: none; color: #8A8A8A; font-size: 20px; font-weight: 900; cursor: pointer; }
     #route-map { width: 100%; height: 100%; min-height: 350px; flex: 1; background: #121212; z-index: 1; }
 
+    /* OpenStreetMap Pure Dark Mode Filter (No API Key Required) */
+    .leaflet-tile-pane {
+      filter: brightness(0.6) invert(1) contrast(1.3) hue-rotate(200deg) saturate(0.3);
+    }
+
     /* Custom Map Marker Styling */
     .custom-map-marker { width: 28px; height: 28px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 13px; display: flex; align-items: center; justify-content: center; border: 2px solid #FFFFFF; box-shadow: 0 2px 6px rgba(0,0,0,0.6); }
     .custom-map-marker.current { background: #4ADE80; color: #000000; }
@@ -180,7 +185,6 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-  // Global State Variables
   let currentMode = 1;
   let currentPos = null;
   let leafletMap = null;
@@ -578,7 +582,7 @@
     listEl.appendChild(finalCard);
   }
 
-  // OSRM Real Road Routing Map Drawer
+  // Pure OpenStreetMap Dark Tile Renderer (100% Free & No API Key Watermark)
   function openRouteMapModal() {
     if (typeof L === 'undefined') {
       alert('지도 인프라(Leaflet) 로딩 중입니다. 잠시 후 다시 시도해 주세요.');
@@ -596,9 +600,9 @@
       if (!leafletMap) {
         leafletMap = L.map('route-map', { zoomControl: false });
         
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        // 100% Free Pure OpenStreetMap Tiles (Styled via CSS Filter)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           maxZoom: 18,
-          subdomains: 'abcd',
           attribution: ''
         }).addTo(leafletMap);
       }
@@ -657,7 +661,6 @@
           throw new Error("No OSRM Route");
         }
       } catch (err) {
-        // Fallback to straight dashed polyline if network fails
         L.polyline(markerCoords, {
           color: themeColor,
           weight: 4,
