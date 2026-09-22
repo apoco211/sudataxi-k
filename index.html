@@ -259,8 +259,8 @@
 
   const METRO_ROUTE_HUBS = [
     { name: "수원 성균관대역 상업지구", lat: 37.3003, lng: 126.9708, address: "성균관대역", amenity: "pub" },
-    { name: "수원 정자중심상가", lat: 37.2991, lng: 126.9912, address: "수원 정자중심상가", amenity: "pub" },
-    { name: "수원 파장동 맛고을", lat: 37.3112, lng: 126.9928, address: "파장동 맛고을", amenity: "restaurant" },
+    { name: "수원 정자중심상가", lat: 37.2991, lng: 126.9912, address: "정자중심상가", amenity: "pub" },
+    { name: "수원 파장동 맛고을", lat: 37.3112, lng: 126.9928, address: "파장동", amenity: "restaurant" },
     { name: "수원역 환승센터", lat: 37.2657, lng: 127.0002, address: "수원역", amenity: "pub" },
     { name: "안산 중앙역 로데오", lat: 37.3182, lng: 126.8384, address: "중앙역", amenity: "pub" },
     { name: "사당역 4번출구 먹자골목", lat: 37.4765, lng: 126.9816, address: "사당역 4번출구", amenity: "pub" },
@@ -273,7 +273,7 @@
   ];
 
   const PRESET_HOTSPOTS = [
-    { name: "역전할맥 평촌점", lat: 37.3914, lng: 126.9199, amenity: "pub", address: "평촌역", isWisu: true },
+    { name: "역전할맥 평촌점", lat: 37.3914, lng: 126.9199, amenity: "pub", address: "역전할맥 평촌점", isWisu: true },
     { name: "평촌 학원가 먹자골목", lat: 37.3831, lng: 126.9285, amenity: "restaurant", address: "평촌학원가", isWisu: true },
     { name: "대야미역 역전시장", lat: 37.3281, lng: 126.9168, amenity: "pub", address: "대야미역", isWisu: true },
     { name: "의왕 계원예대 앞", lat: 37.3712, lng: 126.9754, amenity: "pub", address: "계원예대", isWisu: true },
@@ -603,7 +603,7 @@
               <div class="score-dist">${item.dist.toFixed(1)}km · ${item.score}점</div>
             </div>
           </div>
-          <button class="navi-btn" onclick="openKakaoNavi('${item.name}', '${item.address || item.name}')">카카오내비</button>
+          <button class="navi-btn" onclick="openKakaoNavi('${item.name}', '${item.address || ''}')">카카오내비</button>
         </div>
         <div class="tag-group">
           ${item.delta <= 45 ? '<span class="tag gilmok">#길목우선</span>' : ''}
@@ -628,7 +628,7 @@
             <div class="score-dist">${finalTarget.dist.toFixed(1)}km · [${targetLabel}]</div>
           </div>
         </div>
-        <button class="navi-btn" onclick="openKakaoNavi('${finalTarget.name}', '${finalTarget.address || finalTarget.name}')">카카오내비</button>
+        <button class="navi-btn" onclick="openKakaoNavi('${finalTarget.name}', '${finalTarget.address || ''}')">카카오내비</button>
       </div>
       <div class="sub-info">
         현재→핫스팟 ${routeCards[0] ? routeCards[0].dist.toFixed(1) : 0}km · ${targetLabel} ${finalTarget.dist.toFixed(1)}km
@@ -729,10 +729,23 @@
     document.getElementById('map-modal').classList.remove('active');
   }
 
-  /* 카카오내비 실행 및 명칭 복사 (역 이름/명칭 우선 검색) */
+  /* 카카오내비 검색 실패 방지: 수식어 자동 제거 및 표준 역명 정제 함수 */
+  function cleanNaviQuery(str) {
+    if (!str) return '';
+    return str
+      .replace(/먹자골목|중심상가|상업지구|환승거점|사거리|로데오거리|로데오|환승센터|포차|맛고을/g, '')
+      .replace(/수원|서초|성남|의왕|과천|안산/g, '') // 지역 접두어 제거
+      .trim();
+  }
+
   function openKakaoNavi(name, address) {
-    // 도로명 주소 대신 내비게이션 검색에 100% 성공하는 [장소명/역이름]을 최우선 검색어로 지정
-    const query = name || address;
+    // 1. address가 우선 존재하면 사용, 없으면 name에서 노이즈 제거
+    let query = address;
+    if (!query || query === 'undefined' || query === name) {
+      query = cleanNaviQuery(name);
+    }
+    if (!query) query = name;
+
     navigator.clipboard.writeText(query);
     alert(`📋 [${query}] 명칭이 복사되었습니다.\n카카오내비로 연결합니다.`);
     
