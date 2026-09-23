@@ -148,7 +148,6 @@
     <div class="backup-btn-group">
       <button class="backup-btn" id="btn-export">📤 JSON 내보내기</button>
       <button class="backup-btn" id="btn-import-open">📥 JSON 가져오기</button>
-      <!-- 탐색기에서 파일을 바로 선택하여 불러오는 표준 file input -->
       <input type="file" id="import-file-input" accept=".json,application/json" style="display: none;">
     </div>
     
@@ -187,7 +186,7 @@
   </div>
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
+<script:택시 콜 가이드 앱:index.html>
   let currentMode = 1;
   let currentPos = { lat: 37.4048, lng: 126.9767 };
   let leafletMap = null;
@@ -527,8 +526,16 @@
       return { ...h, dist: d, estimatedTimeMin: estT };
     }).sort((a, b) => a.dist - b.dist);
 
-    let validTargets = currentMode === 1 ? sortedTargets.filter(h => h.dist >= 0.5) : sortedTargets;
-    let finalTarget = validTargets.length > 0 ? validTargets[0] : sortedTargets[0];
+    // [수정 핵심] 모드 1일 때, 현재 위치가 특정 관문역(예: 인덕원역 등) 반경 0.8km 이내에 있다면 
+    // 자기 자신(출발한 역)이 최종 목적지로 잡히는 것을 방지하고 다음으로 가까운 다른 관문역을 최종 목적지로 선정합니다.
+    let finalTarget = sortedTargets[0];
+    if (currentMode === 1) {
+      const veryCloseHubs = sortedTargets.filter(h => h.dist < 0.8);
+      if (veryCloseHubs.length > 0 && sortedTargets.length > 1) {
+        // 현재 위치와 가장 가까운 관문역(자기 자신)을 건너뛰고 다음으로 가까운 관문역을 파이널로 지정
+        finalTarget = sortedTargets[1];
+      }
+    }
 
     finalTarget.estimatedTimeMin = Math.round((finalTarget.dist / (25 / trafficMultiplier)) * 60);
     const finalBearing = getBearing(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
@@ -848,7 +855,6 @@
     }
   }
 
-  // 기사님 본래의 탐색기 파일 불러오기 로직
   function importCallLogs(e) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
@@ -896,7 +902,6 @@
 
     document.getElementById('btn-export').addEventListener('click', () => exportCallLogs());
     
-    // 'JSON 가져오기' 버튼 누르면 탐색기가 바로 뜨도록 연결
     document.getElementById('btn-import-open').addEventListener('click', () => {
       document.getElementById('import-file-input').click();
     });
