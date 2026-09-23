@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+\<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -118,8 +118,13 @@
     .map-modal-close { background: none; border: none; color: #8A8A8A; font-size: 20px; font-weight: 900; cursor: pointer; }
     #route-map { width: 100%; height: 100%; min-height: 350px; flex: 1; background: #121212; z-index: 1; }
     
-    .custom-map-marker { width: 28px; height: 28px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 13px; display: flex; align-items: center; justify-content: center; border: 2px solid #FFFFFF; box-shadow: 0 2px 6px rgba(0,0,0,0.6); }
-    .custom-map-marker.current { background: #4ADE80; color: #000000; }
+    /* 한국 지명 가독성을 극대화한 고대비 필터 */
+    .leaflet-tile-pane { filter: brightness(1.1) contrast(1.4); }
+    
+    /* 마커 및 팝업 스타일 */
+    .custom-map-marker { width: 34px; height: 34px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 16px; display: flex; align-items: center; justify-content: center; border: 2.5px solid #FFFFFF; box-shadow: 0 3px 8px rgba(0,0,0,0.8); }
+    .custom-map-marker.current { background: #4ADE80; color: #000000; font-size: 18px; }
+    .leaflet-popup-content { font-size: 15px; font-weight: 800; color: #111; }
   </style>
 </head>
 <body class="mode-1">
@@ -695,8 +700,8 @@
     setTimeout(async () => {
       if (!leafletMap) {
         leafletMap = L.map('route-map', { zoomControl: false });
-        // 선명하고 가독성이 뛰어난 고대비 다크 스타일 타일 적용
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '' }).addTo(leafletMap);
+        // 한국 지명 및 도로망이 뚜렷하게 표기되는 표준 타일 레이어 적용
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '' }).addTo(leafletMap);
       }
       leafletMap.invalidateSize();
       leafletMap.eachLayer(l => { if (l instanceof L.Marker || l instanceof L.Polyline) leafletMap.removeLayer(l); });
@@ -707,7 +712,7 @@
       currentRouteData.forEach((pt, idx) => {
         let badgeNum = pt.isFinal ? (currentRouteData.length === 2 ? '1' : '4') : idx;
         let html = pt.isCurrent ? '<div class="custom-map-marker current">📍</div>' : `<div class="custom-map-marker" style="background:${themeColor};">${badgeNum}</div>`;
-        L.marker([pt.lat, pt.lng], { icon: L.divIcon({ html, className: '', iconSize: [28, 28], iconAnchor: [14, 14] }) })
+        L.marker([pt.lat, pt.lng], { icon: L.divIcon({ html, className: '', iconSize: [34, 34], iconAnchor: [17, 17] }) })
           .addTo(leafletMap).bindPopup(`<b>${pt.name}</b>`);
       });
 
@@ -718,12 +723,12 @@
         const data = await res.json();
         if (data.routes && data.routes.length > 0) {
           const roadCoords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-          L.polyline(roadCoords, { color: themeColor, weight: 5, opacity: 0.9 }).addTo(leafletMap);
+          L.polyline(roadCoords, { color: themeColor, weight: 6, opacity: 0.95 }).addTo(leafletMap);
         } else {
           throw new Error("No OSRM Route");
         }
       } catch (err) {
-        L.polyline(markerCoords, { color: themeColor, weight: 4, opacity: 0.85, dashArray: '6, 8' }).addTo(leafletMap);
+        L.polyline(markerCoords, { color: themeColor, weight: 5, opacity: 0.9, dashArray: '6, 8' }).addTo(leafletMap);
       }
 
       leafletMap.fitBounds(L.latLngBounds(markerCoords), { padding: [50, 50] });
