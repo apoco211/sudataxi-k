@@ -271,7 +271,7 @@
     document.body.className = `mode-${mode}`;
     document.getElementById('btn-mode1').classList.toggle('active', mode === 1);
     document.getElementById('btn-mode2').classList.toggle('active', mode === 2);
-    calculateAndRender();
+    executeSearch();
   }
 
   function getScoreLevelBadge(score) {
@@ -519,7 +519,6 @@
     const nowHour = new Date().getHours();
     const trafficMultiplier = getTrafficCongestionMultiplier(nowHour);
     const isLastTrainPeakTime = (nowHour >= 23 || nowHour < 1);
-    const isCommuteTime = (nowHour >= 7 && nowHour < 10);
 
     let searchTargetPool = [];
     if (currentMode === 1) {
@@ -600,45 +599,23 @@
         isTrafficHeavy: trafficMultiplier > 1.2,
         isReturnCallBonus,
         isLastTrainPeak,
-        isCommuteTime,
         isReverseHighBonus,
         isFallback: false
       };
     });
 
     let selectedRoute = [];
-    const validPool = scoredPool.filter(p => p.score > -200);
-    validPool.sort((a, b) => b.score - a.score);
+    
+    // [스마트 거리 필터] 최종 목적지가 현재 위치에서 이미 가깝다면(2.5km 이내) 무리하게 먼 경유지 카드를 채우지 않음
+    if (finalTarget.dist > 2.5) {
+      const validPool = scoredPool.filter(p => p.score >= 45 && p.score > -200); // 콜 점수 보통 이상(45점 이상)만 엄선
+      validPool.sort((a, b) => b.score - a.score);
 
-    for (let candidate of validPool) {
-      if (candidate.dist >= finalTarget.dist * 0.95) continue;
-      if (getDistanceKm(candidate.lat, candidate.lng, finalTarget.lat, finalTarget.lng) < 0.2) continue;
-      if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedRoute)) {
-        selectedRoute.push(candidate);
-      }
-      if (selectedRoute.length === 3) break;
-    }
-
-    if (selectedRoute.length < 3) {
-      const fallbackSource = currentMode === 1 ? [...MAJOR_HUBS, ...PRESET_HOTSPOTS] : METRO_ROUTE_HUBS;
-      const remainingHubs = fallbackSource.filter(hub => 
-        (currentMode === 1 ? isInsideWisu(hub.lat, hub.lng) : true) &&
-        !isDuplicatePlace(hub.name, hub.lat, hub.lng, selectedRoute) &&
-        getDistanceKm(hub.lat, hub.lng, finalTarget.lat, finalTarget.lng) >= 0.2
-      ).map(hub => {
-        const dist = getDistanceKm(currentPos.lat, currentPos.lng, hub.lat, hub.lng);
-        return {
-          ...hub,
-          dist,
-          estimatedTimeMin: Math.round((dist / (25 / trafficMultiplier)) * 60),
-          score: 50,
-          isFallback: true
-        };
-      });
-      remainingHubs.sort((a, b) => a.dist - b.dist);
-      for (let hub of remainingHubs) {
-        if (!isDuplicatePlace(hub.name, hub.lat, hub.lng, selectedRoute)) {
-          selectedRoute.push(hub);
+      for (let candidate of validPool) {
+        if (candidate.dist >= finalTarget.dist * 0.95) continue;
+        if (getDistanceKm(candidate.lat, candidate.lng, finalTarget.lat, finalTarget.lng) < 0.2) continue;
+        if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedRoute)) {
+          selectedRoute.push(candidate);
         }
         if (selectedRoute.length === 3) break;
       }
@@ -654,7 +631,7 @@
     const mapBtn = document.getElementById('btn-show-map');
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
-      logEl.innerText = `방금 · ${radius/1000}km 이내 · ${validPool.length}곳 검출 · FINAL: ${finalTarget.name}`;
+      logEl.innerText = `방금 · ${radius/1000}km 이내 · 경유지 ${selectedRoute.length}곳 · FINAL: ${finalTarget.name}`;
     }
     renderCards(selectedRoute, finalTarget);
   }
@@ -696,7 +673,7 @@
     finalCard.innerHTML = `
       <div class="card-header">
         <div class="card-title-group">
-          <div class="num-badge">4</div>
+          <div class="num-badge">${routeCards.length > 0 ? '4' : '1'}</div>
           <div>
             <div class="place-name">${finalTarget.name}</div>
             <div class="score-dist">${finalTarget.dist.toFixed(1)}km (약 ${finalTarget.estimatedTimeMin || 0}분) · [${targetLabel}]</div>
@@ -704,19 +681,19 @@
         </div>
         <button class="navi-btn" onclick="openKakaoNavi('${finalTarget.name}', '${finalTarget.address || ''}')">카카오내비</button>
       </div>
-      <div class="sub-info">현재→핫스팟 ${routeCards[0] ? routeCards[0].dist.toFixed(1) : 0}km · ${targetLabel} ${finalTarget.dist.toFixed(1)}km</div>
+      <div class="sub-info">${routeCards.length > 0 ? `현재→핫스팟 ${routeCards[0].dist.toFixed(1)}km · ` : ''}${targetLabel} 바로 안내 ${finalTarget.dist.toFixed(1)}km</div>
     `;
     listEl.appendChild(finalCard);
   }
 
-  function openRouteMapModal() {
+  async function openRouteMapModal() {
     if (typeof L === 'undefined') {
       alert('지도 로딩 중입니다.');
       return;
     }
     const modal = document.getElementById('map-modal');
     if (modal) modal.classList.add('active');
-    setTimeout(() => {
+    setTimeout(async () => {
       if (!leafletMap) {
         leafletMap = L.map('route-map', { zoomControl: false });
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '' }).addTo(leafletMap);
@@ -725,15 +702,31 @@
       leafletMap.eachLayer(l => { if (l instanceof L.Marker || l instanceof L.Polyline) leafletMap.removeLayer(l); });
       
       const themeColor = currentMode === 1 ? '#FFC800' : '#FF6B00';
-      const coords = currentRouteData.map(pt => [pt.lat, pt.lng]);
+      const markerCoords = currentRouteData.map(pt => [pt.lat, pt.lng]);
       
       currentRouteData.forEach((pt, idx) => {
-        let html = pt.isCurrent ? '<div class="custom-map-marker current">📍</div>' : `<div class="custom-map-marker" style="background:${themeColor};">${pt.isFinal ? 4 : idx}</div>`;
+        let badgeNum = pt.isFinal ? (currentRouteData.length === 2 ? '1' : '4') : idx;
+        let html = pt.isCurrent ? '<div class="custom-map-marker current">📍</div>' : `<div class="custom-map-marker" style="background:${themeColor};">${badgeNum}</div>`;
         L.marker([pt.lat, pt.lng], { icon: L.divIcon({ html, className: '', iconSize: [28, 28], iconAnchor: [14, 14] }) })
           .addTo(leafletMap).bindPopup(`<b>${pt.name}</b>`);
       });
-      L.polyline(coords, { color: themeColor, weight: 5, opacity: 0.9 }).addTo(leafletMap);
-      leafletMap.fitBounds(L.latLngBounds(coords), { padding: [50, 50] });
+
+      try {
+        const coordsStr = currentRouteData.map(pt => `${pt.lng},${pt.lat}`).join(';');
+        const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson`;
+        const res = await fetch(osrmUrl);
+        const data = await res.json();
+        if (data.routes && data.routes.length > 0) {
+          const roadCoords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+          L.polyline(roadCoords, { color: themeColor, weight: 5, opacity: 0.9 }).addTo(leafletMap);
+        } else {
+          throw new Error("No OSRM Route");
+        }
+      } catch (err) {
+        L.polyline(markerCoords, { color: themeColor, weight: 4, opacity: 0.85, dashArray: '6, 8' }).addTo(leafletMap);
+      }
+
+      leafletMap.fitBounds(L.latLngBounds(markerCoords), { padding: [50, 50] });
     }, 200);
   }
 
