@@ -74,7 +74,6 @@
     .tag-group { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
     .tag { font-size: 11px; padding: 2px 6px; border-radius: 6px; background: #2A2A2A; color: #A0A0A0; }
     .tag.near { background: #1E3A8A; color: #93C5FD; border: 1px solid #3B82F6; font-weight: 700; }
-    .tag.gilmok { background: #14331A; color: #4ADE80; border: 1px solid #22C55E; }
     .tag.wisu { background: var(--theme-bg-dark); color: var(--theme-accent); border: 1px solid var(--theme-border); }
     .tag.custom { background: #3B0764; color: #E9D5FF; border: 1px solid #7E22CE; font-weight: 700; }
     .tag.logmatch { background: #2B1F3D; color: #C084FC; border: 1px solid #5B21B6; font-weight: 700; }
@@ -599,7 +598,7 @@
   async function calculateAndRender() {
     if (!currentPos) currentPos = { lat: 37.4048, lng: 126.9767 };
     const logEl = document.getElementById('pipeline-log');
-    if (logEl) logEl.innerText = `실시간 도로망(OSRM) 모드 ${currentMode} 순방향 정렬 연산 중...`;
+    if (logEl) logEl.innerText = `실시간 도로망(OSRM) 모드 ${currentMode} 1~2km 정밀 연산 중...`;
     
     const radius = currentMode === 1 ? 5000 : 15000;
     
@@ -635,8 +634,8 @@
 
     const finalBearing = getBearing(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
 
-    // 2. 경유지 후보군 수집 및 엄격한 방향성/거리 필터링
-    const limitedPool = pool.slice(0, 40);
+    // 2. 모드 2일 때: 현재 위치 주변 엄격한 '1~2km' 내에 알짜 핫플이 없으면 경유지 없이 즉시 FINAL 직행!
+    const limitedPool = pool.slice(0, 35);
     let scoredPool = await Promise.all(limitedPool.map(async item => {
       const road = await fetchRealRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
       
@@ -652,19 +651,15 @@
       if (angleDiff > 180) angleDiff = 360 - angleDiff;
 
       let isNearStep1 = false;
-      let isGilmokStep2 = false;
 
       if (currentMode === 2) {
-        // ⭐ [모드 2 철저한 동선 정방향 제어]
-        // 반경 2.5km 내 초근거리가 아니면, 위수 복귀 방향(angleDiff <= 50도)에 확실히 부합해야만 허용. 반대 방향(예: 수원역처럼 남쪽 등)은 싹 다 배제!
-        if (road.distanceKm <= 2.5) {
-          score += 90; 
+        // ⭐ [기사님 지적 반영 최종 수정: 엄격한 1~2km 기준]
+        // 반경 2.0km 이내이면서 최종 복귀 방향(angleDiff <= 40도)인 확실한 초근거리 핫플만 허용, 없으면 싹 탈락시켜 직행 유도!
+        if (road.distanceKm <= 2.0 && angleDiff <= 40) {
+          score += 100; 
           isNearStep1 = true;
-        } else if (angleDiff <= 50 && road.distanceKm < finalTarget.dist) {
-          score += 40;
-          isGilmokStep2 = true;
         } else {
-          score = -999; // 동선 역주행하거나 엉뚱한 방향인 곳은 무조건 탈락
+          score = -999; 
         }
       } else {
         if (angleDiff <= 60) score += 20;
@@ -677,21 +672,28 @@
         score: Math.max(10, score), 
         delta: angleDiff, 
         isNearStep1,
-        isGilmokStep2,
         logCount: logResult.count
       };
     }));
 
-    // 3. 유효 풀 정제 및 순서 꼬임 방지를 위한 엄격한 순방향 거리 오름차순 정렬
-    let validPool = scoredPool.filter(p => p.score > 0 && p.name !== finalTarget.name);
-    validPool.sort((a, b) => a.dist - b.dist); // ⭐ 핵심: 현재 위치에서 가까운 순서대로 무조건 정렬하여 지그재그 방지!
-
     let selectedRoute = [];
-    for (let candidate of validPool) {
-      if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedRoute)) {
-        selectedRoute.push(candidate);
+    if (currentMode === 1) {
+      let validPool = scoredPool.filter(p => p.score > 0 && p.name !== finalTarget.name);
+      validPool.sort((a, b) => b.score - a.score);
+      for (let candidate of validPool) {
+        if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedRoute)) {
+          selectedRoute.push(candidate);
+        }
+        if (selectedRoute.length === 3) break;
       }
-      if (selectedRoute.length === 3) break;
+      selectedRoute.sort((a, b) => a.dist - b.dist);
+    } else {
+      // 모드 2: 1~2km 내에 알짜가 없으면 경유지 0개! 깔끔하게 FINAL로 직행
+      let validPool = scoredPool.filter(p => p.score > 0 && p.name !== finalTarget.name && p.dist <= 2.0);
+      validPool.sort((a, b) => b.dist - a.dist);
+      if (validPool.length > 0) {
+        selectedRoute.push(validPool[0]); // 1~2km 이내 딱 1개만 경유지 허용
+      }
     }
 
     currentRouteData = [
@@ -703,7 +705,7 @@
     const mapBtn = document.getElementById('btn-show-map');
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
-      logEl.innerText = `방금 · 모드 ${currentMode} 정방향 동선 정렬 완료 · 경유지 ${selectedRoute.length}곳 · FINAL: ${finalTarget.name}`;
+      logEl.innerText = `방금 · 모드 ${currentMode} 연산 완료 · 경유지 ${selectedRoute.length}곳 · 1~2km 검증 완료`;
     }
 
     let subFinalCandidates = [];
@@ -743,8 +745,7 @@
           </div>
         </div>
         <div class="tag-group">
-          ${item.isNearStep1 ? '<span class="tag near">#1-2.5km초근거리</span>' : ''}
-          ${item.isGilmokStep2 ? '<span class="tag gilmok">#정방향복귀길목</span>' : ''}
+          ${item.isNearStep1 ? '<span class="tag near">#1-2km초근거리</span>' : ''}
           ${item.isCustom ? '<span class="tag custom">#나만의핫플</span>' : ''}
           ${item.isWisu ? '<span class="tag wisu">#위수지역</span>' : ''}
           ${item.logCount > 0 ? `<span class="tag logmatch">#누적콜 ${item.logCount}건</span>` : ''}
@@ -755,12 +756,12 @@
 
     const finalCard = document.createElement('div');
     finalCard.className = 'card final-card';
-    const targetLabel = currentMode === 1 ? '최종번화가' : '최종위수진입';
+    const targetLabel = currentMode === 1 ? '최종번화가' : '최종위수직행';
     finalCard.innerHTML = `
       <div class="card-main-content">
         <div class="card-top-row">
           <div class="card-title-group">
-            <div class="num-badge">${routeCards.length > 0 ? '4' : '1'}</div>
+            <div class="num-badge">${routeCards.length > 0 ? '2' : '1'}</div>
             <div class="place-info">
               <div class="place-name">${finalTarget.name}</div>
               <div class="score-dist">실주행 ${finalTarget.dist.toFixed(1)}km (약 ${finalTarget.estimatedTimeMin || 0}분) · ${finalTarget.score}점 ${getScoreLevelBadge(finalTarget.score)} [${targetLabel}]</div>
@@ -772,7 +773,7 @@
           <button class="action-btn map-open-btn" data-name="${finalTarget.name}" data-lat="${finalTarget.lat}" data-lng="${finalTarget.lng}">🗺️ 카카오맵</button>
         </div>
       </div>
-      <div class="sub-info">${routeCards.length > 0 ? `순방향 진행 · ` : ''}${targetLabel} 바로 진입 ${finalTarget.dist.toFixed(1)}km</div>
+      <div class="sub-info">${routeCards.length > 0 ? `1~2km 초근거리 경유 후 직행 · ` : '1~2km 내 핫플 없음 · 위수 진입점 즉시 직행 · '}${finalTarget.dist.toFixed(1)}km</div>
     `;
     listEl.appendChild(finalCard);
 
@@ -860,7 +861,7 @@
     }, 200);
   }
 
-  function closeRouteMapModal() {
+    function closeRouteMapModal() {
     const modal = document.getElementById('map-modal');
     if (modal) modal.classList.remove('active');
   }
@@ -1078,7 +1079,6 @@
     document.getElementById('btn-export').addEventListener('click', () => exportCallLogs());
     
     document.getElementById('btn-import-open').addEventListener('click', () => {
-      document.getElementById('import-file-input').print ? {} : document.getElementById('import-file-input').click();
       document.getElementById('import-file-input').click();
     });
     document.getElementById('import-file-input').addEventListener('change', (e) => importCallLogs(e));
