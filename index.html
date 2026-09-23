@@ -4,10 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>수다택시 K</title>
+
+  <!-- PWA & iOS 홈 아이콘 설정 -->
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="수다택시K">
+  
+  <!-- iOS Safari 아이콘 -->
+  <link rel="apple-touch-icon" href="./icon-180.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png">
+  <link rel="apple-touch-icon" sizes="1024x1024" href="./icon-1024.png">
+  
+  <!-- 브라우저 파비콘 및 기본 아이콘 -->
+  <link rel="shortcut icon" href="./icon-192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
   
   <!-- Leaflet Lightweight Map CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -81,7 +94,7 @@
     
     .card.final-card { background: var(--final-card-bg); border: 1.5px solid var(--theme-accent); box-shadow: 0 0 12px var(--final-card-glow); }
     
-    /* 서브 목적지 카드 정돈 스타일 */
+    /* 서브 목적지 카드 스타일 */
     .sub-final-section { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
     .sub-final-title { font-size: 13px; font-weight: 800; color: var(--theme-accent); margin-bottom: 2px; }
     .sub-final-list { display: flex; flex-direction: column; gap: 10px; }
@@ -537,25 +550,49 @@
   function getCustomHotspots() {
     return JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
   }
+
+  /* -------------------------------------------------------------
+     [개선 2] GPS 수신 폴백 로직 강화
+     ------------------------------------------------------------- */
   function executeSearch() {
     const locText = document.getElementById('loc-text');
     if (locText) locText.innerText = '📍 실시간 GPS 위치 수신 중...';
     
+    // 백업 위치 가져오기 (가장 최근 등록/기록된 콜 위치)
+    function getFallbackPos() {
+      const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+      if (logs.length > 0) {
+        const lastLog = logs[logs.length - 1];
+        if (lastLog.lat && lastLog.lng) {
+          return { lat: Number(lastLog.lat), lng: Number(lastLog.lng), source: '최근 기록' };
+        }
+      }
+      return { lat: 37.4048, lng: 126.9767, source: '인덕원역 기본값' }; // 최종 기본값
+    }
+
     if (!navigator.geolocation) {
-      if (locText) locText.innerText = '📍 GPS 미지원 (인덕원역 대체)';
-      currentPos = { lat: 37.4048, lng: 126.9767 };
+      const fallback = getFallbackPos();
+      currentPos = { lat: fallback.lat, lng: fallback.lng };
+      if (locText) locText.innerText = `📍 GPS 미지원 (${fallback.source} 사용)`;
       calculateAndRender();
       return;
     }
+
     let resolved = false;
     const safetyTimer = setTimeout(() => {
       if (!resolved) {
         resolved = true;
-        if (!currentPos) currentPos = { lat: 37.4048, lng: 126.9767 };
-        if (locText) locText.innerText = `📍 GPS 지연 (마지막 위치 사용: ${currentPos.lat.toFixed(4)}, ${currentPos.lng.toFixed(4)})`;
+        if (!currentPos) {
+          const fallback = getFallbackPos();
+          currentPos = { lat: fallback.lat, lng: fallback.lng };
+          if (locText) locText.innerText = `📍 터널/지하 지연 (${fallback.source} 연결: ${currentPos.lat.toFixed(4)}, ${currentPos.lng.toFixed(4)})`;
+        } else {
+          if (locText) locText.innerText = `📍 GPS 지연 (마지막 위치 사용: ${currentPos.lat.toFixed(4)}, ${currentPos.lng.toFixed(4)})`;
+        }
         calculateAndRender();
       }
     }, 4500);
+
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         if (resolved) return;
@@ -570,13 +607,19 @@
         if (resolved) return;
         resolved = true;
         clearTimeout(safetyTimer);
-        if (!currentPos) currentPos = { lat: 37.4048, lng: 126.9767 };
-        if (locText) locText.innerText = `📍 GPS 수신 실패 (기본/이전 위치 사용)`;
+        if (!currentPos) {
+          const fallback = getFallbackPos();
+          currentPos = { lat: fallback.lat, lng: fallback.lng };
+          if (locText) locText.innerText = `📍 GPS 수신 안됨 (${fallback.source} 연결)`;
+        } else {
+          if (locText) locText.innerText = `📍 GPS 수신 실패 (기존 위치 사용)`;
+        }
         calculateAndRender();
       },
       { enableHighAccuracy: true, timeout: 4000, maximumAge: 0 }
     );
   }
+
   async function calculateAndRender() {
     if (!currentPos) currentPos = { lat: 37.4048, lng: 126.9767 };
     const logEl = document.getElementById('pipeline-log');
@@ -737,7 +780,6 @@
     `;
     listEl.appendChild(finalCard);
     
-    // 서브 카드의 레이아웃 겹침 문제만 정돈하고 기능/스타일 유지
     if (currentMode === 1 && subFinalCandidates && subFinalCandidates.length > 0) {
       const subSection = document.createElement('div');
       subSection.className = 'sub-final-section';
@@ -840,13 +882,32 @@
     }
     showToast(`📋 [${query}] 명칭 복사완료!`);
   }
+
+  /* -------------------------------------------------------------
+     [개선 1] 카카오내비 앱 스키마 연동 및 웹 폴백 처리
+     ------------------------------------------------------------- */
   function openKakaoMapRoute(name, lat, lng) {
     let cleanName = cleanQuery(name);
     if (!cleanName) cleanName = name;
     const targetName = encodeURIComponent(cleanName);
-    const kakaoMapUrl = `https://map.kakao.com/link/to/${targetName},${lat},${lng}`;
-    window.location.href = kakaoMapUrl;
+    
+    // 카카오내비 앱 실행 스키마
+    const naviAppUrl = `kakaonavi://navigate?name=${targetName}&x=${lng}&y=${lat}`;
+    // 카카오맵 웹 폴백 URL
+    const mapWebUrl = `https://map.kakao.com/link/to/${targetName},${lat},${lng}`;
+
+    const startTime = Date.now();
+    // 앱 시도
+    window.location.href = naviAppUrl;
+
+    // 1.2초 내에 화면 전환이 없으면(앱 미설치 등) 웹 페이지로 전환
+    setTimeout(() => {
+      if (Date.now() - startTime < 1800) {
+        window.location.href = mapWebUrl;
+      }
+    }, 1200);
   }
+
   function saveCurrentCallLocation() {
     const doSave = (pos) => {
       let logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
