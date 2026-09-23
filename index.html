@@ -136,7 +136,6 @@
   </style>
 </head>
 <body class="mode-1">
-  <!-- STREAMING_CHUNK:Rendering application header and controls... -->
   <div class="header">주변 콜 많은 곳 찾기</div>
   
   <div class="mode-container">
@@ -209,7 +208,6 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  /* STREAMING_CHUNK:Initializing application state and core boundaries... */
   let currentMode = 1;
   let currentPos = null;
   let leafletMap = null;
@@ -229,13 +227,21 @@
     return wisuBoxes.some(b => lat >= b.minLat && lat <= b.maxLat && lng >= b.minLng && lng <= b.maxLng);
   }
 
-  // [모드 1 전용] 5대 대형 관문 거점 풀 (절대 침범 불가)
+  // [모드 1 전용] 5대 대형 관문 거점 풀 (모드 2에는 절대 포함되지 않음)
   const MAJOR_HUBS = [
     { name: "인덕원역 먹자골목", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway", isWisu: true },
     { name: "범계역 로데오거리", lat: 37.3917, lng: 126.9145, address: "범계역", type: "subway", isWisu: true },
     { name: "안양역 일번가", lat: 37.4013, lng: 126.9222, address: "안양역", type: "subway", isWisu: true },
     { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway", isWisu: true },
     { name: "금정역 먹자골목", lat: 37.3721, lng: 126.9438, address: "금정역", type: "subway", isWisu: true }
+  ];
+
+  // [모드 2 보조용] 위수 남쪽 진입점 후보 거점들 (의왕역, 오전동, 부곡동 등)
+  const WISU_ENTRY_GATEWAYS = [
+    { name: "의왕역 먹자골목", lat: 37.3135, lng: 126.9582, address: "의왕역", type: "subway", isWisu: true },
+    { name: "의왕 부곡상가", lat: 37.3204, lng: 126.9531, address: "부곡동", type: "nightlife", isWisu: true },
+    { name: "군포 부곡동 상업지구", lat: 37.3321, lng: 126.9455, address: "부곡동", type: "nightlife", isWisu: true },
+    { name: "의왕 오전동 상가", lat: 37.3481, lng: 126.9712, address: "오전동", type: "nightlife", isWisu: true }
   ];
 
   function getStraightDistanceKm(lat1, lon1, lat2, lon2) {
@@ -381,7 +387,6 @@
     }
   }
 
-  // 실시간 주변 상권 POI 수집 (모드별 독립 탐색 범위 적용)
   async function fetchOverpassPOIs(lat, lng, radiusMeter) {
     const query = `[out:json][timeout:6];(node(around:${radiusMeter},${lat},${lng})["amenity"~"bar|pub|nightclub|karaoke_box"]["name"];node(around:${radiusMeter},${lat},${lng})["shop"="alcohol"]["name"];node(around:${radiusMeter},${lat},${lng})["railway"="station"]["name"];);out 40;`;
     try {
@@ -501,13 +506,11 @@
     );
   }
 
-  /* STREAMING_CHUNK:Executing independent track calculation for Mode 1 and Mode 2... */
   async function calculateAndRender() {
     if (!currentPos) currentPos = { lat: 37.4048, lng: 126.9767 };
     const logEl = document.getElementById('pipeline-log');
     if (logEl) logEl.innerText = `실시간 도로망(OSRM) 모드 ${currentMode} 독립 연산 중...`;
     
-    // 모드 1: 위수 내부 5km / 모드 2: 타지역 원거리(최대 25km 이상) 위수 진입점 탐색
     const radius = currentMode === 1 ? 5000 : 25000;
     
     const [overpassData, weatherData] = await Promise.all([
@@ -519,40 +522,35 @@
     let pool = [];
     let searchTargetPool = [];
 
-    // [핵심 격리 트랙 분리]
+    // [완전 격리 트랙 - 모드 2는 MAJOR_HUBS를 100% 배제하고 오직 위수 안쪽 상권 및 진입점만 사용]
     if (currentMode === 1) {
-      // 모드 1: 오직 위수지역 내부 장소만 풀에 남기고, 최종 목적지 후보는 철저히 5대 대형 관문 거점(MAJOR_HUBS)만 사용
       pool = [...customHotspots, ...overpassData, ...MAJOR_HUBS].filter(p => isInsideWisu(p.lat, p.lng));
       searchTargetPool = MAJOR_HUBS;
     } else {
-      // 모드 2: 타지역에서 복귀할 때, 위수 안쪽(isWisu === true)에 속하는 모든 실시간 장소 풀을 대상으로 최단거리 진입점 탐색
-      pool = [...customHotspots, ...overpassData, ...MAJOR_HUBS];
+      const wisuOverpass = overpassData.filter(p => isInsideWisu(p.lat, p.lng));
+      pool = [...customHotspots, ...wisuOverpass, ...WISU_ENTRY_GATEWAYS];
       const wisuPool = pool.filter(p => isInsideWisu(p.lat, p.lng));
-      searchTargetPool = wisuPool.length > 0 ? wisuPool : MAJOR_HUBS;
+      searchTargetPool = wisuPool.length > 0 ? wisuPool : WISU_ENTRY_GATEWAYS;
     }
 
     const nowHour = new Date().getHours();
 
-    // 모든 후보 대상에 대해 실시간 도로 주행 거리 연산
     let scoredTargets = await Promise.all(searchTargetPool.map(async h => {
       const road = await fetchRealRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
-      // 거리가 가까울수록 점수가 압도적으로 높아지도록 설정 (최단거리 우선)
       let targetScore = Math.max(10, 500 - Math.round(road.distanceKm * 20));
       return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: targetScore, targetScore };
     }));
 
-    // 최단 주행거리 순서대로 정렬 (모드 1은 가장 가까운 관문역, 모드 2는 가장 가까운 위수 안쪽 진입점)
     scoredTargets.sort((a, b) => b.targetScore - a.targetScore);
 
     let finalTarget = scoredTargets[0];
-    if (!finalTarget) finalTarget = MAJOR_HUBS[0];
+    if (!finalTarget) finalTarget = currentMode === 1 ? MAJOR_HUBS[0] : WISU_ENTRY_GATEWAYS[0];
 
     const finalBearing = getBearing(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
 
     const limitedPool = pool.slice(0, 35);
     let scoredPool = await Promise.all(limitedPool.map(async item => {
       const road = await fetchRealRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
-      const isItemWisu = isInsideWisu(item.lat, item.lng);
       
       let score = Math.max(10, 150 - Math.round(road.distanceKm * 10));
       if (item.isCustom) score += 25;
@@ -631,7 +629,6 @@
     renderCards(selectedRoute, finalTarget, subFinalCandidates);
   }
 
-  /* STREAMING_CHUNK:Rendering recommendation cards and action buttons... */
   function renderCards(routeCards, finalTarget, subFinalCandidates) {
     const listEl = document.getElementById('card-list');
     if (!listEl) return;
@@ -729,7 +726,6 @@
     });
   }
 
-  /* STREAMING_CHUNK:Configuring map modal and user interaction handlers... */
   async function openRouteMapModal() {
     if (typeof L === 'undefined') {
       alert('지도 로딩 중입니다.');
