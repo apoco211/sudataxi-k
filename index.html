@@ -617,9 +617,9 @@
   }
 
   /* -------------------------------------------------------------
-     [핵심 알고리즘 수정] 
-     1. 500m(0.5km) 이내 1순위 거점 감지 시 다음 거점으로 4번 교체
-     2. 동선 이탈(삥 둘러가기) 완전 방지 연산
+     [알고리즘 완전히 재수정] 
+     1. 500m(0.5km) 이내 1순위 거점 건너뛰기 연산 검증 및 보정
+     2. 4번 최종 목적지 방향 이탈(삥 둘러가기) 완벽 차단
      ------------------------------------------------------------- */
   async function calculateAndRender() {
     if (!currentPos) currentPos = { lat: 37.4048, lng: 126.9767 };
@@ -645,31 +645,43 @@
     }
     const nowHour = new Date().getHours();
     
-    // 1. 전체 목적지 거점 실주행 거리 및 점수 계산
+    // 1. 모든 거점에 대한 실주행 거리 및 기본 점수 우선 연산
     let scoredTargets = await Promise.all(searchTargetPool.map(async h => {
       const road = await fetchRealRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
       let targetScore = Math.max(10, 500 - Math.round(road.distanceKm * 20));
-      return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: targetScore, targetScore };
+      return { 
+        ...h, 
+        dist: road.distanceKm, 
+        estimatedTimeMin: road.durationMin, 
+        score: targetScore, 
+        targetScore 
+      };
     }));
-    scoredTargets.sort((a, b) => b.targetScore - a.targetScore);
     
-    // ⭐ [500m 규칙 적용] 1순위 거점이 500m(0.5km) 이내에 있다면 다음 거점으로 4번 교체
-    let finalTarget = scoredTargets[0];
-    if (finalTarget && finalTarget.dist <= 0.5 && scoredTargets.length > 1) {
-      // 500m 초과하는 거점 중 점수가 가장 높은 거점 선택
-      const nextTarget = scoredTargets.find(t => t.dist > 0.5);
-      if (nextTarget) {
-        finalTarget = nextTarget;
-      } else {
-        finalTarget = scoredTargets[1]; // 예외 fallback
-      }
+    // 거리순 및 점수순 정렬
+    scoredTargets.sort((a, b) => a.dist - b.dist);
+    
+    // ⭐ [ 핵심 500m 검증 규칙 ]
+    // 가장 가까운 1순위 거점이 0.5km(500m) 이내이면, 그 거점은 4번(최종) 목적지에서 완전히 제외!
+    let finalTarget = null;
+    let farTargets = scoredTargets.filter(t => t.dist > 0.5);
+    
+    if (farTargets.length > 0) {
+      // 500m 초과하는 거점 중 콜 점수가 가장 높은 곳을 4번 최종 목적지로 선정
+      farTargets.sort((a, b) => b.targetScore - a.targetScore);
+      finalTarget = farTargets[0];
+    } else {
+      // 모든 거점이 500m 이내인 특수 상황이면 가장 멀리 있는 곳 선택
+      scoredTargets.sort((a, b) => b.dist - a.dist);
+      finalTarget = scoredTargets[0];
     }
+    
     if (!finalTarget) finalTarget = currentMode === 1 ? MAJOR_HUBS[0] : MODE2_WISU_GATEWAYS[0];
     
-    // 확정된 4번 목적지로 향하는 각도 계산
+    // 확정된 4번 목적지 방향각 연산
     const finalBearing = getBearing(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
     
-    // 2. 경유 후보지 동선 필터링
+    // 2. 경유 후보지(1~3번) 연산 - 4번 목적지로 향하는 동선 길목만 필터링
     const limitedPool = pool.slice(0, 35);
     let scoredPool = await Promise.all(limitedPool.map(async item => {
       const road = await fetchRealRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
@@ -694,12 +706,14 @@
           score = -999;
         }
       } else {
-        // [모드 1] 최종 목적지 진행 방향(60도 이내)이고, 최종 목적지보다 더 먼 곳은 탈락
-        if (angleDiff <= 60 && road.distanceKm < finalTarget.dist * 0.9) {
+        // [모드 1 강한 조건] 
+        // 1) 4번 목적지 방향과 60도 이내이어야 함
+        // 2) 4번 목적지보다 더 멀리 돌아가는 위치는 탈락 (dist < finalTarget.dist)
+        if (angleDiff <= 60 && road.distanceKm < finalTarget.dist) {
           score += 30;
           if (road.distanceKm <= 2.0) isNearStep1 = true;
         } else {
-          score = -999; // 진행 방향과 어긋나거나 최종 목적지보다 넘어서는 장소 제외
+          score = -999; // 완전히 돌아가는 장소 제외
         }
       }
       return { 
@@ -724,7 +738,7 @@
         }
         if (selectedRoute.length === 3) break;
       }
-      // 현재 위치 기준 전진 순서로 정렬
+      // 현재 위치 기준으로 거리가 가까운 순서로 전진 정렬
       selectedRoute.sort((a, b) => a.dist - b.dist);
     } else {
       let validPool = scoredPool.filter(p => p.score > 0 && p.name !== finalTarget.name && p.dist <= 2.0);
@@ -743,7 +757,7 @@
     const mapBtn = document.getElementById('btn-show-map');
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
-      logEl.innerText = `방금 · 모드 ${currentMode} 연산 완료 · 길목 경유지 ${selectedRoute.length}곳 안내`;
+      logEl.innerText = `방금 · 모드 ${currentMode} 연산 완료 · 500m 이탈 검증 및 길목 경유지 ${selectedRoute.length}곳 안내`;
     }
     let subFinalCandidates = [];
     if (currentMode === 1) {
