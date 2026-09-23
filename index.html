@@ -82,19 +82,6 @@
     
     .card.final-card { background: var(--final-card-bg); border: 1.5px solid var(--theme-accent); box-shadow: 0 0 12px var(--final-card-glow); }
     
-    .sub-final-section { margin-top: 16px; background: #1A1A1A; border: 1.5px dashed #4A3A10; border-radius: 16px; padding: 12px; }
-    .sub-final-title { font-size: 13px; font-weight: 900; color: #FFD700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-    .sub-final-list { display: flex; flex-direction: column; gap: 8px; }
-    .sub-final-card { background: #252215; border: 1px solid #4A3A10; border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
-    .sub-final-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-    .sub-final-info { display: flex; flex-direction: column; gap: 2px; flex: 1; }
-    .sub-final-name { font-size: 15px; font-weight: 900; color: #FFFFFF; }
-    .sub-final-meta { font-size: 12px; font-weight: 800; color: #FFD700; font-family: monospace; display: flex; align-items: center; gap: 6px; }
-    .sub-btn-row { display: flex; gap: 6px; }
-    .sub-action-btn { flex: 1; height: 36px; font-weight: 800; font-size: 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
-    .sub-copy-btn { background: #332B10; color: #D4AF37; border: 1px solid #554410; }
-    .sub-map-btn { background: #554410; color: #FFD700; border: none; }
-    
     .backup-section { margin-top: 20px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 16px; padding: 14px; }
     .backup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .backup-title { font-size: 14px; font-weight: 800; color: var(--theme-accent); }
@@ -159,7 +146,7 @@
     </button>
   </div>
   
-  <div class="pipeline-log" id="pipeline-log">대기 중 · 단계별 연산 준비 중...</div>
+  <div class="pipeline-log" id="pipeline-log">대기 중 · 독립 트랙 연산 준비 중...</div>
   
   <div class="card-list" id="card-list"></div>
   
@@ -231,8 +218,8 @@
    *      : 차로 1~2분 거리에서 실시간 콜을 받기 위해 반경 1~2km 내 상권을 1번 카드로 최우선 배치 (#1-2km초근거리)
    *    - [2단계: 차선책] 반경 1~2km 이내에 핫플이 없을 때 ➔ 복귀 방향 길목 핫플 검색
    *      : 위수지역(안양·군포·의왕·과천)을 향하는 방향(angleDiff <= 60도) 상의 핫플을 수집하여 안내 (#복귀길목)
-   *    - [3단계: FINAL] 실제 주행 최단 위수 경계 진입점
-   *      : 현지 영업 후 복귀를 위한 실제 도로 최단거리 위수 경계 진입점(의왕역, 부곡, 오전동 등)을 마지노선으로 고정 (4번 카드)
+   *    - [3단계: FINAL] 실제 주행 최단 위수 경계 진입점 (모드 2 전용 관문: 의왕역, 부곡, 오전동 등)
+   *      : 현지 영업 후 복귀를 위한 실제 주행 최단거리 위수 경계 진입점을 마지노선으로 고정 (4번 카드)
    * 
    * 4. 데이터 가산점 규칙
    *    - 야간(21~02시): 유흥가/먹자골목/포차 +35점
@@ -342,17 +329,16 @@
     triggerSystemNotification();
   }
 
-  // 지정 4개 위수지역 (안양·군포·의왕·과천) 좌표계 경계 정의
   function isInsideWisu(lat, lng) {
     const wisuBoxes = [
-      { minLat: 37.38, maxLat: 37.43, minLng: 126.90, maxLng: 127.01 }, // 안양시 (평촌/범계/인덕원)
-      { minLat: 37.32, maxLat: 37.38, minLng: 126.89, maxLng: 126.99 }, // 군포시 (산본/금정) 및 의왕 일부
-      { minLat: 37.40, maxLat: 37.46, minLng: 126.96, maxLng: 127.03 }  // 과천시 전역
+      { minLat: 37.38, maxLat: 37.43, minLng: 126.90, maxLng: 127.01 }, // 안양시
+      { minLat: 37.32, maxLat: 37.38, minLng: 126.89, maxLng: 126.99 }, // 군포시
+      { minLat: 37.40, maxLat: 37.46, minLng: 126.96, maxLng: 127.03 }  // 과천시
     ];
     return wisuBoxes.some(b => lat >= b.minLat && lat <= b.maxLat && lng >= b.minLng && lng <= b.maxLng);
   }
 
-  // [모드 1 전용] 위수지역 5대 주요 관문 거점
+  // [모드 1 전용] 대형 관문 거점 풀 (인덕원, 범계, 안양, 산본, 금정)
   const MAJOR_HUBS = [
     { name: "인덕원역 먹자골목", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway", isWisu: true },
     { name: "범계역 로데오거리", lat: 37.3917, lng: 126.9145, address: "범계역", type: "subway", isWisu: true },
@@ -361,7 +347,7 @@
     { name: "금정역 먹자골목", lat: 37.3721, lng: 126.9438, address: "금정역", type: "subway", isWisu: true }
   ];
 
-  // [모드 2 전용] 위수지역 최단 진입 관문 (남쪽/서쪽/북쪽 경계)
+  // [모드 2 전용] 위수 경계 진입점 (산본/범계 등의 대형 도심을 제외한 의왕역, 부곡, 오전동 등 마지노선 복귀 관문)
   const WISU_ENTRY_GATEWAYS = [
     { name: "의왕역 먹자골목", lat: 37.3135, lng: 126.9582, address: "의왕역", type: "subway", isWisu: true },
     { name: "의왕 부곡상가", lat: 37.3204, lng: 126.9531, address: "부곡동", type: "nightlife", isWisu: true },
@@ -369,7 +355,7 @@
     { name: "의왕 오전동 상가", lat: 37.3481, lng: 126.9712, address: "오전동", type: "nightlife", isWisu: true }
   ];
 
-  // [광역 알짜 현지 상권 데이터베이스] 안산, 수원, 판교, 사당 등
+  // [광역 알짜 현지 상권 데이터베이스] 안산, 수원 등
   const REGIONAL_HOTSPOTS_PRESET = [
     { name: "안산 중앙역 로데오거리", lat: 37.3186, lng: 126.8383, address: "중앙역", type: "nightlife", isWisu: false },
     { name: "안산 상록수역 먹자골목", lat: 37.3025, lng: 126.8664, address: "상록수역", type: "subway", isWisu: false },
@@ -401,7 +387,7 @@
 
   async function fetchRealRoadRoute(fromLat, fromLng, toLat, toLng) {
     try {
-      const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLng}?overview=false`;
+      const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=false`;
       const res = await fetch(url);
       const data = await res.json();
       if (data.routes && data.routes.length > 0) {
@@ -664,19 +650,18 @@
     let searchTargetPool = [];
 
     if (currentMode === 1) {
-      // [모드 1]: 위수지역(안양·군포·의왕·과천) 내부 한정
+      // [모드 1]: 위수지역(안양·군포·의왕·과천) 내부 한정 ➔ 5대 대형 관문역 대상
       pool = [...customHotspots, ...overpassData, ...MAJOR_HUBS].filter(p => isInsideWisu(p.lat, p.lng));
       searchTargetPool = MAJOR_HUBS;
     } else {
-      // [모드 2]: 외곽 현지 상권 + 위수 최단 진입 경계점
+      // [모드 2]: 외곽 현지 상권 + 모드 2 전용 위수 복귀 관문(의왕역, 부곡동 등)만 대상! (산본/범계 대형역 배제)
       pool = [...customHotspots, ...overpassData, ...REGIONAL_HOTSPOTS_PRESET, ...WISU_ENTRY_GATEWAYS];
-      const wisuGateways = [...MAJOR_HUBS, ...WISU_ENTRY_GATEWAYS].filter(p => isInsideWisu(p.lat, p.lng));
-      searchTargetPool = wisuGateways.length > 0 ? wisuGateways : WISU_ENTRY_GATEWAYS;
+      searchTargetPool = WISU_ENTRY_GATEWAYS;
     }
 
     const nowHour = new Date().getHours();
 
-    // 1. FINAL 목적지 연산 (3단계: 외곽 내 위치 기준 최단 위수 진입점)
+    // 1. FINAL 목적지 연산 (모드 1은 대형 관문역, 모드 2는 전용 위수 경계 진입점 중 최단거리)
     let scoredTargets = await Promise.all(searchTargetPool.map(async h => {
       const road = await fetchRealRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
       let targetScore = Math.max(10, 500 - Math.round(road.distanceKm * 20));
@@ -741,7 +726,6 @@
     let selectedRoute = [];
     const validPool = scoredPool.filter(p => p.score >= 20 && p.name !== finalTarget.name);
     
-    // 점수 높은 순으로 1차 정렬
     validPool.sort((a, b) => b.score - a.score);
 
     for (let candidate of validPool) {
@@ -761,7 +745,7 @@
     const mapBtn = document.getElementById('btn-show-map');
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
-      logEl.innerText = `방금 · 모드 ${currentMode} (1-2km 우선/길목 단계별) 연산 완료 · 경유지 ${selectedRoute.length}곳 · FINAL: ${finalTarget.name}`;
+      logEl.innerText = `방금 · 모드 ${currentMode} 연산 완료 · 경유지 ${selectedRoute.length}곳 · FINAL: ${finalTarget.name}`;
     }
 
     let subFinalCandidates = [];
