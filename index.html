@@ -384,31 +384,32 @@
     return wisuBoxes.some(b => lat >= b.minLat && lat <= b.maxLat && lng >= b.minLng && lng <= b.maxLng);
   }
 
-  /* 주요 거점 데이터 */
-  const METRO_ROUTE_HUBS = [
+  /* 5대 관문 거점 */
+  const MAJOR_HUBS = [
     { name: "인덕원역 먹자골목", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway" },
     { name: "범계역 로데오거리", lat: 37.3917, lng: 126.9145, address: "범계역", type: "subway" },
     { name: "안양역 일번가", lat: 37.4013, lng: 126.9222, address: "안양역", type: "subway" },
     { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway" },
-    { name: "금정역 먹자골목", lat: 37.3721, lng: 126.9438, address: "금정역", type: "subway" },
+    { name: "금정역 먹자골목", lat: 37.3721, lng: 126.9438, address: "금정역", type: "subway" }
+  ];
+
+  /* 광역 거점 및 과천 출근 거점 대거 보완 */
+  const METRO_ROUTE_HUBS = [
     { name: "과천 지식정보타운 업무지구", lat: 37.4142, lng: 126.9801, address: "과천지식정보타운", type: "office" },
     { name: "정부과천청사역 지하철거점", lat: 37.4261, lng: 126.9898, address: "정부과천청사역", type: "subway" },
     { name: "과천역 지하철거점", lat: 37.4329, lng: 126.9972, address: "과천역", type: "subway" },
-    { name: "평촌역 상업지구", lat: 37.3942, lng: 126.9638, address: "평촌역", type: "subway" },
     { name: "정자역 신분당선 환승거점", lat: 37.3662, lng: 127.1082, address: "정자역", type: "subway" },
     { name: "판교역 중심상업지구", lat: 37.3948, lng: 127.1112, address: "판교역", type: "subway" },
     { name: "판교 테크노밸리 업무지구", lat: 37.4021, lng: 127.1085, address: "판교테크노밸리", type: "office" },
     { name: "사당역 4번출구 먹자골목", lat: 37.4765, lng: 126.9816, address: "사당역 4번출구", type: "subway" },
-    { name: "강남역 사거리", lat: 37.4979, lng: 127.0276, address: "강남역", type: "subway" },
-    { name: "수원역 환승센터", lat: 37.2657, lng: 127.0002, address: "수원역", type: "subway" },
-    { name: "성남 모란역 먹자골목", lat: 37.4321, lng: 127.1291, address: "모란역", type: "nightlife" }
+    { name: "강남역 사거리", lat: 37.4979, lng: 127.0276, address: "강남역", type: "subway" }
   ];
 
   const PRESET_HOTSPOTS = [
-    { name: "과천 지식정보타운역 예정지", lat: 37.4128, lng: 126.9812, type: "office", address: "지식정보타운" },
-    { name: "역전할맥 평촌점", lat: 37.3914, lng: 126.9199, type: "nightlife", address: "역전할맥 평촌점" },
-    { name: "평촌 학원가 먹자골목", lat: 37.3831, lng: 126.9285, type: "nightlife", address: "평촌학원가" },
-    { name: "의왕 계원예대 앞", lat: 37.3712, lng: 126.9754, type: "nightlife", address: "계원예대" }
+    { name: "과천 지식정보타운역 예정지", lat: 37.4128, lng: 126.9812, type: "office", address: "지식정보타운", isWisu: true },
+    { name: "역전할맥 평촌점", lat: 37.3914, lng: 126.9199, type: "nightlife", address: "역전할맥 평촌점", isWisu: true },
+    { name: "평촌 학원가 먹자골목", lat: 37.3831, lng: 126.9285, type: "nightlife", address: "평촌학원가", isWisu: true },
+    { name: "의왕 계원예대 앞", lat: 37.3712, lng: 126.9754, type: "nightlife", address: "계원예대", isWisu: true }
   ];
 
   function getDistanceKm(lat1, lon1, lat2, lon2) {
@@ -433,7 +434,7 @@
       const nameA = item.name.trim();
       const nameB = candName.trim();
       const sameName = nameA === nameB || nameA.includes(nameB) || nameB.includes(nameA);
-      const closeDist = getDistanceKm(item.lat, item.lng, candLat, candLng) < 1.0;
+      const closeDist = getDistanceKm(item.lat, item.lng, candLat, candLng) < 1.2;
       return sameName || closeDist;
     });
   }
@@ -554,7 +555,8 @@
         lat: e.lat,
         lng: e.lon,
         type: 'nightlife',
-        address: e.tags.name
+        address: e.tags.name,
+        isWisu: isInsideWisu(e.lat, e.lon)
       }));
     } catch (err) {
       return [];
@@ -601,7 +603,7 @@
 
     if (nowHour >= 7 && nowHour < 10) {
       if (isCommuteHub) bonus += 35;
-      if (isNightlife) bonus -= 20;
+      if (isNightlife) bonus -= 25; // 아침 감점폭을 현실적으로 조정
     } 
     else if (nowHour >= 21 || nowHour < 2) {
       if (isNightlife) bonus += 35;
@@ -709,7 +711,6 @@
     const customHotspots = getCustomHotspots();
     let pool = [...customHotspots, ...overpassData, ...PRESET_HOTSPOTS, ...METRO_ROUTE_HUBS];
     
-    // 모드 1: 오직 위수지역 내부 장소만 풀로 사용
     if (currentMode === 1) {
       pool = pool.filter(p => isInsideWisu(p.lat, p.lng));
     }
@@ -719,32 +720,28 @@
     const isLastTrainPeakTime = (nowHour >= 23 || nowHour < 1);
     const isCommuteTime = (nowHour >= 7 && nowHour < 10);
 
-    /* [4번 최종 목적지 결정 원칙]
-       모드 1과 모드 2 모두 전체 풀 중에서 "위수지역에 속한 핫플/거점" 중 현 위치에서 가장 가까운 곳을 4번 최종 목적지로 실시간 지정! */
-    const wisuCandidates = pool.filter(p => isInsideWisu(p.lat, p.lng));
+    // [최종 목적지 결정]
     let finalTarget = null;
-    let minWisuDist = Infinity;
-
-    wisuCandidates.forEach(w => {
-      const d = getDistanceKm(currentPos.lat, currentPos.lng, w.lat, w.lng);
-      if (d < minWisuDist) {
-        minWisuDist = d;
-        const estT = Math.round((d / (25 / trafficMultiplier)) * 60);
-        finalTarget = { ...w, dist: d, estimatedTimeMin: estT, isWisu: true };
+    let minEstTime = Infinity;
+    MAJOR_HUBS.forEach(h => {
+      const d = getDistanceKm(currentPos.lat, currentPos.lng, h.lat, h.lng);
+      const estT = Math.round((d / (25 / trafficMultiplier)) * 60);
+      if (estT < minEstTime) {
+        minEstTime = estT;
+        finalTarget = { ...h, dist: d, estimatedTimeMin: estT };
       }
     });
 
-    if (!finalTarget) {
-      const defaultHub = METRO_ROUTE_HUBS[0];
-      const d = getDistanceKm(currentPos.lat, currentPos.lng, defaultHub.lat, defaultHub.lng);
-      finalTarget = { ...defaultHub, dist: d, estimatedTimeMin: Math.round((d / 25) * 60), isWisu: true };
-    }
+    const finalEstTimeMin = Math.round((finalTarget.dist / (25 / trafficMultiplier)) * 60);
+    finalTarget.estimatedTimeMin = finalEstTimeMin;
 
     const finalBearing = getBearing(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
 
     const scoredPool = pool.map(item => {
       const dist = getDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
+      const distToFinal = getDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
       const isItemWisu = isInsideWisu(item.lat, item.lng);
+      
       const avgSpeed = 25 / trafficMultiplier; 
       const estimatedTimeMin = Math.round((dist / avgSpeed) * 60);
 
@@ -752,7 +749,7 @@
 
       if (item.isCustom) score += 25;
 
-      const isMetroHub = METRO_ROUTE_HUBS.some(h => h.name === item.name);
+      const isMetroHub = METRO_ROUTE_HUBS.some(h => h.name === item.name) || MAJOR_HUBS.some(h => h.name === item.name);
       if (currentMode === 2 && isMetroHub) score += 30;
 
       let isLastTrainPeak = false;
@@ -773,37 +770,34 @@
       const logResult = calculateCallLogScore(item.lat, item.lng);
       score += logResult.bonus;
 
-      /* [동선 및 후방 필터링 로직 - 모드 2 정교화] */
+      /* [보정된 방향 및 동선 필터링] 과천~인덕원 길목 유효화 */
       const itemBearing = getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng);
       let angleDiff = Math.abs(finalBearing - itemBearing);
       if (angleDiff > 180) angleDiff = 360 - angleDiff;
 
-      let isBackward = (angleDiff > 90);
-
-      if (currentMode === 2) {
-        // 모드 2: 후방(뒤쪽)인 경우 조건부 처리
-        if (isBackward) {
-          if (dist <= 2.0 && score >= 70) {
-            // 뒤로 가더라도 1~2km 이내 아주 가깝고 콜 점수가 '높음'이면 허용 (소폭 보정)
-            score -= 10;
-          } else {
-            // 그 외 멀거나 점수가 낮으면 배제
-            score -= 999;
-          }
+      if (angleDiff <= 60) {
+        score += 35; // 진행방향 각도 범위를 60도로 유연하게 확장
+      } else if (angleDiff > 110) {
+        if (dist > 2.0) {
+          score -= 999; // 완전히 반대방향 2km 초과는 배제
         } else {
-          // 전진 방향인 경우 가산점
-          score += 15;
+          score -= 20;
         }
       }
 
-      score -= (dist * 2.5);
+      // 목적지 전진성 체크 유연화
+      if (distToFinal > finalTarget.dist + 2.0 && dist > 2.0) {
+        score -= 999;
+      }
+
+      score -= (estimatedTimeMin * 1.2);
 
       return { 
         ...item, 
         dist, 
         estimatedTimeMin,
         score: Math.round(score), 
-        isWisu: isItemWisu,
+        delta: angleDiff, 
         hasWeatherBonus: weatherData.isRainOrSnow,
         hasLogBonus: logResult.matched,
         logCount: logResult.count,
@@ -811,20 +805,18 @@
         isReturnCallBonus,
         isLastTrainPeak,
         isCommuteTime,
-        isBackward,
         isFallback: false
       };
     });
 
-    // 점수 높은 순으로 정렬
+    let selectedRoute = [];
     const validPool = scoredPool.filter(p => p.score > -200);
     validPool.sort((a, b) => b.score - a.score);
 
-    let selectedRoute = [];
-
-    // 1~3번 카드: 4번 최단 위수 복귀지를 제외하고 동선 조건에 부합하는 실시간 상위 3곳 선발
     for (let candidate of validPool) {
+      if (candidate.dist >= finalTarget.dist * 0.95) continue;
       if (getDistanceKm(candidate.lat, candidate.lng, finalTarget.lat, finalTarget.lng) < 0.2) continue;
+      
       const isDuplicate = isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedRoute);
       if (!isDuplicate) {
         selectedRoute.push(candidate);
@@ -832,7 +824,32 @@
       if (selectedRoute.length === 3) break;
     }
 
-    // 거리 순 정렬 (현위치에서 가까운 순 배치)
+    /* 백업 거점 보장: 과천~인덕원 등 유효 카드가 3개 미만일 때 가까운 출근/환승 거점 자동 보충 */
+    if (selectedRoute.length < 3) {
+      const remainingHubs = METRO_ROUTE_HUBS.filter(hub => 
+        !isDuplicatePlace(hub.name, hub.lat, hub.lng, selectedRoute) &&
+        getDistanceKm(hub.lat, hub.lng, finalTarget.lat, finalTarget.lng) >= 0.2
+      ).map(hub => {
+        const dist = getDistanceKm(currentPos.lat, currentPos.lng, hub.lat, hub.lng);
+        const estimatedTimeMin = Math.round((dist / (25 / trafficMultiplier)) * 60);
+        return {
+          ...hub,
+          dist,
+          estimatedTimeMin,
+          score: 50,
+          isFallback: true
+        };
+      });
+
+      remainingHubs.sort((a, b) => a.dist - b.dist);
+      for (let hub of remainingHubs) {
+        if (!isDuplicatePlace(hub.name, hub.lat, hub.lng, selectedRoute)) {
+          selectedRoute.push(hub);
+        }
+        if (selectedRoute.length === 3) break;
+      }
+    }
+
     selectedRoute.sort((a, b) => a.dist - b.dist);
 
     currentRouteData = [
@@ -873,14 +890,15 @@
         </div>
         <div class="tag-group">
           ${item.isCustom ? '<span class="tag custom">#나만의핫플</span>' : ''}
+          ${item.delta <= 60 ? '<span class="tag gilmok">#길목우선</span>' : ''}
           ${item.isWisu ? '<span class="tag wisu">#위수지역</span>' : ''}
           ${item.isCommuteTime && (item.type === 'subway' || item.type === 'office') ? '<span class="tag commute">#출근환승거점</span>' : ''}
           ${item.isLastTrainPeak ? '<span class="tag lasttrain">#막차피크</span>' : ''}
-          ${item.isBackward ? '<span class="tag fallback">#근거리후방고득점</span>' : ''}
           ${item.isReturnCallBonus ? '<span class="tag returncall">#귀로콜우선</span>' : ''}
           ${item.isTrafficHeavy ? '<span class="tag traffic">#정체주의반영</span>' : ''}
           ${item.hasWeatherBonus ? '<span class="tag weather">#강수보너스</span>' : ''}
           ${item.logCount > 0 ? `<span class="tag logmatch">#누적콜 ${item.logCount}건</span>` : ''}
+          ${item.isFallback ? '<span class="tag fallback">#복귀거점</span>' : ''}
         </div>
       `;
       listEl.appendChild(card);
@@ -888,7 +906,7 @@
 
     const finalCard = document.createElement('div');
     finalCard.className = 'card final-card';
-    const targetLabel = '최단 위수복귀지';
+    const targetLabel = currentMode === 1 ? '최종번화가' : '최종위수';
     finalCard.innerHTML = `
       <div class="card-header">
         <div class="card-title-group">
