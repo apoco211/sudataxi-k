@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+\<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -253,7 +253,7 @@
     return wisuBoxes.some(b => lat >= b.minLat && lat <= b.maxLat && lng >= b.minLng && lng <= b.maxLng);
   }
 
-  /* 5대 관문 거점 */
+  /* 모드 1 전용 5대 지정 관문 거점 */
   const MAJOR_HUBS = [
     { name: "인덕원역 먹자골목", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway", isWisu: true },
     { name: "범계역 로데오거리", lat: 37.3917, lng: 126.9145, address: "범계역", type: "subway", isWisu: true },
@@ -562,6 +562,7 @@
     const customHotspots = getCustomHotspots();
     let pool = [...customHotspots, ...overpassData, ...PRESET_HOTSPOTS, ...METRO_ROUTE_HUBS];
     
+    // 모드 1: 오직 위수지역 내부 장소만 100% 한정
     if (currentMode === 1) {
       pool = pool.filter(p => isInsideWisu(p.lat, p.lng));
     }
@@ -570,10 +571,16 @@
     const isLastTrainPeakTime = (nowHour >= 23 || nowHour < 1);
     const isCommuteTime = (nowHour >= 7 && nowHour < 10);
 
-    /* [4번 최종 목적지 결정 원칙 수정] */
-    // 위수지역(isWisu === true) 내부의 전체 핫플/거점 중 현 위치에서 가장 가까운 최단거리 핫플을 4번 복귀지로 설정
-    const allWisuHotspots = pool.filter(p => isInsideWisu(p.lat, p.lng));
-    const searchTargetPool = allWisuHotspots.length > 0 ? allWisuHotspots : MAJOR_HUBS;
+    /* [4번 최종 목적지 결정 로직 정립] */
+    let searchTargetPool = [];
+    if (currentMode === 1) {
+      // 모드 1: 목적지는 오직 지정된 5대 관문역(MAJOR_HUBS) 중 최단 거리 역으로 고정
+      searchTargetPool = MAJOR_HUBS;
+    } else {
+      // 모드 2: 위수지역(isWisu === true) 내부의 전체 핫플/거점 중 실시간 최단 위수 핫플 지정
+      const allWisuHotspots = pool.filter(p => isInsideWisu(p.lat, p.lng));
+      searchTargetPool = allWisuHotspots.length > 0 ? allWisuHotspots : MAJOR_HUBS;
+    }
 
     let finalTarget = null;
     let minEstTime = Infinity;
@@ -617,32 +624,28 @@
       const logResult = calculateCallLogScore(item.lat, item.lng);
       score += logResult.bonus;
 
-      /* [동선 방향성 엄격 정립] */
+      /* [동선 방향성 정립] */
       const itemBearing = getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng);
       let angleDiff = Math.abs(finalBearing - itemBearing);
       if (angleDiff > 180) angleDiff = 360 - angleDiff;
       
       let isReverseHighBonus = false;
 
-      // 1. 복귀 전진 방향 (각도 60도 이내 길목)
+      // 1. 복귀/이동 전진 방향 (각도 60도 이내 길목)
       if (angleDiff <= 60) {
         score += 35; 
       } 
-      // 2. 후방/역방향 예외 허용 처리 (각도 110도 초과)
+      // 2. 후방/역방향 예외 처리 (각도 110도 초과)
       else if (angleDiff > 110) {
-        // [핵심 조건] 근거리(2.0km 이내)이면서 콜점수가 높은 경우 소폭 감점만 적용하여 구제
-        if (dist <= 2.0) {
-          score -= 20; 
-          if (score >= 70) {
-            isReverseHighBonus = true; // 역방향 고득점 핫플 태깅
-          }
+        if (currentMode === 2 && dist <= 2.0) {
+          score -= 20; // 모드2: 근거리 고득점 역방향 예외 구제
+          if (score >= 70) isReverseHighBonus = true;
         } else {
-          // 2.0km 초과 후방/역방향은 완전 배제
-          score -= 999; 
+          score -= 999; // 모드1 또는 2km 초과 모드2 역방향 배제
         }
       }
 
-      // 목적지 전진성 조건 (복귀 목적지보다 멀어지는 2.0km 초과 외곽 장소 배제)
+      // 목적지 전진성 조건
       if (distToFinal > finalTarget.dist + 2.0 && dist > 2.0) {
         score -= 999;
       }
@@ -681,9 +684,11 @@
       if (selectedRoute.length === 3) break;
     }
 
-    /* 백업 거점 보장 (카드 3개 미만 시 근거리 환승거점 보충) */
+    /* 백업 거점 보장 (모드 1일 때는 위수지역 내부 거점만 보충되도록 버그 수정) */
     if (selectedRoute.length < 3) {
-      const remainingHubs = METRO_ROUTE_HUBS.filter(hub => 
+      const fallbackSource = currentMode === 1 ? [...MAJOR_HUBS, ...PRESET_HOTSPOTS] : METRO_ROUTE_HUBS;
+      const remainingHubs = fallbackSource.filter(hub => 
+        (currentMode === 1 ? isInsideWisu(hub.lat, hub.lng) : true) &&
         !isDuplicatePlace(hub.name, hub.lat, hub.lng, selectedRoute) &&
         getDistanceKm(hub.lat, hub.lng, finalTarget.lat, finalTarget.lng) >= 0.2
       ).map(hub => {
