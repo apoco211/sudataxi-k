@@ -136,7 +136,6 @@
   </style>
 </head>
 <body class="mode-1">
-  <!-- STREAMING_CHUNK:Rendering main application template... -->
   <div class="header">주변 콜 많은 곳 찾기</div>
   
   <div class="mode-container">
@@ -209,7 +208,6 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  /* STREAMING_CHUNK:Configuring background audio loop and notification system... */
   let currentMode = 1;
   let currentPos = null;
   let leafletMap = null;
@@ -220,9 +218,8 @@
   let isTimerRunning = false;
   
   let audioCtx = null;
-  let silentAudioElement = null; // 백그라운드 브라우저 생존용 무음 오디오
+  let silentAudioElement = null;
 
-  // 브라우저가 백그라운드에서도 죽지 않도록 하는 1초짜리 무음 WAV 루프
   const SILENT_WAV_BASE64 = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==';
 
   function initOrResumeAudioContext() {
@@ -236,7 +233,6 @@
     } catch(e) {}
   }
 
-  // 백그라운드 무음 오디오 시작 (유튜브/멜론처럼 브라우저 프로세스를 활성화 유지)
   function startBackgroundAudioKeepAlive() {
     try {
       if (!silentAudioElement) {
@@ -255,7 +251,6 @@
     } catch(e) {}
   }
 
-  // 상단 웹 시스템 푸시 알림 요청 및발송 (다른 앱 사용 중일 때 화면 상단 팝업)
   function requestNotificationPermission() {
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
@@ -273,14 +268,13 @@
     }
   }
 
-  // 타이머 종료 시 모바일 스피커로 확실하게 울리는 3연속 고음 알람음
   function playTimerAlarm() {
     try {
       initOrResumeAudioContext();
       if (!audioCtx) return;
       
       const now = audioCtx.currentTime;
-      const beepFreqs = [880, 1050, 1250]; // 삐-삐-삐 다단계 알람
+      const beepFreqs = [880, 1050, 1250];
       
       beepFreqs.forEach((freq, idx) => {
         const startTime = now + (idx * 0.25);
@@ -302,20 +296,18 @@
     } catch(e) {}
     
     if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 300]);
-    triggerSystemNotification(); // 다른 앱을 보고 있어도 화면 상단에 팝업 알림 표시!
+    triggerSystemNotification();
   }
 
-  // 위수지역(안양·군포·의왕·과천) 정밀 경계 영역 판별
   function isInsideWisu(lat, lng) {
     const wisuBoxes = [
-      { minLat: 37.38, maxLat: 37.43, minLng: 126.90, maxLng: 127.01 }, // 안양 평촌/인덕원
-      { minLat: 37.32, maxLat: 37.38, minLng: 126.89, maxLng: 126.99 }, // 군포 산본/금정/의왕 일부
-      { minLat: 37.40, maxLat: 37.46, minLng: 126.96, maxLng: 127.03 }  // 과천 전역
+      { minLat: 37.38, maxLat: 37.43, minLng: 126.90, maxLng: 127.01 },
+      { minLat: 37.32, maxLat: 37.38, minLng: 126.89, maxLng: 126.99 },
+      { minLat: 37.40, maxLat: 37.46, minLng: 126.96, maxLng: 127.03 }
     ];
     return wisuBoxes.some(b => lat >= b.minLat && lat <= b.maxLat && lng >= b.minLng && lng <= b.maxLng);
   }
 
-  // [모드 1 전용] 5대 대형 관문 거점 풀 (모드 2에는 절대 포함되지 않음)
   const MAJOR_HUBS = [
     { name: "인덕원역 먹자골목", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway", isWisu: true },
     { name: "범계역 로데오거리", lat: 37.3917, lng: 126.9145, address: "범계역", type: "subway", isWisu: true },
@@ -324,7 +316,6 @@
     { name: "금정역 먹자골목", lat: 37.3721, lng: 126.9438, address: "금정역", type: "subway", isWisu: true }
   ];
 
-  // [모드 2 보조용] 위수 남쪽 진입점 후보 거점들 (의왕역, 오전동, 부곡동 등)
   const WISU_ENTRY_GATEWAYS = [
     { name: "의왕역 먹자골목", lat: 37.3135, lng: 126.9582, address: "의왕역", type: "subway", isWisu: true },
     { name: "의왕 부곡상가", lat: 37.3204, lng: 126.9531, address: "부곡동", type: "nightlife", isWisu: true },
@@ -401,7 +392,7 @@
 
   function setTimerPreset(min) {
     initOrResumeAudioContext();
-    requestNotificationPermission(); // 푸시 알림 권한 미리 요청
+    requestNotificationPermission();
     if (isTimerRunning) {
       clearInterval(timerInterval);
       isTimerRunning = false;
@@ -416,7 +407,6 @@
     btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 시작`;
   }
 
-  /* STREAMING_CHUNK:Implementing background-safe timer loop... */
   function toggleTimer() {
     initOrResumeAudioContext();
     requestNotificationPermission();
@@ -434,7 +424,7 @@
       btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 재개`;
     } else {
       isTimerRunning = true;
-      startBackgroundAudioKeepAlive(); // 백그라운드 무음 오디오 활성화로 프로세스 생존 유지!
+      startBackgroundAudioKeepAlive();
       btn.classList.add('running');
       btn.classList.remove('finished');
       
@@ -454,7 +444,7 @@
           timerRemainingSec = 0;
           btn.className = 'timer-display-btn finished';
           btn.innerText = `⏱️ 00:00 이동 추천!`;
-          playTimerAlarm(); // 시간 종료 시 백그라운드에서도 외부 스피커 소리 및 상단 알림발송!
+          playTimerAlarm();
         } else {
           btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)}`;
         }
@@ -610,7 +600,6 @@
     let pool = [];
     let searchTargetPool = [];
 
-    // [모드 2는 MAJOR_HUBS 배제]
     if (currentMode === 1) {
       pool = [...customHotspots, ...overpassData, ...MAJOR_HUBS].filter(p => isInsideWisu(p.lat, p.lng));
       searchTargetPool = MAJOR_HUBS;
@@ -995,6 +984,7 @@
     }
   }
 
+  /* 스마트 중복 제거 및 데이터 병합 (Merge) 로직 구현 */
   function importCallLogs(e) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
@@ -1002,18 +992,54 @@
     reader.onload = function(evt) {
       try {
         const json = JSON.parse(evt.target.result);
+        
+        let existingLogs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+        let existingHotspots = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
+
+        let importedLogs = [];
+        let importedHotspots = [];
+
         if (json.call_logs && Array.isArray(json.call_logs)) {
-          localStorage.setItem('sudataxi_call_logs', JSON.stringify(json.call_logs));
+          importedLogs = json.call_logs;
+        } else if (Array.isArray(json)) {
+          importedLogs = json;
         }
+
         if (json.custom_hotspots && Array.isArray(json.custom_hotspots)) {
-          localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(json.custom_hotspots));
+          importedHotspots = json.custom_hotspots;
         }
-        if (Array.isArray(json)) {
-          localStorage.setItem('sudataxi_call_logs', JSON.stringify(json));
-        }
+
+        // 1. 콜 기록 병합 (고유 ID 또는 시간/위치 조합으로 중복 제거)
+        let logMap = new Map();
+        existingLogs.forEach(item => {
+          const key = item.id || `${item.timestamp}_${item.lat}_${item.lng}`;
+          logMap.set(key, item);
+        });
+        importedLogs.forEach(item => {
+          const key = item.id || `${item.timestamp}_${item.lat}_${item.lng}`;
+          logMap.set(key, item);
+        });
+        let mergedLogs = Array.from(logMap.values());
+
+        // 2. 나만의 콜 장소 병합 (고유 ID 또는 이름/위치 조합으로 중복 제거)
+        let hotspotMap = new Map();
+        existingHotspots.forEach(item => {
+          const key = item.id || `${item.name}_${item.lat}_${item.lng}`;
+          hotspotMap.set(key, item);
+        });
+        importedHotspots.forEach(item => {
+          const key = item.id || `${item.name}_${item.lat}_${item.lng}`;
+          hotspotMap.set(key, item);
+        });
+        let mergedHotspots = Array.from(hotspotMap.values());
+
+        // localStorage에 병합된 스마트 전체 데이터 저장
+        localStorage.setItem('sudataxi_call_logs', JSON.stringify(mergedLogs));
+        localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(mergedHotspots));
+
         updateCallLogStats();
         updateCustomHotspotUI();
-        alert('🎉 백업 파일 복원이 완료되었습니다!');
+        alert(`🎉 스마트 백업 데이터 병합 완료!\n\n• 기존 데이터 유지 + 신규 합산 완료\n• 총 누적 콜 기록: ${mergedLogs.length}개\n• 총 나만의 장소: ${mergedHotspots.length}개`);
         calculateAndRender();
       } catch(err) {
         alert('❌ 올바르지 않은 백업 파일 형식입니다.');
