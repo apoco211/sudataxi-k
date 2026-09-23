@@ -617,7 +617,9 @@
   }
 
   /* -------------------------------------------------------------
-     [핵심 수정] 모드 1 & 모드 2 진행 동선 방향각(Bearing) 연산 보정
+     [핵심 알고리즘 수정] 
+     1. 500m(0.5km) 이내 1순위 거점 감지 시 다음 거점으로 4번 교체
+     2. 동선 이탈(삥 둘러가기) 완전 방지 연산
      ------------------------------------------------------------- */
   async function calculateAndRender() {
     if (!currentPos) currentPos = { lat: 37.4048, lng: 126.9767 };
@@ -643,20 +645,31 @@
     }
     const nowHour = new Date().getHours();
     
-    // 1. FINAL 최종 목적지 연산
+    // 1. 전체 목적지 거점 실주행 거리 및 점수 계산
     let scoredTargets = await Promise.all(searchTargetPool.map(async h => {
       const road = await fetchRealRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
       let targetScore = Math.max(10, 500 - Math.round(road.distanceKm * 20));
       return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: targetScore, targetScore };
     }));
     scoredTargets.sort((a, b) => b.targetScore - a.targetScore);
+    
+    // ⭐ [500m 규칙 적용] 1순위 거점이 500m(0.5km) 이내에 있다면 다음 거점으로 4번 교체
     let finalTarget = scoredTargets[0];
+    if (finalTarget && finalTarget.dist <= 0.5 && scoredTargets.length > 1) {
+      // 500m 초과하는 거점 중 점수가 가장 높은 거점 선택
+      const nextTarget = scoredTargets.find(t => t.dist > 0.5);
+      if (nextTarget) {
+        finalTarget = nextTarget;
+      } else {
+        finalTarget = scoredTargets[1]; // 예외 fallback
+      }
+    }
     if (!finalTarget) finalTarget = currentMode === 1 ? MAJOR_HUBS[0] : MODE2_WISU_GATEWAYS[0];
     
-    // 현재 위치 -> 최종 목적지 각도 계산
+    // 확정된 4번 목적지로 향하는 각도 계산
     const finalBearing = getBearing(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
     
-    // 2. 경유 후보지 동선 각도 보정 연산
+    // 2. 경유 후보지 동선 필터링
     const limitedPool = pool.slice(0, 35);
     let scoredPool = await Promise.all(limitedPool.map(async item => {
       const road = await fetchRealRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
@@ -668,7 +681,6 @@
       const logResult = calculateCallLogScore(item.lat, item.lng);
       score += logResult.bonus;
       
-      // 현재위치 -> 후보지 각도
       const itemBearing = getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng);
       let angleDiff = Math.abs(finalBearing - itemBearing);
       if (angleDiff > 180) angleDiff = 360 - angleDiff;
@@ -679,15 +691,15 @@
           score += 100; 
           isNearStep1 = true;
         } else {
-          score = -999; // 완전히 돌아가는 길 탈락
+          score = -999;
         }
       } else {
-        // [모드 1 개선] 최종 목적지로 향하는 동선각(60도 이내) 상의 핫플만 유효 가산
-        if (angleDiff <= 60) {
-          score += 30; // 진행 길목 가산점
+        // [모드 1] 최종 목적지 진행 방향(60도 이내)이고, 최종 목적지보다 더 먼 곳은 탈락
+        if (angleDiff <= 60 && road.distanceKm < finalTarget.dist * 0.9) {
+          score += 30;
           if (road.distanceKm <= 2.0) isNearStep1 = true;
         } else {
-          score -= 100; // 최종 목적지와 반대 방향인 장소 감점
+          score = -999; // 진행 방향과 어긋나거나 최종 목적지보다 넘어서는 장소 제외
         }
       }
       return { 
@@ -703,8 +715,7 @@
     
     let selectedRoute = [];
     if (currentMode === 1) {
-      // 점수가 양수이고 최종 목적지와 동일하지 않은 유효 후보만 선별
-      let validPool = scoredPool.filter(p => p.score > 20 && p.name !== finalTarget.name);
+      let validPool = scoredPool.filter(p => p.score > 0 && p.name !== finalTarget.name);
       validPool.sort((a, b) => b.score - a.score);
       
       for (let candidate of validPool) {
@@ -713,7 +724,7 @@
         }
         if (selectedRoute.length === 3) break;
       }
-      // 1~3번 순서는 현재 위치 기준으로 자연스러운 거리가까운순 정렬
+      // 현재 위치 기준 전진 순서로 정렬
       selectedRoute.sort((a, b) => a.dist - b.dist);
     } else {
       let validPool = scoredPool.filter(p => p.score > 0 && p.name !== finalTarget.name && p.dist <= 2.0);
@@ -732,7 +743,7 @@
     const mapBtn = document.getElementById('btn-show-map');
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
-      logEl.innerText = `방금 · 모드 ${currentMode} 연산 완료 · 길목 경유지 ${selectedRoute.length}곳 정밀 안내`;
+      logEl.innerText = `방금 · 모드 ${currentMode} 연산 완료 · 길목 경유지 ${selectedRoute.length}곳 안내`;
     }
     let subFinalCandidates = [];
     if (currentMode === 1) {
