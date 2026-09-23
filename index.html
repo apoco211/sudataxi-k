@@ -79,7 +79,7 @@
     .sub-final-card { background: #252215; border: 1px solid #4A3A10; border-radius: 12px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; }
     .sub-final-info { display: flex; flex-direction: column; gap: 2px; }
     .sub-final-name { font-size: 15px; font-weight: 900; color: #FFFFFF; }
-    .sub-final-meta { font-size: 12px; font-weight: 800; color: #FFD700; font-family: monospace; }
+    .sub-final-meta { font-size: 12px; font-weight: 800; color: #FFD700; font-family: monospace; display: flex; align-items: center; gap: 4px; }
     .sub-navi-btn { height: 36px; padding: 0 10px; background: #3A2E0A; color: #FFD700; border: 1px solid #FFD700; font-weight: 800; font-size: 12px; border-radius: 8px; cursor: pointer; }
     
     .backup-section { margin-top: 20px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 16px; padding: 14px; }
@@ -535,9 +535,9 @@
       const d = getDistanceKm(currentPos.lat, currentPos.lng, h.lat, h.lng);
       const estTimeMin = Math.round((d / (25 / trafficMultiplier)) * 60);
       const timeBonus = getDynamicTimeCategoryBonus(h.type, h.name, nowHour);
-      let targetScore = 120 - (estTimeMin * 4) + timeBonus;
+      let targetScore = 50 + timeBonus - (estTimeMin * 1.5);
       if (h.name.includes("범계역") || h.name.includes("인덕원역")) targetScore += 10;
-      return { ...h, dist: d, estimatedTimeMin: estTimeMin, targetScore };
+      return { ...h, dist: d, estimatedTimeMin: estTimeMin, score: Math.round(targetScore), targetScore };
     });
 
     scoredTargets.sort((a, b) => b.targetScore - a.targetScore);
@@ -704,7 +704,7 @@
           <div class="num-badge">${routeCards.length > 0 ? '4' : '1'}</div>
           <div>
             <div class="place-name">${finalTarget.name}</div>
-            <div class="score-dist">${finalTarget.dist.toFixed(1)}km (약 ${finalTarget.estimatedTimeMin || 0}분) · [${targetLabel}] ${finalTarget.score ? finalTarget.score + '점 ' + getScoreLevelBadge(finalTarget.score) : ''}</div>
+            <div class="score-dist">${finalTarget.dist.toFixed(1)}km (약 ${finalTarget.estimatedTimeMin || 0}분) · ${finalTarget.score ? finalTarget.score + '점 ' + getScoreLevelBadge(finalTarget.score) : ''} [${targetLabel}]</div>
           </div>
         </div>
         <button class="navi-btn navi-action-btn" data-name="${finalTarget.name}" data-addr="${finalTarget.address || ''}">카카오내비</button>
@@ -972,3 +972,4 @@
 </script>
 </body>
 </html>
+```eof
