@@ -1,4 +1,4 @@
-\<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -118,10 +118,7 @@
     .map-modal-close { background: none; border: none; color: #8A8A8A; font-size: 20px; font-weight: 900; cursor: pointer; }
     #route-map { width: 100%; height: 100%; min-height: 350px; flex: 1; background: #121212; z-index: 1; }
     
-    /* 한국 지명 가독성을 극대화한 고대비 필터 */
     .leaflet-tile-pane { filter: brightness(1.1) contrast(1.4); }
-    
-    /* 마커 및 팝업 스타일 */
     .custom-map-marker { width: 34px; height: 34px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 16px; display: flex; align-items: center; justify-content: center; border: 2.5px solid #FFFFFF; box-shadow: 0 3px 8px rgba(0,0,0,0.8); }
     .custom-map-marker.current { background: #4ADE80; color: #000000; font-size: 18px; }
     .leaflet-popup-content { font-size: 15px; font-weight: 800; color: #111; }
@@ -532,16 +529,17 @@
       searchTargetPool = allWisuHotspots.length > 0 ? allWisuHotspots : MAJOR_HUBS;
     }
 
-    let finalTarget = null;
-    let minEstTime = Infinity;
-    searchTargetPool.forEach(h => {
+    // 모드 1: 최종 목적지가 500m(0.5km) 이내인 경우 차순위 관문역 선택 규칙 적용
+    let sortedTargets = searchTargetPool.map(h => {
       const d = getDistanceKm(currentPos.lat, currentPos.lng, h.lat, h.lng);
       const estT = Math.round((d / (25 / trafficMultiplier)) * 60);
-      if (estT < minEstTime) {
-        minEstTime = estT;
-        finalTarget = { ...h, dist: d, estimatedTimeMin: estT };
-      }
-    });
+      return { ...h, dist: d, estimatedTimeMin: estT };
+    }).sort((a, b) => a.dist - b.dist);
+
+    let finalTarget = sortedTargets[0];
+    if (currentMode === 1 && sortedTargets.length > 1 && finalTarget.dist < 0.5) {
+      finalTarget = sortedTargets[1]; // 가장 가까운 곳이 500m 이내면 다음으로 가까운 곳 선택
+    }
 
     finalTarget.estimatedTimeMin = Math.round((finalTarget.dist / (25 / trafficMultiplier)) * 60);
     const finalBearing = getBearing(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
@@ -700,7 +698,6 @@
     setTimeout(async () => {
       if (!leafletMap) {
         leafletMap = L.map('route-map', { zoomControl: false });
-        // 한국 지명 및 도로망이 뚜렷하게 표기되는 표준 타일 레이어 적용
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '' }).addTo(leafletMap);
       }
       leafletMap.invalidateSize();
