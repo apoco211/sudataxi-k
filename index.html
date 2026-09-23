@@ -11,7 +11,6 @@
   
   <!-- Leaflet Lightweight Map CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
   <style>
     /* Mode Color Theme Variables */
     body.mode-1 {
@@ -22,7 +21,6 @@
       --final-card-bg: #2B2505;
       --final-card-glow: rgba(255, 200, 0, 0.2);
     }
-
     body.mode-2 {
       --theme-accent: #FF6B00;
       --theme-bg-dark: #2A1A0A;
@@ -31,7 +29,6 @@
       --final-card-bg: #2A1A0A;
       --final-card-glow: rgba(255, 107, 0, 0.2);
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background-color: #121212; color: #FFFFFF; max-width: 430px; margin: 0 auto; padding: 16px 16px 110px 16px; min-height: 100vh; transition: all 0.3s ease; }
     
@@ -40,11 +37,11 @@
     .mode-container { display: flex; gap: 8px; margin-bottom: 12px; }
     .mode-pill { flex: 1; height: 38px; border-radius: 12px; background: #2A2A2A; color: #8A8A8A; font-size: 13px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
     .mode-pill.active { background: var(--theme-accent); color: var(--theme-text-on-accent); }
-
+    
     /* Location & Status Bar */
     .loc-bar { background: var(--theme-bg-dark); height: 44px; border: 1px solid var(--theme-border); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-size: 12px; color: var(--theme-accent); margin-bottom: 12px; transition: all 0.3s; }
     .refresh-btn { background: none; border: none; color: var(--theme-accent); font-size: 16px; cursor: pointer; }
-
+    
     /* Big CTA Buttons Group */
     .btn-group-main { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
     .big-btn { width: 100%; height: 60px; background: var(--theme-accent); color: var(--theme-text-on-accent); font-size: 18px; font-weight: 900; border: none; border-radius: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px var(--theme-border); transition: all 0.3s; }
@@ -52,10 +49,10 @@
     
     .map-btn { width: 100%; height: 44px; background: #2A2A2A; color: #FFFFFF; font-size: 14px; font-weight: 800; border: 1px solid var(--theme-border); border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s; }
     .map-btn:active { background: #333333; }
-
+    
     /* Pipeline Log Line */
     .pipeline-log { font-family: monospace; font-size: 11px; color: #8A8A8A; margin: 4px 0 16px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
+    
     /* Cards Stack */
     .card-list { display: flex; flex-direction: column; gap: 12px; }
     .card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 20px; padding: 14px; position: relative; transition: all 0.3s; }
@@ -70,10 +67,10 @@
     .level-high { background: rgba(74, 222, 128, 0.2); color: #4ADE80; border: 1px solid #4ADE80; }
     .level-mid { background: rgba(255, 200, 0, 0.2); color: #FFC800; border: 1px solid #FFC800; }
     .level-low { background: rgba(255, 107, 107, 0.2); color: #FF6B6B; border: 1px solid #FF6B6B; }
-
+    
     /* Navigation Button */
     .navi-btn { height: 44px; padding: 0 14px; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 800; font-size: 13px; border: none; border-radius: 12px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
-
+    
     /* Tags & Subtext */
     .tag-group { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
     .tag { font-size: 11px; padding: 2px 6px; border-radius: 6px; background: #2A2A2A; color: #A0A0A0; }
@@ -87,11 +84,12 @@
     .tag.fallback { background: #3A221A; color: #FB923C; }
     .tag.traffic { background: #3A1A1A; color: #FF6B6B; border: 1px solid #5A2A2A; }
     .tag.returncall { background: #1E293B; color: #38BDF8; border: 1px solid #0284C7; font-weight: 700; }
+    .tag.reverse-high { background: #4C0519; color: #FB7185; border: 1px solid #9F1239; font-weight: 700; }
     .sub-info { font-size: 12px; color: #8A8A8A; margin-top: 8px; border-top: 1px solid #2A2A2A; padding-top: 8px; }
-
+    
     /* Card 4 (FINAL Target Highlight) */
     .card.final-card { background: var(--final-card-bg); border: 1.5px solid var(--theme-accent); box-shadow: 0 0 12px var(--final-card-glow); }
-
+    
     /* Backup & Custom Hotspot Data Section */
     .backup-section { margin-top: 20px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 16px; padding: 14px; }
     .backup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -100,160 +98,37 @@
     .backup-btn-group { display: flex; gap: 8px; }
     .backup-btn { flex: 1; height: 40px; background: #2A2A2A; color: #FFFFFF; font-weight: 800; border: 1px solid #3A3A3A; border-radius: 10px; cursor: pointer; font-size: 13px; }
     .backup-btn:active { background: #333333; }
-
+    
     /* Custom Hotspot Section */
     .custom-section { margin-top: 12px; border-top: 1px dashed #3A3A3A; padding-top: 10px; }
     .add-custom-btn { width: 100%; height: 42px; background: #2A1A3A; color: #D8B4FE; border: 1px solid #6B21A8; font-weight: 800; font-size: 13px; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
     .add-custom-btn:active { background: #3B0764; }
-
+    
     /* Log and Custom List Items */
-    .recent-log-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #242424;
-      border: 1px solid #2E2E2E;
-      border-radius: 6px;
-      padding: 6px 8px;
-    }
-    .recent-log-info {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      overflow: hidden;
-    }
-    .recent-log-time {
-      font-size: 11px;
-      font-weight: 700;
-      color: #E0E0E0;
-      white-space: nowrap;
-    }
-    .recent-log-coords {
-      font-size: 9px;
-      color: #777777;
-      font-family: monospace;
-      white-space: nowrap;
-    }
-    .delete-log-btn {
-      background: #2E1815;
-      color: #FF5555;
-      border: 1px solid #4A2020;
-      border-radius: 4px;
-      padding: 2px 6px;
-      font-size: 10px;
-      font-weight: 700;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-    .delete-log-btn:active {
-      background: #4A2020;
-    }
-
+    .recent-log-item { display: flex; align-items: center; justify-content: space-between; background: #242424; border: 1px solid #2E2E2E; border-radius: 6px; padding: 6px 8px; }
+    .recent-log-info { display: flex; align-items: center; gap: 6px; overflow: hidden; }
+    .recent-log-time { font-size: 11px; font-weight: 700; color: #E0E0E0; white-space: nowrap; }
+    .recent-log-coords { font-size: 9px; color: #777777; font-family: monospace; white-space: nowrap; }
+    .delete-log-btn { background: #2E1815; color: #FF5555; border: 1px solid #4A2020; border-radius: 4px; padding: 2px 6px; font-size: 10px; font-weight: 700; cursor: pointer; flex-shrink: 0; }
+    .delete-log-btn:active { background: #4A2020; }
+    
     /* Fixed Bottom Split Bar */
-    .bottom-bar { 
-      position: fixed; 
-      bottom: 0; 
-      left: 0; 
-      right: 0; 
-      height: 74px; 
-      background: rgba(26,26,26,0.95); 
-      backdrop-filter: blur(10px); 
-      border-top: 2px solid var(--theme-accent); 
-      display: flex; 
-      align-items: center; 
-      gap: 8px; 
-      padding: 8px 12px; 
-      z-index: 100; 
-      max-width: 430px; 
-      margin: 0 auto; 
-      transition: border-color 0.3s; 
-    }
-
-    .timer-container {
-      flex: 1;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .timer-mode-selector {
-      display: flex;
-      gap: 4px;
-      height: 20px;
-    }
-
-    .timer-mode-btn {
-      flex: 1;
-      background: #2A2A2A;
-      color: #8A8A8A;
-      font-size: 10px;
-      font-weight: 800;
-      border: 1px solid #3A3A3A;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .timer-mode-btn.active {
-      background: var(--theme-accent);
-      color: var(--theme-text-on-accent);
-      border-color: var(--theme-accent);
-    }
-
-    .timer-display-btn {
-      flex: 1;
-      background: #2A2A2A;
-      border: 1px solid #3A3A3A;
-      color: #FFFFFF;
-      font-size: 13px;
-      font-weight: 900;
-      border-radius: 10px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-
-    .timer-display-btn.running {
-      background: #3A2E0A;
-      color: var(--theme-accent);
-      border-color: var(--theme-accent);
-    }
-
-    .timer-display-btn.finished {
-      background: #4A1A1A;
-      color: #FF5555;
-      border-color: #FF5555;
-      animation: alertBlink 1s infinite;
-    }
-
+    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 74px; background: rgba(26,26,26,0.95); backdrop-filter: blur(10px); border-top: 2px solid var(--theme-accent); display: flex; align-items: center; gap: 8px; padding: 8px 12px; z-index: 100; max-width: 430px; margin: 0 auto; transition: border-color 0.3s; }
+    .timer-container { flex: 1; height: 100%; display: flex; flex-direction: column; gap: 4px; }
+    .timer-mode-selector { display: flex; gap: 4px; height: 20px; }
+    .timer-mode-btn { flex: 1; background: #2A2A2A; color: #8A8A8A; font-size: 10px; font-weight: 800; border: 1px solid #3A3A3A; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+    .timer-mode-btn.active { background: var(--theme-accent); color: var(--theme-text-on-accent); border-color: var(--theme-accent); }
+    .timer-display-btn { flex: 1; background: #2A2A2A; border: 1px solid #3A3A3A; color: #FFFFFF; font-size: 13px; font-weight: 900; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .timer-display-btn.running { background: #3A2E0A; color: var(--theme-accent); border-color: var(--theme-accent); }
+    .timer-display-btn.finished { background: #4A1A1A; color: #FF5555; border-color: #FF5555; animation: alertBlink 1s infinite; }
+    
     @keyframes alertBlink {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
     }
-
-    .save-call-btn { 
-      flex: 1; 
-      height: 100%; 
-      background: var(--theme-accent); 
-      color: var(--theme-text-on-accent); 
-      font-weight: 900; 
-      font-size: 14px; 
-      border: none; 
-      border-radius: 12px; 
-      cursor: pointer; 
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      line-height: 1.2;
-      word-break: keep-all;
-    }
+    .save-call-btn { flex: 1; height: 100%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 14px; border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.2; word-break: keep-all; }
     .save-call-btn:active { opacity: 0.9; }
-
+    
     /* Full Route Map Modal / Bottom Sheet */
     .map-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
     .map-modal-overlay.active { display: flex; }
@@ -263,38 +138,34 @@
       from { transform: translateY(100%); }
       to { transform: translateY(0); }
     }
-
     .map-modal-header { padding: 14px 16px; background: #121212; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2A2A2A; flex-shrink: 0; }
     .map-modal-title { font-size: 16px; font-weight: 800; color: var(--theme-accent); }
     .map-modal-close { background: none; border: none; color: #8A8A8A; font-size: 20px; font-weight: 900; cursor: pointer; }
     #route-map { width: 100%; height: 100%; min-height: 350px; flex: 1; background: #121212; z-index: 1; }
-
+    
     /* OpenStreetMap Pure Dark Mode Filter */
-    .leaflet-tile-pane {
-      filter: brightness(0.6) invert(1) contrast(1.3) hue-rotate(200deg) saturate(0.3);
-    }
-
+    .leaflet-tile-pane { filter: brightness(0.6) invert(1) contrast(1.3) hue-rotate(200deg) saturate(0.3); }
+    
     /* Custom Map Marker Styling */
     .custom-map-marker { width: 28px; height: 28px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 13px; display: flex; align-items: center; justify-content: center; border: 2px solid #FFFFFF; box-shadow: 0 2px 6px rgba(0,0,0,0.6); }
     .custom-map-marker.current { background: #4ADE80; color: #000000; }
   </style>
 </head>
 <body class="mode-1">
-
   <div class="header">주변 콜 많은 곳 찾기</div>
-
+  
   <!-- Mode Selector Pills -->
   <div class="mode-container">
     <button class="mode-pill active" id="btn-mode1" onclick="setMode(1)">[모드1]</button>
     <button class="mode-pill" id="btn-mode2" onclick="setMode(2)">[모드2]</button>
   </div>
-
+  
   <!-- Location Bar -->
   <div class="loc-bar">
     <span id="loc-text">📍 GPS 위치 확인 중...</span>
     <button class="refresh-btn" onclick="executeSearch()">⟳</button>
   </div>
-
+  
   <!-- Main Action Buttons -->
   <div class="btn-group-main">
     <button class="big-btn" onclick="executeSearch()">
@@ -304,13 +175,13 @@
       <span>🗺️ 전체 동선 지도 보기</span>
     </button>
   </div>
-
+  
   <!-- Pipeline Status Log -->
   <div class="pipeline-log" id="pipeline-log">대기 중 · 위치 검색 진행 중입니다.</div>
-
+  
   <!-- Cards Container -->
   <div class="card-list" id="card-list"></div>
-
+  
   <!-- Data Backup & Sync Section -->
   <div class="backup-section">
     <div class="backup-header">
@@ -322,13 +193,13 @@
       <button class="backup-btn" onclick="document.getElementById('import-file-input').click()">📥 JSON 가져오기</button>
       <input type="file" id="import-file-input" accept=".json" style="display: none;" onchange="importCallLogs(event)">
     </div>
-
+    
     <!-- Recent Logs List Container -->
     <div style="margin-top: 10px; border-top: 1px dashed #3A3A3A; padding-top: 8px;">
       <div style="font-size: 11px; font-weight: 800; color: #8A8A8A; margin-bottom: 6px;">🕒 최근 저장 목록 (최신 5개)</div>
       <div id="recent-logs-list" style="display: flex; flex-direction: column; gap: 4px;"></div>
     </div>
-
+    
     <!-- Custom Hotspot Directly Add Section -->
     <div class="custom-section">
       <button class="add-custom-btn" onclick="addCustomHotspotPrompt()">⭐ 현재 위치를 '나만의 콜 장소'로 직접 등록</button>
@@ -336,7 +207,7 @@
       <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 4px;"></div>
     </div>
   </div>
-
+  
   <!-- Fixed Bottom Split Bar -->
   <div class="bottom-bar">
     <div class="timer-container">
@@ -348,7 +219,7 @@
     </div>
     <button class="save-call-btn" onclick="saveCurrentCallLocation()">📍 고객 탑승<br>위치 저장</button>
   </div>
-
+  
   <!-- Route Map Modal / Bottom Sheet -->
   <div class="map-modal-overlay" id="map-modal" onclick="closeRouteMapModal(event)">
     <div class="map-modal-content" onclick="event.stopPropagation()">
@@ -359,22 +230,20 @@
       <div id="route-map"></div>
     </div>
   </div>
-
+  
   <!-- Leaflet Lightweight Map JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script>
   let currentMode = 1;
   let currentPos = null;
   let leafletMap = null;
   let currentRouteData = [];
-
   let timerPresetMin = 5;
   let timerRemainingSec = 300;
   let timerInterval = null;
   let isTimerRunning = false;
 
-  /* 위수지역 좌표 판별 */
+  /* 위수지역 좌표 판별 (안양·군포·의왕·과천 지정 범위) */
   function isInsideWisu(lat, lng) {
     const wisuBoxes = [
       { minLat: 37.38, maxLat: 37.43, minLng: 126.90, maxLng: 127.01 }, 
@@ -393,7 +262,7 @@
     { name: "금정역 먹자골목", lat: 37.3721, lng: 126.9438, address: "금정역", type: "subway" }
   ];
 
-  /* 광역 거점 및 과천 출근 거점 대거 보완 */
+  /* 광역 거점 및 과천 출근 거점 */
   const METRO_ROUTE_HUBS = [
     { name: "과천 지식정보타운 업무지구", lat: 37.4142, lng: 126.9801, address: "과천지식정보타운", type: "office" },
     { name: "정부과천청사역 지하철거점", lat: 37.4261, lng: 126.9898, address: "정부과천청사역", type: "subway" },
@@ -470,10 +339,8 @@
     }
     timerPresetMin = min;
     timerRemainingSec = min * 60;
-
     document.getElementById('timer-btn-5m').classList.toggle('active', min === 5);
     document.getElementById('timer-btn-10m').classList.toggle('active', min === 10);
-
     const btn = document.getElementById('timer-display-btn');
     btn.className = 'timer-display-btn';
     btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 시작`;
@@ -481,12 +348,10 @@
 
   function toggleTimer() {
     const btn = document.getElementById('timer-display-btn');
-
     if (timerRemainingSec <= 0) {
       timerRemainingSec = timerPresetMin * 60;
       btn.className = 'timer-display-btn';
     }
-
     if (isTimerRunning) {
       clearInterval(timerInterval);
       isTimerRunning = false;
@@ -526,7 +391,6 @@
       osc.start();
       osc.stop(audioCtx.currentTime + 0.8);
     } catch(e) {}
-
     if (navigator.vibrate) {
       navigator.vibrate([300, 150, 300, 150, 300]);
     }
@@ -600,10 +464,9 @@
     let bonus = 0;
     const isNightlife = (itemType === 'nightlife' || itemName.includes('먹자골목') || itemName.includes('포차') || itemName.includes('주점'));
     const isCommuteHub = (itemType === 'subway' || itemType === 'office' || itemName.includes('역') || itemName.includes('지식정보타운') || itemName.includes('테크노밸리'));
-
     if (nowHour >= 7 && nowHour < 10) {
       if (isCommuteHub) bonus += 35;
-      if (isNightlife) bonus -= 25; // 아침 감점폭을 현실적으로 조정
+      if (isNightlife) bonus -= 25;
     } 
     else if (nowHour >= 21 || nowHour < 2) {
       if (isNightlife) bonus += 35;
@@ -622,42 +485,33 @@
   function calculateCallLogScore(candLat, candLng) {
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     if (logs.length === 0) return { bonus: 0, matched: false, count: 0 };
-
     const now = new Date();
     const currentHour = now.getHours();
     const currentDay = now.getDay();
-
     let maxBonus = 0;
     let isMatched = false;
     let matchCount = 0;
-
     logs.forEach(log => {
       const logLat = Number(log.lat);
       const logLng = Number(log.lng);
       if (isNaN(logLat) || isNaN(logLng)) return;
-
       const dist = getDistanceKm(candLat, candLng, logLat, logLng);
       if (dist <= 0.3) {
         matchCount++;
         const logDate = parseDateSafely(log.timestamp);
         const daysPassed = Math.max(0, (now - logDate) / (1000 * 60 * 60 * 24));
         const decayFactor = Math.exp(-0.023 * daysPassed);
-
         const logHour = logDate.getHours();
         const logDay = logDate.getDay();
         const hourDiff = Math.abs(currentHour - logHour);
-
         const isHourMatched = (hourDiff <= 1 || hourDiff >= 23);
         const isDayTypeMatched = (currentDay === 0 || currentDay === 6) === (logDay === 0 || logDay === 6);
-
         let matchMultiplier = 1.0;
         if (isHourMatched) matchMultiplier += 0.5;
         if (isDayTypeMatched) matchMultiplier += 0.3;
-
         if (!isInsideWisu(logLat, logLng)) {
           matchMultiplier *= 1.2;
         }
-
         const score = 25 * decayFactor * matchMultiplier;
         if (score > maxBonus) {
           maxBonus = score;
@@ -665,7 +519,6 @@
         }
       }
     });
-
     return { bonus: Math.round(maxBonus), matched: isMatched, count: matchCount };
   }
 
@@ -681,7 +534,6 @@
       if (locText) locText.innerText = '📍 GPS를 지원하지 않는 브라우저';
       return;
     }
-
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         currentPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
@@ -700,7 +552,6 @@
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
     logEl.innerText = '실시간 기상, 정체 및 POI 스코어 계산 중...';
-
     const radius = currentMode === 1 ? 5000 : 10000;
     
     const [overpassData, weatherData] = await Promise.all([
@@ -714,13 +565,12 @@
     if (currentMode === 1) {
       pool = pool.filter(p => isInsideWisu(p.lat, p.lng));
     }
-
     const nowHour = new Date().getHours();
     const trafficMultiplier = getTrafficCongestionMultiplier(nowHour);
     const isLastTrainPeakTime = (nowHour >= 23 || nowHour < 1);
     const isCommuteTime = (nowHour >= 7 && nowHour < 10);
 
-    // [최종 목적지 결정]
+    /* [4번 최종 목적지 결정 원칙] */
     let finalTarget = null;
     let minEstTime = Infinity;
     MAJOR_HUBS.forEach(h => {
@@ -731,12 +581,11 @@
         finalTarget = { ...h, dist: d, estimatedTimeMin: estT };
       }
     });
-
     const finalEstTimeMin = Math.round((finalTarget.dist / (25 / trafficMultiplier)) * 60);
     finalTarget.estimatedTimeMin = finalEstTimeMin;
-
     const finalBearing = getBearing(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
 
+    /* [1~3번 중간 경유지 스코어링 및 동선 필터링] */
     const scoredPool = pool.map(item => {
       const dist = getDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const distToFinal = getDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
@@ -744,54 +593,56 @@
       
       const avgSpeed = 25 / trafficMultiplier; 
       const estimatedTimeMin = Math.round((dist / avgSpeed) * 60);
-
       let score = 50;
-
       if (item.isCustom) score += 25;
-
       const isMetroHub = METRO_ROUTE_HUBS.some(h => h.name === item.name) || MAJOR_HUBS.some(h => h.name === item.name);
       if (currentMode === 2 && isMetroHub) score += 30;
-
       let isLastTrainPeak = false;
       if (isLastTrainPeakTime && isMetroHub) {
         score += 20;
         isLastTrainPeak = true;
       }
-
       let isReturnCallBonus = false;
       if (!isItemWisu) {
         score += 10;
         isReturnCallBonus = true;
       }
-
       score += getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
       if (weatherData.isRainOrSnow) score += 20;
-
       const logResult = calculateCallLogScore(item.lat, item.lng);
       score += logResult.bonus;
 
-      /* [보정된 방향 및 동선 필터링] 과천~인덕원 길목 유효화 */
+      /* [동선 방향성 엄격 정립] */
       const itemBearing = getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng);
       let angleDiff = Math.abs(finalBearing - itemBearing);
       if (angleDiff > 180) angleDiff = 360 - angleDiff;
+      
+      let isReverseHighBonus = false;
 
+      // 1. 복귀 전진 방향 (각도 60도 이내 길목)
       if (angleDiff <= 60) {
-        score += 35; // 진행방향 각도 범위를 60도로 유연하게 확장
-      } else if (angleDiff > 110) {
-        if (dist > 2.0) {
-          score -= 999; // 완전히 반대방향 2km 초과는 배제
+        score += 35; 
+      } 
+      // 2. 후방/역방향 예외 허용 처리 (각도 110도 초과)
+      else if (angleDiff > 110) {
+        // [핵심 조건] 근거리(2.0km 이내)이면서 콜점수가 높은 경우 소폭 감점만 적용하여 구제
+        if (dist <= 2.0) {
+          score -= 20; 
+          if (score >= 70) {
+            isReverseHighBonus = true; // 역방향 고득점 핫플 태깅
+          }
         } else {
-          score -= 20;
+          // 2.0km 초과 후방/역방향은 완전 배제
+          score -= 999; 
         }
       }
 
-      // 목적지 전진성 체크 유연화
+      // 목적지 전진성 조건 (복귀 목적지보다 멀어지는 2.0km 초과 외곽 장소 배제)
       if (distToFinal > finalTarget.dist + 2.0 && dist > 2.0) {
         score -= 999;
       }
 
       score -= (estimatedTimeMin * 1.2);
-
       return { 
         ...item, 
         dist, 
@@ -805,6 +656,7 @@
         isReturnCallBonus,
         isLastTrainPeak,
         isCommuteTime,
+        isReverseHighBonus,
         isFallback: false
       };
     });
@@ -824,7 +676,7 @@
       if (selectedRoute.length === 3) break;
     }
 
-    /* 백업 거점 보장: 과천~인덕원 등 유효 카드가 3개 미만일 때 가까운 출근/환승 거점 자동 보충 */
+    /* 백업 거점 보장 (카드 3개 미만 시 근거리 환승거점 보충) */
     if (selectedRoute.length < 3) {
       const remainingHubs = METRO_ROUTE_HUBS.filter(hub => 
         !isDuplicatePlace(hub.name, hub.lat, hub.lng, selectedRoute) &&
@@ -840,7 +692,6 @@
           isFallback: true
         };
       });
-
       remainingHubs.sort((a, b) => a.dist - b.dist);
       for (let hub of remainingHubs) {
         if (!isDuplicatePlace(hub.name, hub.lat, hub.lng, selectedRoute)) {
@@ -851,7 +702,6 @@
     }
 
     selectedRoute.sort((a, b) => a.dist - b.dist);
-
     currentRouteData = [
       { name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true },
       ...selectedRoute,
@@ -859,24 +709,21 @@
     ];
 
     document.getElementById('btn-show-map').style.display = 'flex';
-
     const weatherText = weatherData.isRainOrSnow ? ' · 비/눈(+20점)' : '';
     const trafficText = trafficMultiplier > 1.2 ? ` · 정체반영(${trafficMultiplier}x)` : '';
     const timeStatusText = isCommuteTime ? ' · 아침출근피크' : (isLastTrainPeakTime ? ' · 막차피크시간' : '');
     logEl.innerText = `방금 · ${radius/1000}km 이내 · ${validPool.length}곳 검출${weatherText}${trafficText}${timeStatusText} · FINAL: ${finalTarget.name}`;
-
     renderCards(selectedRoute, finalTarget);
   }
 
   function renderCards(routeCards, finalTarget) {
     const listEl = document.getElementById('card-list');
     listEl.innerHTML = '';
-
+    
     routeCards.forEach((item, index) => {
       const card = document.createElement('div');
       card.className = 'card';
       const levelBadgeHtml = getScoreLevelBadge(item.score);
-
       card.innerHTML = `
         <div class="card-header">
           <div class="card-title-group">
@@ -891,6 +738,7 @@
         <div class="tag-group">
           ${item.isCustom ? '<span class="tag custom">#나만의핫플</span>' : ''}
           ${item.delta <= 60 ? '<span class="tag gilmok">#길목우선</span>' : ''}
+          ${item.isReverseHighBonus ? '<span class="tag reverse-high">#근거리고득점후방</span>' : ''}
           ${item.isWisu ? '<span class="tag wisu">#위수지역</span>' : ''}
           ${item.isCommuteTime && (item.type === 'subway' || item.type === 'office') ? '<span class="tag commute">#출근환승거점</span>' : ''}
           ${item.isLastTrainPeak ? '<span class="tag lasttrain">#막차피크</span>' : ''}
@@ -934,14 +782,11 @@
       alert('먼저 [주변 콜 많은 곳 찾기] 버튼을 눌러 위치 검색을 진행해 주세요.');
       return;
     }
-
     const modal = document.getElementById('map-modal');
     modal.classList.add('active');
-
     setTimeout(async () => {
       if (!leafletMap) {
         leafletMap = L.map('route-map', { zoomControl: false });
-        
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           maxZoom: 18,
           attribution: ''
@@ -949,20 +794,16 @@
       }
       
       leafletMap.invalidateSize();
-
       leafletMap.eachLayer(layer => {
         if (layer instanceof L.Marker || layer instanceof L.Polyline) {
           leafletMap.removeLayer(layer);
         }
       });
-
       const themeColor = currentMode === 1 ? '#FFC800' : '#FF6B00';
       const markerCoords = [];
-
       currentRouteData.forEach((pt, idx) => {
         const latLng = [pt.lat, pt.lng];
         markerCoords.push(latLng);
-
         let iconHtml = '';
         if (pt.isCurrent) {
           iconHtml = `<div class="custom-map-marker current">📍</div>`;
@@ -971,25 +812,21 @@
         } else {
           iconHtml = `<div class="custom-map-marker" style="background:${themeColor};">${idx}</div>`;
         }
-
         const customIcon = L.divIcon({
           html: iconHtml,
           className: '',
           iconSize: [28, 28],
           iconAnchor: [14, 14]
         });
-
         L.marker(latLng, { icon: customIcon })
           .addTo(leafletMap)
           .bindPopup(`<b>${pt.name}</b>`);
       });
-
       try {
         const coordsStr = currentRouteData.map(pt => `${pt.lng},${pt.lat}`).join(';');
         const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson`;
         const res = await fetch(osrmUrl);
         const data = await res.json();
-
         if (data.routes && data.routes.length > 0) {
           const roadCoords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
           L.polyline(roadCoords, {
@@ -1008,7 +845,6 @@
           dashArray: '6, 8'
         }).addTo(leafletMap);
       }
-
       leafletMap.fitBounds(L.latLngBounds(markerCoords), { padding: [50, 50] });
     }, 250);
   }
@@ -1031,16 +867,13 @@
       query = cleanNaviQuery(name);
     }
     if (!query) query = name;
-
     navigator.clipboard.writeText(query);
     alert(`📋 [${query}] 명칭이 복사되었습니다.\n카카오내비로 연결합니다.`);
     
     const naviUrl = `kakaonavi://search?q=${encodeURIComponent(query)}`;
     const fallbackUrl = `https://map.kakao.com/link/search/${encodeURIComponent(query)}`;
-
     const startTime = Date.now();
     window.location.href = naviUrl;
-
     setTimeout(() => {
       if (Date.now() - startTime < 1500) {
         window.open(fallbackUrl, '_blank');
@@ -1068,7 +901,6 @@
         alert('🎉 고객 탑승 위치가 성공적으로 저장되었습니다!');
       }, 50);
     };
-
     if (currentPos) {
       doSave(currentPos);
     } else {
@@ -1100,16 +932,13 @@
       alert('📍 위치 정보를 수신하지 못했습니다. 상단 [⟳] 버튼을 누른 후 다시 시도해주세요.');
       return;
     }
-
     const placeName = prompt('⭐ 나만의 콜 장소 이름을 입력해 주세요 (예: 과천 지식정보타운 A동, 인덕원역 3번출구):');
     if (!placeName || !placeName.trim()) return;
-
     const typeChoice = prompt('장소의 성격을 번호로 선택해 주세요:\n1. 출근/업무지구 (아침 피크 우대)\n2. 야간/유흥상권 (저녁 피크 우대)\n3. 일반 지하철/환승역', '1');
     
     let selectedType = 'subway';
     if (typeChoice === '1') selectedType = 'office';
     else if (typeChoice === '2') selectedType = 'nightlife';
-
     const customHotspots = getCustomHotspots();
     const newHotspot = {
       id: 'custom_' + Date.now(),
@@ -1120,7 +949,6 @@
       isCustom: true,
       address: placeName.trim()
     };
-
     customHotspots.push(newHotspot);
     localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(customHotspots));
     alert(`🎉 [${placeName.trim()}] 장소가 '나만의 콜 장소'로 등록되었습니다!`);
@@ -1142,13 +970,11 @@
     const listEl = document.getElementById('custom-hotspots-list');
     if (!listEl) return;
     listEl.innerHTML = '';
-
     const customHotspots = getCustomHotspots();
     if (customHotspots.length === 0) {
       listEl.innerHTML = '<div style="font-size: 10px; color: #666; text-align: center; padding: 4px 0;">등록된 나만의 콜 장소가 없습니다.</div>';
       return;
     }
-
     customHotspots.forEach(item => {
       const itemDiv = document.createElement('div');
       itemDiv.className = 'recent-log-item';
@@ -1193,22 +1019,18 @@
     if (countText) {
       countText.innerText = `저장된 기록: ${logs.length}개`;
     }
-
     const listEl = document.getElementById('recent-logs-list');
     if (!listEl) return;
     listEl.innerHTML = '';
-
     if (logs.length === 0) {
       listEl.innerHTML = '<div style="font-size: 10px; color: #666; text-align: center; padding: 4px 0;">저장된 기록이 없습니다.</div>';
       return;
     }
-
     const sorted = [...logs].reverse().sort((a, b) => {
       const timeA = parseDateSafely(a.timestamp).getTime();
       const timeB = parseDateSafely(b.timestamp).getTime();
       return timeB - timeA;
     }).slice(0, 5);
-
     sorted.forEach(item => {
       const itemDiv = document.createElement('div');
       itemDiv.className = 'recent-log-item';
@@ -1241,12 +1063,10 @@
       alert('내보낼 데이터가 없습니다.');
       return;
     }
-
     const exportData = {
       call_logs: logs,
       custom_hotspots: customHotspots
     };
-
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1267,14 +1087,12 @@
         
         let importedLogs = [];
         let importedHotspots = [];
-
         if (Array.isArray(importedData)) {
           importedLogs = importedData;
         } else {
           importedLogs = importedData.call_logs || [];
           importedHotspots = importedData.custom_hotspots || [];
         }
-
         const existingLogs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
         const logMap = new Map();
         [...existingLogs, ...importedLogs].forEach(item => {
@@ -1284,7 +1102,6 @@
           }
         });
         localStorage.setItem('sudataxi_call_logs', JSON.stringify(Array.from(logMap.values())));
-
         const existingHotspots = getCustomHotspots();
         const hotspotMap = new Map();
         [...existingHotspots, ...importedHotspots].forEach(item => {
@@ -1294,7 +1111,6 @@
           }
         });
         localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(Array.from(hotspotMap.values())));
-
         alert('🎉 탑승 기록 및 나만의 콜 장소 데이터를 성공적으로 복원했습니다!');
         updateCallLogStats();
         updateCustomHotspotUI();
