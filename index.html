@@ -374,7 +374,7 @@
   let timerInterval = null;
   let isTimerRunning = false;
 
-  /* 위수지역 좌표 판별 (인덕원/안양/군포/의왕/과천 보정) */
+  /* 위수지역 좌표 판별 */
   function isInsideWisu(lat, lng) {
     const wisuBoxes = [
       { minLat: 37.38, maxLat: 37.43, minLng: 126.90, maxLng: 127.01 }, 
@@ -384,7 +384,7 @@
     return wisuBoxes.some(b => lat >= b.minLat && lat <= b.maxLat && lng >= b.minLng && lng <= b.maxLng);
   }
 
-  /* 모드 1 & 모드 2 최종 복귀 관문 5대 거점 */
+  /* 5대 관문 거점 */
   const MAJOR_HUBS = [
     { name: "인덕원역 먹자골목", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway" },
     { name: "범계역 로데오거리", lat: 37.3917, lng: 126.9145, address: "범계역", type: "subway" },
@@ -393,7 +393,7 @@
     { name: "금정역 먹자골목", lat: 37.3721, lng: 126.9438, address: "금정역", type: "subway" }
   ];
 
-  /* 광역 주요 거점 데이터 */
+  /* 광역 거점 목록 */
   const METRO_ROUTE_HUBS = [
     { name: "정자역 신분당선 환승거점", lat: 37.3662, lng: 127.1082, address: "정자역", type: "subway" },
     { name: "판교역 중심상업지구", lat: 37.3948, lng: 127.1112, address: "판교역", type: "subway" },
@@ -671,7 +671,6 @@
     return { bonus: Math.round(maxBonus), matched: isMatched, count: matchCount };
   }
 
-  /* 나만의 콜 장소 불러오기 함수 */
   function getCustomHotspots() {
     return JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
   }
@@ -723,7 +722,7 @@
     const isLastTrainPeakTime = (nowHour >= 23 || nowHour < 1);
     const isCommuteTime = (nowHour >= 7 && nowHour < 10);
 
-    // [모드 1 & 모드 2 최종 목적지 결정] 5대 관문 거점 중 실시간 최단 도착지
+    // [최종 목적지 결정] 5대 관문 거점 중 실시간 최단 도착지
     let finalTarget = null;
     let minEstTime = Infinity;
     MAJOR_HUBS.forEach(h => {
@@ -738,10 +737,12 @@
     const finalEstTimeMin = Math.round((finalTarget.dist / (25 / trafficMultiplier)) * 60);
     finalTarget.estimatedTimeMin = finalEstTimeMin;
 
+    /* 목적지로 향하는 벡터 각도 */
     const finalBearing = getBearing(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
 
     const scoredPool = pool.map(item => {
       const dist = getDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
+      const distToFinal = getDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
       const isItemWisu = isInsideWisu(item.lat, item.lng);
       
       const avgSpeed = 25 / trafficMultiplier; 
@@ -749,7 +750,6 @@
 
       let score = 50;
 
-      // 나만의 콜 장소인 경우 +25점 가산점
       if (item.isCustom) score += 25;
 
       const isMetroHub = METRO_ROUTE_HUBS.some(h => h.name === item.name) || MAJOR_HUBS.some(h => h.name === item.name);
@@ -768,22 +768,34 @@
       }
 
       score += getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
-
       if (weatherData.isRainOrSnow) score += 20;
 
       const logResult = calculateCallLogScore(item.lat, item.lng);
       score += logResult.bonus;
 
+      /* [핵심 필터링] 방향 및 전진성 엄격 판별 */
       const itemBearing = getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng);
-      const delta = Math.abs(finalBearing - itemBearing);
-      if (delta <= 45) score += 30;
-      
-      if (delta >= 120) {
-        if (currentMode === 2 && dist <= 3.0) {
-          score -= 10;
+      let angleDiff = Math.abs(finalBearing - itemBearing);
+      if (angleDiff > 180) angleDiff = 360 - angleDiff;
+
+      // 정방향(45도 이내) 보너스
+      if (angleDiff <= 45) {
+        score += 35;
+      } 
+      // 90도 초과 (목적지와 반대 방향인 경우)
+      else if (angleDiff > 90) {
+        if (dist > 1.5) {
+          // 1.5km 초과 떨어진 반대 방향 거점은 완전히 배제 (-999점)
+          score -= 999;
         } else {
-          score -= 50;
+          // 1.5km 이내 초근접 장소는 약간 감점
+          score -= 30;
         }
+      }
+
+      // 목적지 전진성 체크: 현재 위치보다 목적지에서 오히려 멀어지는 장소 감점
+      if (distToFinal > finalTarget.dist + 1.0 && dist > 1.5) {
+        score -= 999;
       }
 
       score -= (estimatedTimeMin * 1.5);
@@ -793,7 +805,7 @@
         dist, 
         estimatedTimeMin,
         score: Math.round(score), 
-        delta, 
+        delta: angleDiff, 
         hasWeatherBonus: weatherData.isRainOrSnow,
         hasLogBonus: logResult.matched,
         logCount: logResult.count,
@@ -806,9 +818,11 @@
     });
 
     let selectedRoute = [];
-    scoredPool.sort((a, b) => b.score - a.score);
+    // 감점(-999점)되어 탈락한 항목 제외 후 점수순 정렬
+    const validPool = scoredPool.filter(p => p.score > -500);
+    validPool.sort((a, b) => b.score - a.score);
 
-    for (let candidate of scoredPool) {
+    for (let candidate of validPool) {
       if (candidate.dist >= finalTarget.dist * 0.95) continue;
       if (getDistanceKm(candidate.lat, candidate.lng, finalTarget.lat, finalTarget.lng) < 0.2) continue;
       
@@ -817,47 +831,6 @@
         selectedRoute.push(candidate);
       }
       if (selectedRoute.length === 3) break;
-    }
-
-    if (selectedRoute.length < 3 && currentMode === 2) {
-      const remainingHubs = METRO_ROUTE_HUBS.filter(hub => 
-        !isDuplicatePlace(hub.name, hub.lat, hub.lng, selectedRoute)
-      ).map(hub => {
-        const dist = getDistanceKm(currentPos.lat, currentPos.lng, hub.lat, hub.lng);
-        const estimatedTimeMin = Math.round((dist / (25 / trafficMultiplier)) * 60);
-        const isItemWisu = isInsideWisu(hub.lat, hub.lng);
-        const logResult = calculateCallLogScore(hub.lat, hub.lng);
-        
-        let score = 65 - estimatedTimeMin * 1.5;
-        let isReturnCallBonus = false;
-        if (!isItemWisu) {
-          score += 10;
-          isReturnCallBonus = true;
-        }
-
-        score += getDynamicTimeCategoryBonus(hub.type, hub.name, nowHour);
-
-        return {
-          ...hub,
-          dist,
-          estimatedTimeMin,
-          score: Math.round(score),
-          delta: Math.abs(finalBearing - getBearing(currentPos.lat, currentPos.lng, hub.lat, hub.lng)),
-          isTrafficHeavy: trafficMultiplier > 1.2,
-          isReturnCallBonus,
-          logCount: logResult.count,
-          isFallback: true
-        };
-      });
-
-      remainingHubs.sort((a, b) => b.score - a.score);
-
-      for (let hub of remainingHubs) {
-        if (!isDuplicatePlace(hub.name, hub.lat, hub.lng, selectedRoute)) {
-          selectedRoute.push(hub);
-        }
-        if (selectedRoute.length === 3) break;
-      }
     }
 
     selectedRoute.sort((a, b) => a.dist - b.dist);
@@ -873,7 +846,7 @@
     const weatherText = weatherData.isRainOrSnow ? ' · 비/눈(+20점)' : '';
     const trafficText = trafficMultiplier > 1.2 ? ` · 정체반영(${trafficMultiplier}x)` : '';
     const timeStatusText = isCommuteTime ? ' · 아침출근피크' : (isLastTrainPeakTime ? ' · 막차피크시간' : '');
-    logEl.innerText = `방금 · ${radius/1000}km 이내 · ${scoredPool.length}곳 검출${weatherText}${trafficText}${timeStatusText} · FINAL: ${finalTarget.name}`;
+    logEl.innerText = `방금 · ${radius/1000}km 이내 · ${validPool.length}곳 검출${weatherText}${trafficText}${timeStatusText} · FINAL: ${finalTarget.name}`;
 
     renderCards(selectedRoute, finalTarget);
   }
@@ -1105,7 +1078,6 @@
     }
   }
 
-  /* 나만의 콜 장소 직접 등록 프롬프트 */
   function addCustomHotspotPrompt() {
     if (!currentPos) {
       alert('📍 위치 정보를 수신하지 못했습니다. 상단 [⟳] 버튼을 누른 후 다시 시도해주세요.');
@@ -1286,7 +1258,6 @@
           importedHotspots = importedData.custom_hotspots || [];
         }
 
-        // 탑승 기록 병합
         const existingLogs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
         const logMap = new Map();
         [...existingLogs, ...importedLogs].forEach(item => {
@@ -1297,7 +1268,6 @@
         });
         localStorage.setItem('sudataxi_call_logs', JSON.stringify(Array.from(logMap.values())));
 
-        // 나만의 핫플 병합
         const existingHotspots = getCustomHotspots();
         const hotspotMap = new Map();
         [...existingHotspots, ...importedHotspots].forEach(item => {
