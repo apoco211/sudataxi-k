@@ -198,7 +198,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   let currentMode = 1;
-  let currentPos = { lat: 37.4048, lng: 126.9767 };
+  let currentPos = null; // 초기값을 null로 주어 반드시 실시간 GPS를 받아오도록 함
   let leafletMap = null;
   let currentRouteData = [];
   let timerPresetMin = 5;
@@ -464,10 +464,11 @@
 
   function executeSearch() {
     const locText = document.getElementById('loc-text');
-    if (locText) locText.innerText = '📍 위치 확인 중...';
+    if (locText) locText.innerText = '📍 실시간 GPS 위치 수신 중...';
     
     if (!navigator.geolocation) {
       if (locText) locText.innerText = '📍 GPS 미지원 (인덕원역 대체)';
+      currentPos = { lat: 37.4048, lng: 126.9767 };
       calculateAndRender();
       return;
     }
@@ -476,11 +477,13 @@
     const safetyTimer = setTimeout(() => {
       if (!resolved) {
         resolved = true;
-        if (locText) locText.innerText = '📍 GPS 수신 지연 (인덕원역 대체 검색)';
+        if (!currentPos) currentPos = { lat: 37.4048, lng: 126.9767 };
+        if (locText) locText.innerText = `📍 GPS 지연 (마지막 위치 사용: ${currentPos.lat.toFixed(4)}, ${currentPos.lng.toFixed(4)})`;
         calculateAndRender();
       }
-    }, 4000);
+    }, 4500);
 
+    // maximumAge: 0을 주어 이전 위치 캐시를 절대 쓰지 않고 무조건 실시간 GPS 좌표를 새로 갱신함
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         if (resolved) return;
@@ -495,14 +498,16 @@
         if (resolved) return;
         resolved = true;
         clearTimeout(safetyTimer);
-        if (locText) locText.innerText = '📍 GPS 수신 실패 (인덕원역 대체 검색)';
+        if (!currentPos) currentPos = { lat: 37.4048, lng: 126.9767 };
+        if (locText) locText.innerText = `📍 GPS 수신 실패 (기본/이전 위치 사용)`;
         calculateAndRender();
       },
-      { enableHighAccuracy: false, timeout: 3500, maximumAge: 10000 }
+      { enableHighAccuracy: true, timeout: 4000, maximumAge: 0 }
     );
   }
 
   async function calculateAndRender() {
+    if (!currentPos) currentPos = { lat: 37.4048, lng: 126.9767 };
     const logEl = document.getElementById('pipeline-log');
     if (logEl) logEl.innerText = '실시간 기상, 정체 및 POI 스코어 계산 중...';
     const radius = currentMode === 1 ? 5000 : 10000;
