@@ -186,7 +186,7 @@
   </div>
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
+<script:택시 콜 가이드 앱:index.html>
   let currentMode = 1;
   let currentPos = { lat: 37.4048, lng: 126.9767 };
   let leafletMap = null;
@@ -520,22 +520,30 @@
       searchTargetPool = allWisuHotspots.length > 0 ? allWisuHotspots : MAJOR_HUBS;
     }
 
-    let sortedTargets = searchTargetPool.map(h => {
+    // [최종 목적지 선정: 거리 유사 시 도착시간이 빠르고 시간대 콜 점수가 높은 곳 우선 연산]
+    let scoredTargets = searchTargetPool.map(h => {
       const d = getDistanceKm(currentPos.lat, currentPos.lng, h.lat, h.lng);
-      const estT = Math.round((d / (25 / trafficMultiplier)) * 60);
-      return { ...h, dist: d, estimatedTimeMin: estT };
-    }).sort((a, b) => a.dist - b.dist);
+      const estTimeMin = Math.round((d / (25 / trafficMultiplier)) * 60);
+      const timeBonus = getDynamicTimeCategoryBonus(h.type, h.name, nowHour);
+      
+      // 복합 평가 공식: 점수가 높을수록 최종 목적지로 유리함
+      // (기본 가치 - 예상 소요시간 페널티 + 시간대별 콜 점수 보너스)
+      let targetScore = 120 - (estTimeMin * 4) + timeBonus;
+      
+      return { ...h, dist: d, estimatedTimeMin: estTimeMin, targetScore };
+    });
 
-    // [최종 목적지 500m 이내 근접 시 차순위 목적지 자동 갱신 및 모드1 자기 자신 제외 로직]
-    let finalTarget = sortedTargets[0];
+    scoredTargets.sort((a, b) => b.targetScore - a.targetScore);
+
+    let finalTarget = scoredTargets[0];
     if (currentMode === 1) {
-      const veryCloseHubs = sortedTargets.filter(h => h.dist < 0.5);
-      if (veryCloseHubs.length > 0 && sortedTargets.length > 1) {
-        finalTarget = sortedTargets[1];
+      const veryCloseHubs = scoredTargets.filter(h => h.dist < 0.5);
+      if (veryCloseHubs.length > 0 && scoredTargets.length > 1) {
+        finalTarget = scoredTargets.find(h => h.dist >= 0.5) || scoredTargets[1];
       }
     } else {
-      if (finalTarget.dist < 0.5 && sortedTargets.length > 1) {
-        finalTarget = sortedTargets[1];
+      if (finalTarget.dist < 0.5 && scoredTargets.length > 1) {
+        finalTarget = scoredTargets[1];
       }
     }
 
