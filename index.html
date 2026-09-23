@@ -107,16 +107,6 @@
     .map-modal-title { font-size: 16px; font-weight: 800; color: var(--theme-accent); }
     .map-modal-close { background: none; border: none; color: #8A8A8A; font-size: 20px; font-weight: 900; cursor: pointer; }
     #route-map { width: 100%; height: 100%; min-height: 350px; flex: 1; background: #121212; z-index: 1; }
-    
-    .custom-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; }
-    .custom-modal-overlay.active { display: flex; }
-    .custom-modal-box { width: 100%; max-width: 360px; background: #1E1E1E; border: 2px solid var(--theme-accent); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
-    .custom-modal-title { font-size: 16px; font-weight: 900; color: var(--theme-accent); }
-    .custom-modal-textarea { width: 100%; height: 130px; background: #121212; border: 1px solid #3A3A3A; color: #FFF; border-radius: 10px; padding: 10px; font-family: monospace; font-size: 12px; resize: none; }
-    .custom-modal-btn-group { display: flex; gap: 8px; }
-    .custom-modal-btn { flex: 1; height: 42px; border-radius: 10px; font-weight: 800; font-size: 13px; border: none; cursor: pointer; }
-    .custom-modal-btn.confirm { background: var(--theme-accent); color: var(--theme-text-on-accent); }
-    .custom-modal-btn.cancel { background: #3A3A3A; color: #FFF; }
 
     .leaflet-tile-pane { filter: brightness(1.1) contrast(1.4); }
     .custom-map-marker { width: 34px; height: 34px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 16px; display: flex; align-items: center; justify-content: center; border: 2.5px solid #FFFFFF; box-shadow: 0 3px 8px rgba(0,0,0,0.8); }
@@ -158,6 +148,8 @@
     <div class="backup-btn-group">
       <button class="backup-btn" id="btn-export">📤 JSON 내보내기</button>
       <button class="backup-btn" id="btn-import-open">📥 JSON 가져오기</button>
+      <!-- 탐색기에서 파일을 바로 선택하여 불러오는 표준 file input -->
+      <input type="file" id="import-file-input" accept=".json,application/json" style="display: none;">
     </div>
     
     <div style="margin-top: 10px; border-top: 1px dashed #3A3A3A; padding-top: 8px;">
@@ -191,19 +183,6 @@
         <button class="map-modal-close" id="map-modal-close">✕</button>
       </div>
       <div id="route-map"></div>
-    </div>
-  </div>
-
-  <!-- JSON 가져오기 모달 -->
-  <div class="custom-modal-overlay" id="import-modal">
-    <div class="custom-modal-box">
-      <div class="custom-modal-title">📥 JSON 백업 데이터 가져오기</div>
-      <div style="font-size: 12px; color: #aaa;">내보내기한 JSON 전체 코드를 아래에 붙여넣어 주세요.</div>
-      <textarea id="import-textarea" class="custom-modal-textarea" placeholder='{"call_logs": [...], "custom_hotspots": [...] }'></textarea>
-      <div class="custom-modal-btn-group">
-        <button class="custom-modal-btn cancel" id="import-modal-cancel">취소</button>
-        <button class="custom-modal-btn confirm" id="import-modal-submit">가져오기 적용</button>
-      </div>
     </div>
   </div>
   
@@ -869,42 +848,38 @@
     }
   }
 
-  function openImportModal() {
-    const modal = document.getElementById('import-modal');
-    if (modal) modal.classList.add('active');
-  }
-
-  function closeImportModal() {
-    const modal = document.getElementById('import-modal');
-    if (modal) modal.classList.remove('active');
-  }
-
-  function submitImportText() {
-    const ta = document.getElementById('import-textarea');
-    if (!ta || !ta.value.trim()) {
-      alert('❌ JSON 데이터를 입력해 주세요.');
-      return;
-    }
-    try {
-      const json = JSON.parse(ta.value.trim());
-      if (json.call_logs && Array.isArray(json.call_logs)) {
-        localStorage.setItem('sudataxi_call_logs', JSON.stringify(json.call_logs));
+  // 기사님 본래의 탐색기 파일 불러오기 로직
+  function importCallLogs(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      try {
+        const json = JSON.parse(evt.target.result);
+        if (json.call_logs && Array.isArray(json.call_logs)) {
+          localStorage.setItem('sudataxi_call_logs', JSON.stringify(json.call_logs));
+        }
+        if (json.custom_hotspots && Array.isArray(json.custom_hotspots)) {
+          localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(json.custom_hotspots));
+        }
+        if (Array.isArray(json)) {
+          localStorage.setItem('sudataxi_call_logs', JSON.stringify(json));
+        }
+        updateCallLogStats();
+        updateCustomHotspotUI();
+        alert('🎉 백업 파일 복원이 완료되었습니다!');
+        calculateAndRender();
+      } catch(err) {
+        alert('❌ 올바르지 않은 백업 파일 형식입니다.');
+      } finally {
+        e.target.value = '';
       }
-      if (json.custom_hotspots && Array.isArray(json.custom_hotspots)) {
-        localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(json.custom_hotspots));
-      }
-      if (Array.isArray(json)) {
-        localStorage.setItem('sudataxi_call_logs', JSON.stringify(json));
-      }
-      updateCallLogStats();
-      updateCustomHotspotUI();
-      closeImportModal();
-      ta.value = '';
-      alert('🎉 백업 복원이 완료되었습니다!');
-      calculateAndRender();
-    } catch(err) {
-      alert('❌ 올바르지 않은 JSON 형식입니다.');
-    }
+    };
+    reader.onerror = function() {
+      alert('❌ 파일 읽기 오류가 발생했습니다.');
+      e.target.value = '';
+    };
+    reader.readAsText(file);
   }
 
   window.addEventListener('DOMContentLoaded', () => {
@@ -920,10 +895,12 @@
     document.getElementById('map-modal').addEventListener('click', (e) => { if(e.target === e.currentTarget) closeRouteMapModal(); });
 
     document.getElementById('btn-export').addEventListener('click', () => exportCallLogs());
-    document.getElementById('btn-import-open').addEventListener('click', () => openImportModal());
-    document.getElementById('import-modal-cancel').addEventListener('click', () => closeImportModal());
-    document.getElementById('import-modal-submit').addEventListener('click', () => submitImportText());
-    document.getElementById('import-modal').addEventListener('click', (e) => { if(e.target === e.currentTarget) closeImportModal(); });
+    
+    // 'JSON 가져오기' 버튼 누르면 탐색기가 바로 뜨도록 연결
+    document.getElementById('btn-import-open').addEventListener('click', () => {
+      document.getElementById('import-file-input').click();
+    });
+    document.getElementById('import-file-input').addEventListener('change', (e) => importCallLogs(e));
 
     document.getElementById('btn-add-custom').addEventListener('click', () => addCustomHotspotPrompt());
     document.getElementById('btn-save-call').addEventListener('click', () => saveCurrentCallLocation());
