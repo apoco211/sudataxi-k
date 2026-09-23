@@ -255,23 +255,23 @@
 
   /* 5대 관문 거점 */
   const MAJOR_HUBS = [
-    { name: "인덕원역 먹자골목", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway" },
-    { name: "범계역 로데오거리", lat: 37.3917, lng: 126.9145, address: "범계역", type: "subway" },
-    { name: "안양역 일번가", lat: 37.4013, lng: 126.9222, address: "안양역", type: "subway" },
-    { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway" },
-    { name: "금정역 먹자골목", lat: 37.3721, lng: 126.9438, address: "금정역", type: "subway" }
+    { name: "인덕원역 먹자골목", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway", isWisu: true },
+    { name: "범계역 로데오거리", lat: 37.3917, lng: 126.9145, address: "범계역", type: "subway", isWisu: true },
+    { name: "안양역 일번가", lat: 37.4013, lng: 126.9222, address: "안양역", type: "subway", isWisu: true },
+    { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway", isWisu: true },
+    { name: "금정역 먹자골목", lat: 37.3721, lng: 126.9438, address: "금정역", type: "subway", isWisu: true }
   ];
 
   /* 광역 거점 및 과천 출근 거점 */
   const METRO_ROUTE_HUBS = [
-    { name: "과천 지식정보타운 업무지구", lat: 37.4142, lng: 126.9801, address: "과천지식정보타운", type: "office" },
-    { name: "정부과천청사역 지하철거점", lat: 37.4261, lng: 126.9898, address: "정부과천청사역", type: "subway" },
-    { name: "과천역 지하철거점", lat: 37.4329, lng: 126.9972, address: "과천역", type: "subway" },
-    { name: "정자역 신분당선 환승거점", lat: 37.3662, lng: 127.1082, address: "정자역", type: "subway" },
-    { name: "판교역 중심상업지구", lat: 37.3948, lng: 127.1112, address: "판교역", type: "subway" },
-    { name: "판교 테크노밸리 업무지구", lat: 37.4021, lng: 127.1085, address: "판교테크노밸리", type: "office" },
-    { name: "사당역 4번출구 먹자골목", lat: 37.4765, lng: 126.9816, address: "사당역 4번출구", type: "subway" },
-    { name: "강남역 사거리", lat: 37.4979, lng: 127.0276, address: "강남역", type: "subway" }
+    { name: "과천 지식정보타운 업무지구", lat: 37.4142, lng: 126.9801, address: "과천지식정보타운", type: "office", isWisu: true },
+    { name: "정부과천청사역 지하철거점", lat: 37.4261, lng: 126.9898, address: "정부과천청사역", type: "subway", isWisu: true },
+    { name: "과천역 지하철거점", lat: 37.4329, lng: 126.9972, address: "과천역", type: "subway", isWisu: true },
+    { name: "정자역 신분당선 환승거점", lat: 37.3662, lng: 127.1082, address: "정자역", type: "subway", isWisu: false },
+    { name: "판교역 중심상업지구", lat: 37.3948, lng: 127.1112, address: "판교역", type: "subway", isWisu: false },
+    { name: "판교 테크노밸리 업무지구", lat: 37.4021, lng: 127.1085, address: "판교테크노밸리", type: "office", isWisu: false },
+    { name: "사당역 4번출구 먹자골목", lat: 37.4765, lng: 126.9816, address: "사당역 4번출구", type: "subway", isWisu: false },
+    { name: "강남역 사거리", lat: 37.4979, lng: 127.0276, address: "강남역", type: "subway", isWisu: false }
   ];
 
   const PRESET_HOTSPOTS = [
@@ -570,10 +570,14 @@
     const isLastTrainPeakTime = (nowHour >= 23 || nowHour < 1);
     const isCommuteTime = (nowHour >= 7 && nowHour < 10);
 
-    /* [4번 최종 목적지 결정 원칙] */
+    /* [4번 최종 목적지 결정 원칙 수정] */
+    // 위수지역(isWisu === true) 내부의 전체 핫플/거점 중 현 위치에서 가장 가까운 최단거리 핫플을 4번 복귀지로 설정
+    const allWisuHotspots = pool.filter(p => isInsideWisu(p.lat, p.lng));
+    const searchTargetPool = allWisuHotspots.length > 0 ? allWisuHotspots : MAJOR_HUBS;
+
     let finalTarget = null;
     let minEstTime = Infinity;
-    MAJOR_HUBS.forEach(h => {
+    searchTargetPool.forEach(h => {
       const d = getDistanceKm(currentPos.lat, currentPos.lng, h.lat, h.lng);
       const estT = Math.round((d / (25 / trafficMultiplier)) * 60);
       if (estT < minEstTime) {
@@ -581,6 +585,7 @@
         finalTarget = { ...h, dist: d, estimatedTimeMin: estT };
       }
     });
+
     const finalEstTimeMin = Math.round((finalTarget.dist / (25 / trafficMultiplier)) * 60);
     finalTarget.estimatedTimeMin = finalEstTimeMin;
     const finalBearing = getBearing(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
