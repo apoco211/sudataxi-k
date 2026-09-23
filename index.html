@@ -50,7 +50,6 @@
     .card-list { display: flex; flex-direction: column; gap: 12px; }
     .card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 20px; padding: 14px; position: relative; }
     
-    /* 카드 내부 정렬을 상단 정보 / 하단 버튼으로 완벽 분리하여 깨짐 방지 */
     .card-main-content { display: flex; flex-direction: column; gap: 10px; }
     .card-top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
     .card-title-group { display: flex; align-items: flex-start; gap: 10px; flex: 1; min-width: 0; }
@@ -66,7 +65,6 @@
     .level-mid { background: rgba(255, 200, 0, 0.2); color: #FFC800; border: 1px solid #FFC800; }
     .level-low { background: rgba(255, 107, 107, 0.2); color: #FF6B6B; border: 1px solid #FF6B6B; }
     
-    /* 하단 버튼 2개 나란히 배치 (복사 / 카카오맵) */
     .card-btn-row { display: flex; gap: 8px; margin-top: 4px; }
     .action-btn { flex: 1; height: 40px; font-weight: 800; font-size: 13px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
     .copy-btn { background: #2C2C2C; color: #CCCCCC; border: 1px solid #444444; }
@@ -159,7 +157,7 @@
     </button>
   </div>
   
-  <div class="pipeline-log" id="pipeline-log">대기 중 · 실제 도로 경로망 연산 준비 중...</div>
+  <div class="pipeline-log" id="pipeline-log">대기 중 · 실시간 동선 연산 준비 중...</div>
   
   <div class="card-list" id="card-list"></div>
   
@@ -219,39 +217,23 @@
   let timerInterval = null;
   let isTimerRunning = false;
 
+  // 위수지역(안양·군포·의왕·과천) 정밀 경계 영역 판별
   function isInsideWisu(lat, lng) {
     const wisuBoxes = [
-      { minLat: 37.38, maxLat: 37.43, minLng: 126.90, maxLng: 127.01 }, 
-      { minLat: 37.32, maxLat: 37.38, minLng: 126.89, maxLng: 126.99 }, 
-      { minLat: 37.40, maxLat: 37.46, minLng: 126.96, maxLng: 127.03 }  
+      { minLat: 37.38, maxLat: 37.43, minLng: 126.90, maxLng: 127.01 }, // 안양 평촌/인덕원
+      { minLat: 37.32, maxLat: 37.38, minLng: 126.89, maxLng: 126.99 }, // 군포 산본/금정/의왕 일부
+      { minLat: 37.40, maxLat: 37.46, minLng: 126.96, maxLng: 127.03 }  // 과천 전역
     ];
     return wisuBoxes.some(b => lat >= b.minLat && lat <= b.maxLat && lng >= b.minLng && lng <= b.maxLng);
   }
 
+  // 모드 1용 위수 내부 5대 대형 관문 거점
   const MAJOR_HUBS = [
     { name: "인덕원역 먹자골목", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway", isWisu: true },
     { name: "범계역 로데오거리", lat: 37.3917, lng: 126.9145, address: "범계역", type: "subway", isWisu: true },
     { name: "안양역 일번가", lat: 37.4013, lng: 126.9222, address: "안양역", type: "subway", isWisu: true },
     { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway", isWisu: true },
     { name: "금정역 먹자골목", lat: 37.3721, lng: 126.9438, address: "금정역", type: "subway", isWisu: true }
-  ];
-
-  const METRO_ROUTE_HUBS = [
-    { name: "과천 지식정보타운 업무지구", lat: 37.4142, lng: 126.9801, address: "과천지식정보타운", type: "office", isWisu: true },
-    { name: "정부과천청사역 지하철거점", lat: 37.4261, lng: 126.9898, address: "정부과천청사역", type: "subway", isWisu: true },
-    { name: "과천역 지하철거점", lat: 37.4329, lng: 126.9972, address: "과천역", type: "subway", isWisu: true },
-    { name: "정자역 신분당선 환승거점", lat: 37.3662, lng: 127.1082, address: "정자역", type: "subway", isWisu: false },
-    { name: "판교역 중심상업지구", lat: 37.3948, lng: 127.1112, address: "판교역", type: "subway", isWisu: false },
-    { name: "판교 테크노밸리 업무지구", lat: 37.4021, lng: 127.1085, address: "판교테크노밸리", type: "office", isWisu: false },
-    { name: "사당역 4번출구 먹자골목", lat: 37.4765, lng: 126.9816, address: "사당역 4번출구", type: "subway", isWisu: false },
-    { name: "강남역 사거리", lat: 37.4979, lng: 127.0276, address: "강남역", type: "subway", isWisu: false }
-  ];
-
-  const PRESET_HOTSPOTS = [
-    { name: "과천 지식정보타운역 예정지", lat: 37.4128, lng: 126.9812, type: "office", address: "지식정보타운", isWisu: true },
-    { name: "역전할맥 평촌점", lat: 37.3914, lng: 126.9199, type: "nightlife", address: "역전할맥 평촌점", isWisu: true },
-    { name: "평촌 학원가 먹자골목", lat: 37.3831, lng: 126.9285, type: "nightlife", address: "평촌학원가", isWisu: true },
-    { name: "의왕 계원예대 앞", lat: 37.3712, lng: 126.9754, type: "nightlife", address: "계원예대", isWisu: true }
   ];
 
   function getStraightDistanceKm(lat1, lon1, lat2, lon2) {
@@ -271,6 +253,7 @@
     return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
   }
 
+  // OSRM 실제 도로 경로 서버 연동
   async function fetchRealRoadRoute(fromLat, fromLng, toLat, toLng) {
     try {
       const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=false`;
@@ -396,8 +379,9 @@
     }
   }
 
+  // 실시간 주변 상권 POI 수집 (모드 2는 위수 방향 광역 확장 탐색 지원)
   async function fetchOverpassPOIs(lat, lng, radiusMeter) {
-    const query = `[out:json][timeout:6];(node(around:${radiusMeter},${lat},${lng})["amenity"~"bar|pub|nightclub|karaoke_box"]["name"];node(around:${radiusMeter},${lat},${lng})["shop"="alcohol"]["name"];);out 30;`;
+    const query = `[out:json][timeout:6];(node(around:${radiusMeter},${lat},${lng})["amenity"~"bar|pub|nightclub|karaoke_box"]["name"];node(around:${radiusMeter},${lat},${lng})["shop"="alcohol"]["name"];node(around:${radiusMeter},${lat},${lng})["railway"="station"]["name"];);out 40;`;
     try {
       const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query });
       const data = await res.json();
@@ -432,14 +416,9 @@
     const isNightlife = (itemType === 'nightlife' || itemName.includes('먹자골목') || itemName.includes('포차') || itemName.includes('주점'));
     const isCommuteHub = (itemType === 'subway' || itemType === 'office' || itemName.includes('역') || itemName.includes('지식정보타운') || itemName.includes('테크노밸리'));
     if (nowHour >= 7 && nowHour < 10) {
-      if (isCommuteHub) bonus += 20;
-      if (isNightlife) bonus -= 10;
-    } else if (nowHour >= 21 || nowHour < 2) {
-      if (isNightlife) bonus += 25;
-      else bonus += 10;
-    } else if (nowHour >= 18 && nowHour < 21) {
       if (isCommuteHub) bonus += 15;
-      if (isNightlife) bonus += 15;
+    } else if (nowHour >= 21 || nowHour < 2) {
+      if (isNightlife) bonus += 20;
     } else {
       bonus += 10;
     }
@@ -450,8 +429,6 @@
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     if (logs.length === 0) return { bonus: 0, matched: false, count: 0 };
     const now = new Date();
-    const currentHour = now.getHours();
-    const currentDay = now.getDay();
     let maxBonus = 0;
     let isMatched = false;
     let matchCount = 0;
@@ -465,16 +442,7 @@
         const logDate = parseDateSafely(log.timestamp);
         const daysPassed = Math.max(0, (now - logDate) / (1000 * 60 * 60 * 24));
         const decayFactor = Math.exp(-0.023 * daysPassed);
-        const logHour = logDate.getHours();
-        const logDay = logDate.getDay();
-        const hourDiff = Math.abs(currentHour - logHour);
-        const isHourMatched = (hourDiff <= 1 || hourDiff >= 23);
-        const isDayTypeMatched = (currentDay === 0 || currentDay === 6) === (logDay === 0 || logDay === 6);
-        let matchMultiplier = 1.0;
-        if (isHourMatched) matchMultiplier += 0.5;
-        if (isDayTypeMatched) matchMultiplier += 0.3;
-        if (!isInsideWisu(logLat, logLng)) matchMultiplier *= 1.2;
-        const score = 25 * decayFactor * matchMultiplier;
+        const score = 25 * decayFactor;
         if (score > maxBonus) {
           maxBonus = score;
           isMatched = true;
@@ -534,8 +502,10 @@
   async function calculateAndRender() {
     if (!currentPos) currentPos = { lat: 37.4048, lng: 126.9767 };
     const logEl = document.getElementById('pipeline-log');
-    if (logEl) logEl.innerText = '실제 도로 경로망(OSRM) 최단거리 복귀 분석 중...';
-    const radius = currentMode === 1 ? 5000 : 10000;
+    if (logEl) logEl.innerText = '실시간 도로망(OSRM) 최단 복귀 동선 분석 중...';
+    
+    // 모드 1: 위수 내부 5km / 모드 2: 타지역 원거리(100km 밖 등)에서도 위수 진입점 탐색을 위해 20km(또는 광역 확장) 반경 적용
+    const radius = currentMode === 1 ? 5000 : 25000;
     
     const [overpassData, weatherData] = await Promise.all([
       fetchOverpassPOIs(currentPos.lat, currentPos.lng, radius),
@@ -543,72 +513,47 @@
     ]);
     
     const customHotspots = getCustomHotspots();
-    let pool = [...customHotspots, ...overpassData, ...PRESET_HOTSPOTS, ...METRO_ROUTE_HUBS];
+    let pool = [...customHotspots, ...overpassData, ...MAJOR_HUBS];
     
     if (currentMode === 1) {
       pool = pool.filter(p => isInsideWisu(p.lat, p.lng));
     }
     const nowHour = new Date().getHours();
-    const isLastTrainPeakTime = (nowHour >= 23 || nowHour < 1);
 
+    // [핵심 모드 2 룰 적용]
+    // 모드 1: 위수 내부 5대 관문역 중 최단거리
+    // 모드 2: 현재 위치가 어디(서울, 평택, 수원 등)이든 상관없이, 수집된 전체 장소 풀 중 '오직 위수지역(isWisu === true) 안에 속하는 모든 장소'를 대상으로 현재 내 위치에서 '실제 도로 주행 거리'가 가장 짧은 위수 안쪽 진입점을 1순위([최종위수진입])로 확정!
     let searchTargetPool = [];
     if (currentMode === 1) {
       searchTargetPool = MAJOR_HUBS;
     } else {
-      let allWisuPool = pool.filter(p => isInsideWisu(p.lat, p.lng));
-      if (allWisuPool.length === 0) allWisuPool = MAJOR_HUBS;
-      searchTargetPool = allWisuPool;
+      const wisuPool = pool.filter(p => isInsideWisu(p.lat, p.lng));
+      searchTargetPool = wisuPool.length > 0 ? wisuPool : MAJOR_HUBS;
     }
 
+    // 모든 후보 대상에 대해 실시간 도로 주행 거리 연산
     let scoredTargets = await Promise.all(searchTargetPool.map(async h => {
       const road = await fetchRealRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
-      // 거리순 절대 정렬 보정 (가까울수록 점수 대폭 상향, 마이너스 방지)
-      let targetScore = Math.max(10, 100 - Math.round(road.distanceKm * 5));
-      if (currentMode === 2) {
-        targetScore += (road.distanceKm < 6.0 ? 30 : 0);
-      } else {
-        targetScore += getDynamicTimeCategoryBonus(h.type, h.name, nowHour);
-      }
+      // 거리가 가까울수록 점수가 무조건 압도적으로 높아지도록 설정 (최단거리 우선)
+      let targetScore = Math.max(10, 500 - Math.round(road.distanceKm * 20));
       return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: targetScore, targetScore };
     }));
 
+    // 최단 주행거리 순서대로 정렬 (가장 먼저 맞닿는 위수 안쪽 진입점이 1순위)
     scoredTargets.sort((a, b) => b.targetScore - a.targetScore);
 
     let finalTarget = scoredTargets[0];
-    if (currentMode === 1) {
-      const veryCloseHubs = scoredTargets.filter(h => h.dist < 0.5);
-      if (veryCloseHubs.length > 0 && scoredTargets.length > 1) {
-        finalTarget = scoredTargets.find(h => h.dist >= 0.5) || scoredTargets[1];
-      }
-    } else {
-      if (finalTarget.dist < 0.3 && scoredTargets.length > 1) {
-        finalTarget = scoredTargets[1];
-      }
-    }
+    if (!finalTarget) finalTarget = MAJOR_HUBS[0];
 
     const finalBearing = getBearing(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
 
-    const limitedPool = pool.slice(0, 25);
+    const limitedPool = pool.slice(0, 35);
     let scoredPool = await Promise.all(limitedPool.map(async item => {
       const road = await fetchRealRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
-      const finalRoadToItem = await fetchRealRoadRoute(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
       const isItemWisu = isInsideWisu(item.lat, item.lng);
       
-      let score = Math.max(10, 80 - Math.round(road.distanceKm * 4));
+      let score = Math.max(10, 150 - Math.round(road.distanceKm * 10));
       if (item.isCustom) score += 25;
-      const isMetroHub = METRO_ROUTE_HUBS.some(h => h.name === item.name) || MAJOR_HUBS.some(h => h.name === item.name);
-      if (currentMode === 2 && isMetroHub) score += 20;
-      
-      let isLastTrainPeak = false;
-      if (isLastTrainPeakTime && isMetroHub) {
-        score += 20;
-        isLastTrainPeak = true;
-      }
-      let isReturnCallBonus = false;
-      if (!isItemWisu) {
-        score += 10;
-        isReturnCallBonus = true;
-      }
       score += getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
       if (weatherData.isRainOrSnow) score += 15;
       const logResult = calculateCallLogScore(item.lat, item.lng);
@@ -625,11 +570,9 @@
         if (currentMode === 2 && road.distanceKm <= 2.0) {
           if (score >= 60) isReverseHighBonus = true;
         } else {
-          score = 5; // 후방 배제
+          score = 5; 
         }
       }
-
-      if (finalRoadToItem.distanceKm > finalTarget.dist + 3.0 && road.distanceKm > 2.0) score = 5;
 
       return { 
         ...item, 
@@ -640,17 +583,14 @@
         hasWeatherBonus: weatherData.isRainOrSnow,
         hasLogBonus: logResult.matched,
         logCount: logResult.count,
-        isReturnCallBonus,
-        isLastTrainPeak,
         isReverseHighBonus,
         isFallback: false
       };
     }));
 
     let selectedRoute = [];
-    
-    if (finalTarget.dist > 2.5) {
-      const validPool = scoredPool.filter(p => p.score >= 30);
+    if (finalTarget.dist > 2.0) {
+      const validPool = scoredPool.filter(p => p.score >= 30 && p.name !== finalTarget.name);
       validPool.sort((a, b) => b.score - a.score);
 
       for (let candidate of validPool) {
@@ -674,7 +614,7 @@
     const mapBtn = document.getElementById('btn-show-map');
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
-      logEl.innerText = `방금 · 실제 도로 최단거리 복귀 연동 · 경유지 ${selectedRoute.length}곳 · FINAL: ${finalTarget.name}`;
+      logEl.innerText = `방금 · 위수진입 최단거리 복귀 연동 · 경유지 ${selectedRoute.length}곳 · FINAL: ${finalTarget.name}`;
     }
 
     let subFinalCandidates = [];
@@ -716,7 +656,6 @@
         <div class="tag-group">
           ${item.isCustom ? '<span class="tag custom">#나만의핫플</span>' : ''}
           ${item.delta <= 60 ? '<span class="tag gilmok">#길목우선</span>' : ''}
-          ${item.isReverseHighBonus ? '<span class="tag reverse-high">#근거리고득점후방</span>' : ''}
           ${item.isWisu ? '<span class="tag wisu">#위수지역</span>' : ''}
           ${item.logCount > 0 ? `<span class="tag logmatch">#누적콜 ${item.logCount}건</span>` : ''}
         </div>
@@ -726,7 +665,7 @@
 
     const finalCard = document.createElement('div');
     finalCard.className = 'card final-card';
-    const targetLabel = currentMode === 1 ? '최종번화가' : '최종위수';
+    const targetLabel = currentMode === 1 ? '최종번화가' : '최종위수진입';
     finalCard.innerHTML = `
       <div class="card-main-content">
         <div class="card-top-row">
@@ -743,7 +682,7 @@
           <button class="action-btn map-open-btn" data-name="${finalTarget.name}" data-lat="${finalTarget.lat}" data-lng="${finalTarget.lng}">🗺️ 카카오맵</button>
         </div>
       </div>
-      <div class="sub-info">${routeCards.length > 0 ? `현재→핫스팟 ${routeCards[0].dist.toFixed(1)}km · ` : ''}${targetLabel} 바로 안내 ${finalTarget.dist.toFixed(1)}km</div>
+      <div class="sub-info">${routeCards.length > 0 ? `현재→경유지 ${routeCards[0].dist.toFixed(1)}km · ` : ''}${targetLabel} 바로 진입 ${finalTarget.dist.toFixed(1)}km</div>
     `;
     listEl.appendChild(finalCard);
 
