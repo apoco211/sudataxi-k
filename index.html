@@ -384,7 +384,7 @@
     return wisuBoxes.some(b => lat >= b.minLat && lat <= b.maxLat && lng >= b.minLng && lng <= b.maxLng);
   }
 
-  /* 5대 관문 거점 */
+  /* 모드 1 복귀 관문 5대 거점 */
   const MAJOR_HUBS = [
     { name: "인덕원역 먹자골목", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway" },
     { name: "범계역 로데오거리", lat: 37.3917, lng: 126.9145, address: "범계역", type: "subway" },
@@ -393,7 +393,7 @@
     { name: "금정역 먹자골목", lat: 37.3721, lng: 126.9438, address: "금정역", type: "subway" }
   ];
 
-  /* 광역 거점 및 과천 출근 거점 대거 보완 */
+  /* 주요 거점 데이터 */
   const METRO_ROUTE_HUBS = [
     { name: "과천 지식정보타운 업무지구", lat: 37.4142, lng: 126.9801, address: "과천지식정보타운", type: "office" },
     { name: "정부과천청사역 지하철거점", lat: 37.4261, lng: 126.9898, address: "정부과천청사역", type: "subway" },
@@ -401,8 +401,12 @@
     { name: "정자역 신분당선 환승거점", lat: 37.3662, lng: 127.1082, address: "정자역", type: "subway" },
     { name: "판교역 중심상업지구", lat: 37.3948, lng: 127.1112, address: "판교역", type: "subway" },
     { name: "판교 테크노밸리 업무지구", lat: 37.4021, lng: 127.1085, address: "판교테크노밸리", type: "office" },
+    { name: "미금역 환승거점", lat: 37.3501, lng: 127.1089, address: "미금역", type: "subway" },
     { name: "사당역 4번출구 먹자골목", lat: 37.4765, lng: 126.9816, address: "사당역 4번출구", type: "subway" },
-    { name: "강남역 사거리", lat: 37.4979, lng: 127.0276, address: "강남역", type: "subway" }
+    { name: "강남역 사거리", lat: 37.4979, lng: 127.0276, address: "강남역", type: "subway" },
+    { name: "수원역 환승센터", lat: 37.2657, lng: 127.0002, address: "수원역", type: "subway" },
+    { name: "성남 모란역 먹자골목", lat: 37.4321, lng: 127.1291, address: "모란역", type: "nightlife" },
+    { name: "수지구청역 먹자골목", lat: 37.3224, lng: 127.0978, address: "수지구청역", type: "nightlife" }
   ];
 
   const PRESET_HOTSPOTS = [
@@ -422,19 +426,12 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
 
-  function getBearing(lat1, lon1, lat2, lon2) {
-    const y = Math.sin((lon2 - lon1) * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180);
-    const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
-              Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos((lon2 - lon1) * Math.PI / 180);
-    return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-  }
-
   function isDuplicatePlace(candName, candLat, candLng, existingList) {
     return existingList.some(item => {
       const nameA = item.name.trim();
       const nameB = candName.trim();
       const sameName = nameA === nameB || nameA.includes(nameB) || nameB.includes(nameA);
-      const closeDist = getDistanceKm(item.lat, item.lng, candLat, candLng) < 1.2;
+      const closeDist = getDistanceKm(item.lat, item.lng, candLat, candLng) < 1.0;
       return sameName || closeDist;
     });
   }
@@ -603,7 +600,7 @@
 
     if (nowHour >= 7 && nowHour < 10) {
       if (isCommuteHub) bonus += 35;
-      if (isNightlife) bonus -= 25; // 아침 감점폭을 현실적으로 조정
+      if (isNightlife) bonus -= 20;
     } 
     else if (nowHour >= 21 || nowHour < 2) {
       if (isNightlife) bonus += 35;
@@ -711,6 +708,7 @@
     const customHotspots = getCustomHotspots();
     let pool = [...customHotspots, ...overpassData, ...PRESET_HOTSPOTS, ...METRO_ROUTE_HUBS];
     
+    // 모드 1인 경우 오직 위수지역 내부 장소들로만 풀을 구성
     if (currentMode === 1) {
       pool = pool.filter(p => isInsideWisu(p.lat, p.lng));
     }
@@ -720,26 +718,8 @@
     const isLastTrainPeakTime = (nowHour >= 23 || nowHour < 1);
     const isCommuteTime = (nowHour >= 7 && nowHour < 10);
 
-    // [최종 목적지 결정]
-    let finalTarget = null;
-    let minEstTime = Infinity;
-    MAJOR_HUBS.forEach(h => {
-      const d = getDistanceKm(currentPos.lat, currentPos.lng, h.lat, h.lng);
-      const estT = Math.round((d / (25 / trafficMultiplier)) * 60);
-      if (estT < minEstTime) {
-        minEstTime = estT;
-        finalTarget = { ...h, dist: d, estimatedTimeMin: estT };
-      }
-    });
-
-    const finalEstTimeMin = Math.round((finalTarget.dist / (25 / trafficMultiplier)) * 60);
-    finalTarget.estimatedTimeMin = finalEstTimeMin;
-
-    const finalBearing = getBearing(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
-
     const scoredPool = pool.map(item => {
       const dist = getDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
-      const distToFinal = getDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
       const isItemWisu = isInsideWisu(item.lat, item.lng);
       
       const avgSpeed = 25 / trafficMultiplier; 
@@ -770,34 +750,14 @@
       const logResult = calculateCallLogScore(item.lat, item.lng);
       score += logResult.bonus;
 
-      /* [보정된 방향 및 동선 필터링] 과천~인덕원 길목 유효화 */
-      const itemBearing = getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng);
-      let angleDiff = Math.abs(finalBearing - itemBearing);
-      if (angleDiff > 180) angleDiff = 360 - angleDiff;
-
-      if (angleDiff <= 60) {
-        score += 35; // 진행방향 각도 범위를 60도로 유연하게 확장
-      } else if (angleDiff > 110) {
-        if (dist > 2.0) {
-          score -= 999; // 완전히 반대방향 2km 초과는 배제
-        } else {
-          score -= 20;
-        }
-      }
-
-      // 목적지 전진성 체크 유연화
-      if (distToFinal > finalTarget.dist + 2.0 && dist > 2.0) {
-        score -= 999;
-      }
-
-      score -= (estimatedTimeMin * 1.2);
+      // 거리 감점만 반영 (억지 방향 감점 제거하여 모든 순수 실시간 핫플 노출)
+      score -= (dist * 3.0);
 
       return { 
         ...item, 
         dist, 
         estimatedTimeMin,
         score: Math.round(score), 
-        delta: angleDiff, 
         hasWeatherBonus: weatherData.isRainOrSnow,
         hasLogBonus: logResult.matched,
         logCount: logResult.count,
@@ -809,48 +769,52 @@
       };
     });
 
+    // 점수 높은 순으로 정렬
+    scoredPool.sort((a, b) => b.score - a.score);
+
     let selectedRoute = [];
-    const validPool = scoredPool.filter(p => p.score > -200);
-    validPool.sort((a, b) => b.score - a.score);
+    let finalTarget = null;
 
-    for (let candidate of validPool) {
-      if (candidate.dist >= finalTarget.dist * 0.95) continue;
-      if (getDistanceKm(candidate.lat, candidate.lng, finalTarget.lat, finalTarget.lng) < 0.2) continue;
-      
-      const isDuplicate = isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedRoute);
-      if (!isDuplicate) {
-        selectedRoute.push(candidate);
-      }
-      if (selectedRoute.length === 3) break;
-    }
-
-    /* 백업 거점 보장: 과천~인덕원 등 유효 카드가 3개 미만일 때 가까운 출근/환승 거점 자동 보충 */
-    if (selectedRoute.length < 3) {
-      const remainingHubs = METRO_ROUTE_HUBS.filter(hub => 
-        !isDuplicatePlace(hub.name, hub.lat, hub.lng, selectedRoute) &&
-        getDistanceKm(hub.lat, hub.lng, finalTarget.lat, finalTarget.lng) >= 0.2
-      ).map(hub => {
-        const dist = getDistanceKm(currentPos.lat, currentPos.lng, hub.lat, hub.lng);
-        const estimatedTimeMin = Math.round((dist / (25 / trafficMultiplier)) * 60);
-        return {
-          ...hub,
-          dist,
-          estimatedTimeMin,
-          score: 50,
-          isFallback: true
-        };
+    if (currentMode === 1) {
+      // 모드 1: 5대 복귀 관문 중 최단도착 장소를 4번 목적지로 두고, 상위 3개 핫플을 1~3번에 배치
+      let minEstTime = Infinity;
+      MAJOR_HUBS.forEach(h => {
+        const d = getDistanceKm(currentPos.lat, currentPos.lng, h.lat, h.lng);
+        const estT = Math.round((d / (25 / trafficMultiplier)) * 60);
+        if (estT < minEstTime) {
+          minEstTime = estT;
+          finalTarget = { ...h, dist: d, estimatedTimeMin: estT };
+        }
       });
 
-      remainingHubs.sort((a, b) => a.dist - b.dist);
-      for (let hub of remainingHubs) {
-        if (!isDuplicatePlace(hub.name, hub.lat, hub.lng, selectedRoute)) {
-          selectedRoute.push(hub);
+      for (let candidate of scoredPool) {
+        if (getDistanceKm(candidate.lat, candidate.lng, finalTarget.lat, finalTarget.lng) < 0.2) continue;
+        const isDuplicate = isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedRoute);
+        if (!isDuplicate) {
+          selectedRoute.push(candidate);
         }
         if (selectedRoute.length === 3) break;
       }
-    }
 
-    selectedRoute.sort((a, b) => a.dist - b.dist);
+      // 거리 순 정렬
+      selectedRoute.sort((a, b) => a.dist - b.dist);
+    } else {
+      // 모드 2: 억지 고정 목적지 없이 실시간 최상위 4개 장소를 1~4번 카드로 순수 배치
+      for (let candidate of scoredPool) {
+        const isDuplicate = isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedRoute);
+        if (!isDuplicate) {
+          selectedRoute.push(candidate);
+        }
+        if (selectedRoute.length === 4) break;
+      }
+      
+      selectedRoute.sort((a, b) => a.dist - b.dist);
+      if (selectedRoute.length >= 4) {
+        finalTarget = selectedRoute.pop(); // 4번째 장소를 4번 카드로
+      } else {
+        finalTarget = selectedRoute[selectedRoute.length - 1] || { name: "주변 거점", dist: 0, estimatedTimeMin: 0 };
+      }
+    }
 
     currentRouteData = [
       { name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true },
@@ -863,7 +827,7 @@
     const weatherText = weatherData.isRainOrSnow ? ' · 비/눈(+20점)' : '';
     const trafficText = trafficMultiplier > 1.2 ? ` · 정체반영(${trafficMultiplier}x)` : '';
     const timeStatusText = isCommuteTime ? ' · 아침출근피크' : (isLastTrainPeakTime ? ' · 막차피크시간' : '');
-    logEl.innerText = `방금 · ${radius/1000}km 이내 · ${validPool.length}곳 검출${weatherText}${trafficText}${timeStatusText} · FINAL: ${finalTarget.name}`;
+    logEl.innerText = `방금 · ${radius/1000}km 이내 · ${scoredPool.length}곳 검출${weatherText}${trafficText}${timeStatusText} · FINAL: ${finalTarget.name}`;
 
     renderCards(selectedRoute, finalTarget);
   }
@@ -890,7 +854,6 @@
         </div>
         <div class="tag-group">
           ${item.isCustom ? '<span class="tag custom">#나만의핫플</span>' : ''}
-          ${item.delta <= 60 ? '<span class="tag gilmok">#길목우선</span>' : ''}
           ${item.isWisu ? '<span class="tag wisu">#위수지역</span>' : ''}
           ${item.isCommuteTime && (item.type === 'subway' || item.type === 'office') ? '<span class="tag commute">#출근환승거점</span>' : ''}
           ${item.isLastTrainPeak ? '<span class="tag lasttrain">#막차피크</span>' : ''}
@@ -898,7 +861,6 @@
           ${item.isTrafficHeavy ? '<span class="tag traffic">#정체주의반영</span>' : ''}
           ${item.hasWeatherBonus ? '<span class="tag weather">#강수보너스</span>' : ''}
           ${item.logCount > 0 ? `<span class="tag logmatch">#누적콜 ${item.logCount}건</span>` : ''}
-          ${item.isFallback ? '<span class="tag fallback">#복귀거점</span>' : ''}
         </div>
       `;
       listEl.appendChild(card);
@@ -906,7 +868,7 @@
 
     const finalCard = document.createElement('div');
     finalCard.className = 'card final-card';
-    const targetLabel = currentMode === 1 ? '최종번화가' : '최종위수';
+    const targetLabel = currentMode === 1 ? '최종복귀관문' : '실시간 4순위 거점';
     finalCard.innerHTML = `
       <div class="card-header">
         <div class="card-title-group">
