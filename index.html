@@ -60,7 +60,11 @@
     .level-mid { background: rgba(255, 200, 0, 0.2); color: #FFC800; border: 1px solid #FFC800; }
     .level-low { background: rgba(255, 107, 107, 0.2); color: #FF6B6B; border: 1px solid #FF6B6B; }
     
-    .navi-btn { height: 44px; padding: 0 14px; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 800; font-size: 13px; border: none; border-radius: 12px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    /* 버튼 그룹 스타일 (복사 / 카카오맵) */
+    .card-btn-group { display: flex; gap: 6px; flex-shrink: 0; }
+    .action-btn { height: 42px; padding: 0 10px; font-weight: 800; font-size: 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .copy-btn { background: #333333; color: #CCCCCC; border: 1px solid #4A4A4A; }
+    .map-open-btn { background: var(--theme-accent); color: var(--theme-text-on-accent); border: none; }
     
     .tag-group { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
     .tag { font-size: 11px; padding: 2px 6px; border-radius: 6px; background: #2A2A2A; color: #A0A0A0; }
@@ -76,11 +80,14 @@
     .sub-final-section { margin-top: 16px; background: #1A1A1A; border: 1.5px dashed #4A3A10; border-radius: 16px; padding: 12px; }
     .sub-final-title { font-size: 13px; font-weight: 900; color: #FFD700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
     .sub-final-list { display: flex; flex-direction: column; gap: 8px; }
-    .sub-final-card { background: #252215; border: 1px solid #4A3A10; border-radius: 12px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; }
-    .sub-final-info { display: flex; flex-direction: column; gap: 2px; }
+    .sub-final-card { background: #252215; border: 1px solid #4A3A10; border-radius: 12px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .sub-final-info { display: flex; flex-direction: column; gap: 2px; flex: 1; }
     .sub-final-name { font-size: 15px; font-weight: 900; color: #FFFFFF; }
     .sub-final-meta { font-size: 12px; font-weight: 800; color: #FFD700; font-family: monospace; display: flex; align-items: center; gap: 4px; }
-    .sub-navi-btn { height: 36px; padding: 0 10px; background: #3A2E0A; color: #FFD700; border: 1px solid #FFD700; font-weight: 800; font-size: 12px; border-radius: 8px; cursor: pointer; }
+    .sub-btn-group { display: flex; gap: 4px; flex-shrink: 0; }
+    .sub-action-btn { height: 36px; padding: 0 8px; font-weight: 800; font-size: 11px; border-radius: 8px; cursor: pointer; }
+    .sub-copy-btn { background: #332B10; color: #D4AF37; border: 1px solid #554410; }
+    .sub-map-btn { background: #554410; color: #FFD700; border: none; }
     
     .backup-section { margin-top: 20px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 16px; padding: 14px; }
     .backup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -518,7 +525,6 @@
     const nowHour = new Date().getHours();
     const isLastTrainPeakTime = (nowHour >= 23 || nowHour < 1);
 
-    // [정직한 이동 시간 계산 표준 평속: 시속 32km (시내 주행 기준 1km당 약 1.87분)]
     const standardSpeedKmh = 32.0;
 
     let searchTargetPool = [];
@@ -529,7 +535,6 @@
       searchTargetPool = allWisuHotspots.length > 0 ? allWisuHotspots : MAJOR_HUBS;
     }
 
-    // 5대 관문역 복합 연산 (거리 유사 시 도착 시간 빠르고 콜 점수 높은 곳 우선)
     let scoredTargets = searchTargetPool.map(h => {
       const d = getDistanceKm(currentPos.lat, currentPos.lng, h.lat, h.lng);
       const estTimeMin = Math.max(1, Math.round((d / standardSpeedKmh) * 60));
@@ -646,7 +651,6 @@
       logEl.innerText = `방금 · ${radius/1000}km 이내 · 경유지 ${selectedRoute.length}곳 · FINAL: ${finalTarget.name}`;
     }
 
-    // 모드 1일 때 하단에 띄워줄 추가 최종 목적지 후보들 계산
     let subFinalCandidates = [];
     if (currentMode === 1) {
       subFinalCandidates = MAJOR_HUBS.filter(h => h.name !== finalTarget.name).map(h => {
@@ -679,7 +683,10 @@
               <div class="score-dist">${item.dist.toFixed(1)}km (약 ${item.estimatedTimeMin}분) · ${item.score}점 ${getScoreLevelBadge(item.score)}</div>
             </div>
           </div>
-          <button class="navi-btn navi-action-btn" data-name="${item.name}" data-addr="${item.address || ''}">카카오내비</button>
+          <div class="card-btn-group">
+            <button class="action-btn copy-btn" data-name="${item.name}" data-addr="${item.address || ''}">📋 복사</button>
+            <button class="action-btn map-open-btn" data-name="${item.name}" data-lat="${item.lat}" data-lng="${item.lng}">🗺️ 카카오맵</button>
+          </div>
         </div>
         <div class="tag-group">
           ${item.isCustom ? '<span class="tag custom">#나만의핫플</span>' : ''}
@@ -704,7 +711,10 @@
             <div class="score-dist">${finalTarget.dist.toFixed(1)}km (약 ${finalTarget.estimatedTimeMin || 0}분) · ${finalTarget.score ? finalTarget.score + '점 ' + getScoreLevelBadge(finalTarget.score) : ''} [${targetLabel}]</div>
           </div>
         </div>
-        <button class="navi-btn navi-action-btn" data-name="${finalTarget.name}" data-addr="${finalTarget.address || ''}">카카오내비</button>
+        <div class="card-btn-group">
+          <button class="action-btn copy-btn" data-name="${finalTarget.name}" data-addr="${finalTarget.address || ''}">📋 복사</button>
+          <button class="action-btn map-open-btn" data-name="${finalTarget.name}" data-lat="${finalTarget.lat}" data-lng="${finalTarget.lng}">🗺️ 카카오맵</button>
+        </div>
       </div>
       <div class="sub-info">${routeCards.length > 0 ? `현재→핫스팟 ${routeCards[0].dist.toFixed(1)}km · ` : ''}${targetLabel} 바로 안내 ${finalTarget.dist.toFixed(1)}km</div>
     `;
@@ -722,7 +732,10 @@
                 <div class="sub-final-name">${sub.name}</div>
                 <div class="sub-final-meta">${sub.dist.toFixed(1)}km (약 ${sub.estimatedTimeMin}분) · ${sub.score}점 ${getScoreLevelBadge(sub.score)}</div>
               </div>
-              <button class="sub-navi-btn navi-action-btn" data-name="${sub.name}" data-addr="${sub.address || ''}">내비보기</button>
+              <div class="sub-btn-group">
+                <button class="sub-action-btn sub-copy-btn" data-name="${sub.name}" data-addr="${sub.address || ''}">📋 복사</button>
+                <button class="sub-action-btn sub-map-btn" data-name="${sub.name}" data-lat="${sub.lat}" data-lng="${sub.lng}">🗺️ 지도</button>
+              </div>
             </div>
           `).join('')}
         </div>
@@ -730,9 +743,18 @@
       listEl.appendChild(subSection);
     }
 
-    document.querySelectorAll('.navi-action-btn').forEach(btn => {
+    // 이벤트 리스너 연결
+    document.querySelectorAll('.copy-btn, .sub-copy-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        openKakaoNavi(e.currentTarget.dataset.name, e.currentTarget.dataset.addr);
+        const ds = e.currentTarget.dataset;
+        copyPlaceName(ds.name, ds.addr);
+      });
+    });
+
+    document.querySelectorAll('.map-open-btn, .sub-map-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const ds = e.currentTarget.dataset;
+        openKakaoMapRoute(ds.name, ds.lat, ds.lng);
       });
     });
   }
@@ -786,19 +808,35 @@
     if (modal) modal.classList.remove('active');
   }
 
-  function cleanNaviQuery(str) {
+  function cleanQuery(str) {
     if (!str) return '';
     return str.replace(/먹자골목|중심상가|상업지구|환승거점|사거리|로데오거리|로데오|환승센터|포차|맛고을|업무지구/g, '').trim();
   }
 
-  function openKakaoNavi(name, address) {
-    let query = address && address !== 'undefined' ? address : cleanNaviQuery(name);
+  // 1. 명칭 복사 기능
+  function copyPlaceName(name, address) {
+    let query = address && address !== 'undefined' ? address : cleanQuery(name);
     if (!query) query = name;
     try {
       navigator.clipboard.writeText(query);
-    } catch(e) {}
-    alert(`📋 [${query}] 명칭 복사완료!\n카카오내비를 엽니다.`);
-    window.location.href = `kakaonavi://search?q=${encodeURIComponent(query)}`;
+    } catch(e) {
+      const t = document.createElement('textarea');
+      t.value = query;
+      document.body.appendChild(t);
+      t.select();
+      document.execCommand('copy');
+      document.body.removeChild(t);
+    }
+    alert(`📋 [${query}] 명칭 복사완료!`);
+  }
+
+  // 2. 카카오맵 길찾기 열기 (실시간 교통 및 안내 반영)
+  function openKakaoMapRoute(name, lat, lng) {
+    let cleanName = cleanQuery(name);
+    if (!cleanName) cleanName = name;
+    const targetName = encodeURIComponent(cleanName);
+    const kakaoMapUrl = `https://map.kakao.com/link/to/${targetName},${lat},${lng}`;
+    window.location.href = kakaoMapUrl;
   }
 
   function saveCurrentCallLocation() {
