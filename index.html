@@ -328,9 +328,7 @@
     { name: "안산 상록수역 먹자골목", lat: 37.3025, lng: 126.8664, address: "상록수역", type: "subway", isWisu: false },
     { name: "안산 한대앞역 상권", lat: 37.3097, lng: 126.8532, address: "한대앞역", type: "subway", isWisu: false },
     { name: "안산 고잔신도시 먹자골목", lat: 37.3168, lng: 126.8231, address: "고잔역", type: "nightlife", isWisu: false },
-    { name: "안산 선부역 동명상가", lat: 37.3341, lng: 126.8123, address: "선부역", type: "nightlife", isWisu: false },
-    { name: "수원역 로데오거리", lat: 37.2660, lng: 127.0007, address: "수원역", type: "subway", isWisu: false },
-    { name: "수원 인계동 나혜석거리", lat: 37.2625, lng: 127.0315, address: "인계동", type: "nightlife", isWisu: false }
+    { name: "안산 선부역 동명상가", lat: 37.3341, lng: 126.8123, address: "선부역", type: "nightlife", isWisu: false }
   ];
 
   function getStraightDistanceKm(lat1, lon1, lat2, lon2) {
@@ -601,7 +599,7 @@
   async function calculateAndRender() {
     if (!currentPos) currentPos = { lat: 37.4048, lng: 126.9767 };
     const logEl = document.getElementById('pipeline-log');
-    if (logEl) logEl.innerText = `실시간 도로망(OSRM) 모드 ${currentMode} 단계별 연산 중...`;
+    if (logEl) logEl.innerText = `실시간 도로망(OSRM) 모드 ${currentMode} 순방향 정렬 연산 중...`;
     
     const radius = currentMode === 1 ? 5000 : 15000;
     
@@ -624,6 +622,7 @@
 
     const nowHour = new Date().getHours();
 
+    // 1. FINAL 목적지 연산 (최단 위수 진입점)
     let scoredTargets = await Promise.all(searchTargetPool.map(async h => {
       const road = await fetchRealRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
       let targetScore = Math.max(10, 500 - Math.round(road.distanceKm * 20));
@@ -636,7 +635,8 @@
 
     const finalBearing = getBearing(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
 
-    const limitedPool = pool.slice(0, 35);
+    // 2. 경유지 후보군 수집 및 엄격한 방향성/거리 필터링
+    const limitedPool = pool.slice(0, 40);
     let scoredPool = await Promise.all(limitedPool.map(async item => {
       const road = await fetchRealRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
       
@@ -655,18 +655,16 @@
       let isGilmokStep2 = false;
 
       if (currentMode === 2) {
-        // ⭐ [모드 2 핵심 필터링 규칙 강화]
-        // 1단계: 반경 2.2km 이내 초근거리 상권이면 무조건 최우선 선택!
-        if (road.distanceKm <= 2.2) {
-          score += 80; 
+        // ⭐ [모드 2 철저한 동선 정방향 제어]
+        // 반경 2.5km 내 초근거리가 아니면, 위수 복귀 방향(angleDiff <= 50도)에 확실히 부합해야만 허용. 반대 방향(예: 수원역처럼 남쪽 등)은 싹 다 배제!
+        if (road.distanceKm <= 2.5) {
+          score += 90; 
           isNearStep1 = true;
-        } 
-        // 2단계: 2.2km를 넘어가면, '위수 복귀 방향(angleDiff <= 60도)'인 길목 상권만 허용하고, 반대 방향은 점수를 대폭 깎아서 배제!
-        else if (angleDiff <= 60) {
-          score += 30;
+        } else if (angleDiff <= 50 && road.distanceKm < finalTarget.dist) {
+          score += 40;
           isGilmokStep2 = true;
         } else {
-          score -= 100; // 복귀 방향이 아닌 멀리 떨어진 엉뚱한 곳은 순위권에서 강제 제외
+          score = -999; // 동선 역주행하거나 엉뚱한 방향인 곳은 무조건 탈락
         }
       } else {
         if (angleDiff <= 60) score += 20;
@@ -680,17 +678,15 @@
         delta: angleDiff, 
         isNearStep1,
         isGilmokStep2,
-        hasWeatherBonus: weatherData.isRainOrSnow,
-        hasLogBonus: logResult.matched,
         logCount: logResult.count
       };
     }));
 
-    let selectedRoute = [];
-    const validPool = scoredPool.filter(p => p.score >= 20 && p.name !== finalTarget.name);
-    
-    validPool.sort((a, b) => b.score - a.score);
+    // 3. 유효 풀 정제 및 순서 꼬임 방지를 위한 엄격한 순방향 거리 오름차순 정렬
+    let validPool = scoredPool.filter(p => p.score > 0 && p.name !== finalTarget.name);
+    validPool.sort((a, b) => a.dist - b.dist); // ⭐ 핵심: 현재 위치에서 가까운 순서대로 무조건 정렬하여 지그재그 방지!
 
+    let selectedRoute = [];
     for (let candidate of validPool) {
       if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedRoute)) {
         selectedRoute.push(candidate);
@@ -698,7 +694,6 @@
       if (selectedRoute.length === 3) break;
     }
 
-    selectedRoute.sort((a, b) => a.dist - b.dist);
     currentRouteData = [
       { name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true },
       ...selectedRoute,
@@ -708,7 +703,7 @@
     const mapBtn = document.getElementById('btn-show-map');
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
-      logEl.innerText = `방금 · 모드 ${currentMode} 연산 완료 · 경유지 ${selectedRoute.length}곳 · FINAL: ${finalTarget.name}`;
+      logEl.innerText = `방금 · 모드 ${currentMode} 정방향 동선 정렬 완료 · 경유지 ${selectedRoute.length}곳 · FINAL: ${finalTarget.name}`;
     }
 
     let subFinalCandidates = [];
@@ -748,8 +743,8 @@
           </div>
         </div>
         <div class="tag-group">
-          ${item.isNearStep1 ? '<span class="tag near">#1-2km초근거리</span>' : ''}
-          ${item.isGilmokStep2 ? '<span class="tag gilmok">#복귀길목핫플</span>' : ''}
+          ${item.isNearStep1 ? '<span class="tag near">#1-2.5km초근거리</span>' : ''}
+          ${item.isGilmokStep2 ? '<span class="tag gilmok">#정방향복귀길목</span>' : ''}
           ${item.isCustom ? '<span class="tag custom">#나만의핫플</span>' : ''}
           ${item.isWisu ? '<span class="tag wisu">#위수지역</span>' : ''}
           ${item.logCount > 0 ? `<span class="tag logmatch">#누적콜 ${item.logCount}건</span>` : ''}
@@ -777,7 +772,7 @@
           <button class="action-btn map-open-btn" data-name="${finalTarget.name}" data-lat="${finalTarget.lat}" data-lng="${finalTarget.lng}">🗺️ 카카오맵</button>
         </div>
       </div>
-      <div class="sub-info">${routeCards.length > 0 ? `현재→현지핫플 ${routeCards[0].dist.toFixed(1)}km · ` : ''}${targetLabel} 바로 진입 ${finalTarget.dist.toFixed(1)}km</div>
+      <div class="sub-info">${routeCards.length > 0 ? `순방향 진행 · ` : ''}${targetLabel} 바로 진입 ${finalTarget.dist.toFixed(1)}km</div>
     `;
     listEl.appendChild(finalCard);
 
@@ -1083,6 +1078,7 @@
     document.getElementById('btn-export').addEventListener('click', () => exportCallLogs());
     
     document.getElementById('btn-import-open').addEventListener('click', () => {
+      document.getElementById('import-file-input').print ? {} : document.getElementById('import-file-input').click();
       document.getElementById('import-file-input').click();
     });
     document.getElementById('import-file-input').addEventListener('change', (e) => importCallLogs(e));
