@@ -136,6 +136,7 @@
   </style>
 </head>
 <body class="mode-1">
+  <!-- STREAMING_CHUNK:Rendering layout and app elements... -->
   <div class="header">주변 콜 많은 곳 찾기</div>
   
   <div class="mode-container">
@@ -208,6 +209,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+  /* STREAMING_CHUNK:Initializing Web Audio API and state management... */
   let currentMode = 1;
   let currentPos = null;
   let leafletMap = null;
@@ -216,6 +218,51 @@
   let timerRemainingSec = 300;
   let timerInterval = null;
   let isTimerRunning = false;
+  
+  // 모바일 웹 브라우저에서 알람 소리가 막히지 않도록 사전 해제되는 공유 AudioContext
+  let audioCtx = null;
+
+  function initOrResumeAudioContext() {
+    try {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    } catch(e) {}
+  }
+
+  // 타이머 종료 시 모바일 스피커로 확실하게 울리는 3연속 고음 알람음
+  function playTimerAlarm() {
+    try {
+      initOrResumeAudioContext();
+      if (!audioCtx) return;
+      
+      const now = audioCtx.currentTime;
+      const beepFreqs = [880, 1050, 1250]; // 삐-삐-삐 다단계 알람
+      
+      beepFreqs.forEach((freq, idx) => {
+        const startTime = now + (idx * 0.25);
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, startTime);
+        
+        gain.gain.setValueAtTime(0.6, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.2);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start(startTime);
+        osc.stop(startTime + 0.2);
+      });
+    } catch(e) {}
+    
+    if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 300]);
+  }
 
   // 위수지역(안양·군포·의왕·과천) 정밀 경계 영역 판별
   function isInsideWisu(lat, lng) {
@@ -313,6 +360,7 @@
   }
 
   function setTimerPreset(min) {
+    initOrResumeAudioContext(); // 터치 시 사운드 엔진 미리 해제
     if (isTimerRunning) {
       clearInterval(timerInterval);
       isTimerRunning = false;
@@ -326,7 +374,9 @@
     btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 시작`;
   }
 
+  /* STREAMING_CHUNK:Configuring timer control with audio alarm activation... */
   function toggleTimer() {
+    initOrResumeAudioContext(); // 사용자 클릭 시점에서 AudioContext를 깨워둠
     const btn = document.getElementById('timer-display-btn');
     if (timerRemainingSec <= 0) {
       timerRemainingSec = timerPresetMin * 60;
@@ -350,28 +400,12 @@
           timerRemainingSec = 0;
           btn.className = 'timer-display-btn finished';
           btn.innerText = `⏱️ 00:00 이동 추천!`;
-          playTimerAlarm();
+          playTimerAlarm(); // 시간 종료 시 외부 스피커로 소리 및 진동 알람 발생!
         } else {
           btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)}`;
         }
       }, 1000);
     }
-  }
-
-  function playTimerAlarm() {
-    try {
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.8);
-    } catch(e) {}
-    if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 300]);
   }
 
   async function fetchRealtimeWeather(lat, lng) {
