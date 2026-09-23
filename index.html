@@ -551,14 +551,10 @@
     return JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
   }
 
-  /* -------------------------------------------------------------
-     [개선 2] GPS 수신 폴백 로직 강화
-     ------------------------------------------------------------- */
   function executeSearch() {
     const locText = document.getElementById('loc-text');
     if (locText) locText.innerText = '📍 실시간 GPS 위치 수신 중...';
     
-    // 백업 위치 가져오기 (가장 최근 등록/기록된 콜 위치)
     function getFallbackPos() {
       const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
       if (logs.length > 0) {
@@ -567,7 +563,7 @@
           return { lat: Number(lastLog.lat), lng: Number(lastLog.lng), source: '최근 기록' };
         }
       }
-      return { lat: 37.4048, lng: 126.9767, source: '인덕원역 기본값' }; // 최종 기본값
+      return { lat: 37.4048, lng: 126.9767, source: '인덕원역 기본값' };
     }
 
     if (!navigator.geolocation) {
@@ -620,10 +616,13 @@
     );
   }
 
+  /* -------------------------------------------------------------
+     [핵심 수정] 모드 1 & 모드 2 진행 동선 방향각(Bearing) 연산 보정
+     ------------------------------------------------------------- */
   async function calculateAndRender() {
     if (!currentPos) currentPos = { lat: 37.4048, lng: 126.9767 };
     const logEl = document.getElementById('pipeline-log');
-    if (logEl) logEl.innerText = `실시간 도로망(OSRM) 모드 ${currentMode} 1~2km 정밀 연산 중...`;
+    if (logEl) logEl.innerText = `실시간 도로망(OSRM) 모드 ${currentMode} 동선 정밀 연산 중...`;
     
     const radius = currentMode === 1 ? 5000 : 15000;
     
@@ -643,6 +642,8 @@
       searchTargetPool = MODE2_WISU_GATEWAYS;
     }
     const nowHour = new Date().getHours();
+    
+    // 1. FINAL 최종 목적지 연산
     let scoredTargets = await Promise.all(searchTargetPool.map(async h => {
       const road = await fetchRealRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
       let targetScore = Math.max(10, 500 - Math.round(road.distanceKm * 20));
@@ -651,7 +652,11 @@
     scoredTargets.sort((a, b) => b.targetScore - a.targetScore);
     let finalTarget = scoredTargets[0];
     if (!finalTarget) finalTarget = currentMode === 1 ? MAJOR_HUBS[0] : MODE2_WISU_GATEWAYS[0];
+    
+    // 현재 위치 -> 최종 목적지 각도 계산
     const finalBearing = getBearing(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
+    
+    // 2. 경유 후보지 동선 각도 보정 연산
     const limitedPool = pool.slice(0, 35);
     let scoredPool = await Promise.all(limitedPool.map(async item => {
       const road = await fetchRealRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
@@ -662,19 +667,28 @@
       if (weatherData.isRainOrSnow) score += 20;
       const logResult = calculateCallLogScore(item.lat, item.lng);
       score += logResult.bonus;
+      
+      // 현재위치 -> 후보지 각도
       const itemBearing = getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng);
       let angleDiff = Math.abs(finalBearing - itemBearing);
       if (angleDiff > 180) angleDiff = 360 - angleDiff;
+      
       let isNearStep1 = false;
       if (currentMode === 2) {
         if (road.distanceKm <= 2.0 && angleDiff <= 40) {
           score += 100; 
           isNearStep1 = true;
         } else {
-          score = -999; 
+          score = -999; // 완전히 돌아가는 길 탈락
         }
       } else {
-        if (angleDiff <= 60) score += 20;
+        // [모드 1 개선] 최종 목적지로 향하는 동선각(60도 이내) 상의 핫플만 유효 가산
+        if (angleDiff <= 60) {
+          score += 30; // 진행 길목 가산점
+          if (road.distanceKm <= 2.0) isNearStep1 = true;
+        } else {
+          score -= 100; // 최종 목적지와 반대 방향인 장소 감점
+        }
       }
       return { 
         ...item, 
@@ -686,16 +700,20 @@
         logCount: logResult.count
       };
     }));
+    
     let selectedRoute = [];
     if (currentMode === 1) {
-      let validPool = scoredPool.filter(p => p.score > 0 && p.name !== finalTarget.name);
+      // 점수가 양수이고 최종 목적지와 동일하지 않은 유효 후보만 선별
+      let validPool = scoredPool.filter(p => p.score > 20 && p.name !== finalTarget.name);
       validPool.sort((a, b) => b.score - a.score);
+      
       for (let candidate of validPool) {
         if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedRoute)) {
           selectedRoute.push(candidate);
         }
         if (selectedRoute.length === 3) break;
       }
+      // 1~3번 순서는 현재 위치 기준으로 자연스러운 거리가까운순 정렬
       selectedRoute.sort((a, b) => a.dist - b.dist);
     } else {
       let validPool = scoredPool.filter(p => p.score > 0 && p.name !== finalTarget.name && p.dist <= 2.0);
@@ -704,15 +722,17 @@
         selectedRoute.push(validPool[0]);
       }
     }
+    
     currentRouteData = [
       { name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true },
       ...selectedRoute,
       { ...finalTarget, isFinal: true }
     ];
+    
     const mapBtn = document.getElementById('btn-show-map');
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
-      logEl.innerText = `방금 · 모드 ${currentMode} 연산 완료 · 경유지 ${selectedRoute.length}곳 · 1~2km 검증 완료`;
+      logEl.innerText = `방금 · 모드 ${currentMode} 연산 완료 · 길목 경유지 ${selectedRoute.length}곳 정밀 안내`;
     }
     let subFinalCandidates = [];
     if (currentMode === 1) {
@@ -724,6 +744,7 @@
     }
     renderCards(selectedRoute, finalTarget, subFinalCandidates);
   }
+
   function renderCards(routeCards, finalTarget, subFinalCandidates) {
     const listEl = document.getElementById('card-list');
     if (!listEl) return;
@@ -764,7 +785,7 @@
       <div class="card-main-content">
         <div class="card-top-row">
           <div class="card-title-group">
-            <div class="num-badge">${routeCards.length > 0 ? '2' : '1'}</div>
+            <div class="num-badge">${routeCards.length + 1}</div>
             <div class="place-info">
               <div class="place-name">${finalTarget.name}</div>
               <div class="score-dist">실주행 ${finalTarget.dist.toFixed(1)}km (약 ${finalTarget.estimatedTimeMin || 0}분) · ${finalTarget.score}점 ${getScoreLevelBadge(finalTarget.score)} [${targetLabel}]</div>
@@ -776,7 +797,7 @@
           <button class="action-btn map-open-btn" data-name="${finalTarget.name}" data-lat="${finalTarget.lat}" data-lng="${finalTarget.lng}">🗺️ 카카오맵</button>
         </div>
       </div>
-      <div class="sub-info">${routeCards.length > 0 ? '1~2km 초근거리 경유 후 직행 · ' : '1~2km 내 핫플 없음 · 위수 진입점 즉시 직행 · '}${finalTarget.dist.toFixed(1)}km</div>
+      <div class="sub-info">${routeCards.length > 0 ? '길목 핫플 경유 후 직행 · ' : '경유지 없음 · 최종 목적지 즉시 직행 · '}${finalTarget.dist.toFixed(1)}km</div>
     `;
     listEl.appendChild(finalCard);
     
@@ -837,7 +858,7 @@
       const markerCoords = currentRouteData.map(pt => [pt.lat, pt.lng]);
       
       currentRouteData.forEach((pt, idx) => {
-        let badgeNum = pt.isFinal ? (currentRouteData.length === 2 ? '1' : '4') : idx;
+        let badgeNum = pt.isFinal ? currentRouteData.length - 1 : idx;
         let html = pt.isCurrent ? '<div class="custom-map-marker current">📍</div>' : `<div class="custom-map-marker" style="background:${themeColor};">${badgeNum}</div>`;
         L.marker([pt.lat, pt.lng], { icon: L.divIcon({ html, className: '', iconSize: [34, 34], iconAnchor: [17, 17] }) })
           .addTo(leafletMap).bindPopup(`<b>${pt.name}</b>`);
@@ -883,24 +904,17 @@
     showToast(`📋 [${query}] 명칭 복사완료!`);
   }
 
-  /* -------------------------------------------------------------
-     [개선 1] 카카오내비 앱 스키마 연동 및 웹 폴백 처리
-     ------------------------------------------------------------- */
   function openKakaoMapRoute(name, lat, lng) {
     let cleanName = cleanQuery(name);
     if (!cleanName) cleanName = name;
     const targetName = encodeURIComponent(cleanName);
     
-    // 카카오내비 앱 실행 스키마
     const naviAppUrl = `kakaonavi://navigate?name=${targetName}&x=${lng}&y=${lat}`;
-    // 카카오맵 웹 폴백 URL
     const mapWebUrl = `https://map.kakao.com/link/to/${targetName},${lat},${lng}`;
 
     const startTime = Date.now();
-    // 앱 시도
     window.location.href = naviAppUrl;
 
-    // 1.2초 내에 화면 전환이 없으면(앱 미설치 등) 웹 페이지로 전환
     setTimeout(() => {
       if (Date.now() - startTime < 1800) {
         window.location.href = mapWebUrl;
