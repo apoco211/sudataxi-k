@@ -198,7 +198,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   let currentMode = 1;
-  let currentPos = null; // 초기값을 null로 주어 반드시 실시간 GPS를 받아오도록 함
+  let currentPos = null;
   let leafletMap = null;
   let currentRouteData = [];
   let timerPresetMin = 5;
@@ -394,13 +394,6 @@
     return new Date(0);
   }
 
-  function getTrafficCongestionMultiplier(nowHour) {
-    if (nowHour >= 7 && nowHour <= 9) return 1.6;  
-    if (nowHour >= 17 && nowHour <= 20) return 1.5; 
-    if (nowHour >= 22 || nowHour <= 1) return 1.3;  
-    return 1.0;                                     
-  }
-
   function getDynamicTimeCategoryBonus(itemType, itemName, nowHour) {
     let bonus = 0;
     const isNightlife = (itemType === 'nightlife' || itemName.includes('먹자골목') || itemName.includes('포차') || itemName.includes('주점'));
@@ -483,7 +476,6 @@
       }
     }, 4500);
 
-    // maximumAge: 0을 주어 이전 위치 캐시를 절대 쓰지 않고 무조건 실시간 GPS 좌표를 새로 갱신함
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         if (resolved) return;
@@ -509,7 +501,7 @@
   async function calculateAndRender() {
     if (!currentPos) currentPos = { lat: 37.4048, lng: 126.9767 };
     const logEl = document.getElementById('pipeline-log');
-    if (logEl) logEl.innerText = '실시간 기상, 정체 및 POI 스코어 계산 중...';
+    if (logEl) logEl.innerText = '실시간 위치 기반 데이터 스코어 계산 중...';
     const radius = currentMode === 1 ? 5000 : 10000;
     
     const [overpassData, weatherData] = await Promise.all([
@@ -524,8 +516,10 @@
       pool = pool.filter(p => isInsideWisu(p.lat, p.lng));
     }
     const nowHour = new Date().getHours();
-    const trafficMultiplier = getTrafficCongestionMultiplier(nowHour);
     const isLastTrainPeakTime = (nowHour >= 23 || nowHour < 1);
+
+    // [정직한 이동 시간 계산 표준 평속: 시속 32km (시내 주행 기준 1km당 약 1.87분)]
+    const standardSpeedKmh = 32.0;
 
     let searchTargetPool = [];
     if (currentMode === 1) {
@@ -538,7 +532,7 @@
     // 5대 관문역 복합 연산 (거리 유사 시 도착 시간 빠르고 콜 점수 높은 곳 우선)
     let scoredTargets = searchTargetPool.map(h => {
       const d = getDistanceKm(currentPos.lat, currentPos.lng, h.lat, h.lng);
-      const estTimeMin = Math.round((d / (25 / trafficMultiplier)) * 60);
+      const estTimeMin = Math.max(1, Math.round((d / standardSpeedKmh) * 60));
       const timeBonus = getDynamicTimeCategoryBonus(h.type, h.name, nowHour);
       let targetScore = 50 + timeBonus - (estTimeMin * 1.5);
       if (h.name.includes("범계역") || h.name.includes("인덕원역")) targetScore += 10;
@@ -559,7 +553,7 @@
       }
     }
 
-    finalTarget.estimatedTimeMin = Math.round((finalTarget.dist / (25 / trafficMultiplier)) * 60);
+    finalTarget.estimatedTimeMin = Math.max(1, Math.round((finalTarget.dist / standardSpeedKmh) * 60));
     const finalBearing = getBearing(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
 
     const scoredPool = pool.map(item => {
@@ -567,7 +561,7 @@
       const distToFinal = getDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
       const isItemWisu = isInsideWisu(item.lat, item.lng);
       
-      const estimatedTimeMin = Math.round((dist / (25 / trafficMultiplier)) * 60);
+      const estimatedTimeMin = Math.max(1, Math.round((dist / standardSpeedKmh) * 60));
       let score = 50;
       if (item.isCustom) score += 25;
       const isMetroHub = METRO_ROUTE_HUBS.some(h => h.name === item.name) || MAJOR_HUBS.some(h => h.name === item.name);
@@ -616,7 +610,6 @@
         hasWeatherBonus: weatherData.isRainOrSnow,
         hasLogBonus: logResult.matched,
         logCount: logResult.count,
-        isTrafficHeavy: trafficMultiplier > 1.2,
         isReturnCallBonus,
         isLastTrainPeak,
         isReverseHighBonus,
@@ -653,17 +646,16 @@
       logEl.innerText = `방금 · ${radius/1000}km 이내 · 경유지 ${selectedRoute.length}곳 · FINAL: ${finalTarget.name}`;
     }
 
-    // 모드 1일 때 하단에 띄워줄 추가 최종 목적지 후보들 계산 (현재 메인 파이널 제외한 나머지 관문역들)
+    // 모드 1일 때 하단에 띄워줄 추가 최종 목적지 후보들 계산
     let subFinalCandidates = [];
     if (currentMode === 1) {
       subFinalCandidates = MAJOR_HUBS.filter(h => h.name !== finalTarget.name).map(h => {
         const d = getDistanceKm(currentPos.lat, currentPos.lng, h.lat, h.lng);
-        const estT = Math.round((d / (25 / trafficMultiplier)) * 60);
+        const estT = Math.max(1, Math.round((d / standardSpeedKmh) * 60));
         const timeBonus = getDynamicTimeCategoryBonus(h.type, h.name, nowHour);
         const totalScore = 50 + timeBonus + (h.name.includes("범계") || h.name.includes("인덕원") ? 15 : 0);
         return { ...h, dist: d, estimatedTimeMin: estT, score: Math.round(totalScore) };
       });
-      // 거리순 정렬
       subFinalCandidates.sort((a, b) => a.dist - b.dist);
     }
 
@@ -718,7 +710,6 @@
     `;
     listEl.appendChild(finalCard);
 
-    // 모드 1일 때만 하단에 '추가 최종 목적지 후보 카드 목록' 렌더링 (알고리즘 영향 없음)
     if (currentMode === 1 && subFinalCandidates && subFinalCandidates.length > 0) {
       const subSection = document.createElement('div');
       subSection.className = 'sub-final-section';
