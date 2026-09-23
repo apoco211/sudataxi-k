@@ -186,7 +186,7 @@
   </div>
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script:택시 콜 가이드 앱:index.html>
+<script>
   let currentMode = 1;
   let currentPos = { lat: 37.4048, lng: 126.9767 };
   let leafletMap = null;
@@ -526,13 +526,15 @@
       return { ...h, dist: d, estimatedTimeMin: estT };
     }).sort((a, b) => a.dist - b.dist);
 
-    // [수정 핵심] 모드 1일 때, 현재 위치가 특정 관문역(예: 인덕원역 등) 반경 0.8km 이내에 있다면 
-    // 자기 자신(출발한 역)이 최종 목적지로 잡히는 것을 방지하고 다음으로 가까운 다른 관문역을 최종 목적지로 선정합니다.
+    // [최종 목적지 500m 이내 근접 시 차순위 목적지 자동 갱신 및 모드1 자기 자신 제외 로직]
     let finalTarget = sortedTargets[0];
     if (currentMode === 1) {
-      const veryCloseHubs = sortedTargets.filter(h => h.dist < 0.8);
+      const veryCloseHubs = sortedTargets.filter(h => h.dist < 0.5);
       if (veryCloseHubs.length > 0 && sortedTargets.length > 1) {
-        // 현재 위치와 가장 가까운 관문역(자기 자신)을 건너뛰고 다음으로 가까운 관문역을 파이널로 지정
+        finalTarget = sortedTargets[1];
+      }
+    } else {
+      if (finalTarget.dist < 0.5 && sortedTargets.length > 1) {
         finalTarget = sortedTargets[1];
       }
     }
