@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   
   <!-- Leaflet Lightweight Map CSS -->
-  <link rel="stylesheet" href="[https://unpkg.com/leaflet@1.9.4/dist/leaflet.css](https://unpkg.com/leaflet@1.9.4/dist/leaflet.css)" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     body.mode-1 {
       --theme-accent: #FFC800;
@@ -66,15 +66,8 @@
     .tag { font-size: 11px; padding: 2px 6px; border-radius: 6px; background: #2A2A2A; color: #A0A0A0; }
     .tag.gilmok { background: #14331A; color: #4ADE80; }
     .tag.wisu { background: var(--theme-bg-dark); color: var(--theme-accent); border: 1px solid var(--theme-border); }
-    .tag.weather { background: #1A2A3A; color: #60A5FA; }
-    .tag.lasttrain { background: #831843; color: #F472B6; border: 1px solid #9D174D; font-weight: 700; }
-    .tag.commute { background: #1E3A8A; color: #93C5FD; border: 1px solid #2563EB; font-weight: 700; }
     .tag.custom { background: #3B0764; color: #E9D5FF; border: 1px solid #7E22CE; font-weight: 700; }
     .tag.logmatch { background: #2B1F3D; color: #C084FC; border: 1px solid #5B21B6; font-weight: 700; }
-    .tag.fallback { background: #3A221A; color: #FB923C; }
-    .tag.traffic { background: #3A1A1A; color: #FF6B6B; border: 1px solid #5A2A2A; }
-    .tag.returncall { background: #1E293B; color: #38BDF8; border: 1px solid #0284C7; font-weight: 700; }
-    .tag.reverse-high { background: #4C0519; color: #FB7185; border: 1px solid #9F1239; font-weight: 700; }
     .sub-info { font-size: 12px; color: #8A8A8A; margin-top: 8px; border-top: 1px solid #2A2A2A; padding-top: 8px; }
     
     .card.final-card { background: var(--final-card-bg); border: 1.5px solid var(--theme-accent); box-shadow: 0 0 12px var(--final-card-glow); }
@@ -90,10 +83,7 @@
     .add-custom-btn { width: 100%; height: 42px; background: #2A1A3A; color: #D8B4FE; border: 1px solid #6B21A8; font-weight: 800; font-size: 13px; border-radius: 10px; cursor: pointer; }
     
     .recent-log-item { display: flex; align-items: center; justify-content: space-between; background: #242424; border: 1px solid #2E2E2E; border-radius: 6px; padding: 6px 8px; }
-    .recent-log-info { display: flex; align-items: center; gap: 6px; overflow: hidden; }
     .recent-log-time { font-size: 11px; font-weight: 700; color: #E0E0E0; white-space: nowrap; }
-    .recent-log-coords { font-size: 9px; color: #777777; font-family: monospace; white-space: nowrap; }
-    .delete-log-btn { background: #2E1815; color: #FF5555; border: 1px solid #4A2020; border-radius: 4px; padding: 2px 6px; font-size: 10px; font-weight: 700; cursor: pointer; flex-shrink: 0; }
     
     .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 74px; background: rgba(26,26,26,0.95); backdrop-filter: blur(10px); border-top: 2px solid var(--theme-accent); display: flex; align-items: center; gap: 8px; padding: 8px 12px; z-index: 100; max-width: 430px; margin: 0 auto; }
     .timer-container { flex: 1; height: 100%; display: flex; flex-direction: column; gap: 4px; }
@@ -118,6 +108,16 @@
     .map-modal-close { background: none; border: none; color: #8A8A8A; font-size: 20px; font-weight: 900; cursor: pointer; }
     #route-map { width: 100%; height: 100%; min-height: 350px; flex: 1; background: #121212; z-index: 1; }
     
+    .custom-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .custom-modal-overlay.active { display: flex; }
+    .custom-modal-box { width: 100%; max-width: 360px; background: #1E1E1E; border: 2px solid var(--theme-accent); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+    .custom-modal-title { font-size: 16px; font-weight: 900; color: var(--theme-accent); }
+    .custom-modal-textarea { width: 100%; height: 130px; background: #121212; border: 1px solid #3A3A3A; color: #FFF; border-radius: 10px; padding: 10px; font-family: monospace; font-size: 12px; resize: none; }
+    .custom-modal-btn-group { display: flex; gap: 8px; }
+    .custom-modal-btn { flex: 1; height: 42px; border-radius: 10px; font-weight: 800; font-size: 13px; border: none; cursor: pointer; }
+    .custom-modal-btn.confirm { background: var(--theme-accent); color: var(--theme-text-on-accent); }
+    .custom-modal-btn.cancel { background: #3A3A3A; color: #FFF; }
+
     .leaflet-tile-pane { filter: brightness(1.1) contrast(1.4); }
     .custom-map-marker { width: 34px; height: 34px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 16px; display: flex; align-items: center; justify-content: center; border: 2.5px solid #FFFFFF; box-shadow: 0 3px 8px rgba(0,0,0,0.8); }
     .custom-map-marker.current { background: #4ADE80; color: #000000; font-size: 18px; }
@@ -128,20 +128,20 @@
   <div class="header">주변 콜 많은 곳 찾기</div>
   
   <div class="mode-container">
-    <button class="mode-pill active" id="btn-mode1" onclick="setMode(1)">[모드1]</button>
-    <button class="mode-pill" id="btn-mode2" onclick="setMode(2)">[모드2]</button>
+    <button class="mode-pill active" id="btn-mode1">[모드1]</button>
+    <button class="mode-pill" id="btn-mode2">[모드2]</button>
   </div>
   
   <div class="loc-bar">
-    <span id="loc-text">📍 GPS 위치 확인 중...</span>
-    <button class="refresh-btn" onclick="executeSearch()">⟳</button>
+    <span id="loc-text">📍 위치 확인 중...</span>
+    <button class="refresh-btn" id="btn-refresh">⟳</button>
   </div>
   
   <div class="btn-group-main">
-    <button class="big-btn" onclick="executeSearch()">
+    <button class="big-btn" id="btn-search">
       <span>📍 주변 콜 많은 곳 찾기</span>
     </button>
-    <button class="map-btn" id="btn-show-map" onclick="openRouteMapModal()" style="display: none;">
+    <button class="map-btn" id="btn-show-map" style="display: none;">
       <span>🗺️ 전체 동선 지도 보기</span>
     </button>
   </div>
@@ -156,9 +156,8 @@
       <span class="backup-count" id="log-count-text">저장된 기록: 0개</span>
     </div>
     <div class="backup-btn-group">
-      <button class="backup-btn" onclick="exportCallLogs()">📤 JSON 내보내기</button>
-      <button class="backup-btn" onclick="document.getElementById('import-file-input').click()">📥 JSON 가져오기</button>
-      <input type="file" id="import-file-input" accept=".json" style="display: none;" onchange="importCallLogs(event)">
+      <button class="backup-btn" id="btn-export">📤 JSON 내보내기</button>
+      <button class="backup-btn" id="btn-import-open">📥 JSON 가져오기</button>
     </div>
     
     <div style="margin-top: 10px; border-top: 1px dashed #3A3A3A; padding-top: 8px;">
@@ -167,7 +166,7 @@
     </div>
     
     <div class="custom-section">
-      <button class="add-custom-btn" onclick="addCustomHotspotPrompt()">⭐ 현재 위치를 '나만의 콜 장소'로 직접 등록</button>
+      <button class="add-custom-btn" id="btn-add-custom">⭐ 현재 위치를 '나만의 콜 장소'로 직접 등록</button>
       <div style="font-size: 11px; font-weight: 800; color: #C084FC; margin: 8px 0 4px 0;">📍 나만의 콜 장소 목록</div>
       <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 4px;"></div>
     </div>
@@ -176,25 +175,39 @@
   <div class="bottom-bar">
     <div class="timer-container">
       <div class="timer-mode-selector">
-        <button class="timer-mode-btn active" id="timer-btn-5m" onclick="setTimerPreset(5)">5분 대기</button>
-        <button class="timer-mode-btn" id="timer-btn-10m" onclick="setTimerPreset(10)">10분 대기</button>
+        <button class="timer-mode-btn active" id="timer-btn-5m">5분 대기</button>
+        <button class="timer-mode-btn" id="timer-btn-10m">10분 대기</button>
       </div>
-      <button class="timer-display-btn" id="timer-display-btn" onclick="toggleTimer()">⏱️ 05:00 시작</button>
+      <button class="timer-display-btn" id="timer-display-btn">⏱️ 05:00 시작</button>
     </div>
-    <button class="save-call-btn" onclick="saveCurrentCallLocation()">📍 고객 탑승<br>위치 저장</button>
+    <button class="save-call-btn" id="btn-save-call">📍 고객 탑승<br>위치 저장</button>
   </div>
   
-  <div class="map-modal-overlay" id="map-modal" onclick="closeRouteMapModal(event)">
-    <div class="map-modal-content" onclick="event.stopPropagation()">
+  <!-- 지도 모달 -->
+  <div class="map-modal-overlay" id="map-modal">
+    <div class="map-modal-content">
       <div class="map-modal-header">
         <span class="map-modal-title">🗺️ 실제 도로 이동 동선 지도</span>
-        <button class="map-modal-close" onclick="closeRouteMapModal()">✕</button>
+        <button class="map-modal-close" id="map-modal-close">✕</button>
       </div>
       <div id="route-map"></div>
     </div>
   </div>
+
+  <!-- JSON 가져오기 모달 -->
+  <div class="custom-modal-overlay" id="import-modal">
+    <div class="custom-modal-box">
+      <div class="custom-modal-title">📥 JSON 백업 데이터 가져오기</div>
+      <div style="font-size: 12px; color: #aaa;">내보내기한 JSON 전체 코드를 아래에 붙여넣어 주세요.</div>
+      <textarea id="import-textarea" class="custom-modal-textarea" placeholder='{"call_logs": [...], "custom_hotspots": [...] }'></textarea>
+      <div class="custom-modal-btn-group">
+        <button class="custom-modal-btn cancel" id="import-modal-cancel">취소</button>
+        <button class="custom-modal-btn confirm" id="import-modal-submit">가져오기 적용</button>
+      </div>
+    </div>
+  </div>
   
-  <script src="[https://unpkg.com/leaflet@1.9.4/dist/leaflet.js](https://unpkg.com/leaflet@1.9.4/dist/leaflet.js)"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   let currentMode = 1;
   let currentPos = { lat: 37.4048, lng: 126.9767 };
@@ -351,7 +364,7 @@
 
   async function fetchRealtimeWeather(lat, lng) {
     try {
-      const url = `[https://api.open-meteo.com/v1/forecast?latitude=$](https://api.open-meteo.com/v1/forecast?latitude=$){lat}&longitude=${lng}&current=precipitation,rain,showers,snowfall&timezone=Asia%2FTokyo`;
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=precipitation,rain,showers,snowfall&timezone=Asia%2FTokyo`;
       const res = await fetch(url);
       const data = await res.json();
       const current = data.current || {};
@@ -365,7 +378,7 @@
   async function fetchOverpassPOIs(lat, lng, radiusMeter) {
     const query = `[out:json][timeout:6];(node(around:${radiusMeter},${lat},${lng})["amenity"~"bar|pub|nightclub|karaoke_box"]["name"];node(around:${radiusMeter},${lat},${lng})["shop"="alcohol"]["name"];);out 30;`;
     try {
-      const res = await fetch('[https://overpass-api.de/api/interpreter](https://overpass-api.de/api/interpreter)', { method: 'POST', body: query });
+      const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query });
       const data = await res.json();
       return (data.elements || []).map(e => ({
         name: e.tags.name,
@@ -529,14 +542,13 @@
       searchTargetPool = allWisuHotspots.length > 0 ? allWisuHotspots : MAJOR_HUBS;
     }
 
-    // 모드 1: 500m(0.5km) 미만인 관문역은 완전히 제외하고 500m 이상 떨어진 차순위 관문역 선택
     let sortedTargets = searchTargetPool.map(h => {
       const d = getDistanceKm(currentPos.lat, currentPos.lng, h.lat, h.lng);
       const estT = Math.round((d / (25 / trafficMultiplier)) * 60);
       return { ...h, dist: d, estimatedTimeMin: estT };
     }).sort((a, b) => a.dist - b.dist);
 
-    let validTargets = sortedTargets.filter(h => h.dist >= 0.5);
+    let validTargets = currentMode === 1 ? sortedTargets.filter(h => h.dist >= 0.5) : sortedTargets;
     let finalTarget = validTargets.length > 0 ? validTargets[0] : sortedTargets[0];
 
     finalTarget.estimatedTimeMin = Math.round((finalTarget.dist / (25 / trafficMultiplier)) * 60);
@@ -630,3 +642,299 @@
     const mapBtn = document.getElementById('btn-show-map');
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
+      logEl.innerText = `방금 · ${radius/1000}km 이내 · 경유지 ${selectedRoute.length}곳 · FINAL: ${finalTarget.name}`;
+    }
+    renderCards(selectedRoute, finalTarget);
+  }
+
+  function renderCards(routeCards, finalTarget) {
+    const listEl = document.getElementById('card-list');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    
+    routeCards.forEach((item, index) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="card-header">
+          <div class="card-title-group">
+            <div class="num-badge">${index + 1}</div>
+            <div>
+              <div class="place-name">${item.name}</div>
+              <div class="score-dist">${item.dist.toFixed(1)}km (약 ${item.estimatedTimeMin}분) · ${item.score}점 ${getScoreLevelBadge(item.score)}</div>
+            </div>
+          </div>
+          <button class="navi-btn navi-action-btn" data-name="${item.name}" data-addr="${item.address || ''}">카카오내비</button>
+        </div>
+        <div class="tag-group">
+          ${item.isCustom ? '<span class="tag custom">#나만의핫플</span>' : ''}
+          ${item.delta <= 60 ? '<span class="tag gilmok">#길목우선</span>' : ''}
+          ${item.isReverseHighBonus ? '<span class="tag reverse-high">#근거리고득점후방</span>' : ''}
+          ${item.isWisu ? '<span class="tag wisu">#위수지역</span>' : ''}
+          ${item.logCount > 0 ? `<span class="tag logmatch">#누적콜 ${item.logCount}건</span>` : ''}
+        </div>
+      `;
+      listEl.appendChild(card);
+    });
+
+    const finalCard = document.createElement('div');
+    finalCard.className = 'card final-card';
+    const targetLabel = currentMode === 1 ? '최종번화가' : '최종위수';
+    finalCard.innerHTML = `
+      <div class="card-header">
+        <div class="card-title-group">
+          <div class="num-badge">${routeCards.length > 0 ? '4' : '1'}</div>
+          <div>
+            <div class="place-name">${finalTarget.name}</div>
+            <div class="score-dist">${finalTarget.dist.toFixed(1)}km (약 ${finalTarget.estimatedTimeMin || 0}분) · [${targetLabel}]</div>
+          </div>
+        </div>
+        <button class="navi-btn navi-action-btn" data-name="${finalTarget.name}" data-addr="${finalTarget.address || ''}">카카오내비</button>
+      </div>
+      <div class="sub-info">${routeCards.length > 0 ? `현재→핫스팟 ${routeCards[0].dist.toFixed(1)}km · ` : ''}${targetLabel} 바로 안내 ${finalTarget.dist.toFixed(1)}km</div>
+    `;
+    listEl.appendChild(finalCard);
+
+    document.querySelectorAll('.navi-action-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        openKakaoNavi(e.currentTarget.dataset.name, e.currentTarget.dataset.addr);
+      });
+    });
+  }
+
+  async function openRouteMapModal() {
+    if (typeof L === 'undefined') {
+      alert('지도 로딩 중입니다.');
+      return;
+    }
+    const modal = document.getElementById('map-modal');
+    if (modal) modal.classList.add('active');
+    setTimeout(async () => {
+      if (!leafletMap) {
+        leafletMap = L.map('route-map', { zoomControl: false });
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '' }).addTo(leafletMap);
+      }
+      leafletMap.invalidateSize();
+      leafletMap.eachLayer(l => { if (l instanceof L.Marker || l instanceof L.Polyline) leafletMap.removeLayer(l); });
+      
+      const themeColor = currentMode === 1 ? '#FFC800' : '#FF6B00';
+      const markerCoords = currentRouteData.map(pt => [pt.lat, pt.lng]);
+      
+      currentRouteData.forEach((pt, idx) => {
+        let badgeNum = pt.isFinal ? (currentRouteData.length === 2 ? '1' : '4') : idx;
+        let html = pt.isCurrent ? '<div class="custom-map-marker current">📍</div>' : `<div class="custom-map-marker" style="background:${themeColor};">${badgeNum}</div>`;
+        L.marker([pt.lat, pt.lng], { icon: L.divIcon({ html, className: '', iconSize: [34, 34], iconAnchor: [17, 17] }) })
+          .addTo(leafletMap).bindPopup(`<b>${pt.name}</b>`);
+      });
+
+      try {
+        const coordsStr = currentRouteData.map(pt => `${pt.lng},${pt.lat}`).join(';');
+        const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson`;
+        const res = await fetch(osrmUrl);
+        const data = await res.json();
+        if (data.routes && data.routes.length > 0) {
+          const roadCoords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+          L.polyline(roadCoords, { color: themeColor, weight: 6, opacity: 0.95 }).addTo(leafletMap);
+        } else {
+          throw new Error("No OSRM Route");
+        }
+      } catch (err) {
+        L.polyline(markerCoords, { color: themeColor, weight: 5, opacity: 0.9, dashArray: '6, 8' }).addTo(leafletMap);
+      }
+
+      leafletMap.fitBounds(L.latLngBounds(markerCoords), { padding: [50, 50] });
+    }, 200);
+  }
+
+  function closeRouteMapModal() {
+    const modal = document.getElementById('map-modal');
+    if (modal) modal.classList.remove('active');
+  }
+
+  function cleanNaviQuery(str) {
+    if (!str) return '';
+    return str.replace(/먹자골목|중심상가|상업지구|환승거점|사거리|로데오거리|로데오|환승센터|포차|맛고을|업무지구/g, '').trim();
+  }
+
+  function openKakaoNavi(name, address) {
+    let query = address && address !== 'undefined' ? address : cleanNaviQuery(name);
+    if (!query) query = name;
+    try {
+      navigator.clipboard.writeText(query);
+    } catch(e) {}
+    alert(`📋 [${query}] 명칭 복사완료!\n카카오내비를 엽니다.`);
+    window.location.href = `kakaonavi://search?q=${encodeURIComponent(query)}`;
+  }
+
+  function saveCurrentCallLocation() {
+    const doSave = (pos) => {
+      let logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+      logs.push({ id: 'log_' + Date.now(), timestamp: new Date().toISOString(), lat: pos.lat, lng: pos.lng, mode: currentMode });
+      localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
+      updateCallLogStats();
+      alert('🎉 탑승 위치 저장 완료!');
+    };
+    if (currentPos) doSave(currentPos);
+    else doSave({ lat: 37.4048, lng: 126.9767 });
+  }
+
+  function addCustomHotspotPrompt() {
+    if (!currentPos) {
+      alert('먼저 위치 검색을 진행해 주세요.');
+      return;
+    }
+    const name = prompt('⭐ 나만의 콜 장소 이름:');
+    if (!name || !name.trim()) return;
+    let custom = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
+    custom.push({ id: 'custom_' + Date.now(), name: name.trim(), lat: currentPos.lat, lng: currentPos.lng, type: 'subway', isCustom: true, address: name.trim() });
+    localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(custom));
+    updateCustomHotspotUI();
+    calculateAndRender();
+    alert('등록 완료!');
+  }
+
+  function deleteCustomHotspot(id) {
+    let custom = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]').filter(i => i.id !== id);
+    localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(custom));
+    updateCustomHotspotUI();
+    calculateAndRender();
+  }
+
+  function updateCustomHotspotUI() {
+    const list = document.getElementById('custom-hotspots-list');
+    if (!list) return;
+    const custom = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
+    if (custom.length === 0) {
+      list.innerHTML = '<div style="font-size:10px; color:#666; text-align:center;">등록된 장소가 없습니다.</div>';
+      return;
+    }
+    list.innerHTML = custom.map(item => `
+      <div class="recent-log-item">
+        <span class="recent-log-time">⭐ ${item.name}</span>
+        <button class="delete-custom-btn" data-id="${item.id}" style="background:#2E1815; color:#FF5555; border:1px solid #4A2020; border-radius:4px; padding:2px 6px; font-size:10px; font-weight:700; cursor:pointer;">삭제</button>
+      </div>
+    `).join('');
+
+    document.querySelectorAll('.delete-custom-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        deleteCustomHotspot(e.currentTarget.dataset.id);
+      });
+    });
+  }
+
+  function deleteCallLog(id, ts) {
+    let logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]').filter(i => i.id !== id && i.timestamp !== ts);
+    localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
+    updateCallLogStats();
+  }
+
+  function updateCallLogStats() {
+    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+    const countText = document.getElementById('log-count-text');
+    if (countText) countText.innerText = `저장된 기록: ${logs.length}개`;
+    const list = document.getElementById('recent-logs-list');
+    if (!list) return;
+    if (logs.length === 0) {
+      list.innerHTML = '<div style="font-size:10px; color:#666; text-align:center;">기록이 없습니다.</div>';
+      return;
+    }
+    list.innerHTML = logs.slice(-5).reverse().map(item => `
+      <div class="recent-log-item">
+        <span class="recent-log-time">📍 ${new Date(item.timestamp).toLocaleTimeString()} [M${item.mode || 1}]</span>
+        <button class="delete-log-item-btn" data-id="${item.id}" data-ts="${item.timestamp}" style="background:#2E1815; color:#FF5555; border:1px solid #4A2020; border-radius:4px; padding:2px 6px; font-size:10px; font-weight:700; cursor:pointer;">삭제</button>
+      </div>
+    `).join('');
+
+    document.querySelectorAll('.delete-log-item-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        deleteCallLog(e.currentTarget.dataset.id, e.currentTarget.dataset.ts);
+      });
+    });
+  }
+
+  function exportCallLogs() {
+    const data = { call_logs: JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]'), custom_hotspots: JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]') };
+    const jsonStr = JSON.stringify(data, null, 2);
+    try {
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `sudataxi_backup_${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch(e) {
+      navigator.clipboard.writeText(jsonStr);
+      alert('📋 백업 데이터가 클립보드에 복사되었습니다!');
+    }
+  }
+
+  function openImportModal() {
+    const modal = document.getElementById('import-modal');
+    if (modal) modal.classList.add('active');
+  }
+
+  function closeImportModal() {
+    const modal = document.getElementById('import-modal');
+    if (modal) modal.classList.remove('active');
+  }
+
+  function submitImportText() {
+    const ta = document.getElementById('import-textarea');
+    if (!ta || !ta.value.trim()) {
+      alert('❌ JSON 데이터를 입력해 주세요.');
+      return;
+    }
+    try {
+      const json = JSON.parse(ta.value.trim());
+      if (json.call_logs && Array.isArray(json.call_logs)) {
+        localStorage.setItem('sudataxi_call_logs', JSON.stringify(json.call_logs));
+      }
+      if (json.custom_hotspots && Array.isArray(json.custom_hotspots)) {
+        localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(json.custom_hotspots));
+      }
+      if (Array.isArray(json)) {
+        localStorage.setItem('sudataxi_call_logs', JSON.stringify(json));
+      }
+      updateCallLogStats();
+      updateCustomHotspotUI();
+      closeImportModal();
+      ta.value = '';
+      alert('🎉 백업 복원이 완료되었습니다!');
+      calculateAndRender();
+    } catch(err) {
+      alert('❌ 올바르지 않은 JSON 형식입니다.');
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    updateCallLogStats();
+    updateCustomHotspotUI();
+
+    document.getElementById('btn-mode1').addEventListener('click', () => setMode(1));
+    document.getElementById('btn-mode2').addEventListener('click', () => setMode(2));
+    document.getElementById('btn-refresh').addEventListener('click', () => executeSearch());
+    document.getElementById('btn-search').addEventListener('click', () => executeSearch());
+    document.getElementById('btn-show-map').addEventListener('click', () => openRouteMapModal());
+    document.getElementById('map-modal-close').addEventListener('click', () => closeRouteMapModal());
+    document.getElementById('map-modal').addEventListener('click', (e) => { if(e.target === e.currentTarget) closeRouteMapModal(); });
+
+    document.getElementById('btn-export').addEventListener('click', () => exportCallLogs());
+    document.getElementById('btn-import-open').addEventListener('click', () => openImportModal());
+    document.getElementById('import-modal-cancel').addEventListener('click', () => closeImportModal());
+    document.getElementById('import-modal-submit').addEventListener('click', () => submitImportText());
+    document.getElementById('import-modal').addEventListener('click', (e) => { if(e.target === e.currentTarget) closeImportModal(); });
+
+    document.getElementById('btn-add-custom').addEventListener('click', () => addCustomHotspotPrompt());
+    document.getElementById('btn-save-call').addEventListener('click', () => saveCurrentCallLocation());
+
+    document.getElementById('timer-btn-5m').addEventListener('click', () => setTimerPreset(5));
+    document.getElementById('timer-btn-10m').addEventListener('click', () => setTimerPreset(10));
+    document.getElementById('timer-display-btn').addEventListener('click', () => toggleTimer());
+
+    setTimeout(() => { executeSearch(); }, 100);
+  });
+</script>
+</body>
+</html>
+```eof
