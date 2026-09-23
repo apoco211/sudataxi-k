@@ -81,6 +81,8 @@
     .tag.wisu { background: var(--theme-bg-dark); color: var(--theme-accent); border: 1px solid var(--theme-border); }
     .tag.weather { background: #1A2A3A; color: #60A5FA; }
     .tag.lasttrain { background: #831843; color: #F472B6; border: 1px solid #9D174D; font-weight: 700; }
+    .tag.commute { background: #1E3A8A; color: #93C5FD; border: 1px solid #2563EB; font-weight: 700; }
+    .tag.custom { background: #3B0764; color: #E9D5FF; border: 1px solid #7E22CE; font-weight: 700; }
     .tag.logmatch { background: #2B1F3D; color: #C084FC; border: 1px solid #5B21B6; font-weight: 700; }
     .tag.fallback { background: #3A221A; color: #FB923C; }
     .tag.traffic { background: #3A1A1A; color: #FF6B6B; border: 1px solid #5A2A2A; }
@@ -90,7 +92,7 @@
     /* Card 4 (FINAL Target Highlight) */
     .card.final-card { background: var(--final-card-bg); border: 1.5px solid var(--theme-accent); box-shadow: 0 0 12px var(--final-card-glow); }
 
-    /* Backup & Data Section */
+    /* Backup & Custom Hotspot Data Section */
     .backup-section { margin-top: 20px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 16px; padding: 14px; }
     .backup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .backup-title { font-size: 14px; font-weight: 800; color: var(--theme-accent); transition: color 0.3s; }
@@ -99,7 +101,12 @@
     .backup-btn { flex: 1; height: 40px; background: #2A2A2A; color: #FFFFFF; font-weight: 800; border: 1px solid #3A3A3A; border-radius: 10px; cursor: pointer; font-size: 13px; }
     .backup-btn:active { background: #333333; }
 
-    /* Compact Recent Logs Item Styling */
+    /* Custom Hotspot Section */
+    .custom-section { margin-top: 12px; border-top: 1px dashed #3A3A3A; padding-top: 10px; }
+    .add-custom-btn { width: 100%; height: 42px; background: #2A1A3A; color: #D8B4FE; border: 1px solid #6B21A8; font-weight: 800; font-size: 13px; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+    .add-custom-btn:active { background: #3B0764; }
+
+    /* Log and Custom List Items */
     .recent-log-item {
       display: flex;
       align-items: center;
@@ -107,7 +114,7 @@
       background: #242424;
       border: 1px solid #2E2E2E;
       border-radius: 6px;
-      padding: 4px 8px;
+      padding: 6px 8px;
     }
     .recent-log-info {
       display: flex;
@@ -142,7 +149,7 @@
       background: #4A2020;
     }
 
-    /* Fixed Bottom Bar & Timer Redesign */
+    /* Fixed Bottom Split Bar */
     .bottom-bar { 
       position: fixed; 
       bottom: 0; 
@@ -307,7 +314,7 @@
   <!-- Data Backup & Sync Section -->
   <div class="backup-section">
     <div class="backup-header">
-      <span class="backup-title">📊 고객 탑승 기록 백업</span>
+      <span class="backup-title">📊 데이터 관리 & 백업</span>
       <span class="backup-count" id="log-count-text">저장된 기록: 0개</span>
     </div>
     <div class="backup-btn-group">
@@ -316,14 +323,21 @@
       <input type="file" id="import-file-input" accept=".json" style="display: none;" onchange="importCallLogs(event)">
     </div>
 
-    <!-- Recent Logs Delete Container -->
+    <!-- Recent Logs List Container -->
     <div style="margin-top: 10px; border-top: 1px dashed #3A3A3A; padding-top: 8px;">
       <div style="font-size: 11px; font-weight: 800; color: #8A8A8A; margin-bottom: 6px;">🕒 최근 저장 목록 (최신 5개)</div>
       <div id="recent-logs-list" style="display: flex; flex-direction: column; gap: 4px;"></div>
     </div>
+
+    <!-- Custom Hotspot Directly Add Section -->
+    <div class="custom-section">
+      <button class="add-custom-btn" onclick="addCustomHotspotPrompt()">⭐ 현재 위치를 '나만의 콜 장소'로 직접 등록</button>
+      <div style="font-size: 11px; font-weight: 800; color: #C084FC; margin: 8px 0 4px 0;">📍 나만의 콜 장소 목록</div>
+      <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 4px;"></div>
+    </div>
   </div>
 
-  <!-- Fixed Bottom Split Bar (Left: Waiting Timer / Right: Save Location) -->
+  <!-- Fixed Bottom Split Bar -->
   <div class="bottom-bar">
     <div class="timer-container">
       <div class="timer-mode-selector">
@@ -355,51 +369,49 @@
   let leafletMap = null;
   let currentRouteData = [];
 
-  /* 타이머 변수 */
   let timerPresetMin = 5;
   let timerRemainingSec = 300;
   let timerInterval = null;
   let isTimerRunning = false;
 
-  /* 위수지역 좌표 판별 (인덕원역 포함 완벽 보정) */
+  /* 위수지역 좌표 판별 (인덕원/안양/군포/의왕/과천 보정) */
   function isInsideWisu(lat, lng) {
     const wisuBoxes = [
-      { minLat: 37.38, maxLat: 37.43, minLng: 126.90, maxLng: 127.01 }, // 안양, 평촌, 인덕원, 의왕 포일
-      { minLat: 37.32, maxLat: 37.38, minLng: 126.89, maxLng: 126.99 }, // 군포, 산본, 금정, 의왕 내손
-      { minLat: 37.40, maxLat: 37.46, minLng: 126.96, maxLng: 127.03 }  // 과천 전체 및 인덕원 북부
+      { minLat: 37.38, maxLat: 37.43, minLng: 126.90, maxLng: 127.01 }, 
+      { minLat: 37.32, maxLat: 37.38, minLng: 126.89, maxLng: 126.99 }, 
+      { minLat: 37.40, maxLat: 37.46, minLng: 126.96, maxLng: 127.03 }  
     ];
     return wisuBoxes.some(b => lat >= b.minLat && lat <= b.maxLat && lng >= b.minLng && lng <= b.maxLng);
   }
 
+  /* 모드 1 & 모드 2 최종 복귀 관문 5대 거점 */
   const MAJOR_HUBS = [
-    { name: "범계역 로데오거리", lat: 37.3917, lng: 126.9145, address: "범계역" },
-    { name: "안양역 일번가", lat: 37.4013, lng: 126.9222, address: "안양역" },
-    { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331, address: "산본역" },
-    { name: "인덕원역 먹자골목", lat: 37.4048, lng: 126.9767, address: "인덕원역" },
-    { name: "금정역 먹자골목", lat: 37.3721, lng: 126.9438, address: "금정역" }
+    { name: "인덕원역 먹자골목", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway" },
+    { name: "범계역 로데오거리", lat: 37.3917, lng: 126.9145, address: "범계역", type: "subway" },
+    { name: "안양역 일번가", lat: 37.4013, lng: 126.9222, address: "안양역", type: "subway" },
+    { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway" },
+    { name: "금정역 먹자골목", lat: 37.3721, lng: 126.9438, address: "금정역", type: "subway" }
   ];
 
+  /* 광역 주요 거점 데이터 */
   const METRO_ROUTE_HUBS = [
-    { name: "수원 성균관대역 상업지구", lat: 37.3003, lng: 126.9708, address: "성균관대역", amenity: "pub" },
-    { name: "수원 정자중심상가", lat: 37.2991, lng: 126.9912, address: "정자중심상가", amenity: "pub" },
-    { name: "수원 파장동 맛고을", lat: 37.3112, lng: 126.9928, address: "파장동", amenity: "restaurant" },
-    { name: "수원역 환승센터", lat: 37.2657, lng: 127.0002, address: "수원역", amenity: "pub" },
-    { name: "안산 중앙역 로데오", lat: 37.3182, lng: 126.8384, address: "중앙역", amenity: "pub" },
-    { name: "사당역 4번출구 먹자골목", lat: 37.4765, lng: 126.9816, address: "사당역 4번출구", amenity: "pub" },
-    { name: "강남역 사거리", lat: 37.4979, lng: 127.0276, address: "강남역", amenity: "pub" },
-    { name: "판교역 중심상업지구", lat: 37.3948, lng: 127.1112, address: "판교역", amenity: "pub" },
-    { name: "성남 모란역 먹자골목", lat: 37.4321, lng: 127.1291, address: "모란역", amenity: "pub" },
-    { name: "잠실역 사거리", lat: 37.5133, lng: 127.1001, address: "잠실역", amenity: "subway" },
-    { name: "서초 양재역 환승거점", lat: 37.4842, lng: 127.0346, address: "양재역", amenity: "subway" },
-    { name: "수지구청역 먹자골목", lat: 37.3224, lng: 127.0978, address: "수지구청역", amenity: "pub" }
+    { name: "정자역 신분당선 환승거점", lat: 37.3662, lng: 127.1082, address: "정자역", type: "subway" },
+    { name: "판교역 중심상업지구", lat: 37.3948, lng: 127.1112, address: "판교역", type: "subway" },
+    { name: "판교 테크노밸리 업무지구", lat: 37.4021, lng: 127.1085, address: "판교테크노밸리", type: "office" },
+    { name: "미금역 환승거점", lat: 37.3501, lng: 127.1089, address: "미금역", type: "subway" },
+    { name: "사당역 4번출구 먹자골목", lat: 37.4765, lng: 126.9816, address: "사당역 4번출구", type: "subway" },
+    { name: "강남역 사거리", lat: 37.4979, lng: 127.0276, address: "강남역", type: "subway" },
+    { name: "수원 성균관대역 상업지구", lat: 37.3003, lng: 126.9708, address: "성균관대역", type: "subway" },
+    { name: "수원역 환승센터", lat: 37.2657, lng: 127.0002, address: "수원역", type: "subway" },
+    { name: "안산 중앙역 로데오", lat: 37.3182, lng: 126.8384, address: "중앙역", type: "subway" },
+    { name: "성남 모란역 먹자골목", lat: 37.4321, lng: 127.1291, address: "모란역", type: "nightlife" },
+    { name: "수지구청역 먹자골목", lat: 37.3224, lng: 127.0978, address: "수지구청역", type: "nightlife" }
   ];
 
   const PRESET_HOTSPOTS = [
-    { name: "역전할맥 평촌점", lat: 37.3914, lng: 126.9199, amenity: "pub", address: "역전할맥 평촌점", isWisu: true },
-    { name: "평촌 학원가 먹자골목", lat: 37.3831, lng: 126.9285, amenity: "restaurant", address: "평촌학원가", isWisu: true },
-    { name: "대야미역 역전시장", lat: 37.3281, lng: 126.9168, amenity: "pub", address: "대야미역", isWisu: true },
-    { name: "의왕 계원예대 앞", lat: 37.3712, lng: 126.9754, amenity: "pub", address: "계원예대", isWisu: true },
-    { name: "과천 정부청사역 포차", lat: 37.4261, lng: 126.9898, amenity: "pub", address: "정부과천청사역", isWisu: true }
+    { name: "역전할맥 평촌점", lat: 37.3914, lng: 126.9199, type: "nightlife", address: "역전할맥 평촌점", isWisu: true },
+    { name: "평촌 학원가 먹자골목", lat: 37.3831, lng: 126.9285, type: "nightlife", address: "평촌학원가", isWisu: true },
+    { name: "의왕 계원예대 앞", lat: 37.3712, lng: 126.9754, type: "nightlife", address: "계원예대", isWisu: true }
   ];
 
   function getDistanceKm(lat1, lon1, lat2, lon2) {
@@ -447,7 +459,6 @@
     }
   }
 
-  /* 타이머 컨트롤 로직 */
   function formatMMSS(seconds) {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -510,7 +521,7 @@
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 비프음
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime);
       gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
       osc.connect(gain);
       gain.connect(audioCtx.destination);
@@ -545,8 +556,7 @@
         name: e.tags.name,
         lat: e.lat,
         lng: e.lon,
-        amenity: e.tags.amenity || '',
-        shop: e.tags.shop || '',
+        type: 'nightlife',
         address: e.tags.name,
         isWisu: isInsideWisu(e.lat, e.lon)
       }));
@@ -588,20 +598,24 @@
     return 1.0;                                     
   }
 
-  function getDynamicTimeCategoryBonus(amenity, shop, nowHour) {
+  function getDynamicTimeCategoryBonus(itemType, itemName, nowHour) {
     let bonus = 0;
-    const isNightlifePOI = ['bar', 'pub', 'nightclub', 'karaoke_box'].includes(amenity) || shop === 'alcohol';
+    const isNightlife = (itemType === 'nightlife' || itemName.includes('먹자골목') || itemName.includes('포차') || itemName.includes('주점'));
+    const isCommuteHub = (itemType === 'subway' || itemType === 'office' || itemName.includes('역') || itemName.includes('테크노밸리'));
 
-    if (nowHour >= 21 || nowHour < 2) {
-      if (isNightlifePOI) bonus += 35;
-      else bonus += 15;
-    } else if (nowHour >= 18 && nowHour < 21) {
-      if (isNightlifePOI) bonus += 20;
-      else bonus += 15;
-    } else if (nowHour >= 7 && nowHour < 9) {
-      if (['hospital', 'university', 'bus_station'].includes(amenity)) bonus += 20;
+    if (nowHour >= 7 && nowHour < 10) {
+      if (isCommuteHub) bonus += 35;
+      if (isNightlife) bonus -= 50;
+    } 
+    else if (nowHour >= 21 || nowHour < 2) {
+      if (isNightlife) bonus += 35;
       else bonus += 10;
-    } else {
+    } 
+    else if (nowHour >= 18 && nowHour < 21) {
+      if (isCommuteHub) bonus += 20;
+      if (isNightlife) bonus += 20;
+    } 
+    else {
       bonus += 5;
     }
     return bonus;
@@ -657,6 +671,11 @@
     return { bonus: Math.round(maxBonus), matched: isMatched, count: matchCount };
   }
 
+  /* 나만의 콜 장소 불러오기 함수 */
+  function getCustomHotspots() {
+    return JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
+  }
+
   function executeSearch() {
     const locText = document.getElementById('loc-text');
     if (locText) locText.innerText = '📍 현재 위치 확인 중...';
@@ -692,7 +711,9 @@
       fetchRealtimeWeather(currentPos.lat, currentPos.lng)
     ]);
     
-    let pool = [...overpassData, ...PRESET_HOTSPOTS, ...METRO_ROUTE_HUBS];
+    const customHotspots = getCustomHotspots();
+    let pool = [...customHotspots, ...overpassData, ...PRESET_HOTSPOTS, ...METRO_ROUTE_HUBS];
+    
     if (currentMode === 1) {
       pool = pool.filter(p => isInsideWisu(p.lat, p.lng));
     }
@@ -700,46 +721,19 @@
     const nowHour = new Date().getHours();
     const trafficMultiplier = getTrafficCongestionMultiplier(nowHour);
     const isLastTrainPeakTime = (nowHour >= 23 || nowHour < 1);
+    const isCommuteTime = (nowHour >= 7 && nowHour < 10);
 
-    // [모드2 목적지 결정] 위수지역 내부 핫플 중 콜점수 상위권 + 최단 이동시간 거점 선택
+    // [모드 1 & 모드 2 최종 목적지 결정] 5대 관문 거점 중 실시간 최단 도착지
     let finalTarget = null;
-    if (currentMode === 1) {
-      let minD = Infinity;
-      MAJOR_HUBS.forEach(h => {
-        const d = getDistanceKm(currentPos.lat, currentPos.lng, h.lat, h.lng);
-        if (d < minD) { minD = d; finalTarget = { ...h, dist: d }; }
-      });
-    } else {
-      const wisuPool = pool.filter(p => isInsideWisu(p.lat, p.lng));
-      
-      const evaluatedWisuPool = wisuPool.map(p => {
-        const dist = getDistanceKm(currentPos.lat, currentPos.lng, p.lat, p.lng);
-        const estimatedTimeMin = Math.round((dist / (25 / trafficMultiplier)) * 60);
-        
-        let callScore = 50;
-        const isMetroHub = METRO_ROUTE_HUBS.some(h => h.name === p.name) || MAJOR_HUBS.some(h => h.name === p.name);
-        if (isMetroHub) callScore += 20;
-        if (isLastTrainPeakTime && isMetroHub) callScore += 20;
-        callScore += getDynamicTimeCategoryBonus(p.amenity, p.shop, nowHour);
-        if (weatherData.isRainOrSnow) callScore += 20;
-        
-        const logResult = calculateCallLogScore(p.lat, p.lng);
-        callScore += logResult.bonus;
-
-        return { ...p, dist, estimatedTimeMin, callScore };
-      });
-
-      if (evaluatedWisuPool.length > 0) {
-        const maxCallScore = Math.max(...evaluatedWisuPool.map(p => p.callScore));
-        const highScoreCandidates = evaluatedWisuPool.filter(p => p.callScore >= maxCallScore * 0.8);
-        highScoreCandidates.sort((a, b) => a.estimatedTimeMin - b.estimatedTimeMin);
-        finalTarget = highScoreCandidates[0];
+    let minEstTime = Infinity;
+    MAJOR_HUBS.forEach(h => {
+      const d = getDistanceKm(currentPos.lat, currentPos.lng, h.lat, h.lng);
+      const estT = Math.round((d / (25 / trafficMultiplier)) * 60);
+      if (estT < minEstTime) {
+        minEstTime = estT;
+        finalTarget = { ...h, dist: d, estimatedTimeMin: estT };
       }
-
-      if (!finalTarget) {
-        finalTarget = { ...MAJOR_HUBS[0], dist: getDistanceKm(currentPos.lat, currentPos.lng, MAJOR_HUBS[0].lat, MAJOR_HUBS[0].lng) };
-      }
-    }
+    });
 
     const finalEstTimeMin = Math.round((finalTarget.dist / (25 / trafficMultiplier)) * 60);
     finalTarget.estimatedTimeMin = finalEstTimeMin;
@@ -754,6 +748,9 @@
       const estimatedTimeMin = Math.round((dist / avgSpeed) * 60);
 
       let score = 50;
+
+      // 나만의 콜 장소인 경우 +25점 가산점
+      if (item.isCustom) score += 25;
 
       const isMetroHub = METRO_ROUTE_HUBS.some(h => h.name === item.name) || MAJOR_HUBS.some(h => h.name === item.name);
       if (currentMode === 2 && isMetroHub) score += 30;
@@ -770,7 +767,8 @@
         isReturnCallBonus = true;
       }
 
-      score += getDynamicTimeCategoryBonus(item.amenity, item.shop, nowHour);
+      score += getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
+
       if (weatherData.isRainOrSnow) score += 20;
 
       const logResult = calculateCallLogScore(item.lat, item.lng);
@@ -802,6 +800,7 @@
         isTrafficHeavy: trafficMultiplier > 1.2,
         isReturnCallBonus,
         isLastTrainPeak,
+        isCommuteTime,
         isFallback: false
       };
     });
@@ -836,11 +835,7 @@
           isReturnCallBonus = true;
         }
 
-        let isLastTrainPeak = false;
-        if (isLastTrainPeakTime) {
-          score += 20;
-          isLastTrainPeak = true;
-        }
+        score += getDynamicTimeCategoryBonus(hub.type, hub.name, nowHour);
 
         return {
           ...hub,
@@ -850,7 +845,6 @@
           delta: Math.abs(finalBearing - getBearing(currentPos.lat, currentPos.lng, hub.lat, hub.lng)),
           isTrafficHeavy: trafficMultiplier > 1.2,
           isReturnCallBonus,
-          isLastTrainPeak,
           logCount: logResult.count,
           isFallback: true
         };
@@ -878,8 +872,8 @@
 
     const weatherText = weatherData.isRainOrSnow ? ' · 비/눈(+20점)' : '';
     const trafficText = trafficMultiplier > 1.2 ? ` · 정체반영(${trafficMultiplier}x)` : '';
-    const lastTrainText = isLastTrainPeakTime ? ' · 막차피크시간' : '';
-    logEl.innerText = `방금 · ${radius/1000}km 이내 · ${scoredPool.length}곳 검출${weatherText}${trafficText}${lastTrainText} · FINAL: ${finalTarget.name}`;
+    const timeStatusText = isCommuteTime ? ' · 아침출근피크' : (isLastTrainPeakTime ? ' · 막차피크시간' : '');
+    logEl.innerText = `방금 · ${radius/1000}km 이내 · ${scoredPool.length}곳 검출${weatherText}${trafficText}${timeStatusText} · FINAL: ${finalTarget.name}`;
 
     renderCards(selectedRoute, finalTarget);
   }
@@ -905,8 +899,10 @@
           <button class="navi-btn" onclick="openKakaoNavi('${item.name}', '${item.address || ''}')">카카오내비</button>
         </div>
         <div class="tag-group">
+          ${item.isCustom ? '<span class="tag custom">#나만의핫플</span>' : ''}
           ${item.delta <= 45 ? '<span class="tag gilmok">#길목우선</span>' : ''}
           ${item.isWisu ? '<span class="tag wisu">#위수지역</span>' : ''}
+          ${item.isCommuteTime && (item.type === 'subway' || item.type === 'office') ? '<span class="tag commute">#출근환승거점</span>' : ''}
           ${item.isLastTrainPeak ? '<span class="tag lasttrain">#막차피크</span>' : ''}
           ${item.isReturnCallBonus ? '<span class="tag returncall">#귀로콜우선</span>' : ''}
           ${item.isTrafficHeavy ? '<span class="tag traffic">#정체주의반영</span>' : ''}
@@ -1034,7 +1030,7 @@
   function cleanNaviQuery(str) {
     if (!str) return '';
     return str
-      .replace(/먹자골목|중심상가|상업지구|환승거점|사거리|로데오거리|로데오|환승센터|포차|맛고을/g, '')
+      .replace(/먹자골목|중심상가|상업지구|환승거점|사거리|로데오거리|로데오|환승센터|포차|맛고을|업무지구/g, '')
       .replace(/수원|서초|성남|의왕|과천|안산/g, '')
       .trim();
   }
@@ -1109,6 +1105,76 @@
     }
   }
 
+  /* 나만의 콜 장소 직접 등록 프롬프트 */
+  function addCustomHotspotPrompt() {
+    if (!currentPos) {
+      alert('📍 위치 정보를 수신하지 못했습니다. 상단 [⟳] 버튼을 누른 후 다시 시도해주세요.');
+      return;
+    }
+
+    const placeName = prompt('⭐ 나만의 콜 장소 이름을 입력해 주세요 (예: 판교 A타워 앞, 삼평동 택시승강장):');
+    if (!placeName || !placeName.trim()) return;
+
+    const typeChoice = prompt('장소의 성격을 번호로 선택해 주세요:\n1. 출근/업무지구 (아침 피크 우대)\n2. 야간/유흥상권 (저녁 피크 우대)\n3. 일반 지하철/환승역', '1');
+    
+    let selectedType = 'subway';
+    if (typeChoice === '1') selectedType = 'office';
+    else if (typeChoice === '2') selectedType = 'nightlife';
+
+    const customHotspots = getCustomHotspots();
+    const newHotspot = {
+      id: 'custom_' + Date.now(),
+      name: placeName.trim(),
+      lat: Number(currentPos.lat),
+      lng: Number(currentPos.lng),
+      type: selectedType,
+      isCustom: true,
+      address: placeName.trim()
+    };
+
+    customHotspots.push(newHotspot);
+    localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(customHotspots));
+    alert(`🎉 [${placeName.trim()}] 장소가 '나만의 콜 장소'로 등록되었습니다!`);
+    
+    updateCustomHotspotUI();
+    calculateAndRender();
+  }
+
+  function deleteCustomHotspot(id) {
+    if (!confirm('이 나만의 콜 장소를 삭제하시겠습니까?')) return;
+    let customHotspots = getCustomHotspots();
+    customHotspots = customHotspots.filter(item => item.id !== id);
+    localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(customHotspots));
+    updateCustomHotspotUI();
+    calculateAndRender();
+  }
+
+  function updateCustomHotspotUI() {
+    const listEl = document.getElementById('custom-hotspots-list');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+
+    const customHotspots = getCustomHotspots();
+    if (customHotspots.length === 0) {
+      listEl.innerHTML = '<div style="font-size: 10px; color: #666; text-align: center; padding: 4px 0;">등록된 나만의 콜 장소가 없습니다.</div>';
+      return;
+    }
+
+    customHotspots.forEach(item => {
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'recent-log-item';
+      const typeText = item.type === 'office' ? '출근/업무' : (item.type === 'nightlife' ? '야간/유흥' : '환승역');
+      
+      itemDiv.innerHTML = `
+        <div class="recent-log-info">
+          <span class="recent-log-time">⭐ ${item.name} (${typeText})</span>
+        </div>
+        <button class="delete-log-btn" onclick="deleteCustomHotspot('${item.id}')">삭제</button>
+      `;
+      listEl.appendChild(itemDiv);
+    });
+  }
+
   function formatKoreanDateTime(isoString) {
     const d = parseDateSafely(isoString);
     if (isNaN(d.getTime()) || d.getTime() === 0) return "날짜 정보 없음";
@@ -1180,16 +1246,24 @@
 
   function exportCallLogs() {
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
-    if (logs.length === 0) {
-      alert('내보낼 탑승 기록 데이터가 없습니다.');
+    const customHotspots = getCustomHotspots();
+    
+    if (logs.length === 0 && customHotspots.length === 0) {
+      alert('내보낼 데이터가 없습니다.');
       return;
     }
-    const blob = new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' });
+
+    const exportData = {
+      call_logs: logs,
+      custom_hotspots: customHotspots
+    };
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     a.href = url;
-    a.download = `sudataxi_call_logs_${today}.json`;
+    a.download = `sudataxi_backup_${today}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -1200,8 +1274,19 @@
     const reader = new FileReader();
     reader.onload = function(e) {
       try {
-        const importedLogs = JSON.parse(e.target.result);
-        if (!Array.isArray(importedLogs)) throw new Error('잘못된 형식입니다.');
+        const importedData = JSON.parse(e.target.result);
+        
+        let importedLogs = [];
+        let importedHotspots = [];
+
+        if (Array.isArray(importedData)) {
+          importedLogs = importedData;
+        } else {
+          importedLogs = importedData.call_logs || [];
+          importedHotspots = importedData.custom_hotspots || [];
+        }
+
+        // 탑승 기록 병합
         const existingLogs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
         const logMap = new Map();
         [...existingLogs, ...importedLogs].forEach(item => {
@@ -1210,10 +1295,23 @@
             logMap.set(item.timestamp, item);
           }
         });
-        const mergedLogs = Array.from(logMap.values());
-        localStorage.setItem('sudataxi_call_logs', JSON.stringify(mergedLogs));
-        alert(`🎉 기록을 가져왔습니다! (총 ${mergedLogs.length}개)`);
+        localStorage.setItem('sudataxi_call_logs', JSON.stringify(Array.from(logMap.values())));
+
+        // 나만의 핫플 병합
+        const existingHotspots = getCustomHotspots();
+        const hotspotMap = new Map();
+        [...existingHotspots, ...importedHotspots].forEach(item => {
+          if (item.name) {
+            if (!item.id) item.id = 'custom_' + Date.now();
+            hotspotMap.set(item.name, item);
+          }
+        });
+        localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(Array.from(hotspotMap.values())));
+
+        alert('🎉 탑승 기록 및 나만의 콜 장소 데이터를 성공적으로 복원했습니다!');
         updateCallLogStats();
+        updateCustomHotspotUI();
+        calculateAndRender();
       } catch (err) {
         alert('⚠️ 올바른 수다택시 K 백업 JSON 파일이 아닙니다.');
       } finally {
@@ -1237,6 +1335,7 @@
 
   window.addEventListener('DOMContentLoaded', () => {
     updateCallLogStats();
+    updateCustomHotspotUI();
     setTimeout(() => {
       executeSearch();
     }, 200);
