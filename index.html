@@ -186,7 +186,7 @@
   </div>
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script:택시 콜 가이드 앱:index.html>
+<script>
   let currentMode = 1;
   let currentPos = { lat: 37.4048, lng: 126.9767 };
   let leafletMap = null;
@@ -520,16 +520,12 @@
       searchTargetPool = allWisuHotspots.length > 0 ? allWisuHotspots : MAJOR_HUBS;
     }
 
-    // [최종 목적지 선정: 거리 유사 시 도착시간이 빠르고 시간대 콜 점수가 높은 곳 우선 연산]
+    // 5대 관문역 복합 연산: 거리 유사 시 도착시간이 빠르고 시간대 콜 점수가 높은 곳 우선
     let scoredTargets = searchTargetPool.map(h => {
       const d = getDistanceKm(currentPos.lat, currentPos.lng, h.lat, h.lng);
       const estTimeMin = Math.round((d / (25 / trafficMultiplier)) * 60);
       const timeBonus = getDynamicTimeCategoryBonus(h.type, h.name, nowHour);
-      
-      // 복합 평가 공식: 점수가 높을수록 최종 목적지로 유리함
-      // (기본 가치 - 예상 소요시간 페널티 + 시간대별 콜 점수 보너스)
       let targetScore = 120 - (estTimeMin * 4) + timeBonus;
-      
       return { ...h, dist: d, estimatedTimeMin: estTimeMin, targetScore };
     });
 
