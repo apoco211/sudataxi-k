@@ -1,21 +1,35 @@
 {
   "name": "수다택시 K",
   "short_name": "수다택시K",
-  "description": "실시간 공공데이터 및 알고리즘 기반 택시 콜 밀집 지역 추천 시스템",
-  "start_url": "./?v=628",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#FFC800",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "./icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icon-512.png",
+      "src": "./icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
   ]
 }
+```eof
+
+---
+
+### 2. `index.html`의 `<head>` 태그에 아이콘 링크 추가
+현재 `index.html` 파일에는 `manifest.json` 연결만 있고, 애플(iOS) 기기나 사파리 브라우저에서 인식하는 전용 아이콘 태그가 누락되어 있을 수 있습니다. 
+
+`index.html`의 `<head>` 영역에 아래 코드 줄들을 추가해 주어야 아이콘이 완벽하게 나타납니다.
+
+```html
+  <!-- PWA Manifest 및 아이콘 설정 -->
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icon-180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
