@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>수다택시 K</title>
 
-  <!-- PWA & iOS 홈 아이콘 설정 -->
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -19,7 +18,6 @@
   <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
   
-  <!-- Leaflet Lightweight Map CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   
   <style>
@@ -189,7 +187,7 @@
   </div>
   
   <div class="loc-bar">
-    <span id="loc-text">📍 위치 확인 중...</span>
+    <span id="loc-text">📍 GPS 위치 확인 중...</span>
     <button class="refresh-btn" id="btn-refresh">⟳</button>
   </div>
   
@@ -210,7 +208,7 @@
     <div id="call-map-view"></div>
   </div>
   
-  <div class="pipeline-log" id="pipeline-log">대기 중 · 연산 준비 중...</div>
+  <div class="pipeline-log" id="pipeline-log">대기 중 · 실시간 동적 경로 스캔 연산 대기</div>
   
   <div class="card-list" id="card-list"></div>
   
@@ -340,7 +338,6 @@
     triggerSystemNotification();
   }
 
-  /* 4개 위수도시 (안양/군포/의왕/과천) 관문 경계점 */
   const WISU_BOUNDARY_POINTS = [
     { name: "안양 석수동 경계 (인천/부천/서울 방면)", lat: 37.4265, lng: 126.9050, address: "석수동" },
     { name: "안양 박달동 경계 (시흥/인천 방면)", lat: 37.4080, lng: 126.8920, address: "박달동" },
@@ -353,9 +350,9 @@
 
   function isInsideWisu(lat, lng) {
     const wisuBoxes = [
-      { minLat: 37.38, maxLat: 37.43, minLng: 126.90, maxLng: 127.01 }, // 안양
-      { minLat: 37.32, maxLat: 37.38, minLng: 126.89, maxLng: 126.99 }, // 군포
-      { minLat: 37.40, maxLat: 37.46, minLng: 126.96, maxLng: 127.03 }  // 과천
+      { minLat: 37.38, maxLat: 37.43, minLng: 126.90, maxLng: 127.01 },
+      { minLat: 37.32, maxLat: 37.38, minLng: 126.89, maxLng: 126.99 },
+      { minLat: 37.40, maxLat: 37.46, minLng: 126.96, maxLng: 127.03 }
     ];
     return wisuBoxes.some(b => lat >= b.minLat && lat <= b.maxLat && lng >= b.minLng && lng <= b.maxLng);
   }
@@ -374,8 +371,9 @@
   }
 
   const MAJOR_HUBS = [
-    { name: "인덕원역 먹자골목", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway", isWisu: true },
+    { name: "평촌역 먹자골목", lat: 37.3942, lng: 126.9638, address: "평촌역", type: "subway", isWisu: true },
     { name: "범계역 로데오거리", lat: 37.3917, lng: 126.9145, address: "범계역", type: "subway", isWisu: true },
+    { name: "인덕원역 먹자골목", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway", isWisu: true },
     { name: "안양역 일번가", lat: 37.4013, lng: 126.9222, address: "안양역", type: "subway", isWisu: true },
     { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway", isWisu: true },
     { name: "금정역 먹자골목", lat: 37.3721, lng: 126.9438, address: "금정역", type: "subway", isWisu: true }
@@ -391,7 +389,6 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
 
-  /* OSRM 도로망 실제 주행 경로 연산 */
   async function fetchRealRoadRouteDetails(fromLat, fromLng, toLat, toLng) {
     try {
       const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
@@ -648,75 +645,35 @@
     return JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
   }
 
+  /* 가짜 인덕원 기본값 완전히 제거 - 실시간 위치 직접 수신 */
   function executeSearch() {
     const locText = document.getElementById('loc-text');
     if (locText) locText.innerText = '📍 실시간 GPS 위치 수신 중...';
-    
-    function getFallbackPos() {
-      const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
-      if (logs.length > 0) {
-        const lastLog = logs[logs.length - 1];
-        if (lastLog.lat && lastLog.lng) {
-          return { lat: Number(lastLog.lat), lng: Number(lastLog.lng), source: '최근 기록' };
-        }
-      }
-      return { lat: 37.4048, lng: 126.9767, source: '인덕원역 기본값' };
-    }
 
     if (!navigator.geolocation) {
-      const fallback = getFallbackPos();
-      currentPos = { lat: fallback.lat, lng: fallback.lng };
-      if (locText) locText.innerText = `📍 GPS 미지원 (${fallback.source} 사용)`;
-      if (currentMode !== 3) calculateAndRender();
+      if (locText) locText.innerText = `❌ GPS 미지원 기기입니다.`;
       return;
     }
 
-    let resolved = false;
-    const safetyTimer = setTimeout(() => {
-      if (!resolved) {
-        resolved = true;
-        if (!currentPos) {
-          const fallback = getFallbackPos();
-          currentPos = { lat: fallback.lat, lng: fallback.lng };
-          if (locText) locText.innerText = `📍 터널/지하 지연 (${fallback.source} 연결: ${currentPos.lat.toFixed(4)}, ${currentPos.lng.toFixed(4)})`;
-        } else {
-          if (locText) locText.innerText = `📍 GPS 지연 (마지막 위치 사용: ${currentPos.lat.toFixed(4)}, ${currentPos.lng.toFixed(4)})`;
-        }
-        if (currentMode !== 3) calculateAndRender();
-      }
-    }, 4500);
-
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        if (resolved) return;
-        resolved = true;
-        clearTimeout(safetyTimer);
         currentPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         const inWisu = isInsideWisu(currentPos.lat, currentPos.lng);
         if (locText) locText.innerText = `📍 ${currentPos.lat.toFixed(4)}, ${currentPos.lng.toFixed(4)} (${inWisu ? '위수 안' : '외곽/타지역'})`;
         if (currentMode !== 3) calculateAndRender();
       },
       (err) => {
-        if (resolved) return;
-        resolved = true;
-        clearTimeout(safetyTimer);
-        if (!currentPos) {
-          const fallback = getFallbackPos();
-          currentPos = { lat: fallback.lat, lng: fallback.lng };
-          if (locText) locText.innerText = `📍 GPS 수신 안됨 (${fallback.source} 연결)`;
-        } else {
-          if (locText) locText.innerText = `📍 GPS 수신 실패 (기존 위치 사용)`;
-        }
-        if (currentMode !== 3) calculateAndRender();
+        if (locText) locText.innerText = `❌ GPS 수신 대기 (⟳ 새로고침 터치)`;
+        showToast("📍 위치 권한을 허용하신 후 ⟳ 새로고침을 누르세요.");
       },
-      { enableHighAccuracy: true, timeout: 4000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 }
     );
   }
 
   async function calculateAndRender() {
-    if (!currentPos) currentPos = { lat: 37.4048, lng: 126.9767 };
+    if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
-    if (logEl) logEl.innerText = `실시간 동적 경로 5km 스캔 연산 중...`;
+    if (logEl) logEl.innerText = `현재 위치에서 목적지 방향 5km 스캔 연산 중...`;
     
     const weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng);
     const customHotspots = getCustomHotspots();
@@ -725,18 +682,16 @@
     let mainRouteGeometry = [];
 
     if (currentMode === 1) {
-      // [모드 1 최적화] 실주행 도로망 거리(OSRM) 기준 최단거리 번화가를 무조건 1순위 목적지로 선정
+      // 모드 1: 내 현위치 기준 최단거리 주요 번화가를 목적지로 잡음
       let scoredTargets = await Promise.all(MAJOR_HUBS.map(async h => {
         const road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, h.lat, h.lng);
-        // 실주행 거리가 짧을수록 가산점 극대화
-        const roadScore = Math.max(10, 800 - Math.round(road.distanceKm * 40));
-        return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: roadScore, geometry: road.geometryCoords };
+        return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: 100, geometry: road.geometryCoords };
       }));
-      scoredTargets.sort((a, b) => b.score - a.score);
+      scoredTargets.sort((a, b) => a.dist - b.dist);
       finalTarget = scoredTargets[0] || MAJOR_HUBS[0];
       mainRouteGeometry = finalTarget.geometry || [];
     } else {
-      // 모드 2: 실시간 최단 위수 경계점 연산
+      // 모드 2: 최단 위수 경계점 연산
       const closestGateway = findClosestWisuGateway(currentPos.lat, currentPos.lng);
       const road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, closestGateway.lat, closestGateway.lng);
       finalTarget = {
@@ -748,10 +703,10 @@
       mainRouteGeometry = road.geometryCoords || [];
     }
 
-    // 1단계: 출발지 반경 2km 초근거리 POI 스캔
+    // 1단계: 출발지 2km 초근거리 POI 스캔
     const startPoisPromise = fetchPOIsAroundPoint(currentPos.lat, currentPos.lng, 2000);
     
-    // 2단계: 5km 간격 거점(Waypoints) 좌표 추출 및 각 거점 주변 1.5km POI 스캔
+    // 2단계: 목적지 방향 5km 간격 거점(Waypoints) 스캔
     const waypoints = extractPathWaypointsEvery5km(mainRouteGeometry, 5.0);
     const waypointPoisPromises = waypoints.map(wp => fetchPOIsAroundPoint(wp.lat, wp.lng, 1500));
 
@@ -763,7 +718,7 @@
     const nowHour = new Date().getHours();
 
     let scoredPool = await Promise.all(rawPool.map(async item => {
-      if (item.name === finalTarget.name || getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng) < 0.8) {
+      if (item.name === finalTarget.name || getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng) < 0.5) {
         return { ...item, score: -999 };
       }
 
@@ -771,7 +726,7 @@
       let isNearStep1 = directDist <= 2.0;
 
       const road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, item.lat, item.lng);
-      let score = Math.max(10, 150 - Math.round(road.distanceKm * 10));
+      let score = Math.max(10, 300 - Math.round(road.distanceKm * 25));
 
       if (isNearStep1) score += 120;
       else score += 50;
@@ -796,7 +751,7 @@
 
     let selectedRoute = [];
     let validPool = scoredPool.filter(p => p.score >= 40 && p.name !== finalTarget.name);
-    validPool.sort((a, b) => b.score - a.score);
+    validPool.sort((a, b) => a.dist - b.dist);
 
     const maxCards = currentMode === 1 ? 3 : 2;
     for (let candidate of validPool) {
@@ -805,7 +760,6 @@
       }
       if (selectedRoute.length === maxCards) break;
     }
-    selectedRoute.sort((a, b) => a.dist - b.dist);
 
     currentRouteData = [
       { name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true },
@@ -817,8 +771,8 @@
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
       logEl.innerText = selectedRoute.length > 0 
-        ? `방금 · 모드 ${currentMode} 연산 완료 · 5km 경로 스캔 핫플 ${selectedRoute.length}곳 안내`
-        : `방금 · 모드 ${currentMode} 연산 완료 · 주변 및 5km 경로상 핫플 없음 (최단 경계로 직행)`;
+        ? `방금 · 모드 ${currentMode} 연산 완료 · 목적지 방향 경로 핫플 ${selectedRoute.length}곳 안내`
+        : `방금 · 모드 ${currentMode} 연산 완료 · 경로상 핫플 없음 (${finalTarget.name} 직행)`;
     }
     
     let subFinalCandidates = [];
@@ -857,7 +811,7 @@
         </div>
         <div class="tag-group">
           ${item.isTimeMatch ? '<span class="tag timematch">🔥현재시간대콜집중</span>' : ''}
-          ${item.isNearStep1 ? '<span class="tag near">#출발지2km초근거리</span>' : '<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#경로선5km스캔</span>'}
+          ${item.isNearStep1 ? '<span class="tag near">#출발지2km초근거리</span>' : '<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#목적지방향5km스캔</span>'}
           ${item.isCustom ? '<span class="tag custom">#나만의핫플</span>' : ''}
           ${item.isWisu ? '<span class="tag wisu">#위수지역</span>' : ''}
           ${item.logCount > 0 ? `<span class="tag logmatch">#누적콜 ${item.logCount}건</span>` : ''}
@@ -887,7 +841,7 @@
           <button class="action-btn map-open-btn" data-name="${finalTarget.name}" data-lat="${finalTarget.lat}" data-lng="${finalTarget.lng}">🗺️ 카카오맵</button>
         </div>
       </div>
-      <div class="sub-info">${routeCards.length > 0 ? '5km 경로 스캔 핫플 경유 후 복귀 · ' : '경유지 없음 · 즉시 직행 · '}${finalTarget.dist.toFixed(1)}km</div>
+      <div class="sub-info">${routeCards.length > 0 ? '경로상 핫플 경유 후 이동 · ' : '경유지 없음 · 즉시 직행 · '}${finalTarget.dist.toFixed(1)}km</div>
     `;
     listEl.appendChild(finalCard);
     
@@ -1086,7 +1040,7 @@
       if (currentMode === 3) renderCallMapView();
     };
     if (currentPos) doSave(currentPos);
-    else doSave({ lat: 37.4048, lng: 126.9767 });
+    else showToast("위치 확인 후 저장 가능합니다.");
   }
   function addCustomHotspotPrompt() {
     if (!currentPos) {
