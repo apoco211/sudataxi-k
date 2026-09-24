@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+\<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -837,17 +837,16 @@
     let mainRouteGeometry = [];
 
     if (currentMode === 1) {
-      // 🌟 [핵심 수정 1] 0.5km(500m) 이내에 존재하는 최종목적지는 이미 도착한 것으로 간주하여 제외!
+      // OSRM 실주행 거리 연산 후 0.5km(500m) 이내 목적지는 무조건 다음 거점으로 자동 스킵!
       let scoredTargets = await Promise.all(MAJOR_HUBS.map(async h => {
         const road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, h.lat, h.lng);
         return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: 100, geometry: road.geometryCoords };
       }));
 
-      // 현위치에서 0.5km 이상 떨어진 '다음 거점'들만 필터링
+      // 실주행 거리가 0.5km 초과인 곳만 필터링
       let validTargets = scoredTargets.filter(h => h.dist > 0.5);
       validTargets.sort((a, b) => a.dist - b.dist);
 
-      // 만약 전부 500m 이내면 전체 중 최단거리 선택, 아니면 500m 바깥의 가장 가까운 거점 선택!
       finalTarget = validTargets.length > 0 ? validTargets[0] : scoredTargets.sort((a, b) => a.dist - b.dist)[0];
       mainRouteGeometry = finalTarget.geometry || [];
     } else {
@@ -872,32 +871,25 @@
     poiResults.forEach(list => { rawPool.push(...list); });
 
     const nowHour = new Date().getHours();
-    
-    // A-C 간 최단 직선 거리
-    const distAtoC = getStraightDistanceKm(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
+    const distToFinal = finalTarget.dist;
 
     let scoredPool = await Promise.all(rawPool.map(async item => {
-      // 1) 목적지 자체이거나 0.5km 이내면 경유지 대상에서 제외
+      // 1) 목적지 자신이나 0.5km 이내 위치는 경유지 제외
       if (item.name === finalTarget.name || getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng) < 0.5) {
         return { ...item, score: -999 };
       }
 
-      // 🎯 [핵심 수정 2] A(현위치) -> B(후보지) -> C(목적지) 엄격한 경로 우회율 검증
+      // A->B->C 총 경로 우회율 15% 초과 및 역방향 장소 완전 봉쇄
       const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const distBtoC = getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
+      const distAtoC = getStraightDistanceKm(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
+      
       const totalDetourDist = distAtoB + distBtoC;
 
-      // ❌ B를 경유할 때 총 거리가 직행 거리에 비해 15% 이상 늘어나면 무조건 제외 (-999점)
-      if (totalDetourDist > (distAtoC * 1.15) + 0.8) {
+      if (totalDetourDist > (distAtoC * 1.15) + 0.8 || distBtoC > distAtoC) {
         return { ...item, score: -999 };
       }
 
-      // ❌ 목적지 C를 지나쳐 넘어가는 장소 제외
-      if (distBtoC > distAtoC) {
-        return { ...item, score: -999 };
-      }
-
-      // 실주행 길찾기 상세 연산
       const road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, item.lat, item.lng);
       
       let isNearStep1 = distAtoB <= 3.0;
@@ -929,15 +921,13 @@
 
     let selectedRoute = [];
     let validPool = scoredPool.filter(p => p.score >= 35 && p.name !== finalTarget.name);
-    
-    // 현위치에서 가까운 순서대로 정렬
     validPool.sort((a, b) => a.dist - b.dist);
 
-    // 🌟 [핵심 수정 3] 최종목적지가 1.5km 이내로 코앞이면 경유 카드를 0개로 제한하여 불필요한 추천 완벽 차단!
+    // 최종목적지가 1.5km 이내로 코앞이면 중간 경유 추천 카드 0개로 완전 제한!
     let maxCards = currentMode === 1 ? 3 : 2;
-    if (distAtoC <= 1.5) {
+    if (distToFinal <= 1.5) {
       maxCards = 0;
-    } else if (distAtoC <= 4.0) {
+    } else if (distToFinal <= 4.0) {
       maxCards = 1;
     }
 
@@ -1296,6 +1286,8 @@
       });
     });
   }
+
+  // 🌟 내보내기 시 클립보드 복사가 아닌 진짜 .json 파일로 저장되는 함수
   function exportCallLogs() {
     const data = { 
       call_logs: JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]'), 
@@ -1303,19 +1295,19 @@
       master_hotspots: getMasterHotspotsFromStorage()
     };
     const jsonStr = JSON.stringify(data, null, 2);
-    try {
-      const blob = new Blob([jsonStr], { type: 'application/json' });
-      const url = URL.createElement(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `sudataxi_backup_${Date.now()}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch(e) {
-      navigator.clipboard.writeText(jsonStr);
-      showToast('📋 백업 데이터 복사완료!');
-    }
+    const fileName = `sudataxi_backup_${Date.now()}.json`;
+
+    const encodedUri = "data:text/json;charset=utf-8," + encodeURIComponent(jsonStr);
+    const a = document.createElement('a');
+    a.setAttribute("href", encodedUri);
+    a.setAttribute("download", fileName);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    showToast('📤 백업 파일 다운로드 완료!');
   }
+
   function importCallLogs(e) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
