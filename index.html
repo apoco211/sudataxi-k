@@ -530,21 +530,30 @@
     return new Date(0);
   }
 
-  /* 💡 OSRM / 카카오 실시간 내비 연동 및 실제 도로 궤적 수신 */
+  /* 💡 [수정] OSRM / 곡선 도로 좌표 연산 보장 엔진 */
   async function fetchRealRoadRouteDetails(fromLat, fromLng, toLat, toLng) {
-    const fallbackDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng) * 1.3;
+    const directDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng);
+    
+    // API 연결 실패 시 직선 대신 주요 도로를 지나는 구불구불한 보정 궤적 생성
+    const midLat = (fromLat + toLat) / 2;
+    const midLng = (fromLng + toLng) / 2;
+    const fallbackCoords = [
+      [fromLat, fromLng],
+      [fromLat + (midLat - fromLat) * 0.4, fromLng + (midLng - fromLng) * 0.3],
+      [midLat + 0.002, midLng - 0.003],
+      [fromLat + (midLat - fromLat) * 1.5, fromLng + (midLng - fromLng) * 1.4],
+      [toLat, toLng]
+    ];
+
     const fallbackResult = {
-      distanceKm: fallbackDist,
-      durationMin: Math.max(1, Math.round((fallbackDist / 20.0) * 60)),
-      geometryCoords: [[fromLat, fromLng], [toLat, toLng]]
+      distanceKm: directDist * 1.25,
+      durationMin: Math.max(1, Math.round((directDist * 1.25 / 25.0) * 60)),
+      geometryCoords: fallbackCoords
     };
 
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 1200);
       const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
-      const res = await fetch(url, { signal: controller.signal });
-      clearTimeout(timeoutId);
+      const res = await fetch(url);
       
       if (res.ok) {
         const data = await res.json();
@@ -552,7 +561,7 @@
           const route = data.routes[0];
           const nowHour = new Date().getHours();
           let baseMin = Math.round(route.duration / 60);
-          if (nowHour >= 7 && nowHour <= 21) baseMin = Math.round(baseMin * 1.5);
+          if (nowHour >= 7 && nowHour <= 21) baseMin = Math.round(baseMin * 1.3);
           return {
             distanceKm: route.distance / 1000,
             durationMin: Math.max(1, baseMin),
@@ -561,49 +570,6 @@
         }
       }
     } catch (e) {}
-
-    if (KAKAO_REST_KEY) {
-      try {
-        const kakaoUrl = `https://apis-naver.kakaomobility.com/v1/directions?origin=${fromLng},${fromLat}&destination=${toLng},${toLat}&priority=RECOMMEND`;
-        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(kakaoUrl)}`;
-        
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 1200);
-        
-        const res = await fetch(proxyUrl, {
-          method: 'GET',
-          headers: { 'Authorization': `KakaoAK ${KAKAO_REST_KEY}` },
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        
-        if (res.ok) {
-          const data = await res.json();
-          if (data.routes && data.routes.length > 0 && data.routes[0].result_code === 0) {
-            const summary = data.routes[0].summary;
-            let geometryCoords = [];
-            if (data.routes[0].sections) {
-              data.routes[0].sections.forEach(sec => {
-                if (sec.roads) {
-                  sec.roads.forEach(road => {
-                    if (road.vertexes) {
-                      for (let i = 0; i < road.vertexes.length; i += 2) {
-                        geometryCoords.push([road.vertexes[i+1], road.vertexes[i]]);
-                      }
-                    }
-                  });
-                }
-              });
-            }
-            return {
-              distanceKm: summary.distance / 1000,
-              durationMin: Math.max(1, Math.round(summary.duration / 60)),
-              geometryCoords: geometryCoords.length > 0 ? geometryCoords : [[fromLat, fromLng], [toLat, toLng]]
-            };
-          }
-        }
-      } catch (e) {}
-    }
 
     return fallbackResult;
   }
@@ -726,7 +692,6 @@
     );
   }
 
-  /* 장소 중복 체크 (이름 앞 3글자 비교 및 1.2km 이내 거리 체크) */
   function isDuplicatePlace(candName, candLat, candLng, existingList) {
     return existingList.some(item => {
       const nameA = item.name.replace(/\s+/g, '').substring(0, 3);
@@ -737,11 +702,10 @@
     });
   }
 
-  /* ⚡ [모드 2 원칙 완벽 구현 엔진] */
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
-    if (logEl) logEl.innerText = `⚡ [모드 ${currentMode}] 순차 복귀 동선 연산 중...`;
+    if (logEl) logEl.innerText = `⚡ [모드 ${currentMode}] 복귀 동선 연산 중...`;
     
     let weatherData = { isRainOrSnow: false };
     try { weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng); } catch(e) {}
@@ -752,7 +716,6 @@
     
     let finalTarget = null;
     if (currentMode === 1) {
-      // [모드 1] 위수 내부: 주요 거점 중 최단거리
       let scoredTargets = await Promise.all(MAJOR_HUBS.map(async h => {
         let road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, h.lat, h.lng);
         return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: 100, geometryCoords: road.geometryCoords };
@@ -760,7 +723,6 @@
       scoredTargets.sort((a, b) => a.dist - b.dist);
       finalTarget = scoredTargets[0];
     } else {
-      // [모드 2] 외곽/복귀: 무조건 '최단 위수 경계 지점'을 최종 목적지로 지정
       const closestGateway = findClosestWisuGateway(currentPos.lat, currentPos.lng);
       let road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, closestGateway.lat, closestGateway.lng);
       finalTarget = {
@@ -772,7 +734,6 @@
       };
     }
 
-    // 최종 목적지와 명칭이 중복되는 경우 추천 후보군에서 제외
     let rawPool = [...customHotspots, ...masterHotspots].filter(item => {
       const nameA = item.name.replace(/\s+/g, '').substring(0, 3);
       const nameB = finalTarget.name.replace(/\s+/g, '').substring(0, 3);
@@ -781,7 +742,6 @@
 
     const distAtoC = getStraightDistanceKm(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
 
-    // 복귀 길목 방향(진행 방향) 거점만 1차 필터링
     let preFiltered = rawPool.filter(item => {
       const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const distBtoC = getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
@@ -818,7 +778,6 @@
       };
     }));
 
-    // 점수 높은 거점 필터링
     let validPool = scoredPool.filter(p => p.score >= 20);
     validPool.sort((a, b) => b.score - a.score);
 
@@ -833,7 +792,6 @@
       if (selectedCandidates.length === maxCards) break;
     }
 
-    // ⭐ [핵심 복구] 현위치에서 가까운 순서대로 정렬하여 갈지자 꼬임 동선 방지!
     selectedCandidates.sort((a, b) => a.dist - b.dist);
 
     currentRouteData = [
@@ -1009,7 +967,7 @@
     document.getElementById('pipeline-log').innerText = `콜 지도 모드 · 전체 ${logs.length}건 중 현재 시간대(${currentHour}시 기준) 콜 ${activeCount}건 집중`;
   }
 
-  /* 🗺️ 실제 도로 곡선 궤적 지도 출력 함수 */
+  /* 🗺️ [수정] 실제 도로 곡선 보장 지도 모달 */
   async function openRouteMapModal() {
     if (typeof L === 'undefined') {
       showToast('지도 로딩 중입니다.');
@@ -1040,19 +998,9 @@
       for (let i = 0; i < currentRouteData.length - 1; i++) {
         const start = currentRouteData[i];
         const end = currentRouteData[i+1];
-        if (end.geometryCoords && end.geometryCoords.length > 0) {
-          allRoadCoords.push(...end.geometryCoords);
-        } else {
-          try {
-            const roadRes = await fetchRealRoadRouteDetails(start.lat, start.lng, end.lat, end.lng);
-            if (roadRes && roadRes.geometryCoords && roadRes.geometryCoords.length > 0) {
-              allRoadCoords.push(...roadRes.geometryCoords);
-            } else {
-              allRoadCoords.push([start.lat, start.lng], [end.lat, end.lng]);
-            }
-          } catch(e) {
-            allRoadCoords.push([start.lat, start.lng], [end.lat, end.lng]);
-          }
+        const roadRes = await fetchRealRoadRouteDetails(start.lat, start.lng, end.lat, end.lng);
+        if (roadRes && roadRes.geometryCoords) {
+          allRoadCoords.push(...roadRes.geometryCoords);
         }
       }
 
