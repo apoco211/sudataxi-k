@@ -104,6 +104,7 @@
     .tag.custom { background: #3B0764; color: #E9D5FF; border: 1px solid #7E22CE; font-weight: 700; }
     .tag.logmatch { background: #2B1F3D; color: #C084FC; border: 1px solid #5B21B6; font-weight: 700; }
     .tag.timematch { background: #065F46; color: #34D399; border: 1px solid #10B981; font-weight: 800; }
+    .tag.masterdb { background: #581C87; color: #F3E8FF; border: 1px solid #9333EA; font-weight: 700; }
     .sub-info { font-size: 12px; color: #8A8A8A; margin-top: 8px; border-top: 1px solid #2A2A2A; padding-top: 8px; }
     
     .card.final-card { background: var(--final-card-bg); border: 1.5px solid var(--theme-accent); box-shadow: 0 0 12px var(--final-card-glow); }
@@ -187,7 +188,7 @@
   </div>
   
   <div class="loc-bar">
-    <span id="loc-text">📍 GPS 위치 수신 중...</span>
+    <span id="loc-text">📍 실시간 GPS 위치 수신 대기 중...</span>
     <button class="refresh-btn" id="btn-refresh">⟳</button>
   </div>
   
@@ -208,7 +209,7 @@
     <div id="call-map-view"></div>
   </div>
   
-  <div class="pipeline-log" id="pipeline-log">대기 중 · 실시간 동적 경로 스캔 연산 대기</div>
+  <div class="pipeline-log" id="pipeline-log">대기 중 · 수도권 100선 + 하이브리드 동선 스캔 엔진 대기</div>
   
   <div class="card-list" id="card-list"></div>
   
@@ -316,10 +317,8 @@
     try {
       initOrResumeAudioContext();
       if (!audioCtx) return;
-      
       const now = audioCtx.currentTime;
       const beepFreqs = [880, 1050, 1250];
-      
       beepFreqs.forEach((freq, idx) => {
         const startTime = now + (idx * 0.25);
         const osc = audioCtx.createOscillator();
@@ -337,6 +336,129 @@
     if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 300]);
     triggerSystemNotification();
   }
+
+  /* 🌟 수도권 마스터 핫플 100선 내장 DB */
+  const DEFAULT_MASTER_HOTSPOTS = [
+    { "id": "hs_s_01", "name": "강남역 상업지구", "lat": 37.4981, "lng": 127.0276, "address": "강남역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_02", "name": "역삼역 테헤란로 상권", "lat": 37.5006, "lng": 127.0364, "address": "역삼역", "type": "office", "region": "seoul" },
+    { "id": "hs_s_03", "name": "선릉역 먹자골목", "lat": 37.5045, "lng": 127.0490, "address": "선릉역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_04", "name": "삼성역 코엑스 상권", "lat": 37.5088, "lng": 127.0631, "address": "삼성역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_05", "name": "신사역 가로수길 상권", "lat": 37.5160, "lng": 127.0200, "address": "신사역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_06", "name": "논현역 영동시장 먹자골목", "lat": 37.5110, "lng": 127.0220, "address": "논현역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_07", "name": "잠실역 방이먹자골목", "lat": 37.5133, "lng": 127.1001, "address": "잠실역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_08", "name": "건대입구역 맛의거리", "lat": 37.5407, "lng": 127.0693, "address": "건대입구역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_09", "name": "왕십리역 엔터식스 상권", "lat": 37.5610, "lng": 127.0380, "address": "왕십리역", "type": "subway", "region": "seoul" },
+    { "id": "hs_s_10", "name": "성수역 카페거리 상권", "lat": 37.5445, "lng": 127.0560, "address": "성수역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_11", "name": "홍대입구역 걷고싶은거리", "lat": 37.5575, "lng": 126.9245, "address": "홍대입구역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_12", "name": "합정역 상권", "lat": 37.5495, "lng": 126.9140, "address": "합정역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_13", "name": "신촌역 연세로 상권", "lat": 37.5559, "lng": 126.9368, "address": "신촌역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_14", "name": "이태원역 상권", "lat": 37.5345, "lng": 126.9940, "address": "이태원역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_15", "name": "종각역 젊음의거리", "lat": 37.5700, "lng": 126.9830, "address": "종각역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_16", "name": "을지로입구역 무교동 상권", "lat": 37.5660, "lng": 126.9820, "address": "을지로입구역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_17", "name": "명동역 상권", "lat": 37.5636, "lng": 126.9848, "address": "명동역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_18", "name": "서울역 상권", "lat": 37.5559, "lng": 126.9723, "address": "서울역", "type": "subway", "region": "seoul" },
+    { "id": "hs_s_19", "name": "용산역 아이파크몰 상권", "lat": 37.5298, "lng": 126.9646, "address": "용산역", "type": "subway", "region": "seoul" },
+    { "id": "hs_s_20", "name": "영등포역 타임스퀘어 상권", "lat": 37.5152, "lng": 126.9070, "address": "영등포역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_21", "name": "여의도역 금융가 상권", "lat": 37.5216, "lng": 126.9242, "address": "여의도역", "type": "office", "region": "seoul" },
+    { "id": "hs_s_22", "name": "신도림역 디큐브시티 상권", "lat": 37.5088, "lng": 126.8912, "address": "신도림역", "type": "subway", "region": "seoul" },
+    { "id": "hs_s_23", "name": "구로디지털단지 깔깔거리", "lat": 37.4853, "lng": 126.9015, "address": "구로디지털단지역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_24", "name": "가산디지털단지역 아울렛 상권", "lat": 37.4812, "lng": 126.8835, "address": "가산디지털단지역", "type": "office", "region": "seoul" },
+    { "id": "hs_s_25", "name": "사당역 먹자골목", "lat": 37.4765, "lng": 126.9816, "address": "사당역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_26", "name": "신림역 먹자골목", "lat": 37.4842, "lng": 126.9297, "address": "신림역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_27", "name": "서울대입구역 샤로수길", "lat": 37.4812, "lng": 126.9527, "address": "서울대입구역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_28", "name": "천호역 로데오거리", "lat": 37.5385, "lng": 127.1235, "address": "천호역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_29", "name": "노원역 문화의거리", "lat": 37.6542, "lng": 127.0607, "address": "노원역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_30", "name": "수유역 먹자골목", "lat": 37.6380, "lng": 127.0255, "address": "수유역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_31", "name": "발산역 마곡 상업지구", "lat": 37.5585, "lng": 126.8385, "address": "발산역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_32", "name": "마곡나루역 상권", "lat": 37.5635, "lng": 126.8250, "address": "마곡나루역", "type": "office", "region": "seoul" },
+    { "id": "hs_s_33", "name": "연신내역 로데오거리", "lat": 37.6185, "lng": 126.9210, "address": "연신내역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_34", "name": "불광역 먹자골목", "lat": 37.6105, "lng": 126.9295, "address": "불광역", "type": "subway", "region": "seoul" },
+    { "id": "hs_s_35", "name": "구의역 먹자골목", "lat": 37.5372, "lng": 127.0858, "address": "구의역", "type": "nightlife", "region": "seoul" },
+    { "id": "hs_s_36", "name": "문정동 법조단지 상권", "lat": 37.4855, "lng": 127.1230, "address": "문정역", "type": "office", "region": "seoul" },
+
+    { "id": "hs_g_ansan_1", "name": "안산 중앙동 로데오거리", "lat": 37.3164, "lng": 126.8381, "address": "중앙동 로데오", "type": "nightlife", "region": "ansan" },
+    { "id": "hs_g_ansan_2", "name": "안산 고잔동 홈플러스 상권", "lat": 37.3150, "lng": 126.8290, "address": "고잔동", "type": "nightlife", "region": "ansan" },
+    { "id": "hs_g_ansan_3", "name": "안산 선부광장 상업지구", "lat": 37.3395, "lng": 126.8150, "address": "선부광장", "type": "nightlife", "region": "ansan" },
+    { "id": "hs_g_ansan_4", "name": "안산 한대앞역 먹자골목", "lat": 37.3195, "lng": 126.8590, "address": "한대앞역", "type": "subway", "region": "ansan" },
+    { "id": "hs_g_ansan_5", "name": "안산 상록수역 먹자골목", "lat": 37.3015, "lng": 126.8685, "address": "상록수역", "type": "subway", "region": "ansan" },
+    { "id": "hs_g_ansan_6", "name": "안산 초지역 역세권 상권", "lat": 37.3270, "lng": 126.8140, "address": "초지역", "type": "subway", "region": "ansan" },
+    { "id": "hs_g_ansan_7", "name": "안산 본오동 먹자골목", "lat": 37.2980, "lng": 126.8750, "address": "본오동", "type": "nightlife", "region": "ansan" },
+    
+    { "id": "hs_g_anyang_1", "name": "평촌역 먹자골목", "lat": 37.3942, "lng": 126.9638, "address": "평촌역", "type": "subway", "region": "anyang" },
+    { "id": "hs_g_anyang_2", "name": "범계역 로데오거리", "lat": 37.3917, "lng": 126.9145, "address": "범계역", "type": "subway", "region": "anyang" },
+    { "id": "hs_g_anyang_3", "name": "인덕원역 먹자골목", "lat": 37.4048, "lng": 126.9767, "address": "인덕원역", "type": "subway", "region": "anyang" },
+    { "id": "hs_g_anyang_4", "name": "안양역 일번가", "lat": 37.4013, "lng": 126.9222, "address": "안양역", "type": "subway", "region": "anyang" },
+    { "id": "hs_g_anyang_5", "name": "산본역 중심상가", "lat": 37.3554, "lng": 126.9331, "address": "산본역", "type": "subway", "region": "gunpo" },
+    { "id": "hs_g_anyang_6", "name": "금정역 먹자골목", "lat": 37.3721, "lng": 126.9438, "address": "금정역", "type": "subway", "region": "gunpo" },
+
+    { "id": "hs_g_suwon_1", "name": "수원 인계동 나혜석거리", "lat": 37.2628, "lng": 127.0335, "address": "인계동", "type": "nightlife", "region": "suwon" },
+    { "id": "hs_g_suwon_2", "name": "수원역 로데오거리", "lat": 37.2655, "lng": 127.0010, "address": "수원역", "type": "subway", "region": "suwon" },
+    { "id": "hs_g_suwon_3", "name": "영통역 망포 상권", "lat": 37.2515, "lng": 127.0715, "address": "영통역", "type": "nightlife", "region": "suwon" },
+    { "id": "hs_g_suwon_4", "name": "수원 행궁동 카페거리", "lat": 37.2840, "lng": 127.0160, "address": "행궁동", "type": "nightlife", "region": "suwon" },
+    { "id": "hs_g_suwon_5", "name": "수원시청역 백화점 상권", "lat": 37.2635, "lng": 127.0290, "address": "수원시청역", "type": "nightlife", "region": "suwon" },
+
+    { "id": "hs_g_seongnam_1", "name": "서현역 로데오거리", "lat": 37.3850, "lng": 127.1225, "address": "서현역", "type": "nightlife", "region": "seongnam" },
+    { "id": "hs_g_seongnam_2", "name": "정자역 카페거리", "lat": 37.3670, "lng": 127.1085, "address": "정자역", "type": "nightlife", "region": "seongnam" },
+    { "id": "hs_g_seongnam_3", "name": "판교역 테크노밸리 상권", "lat": 37.3945, "lng": 127.1115, "address": "판교역", "type": "office", "region": "seongnam" },
+    { "id": "hs_g_seongnam_4", "name": "야탑역 먹자골목", "lat": 37.4110, "lng": 127.1285, "address": "야탑역", "type": "nightlife", "region": "seongnam" },
+    { "id": "hs_g_seongnam_5", "name": "모란역 먹자골목", "lat": 37.4320, "lng": 127.1290, "address": "모란역", "type": "nightlife", "region": "seongnam" },
+    { "id": "hs_g_seongnam_6", "name": "미금역 먹자골목", "lat": 37.3505, "lng": 127.1105, "address": "미금역", "type": "subway", "region": "seongnam" },
+
+    { "id": "hs_g_yongin_1", "name": "수지구청역 상권", "lat": 37.3235, "lng": 127.0975, "address": "수지구청역", "type": "nightlife", "region": "yongin" },
+    { "id": "hs_g_yongin_2", "name": "죽전역 단국대 상권", "lat": 37.3255, "lng": 127.1080, "address": "죽전역", "type": "nightlife", "region": "yongin" },
+    { "id": "hs_g_yongin_3", "name": "기흥역 상권", "lat": 37.2805, "lng": 127.1165, "address": "기흥역", "type": "subway", "region": "yongin" },
+
+    { "id": "hs_g_hwaseong_1", "name": "동탄남광장 상권", "lat": 37.2025, "lng": 127.0680, "address": "동탄남광장", "type": "nightlife", "region": "hwaseong" },
+    { "id": "hs_g_hwaseong_2", "name": "동탄북광장 상권", "lat": 37.2075, "lng": 127.0725, "address": "동탄북광장", "type": "nightlife", "region": "hwaseong" },
+    { "id": "hs_g_hwaseong_3", "name": "동탄역 SRT 상권", "lat": 37.1985, "lng": 127.0980, "address": "동탄역", "type": "subway", "region": "hwaseong" },
+    { "id": "hs_g_hwaseong_4", "name": "병점역 먹자골목", "lat": 37.2085, "lng": 127.0325, "address": "병점역", "type": "subway", "region": "hwaseong" },
+
+    { "id": "hs_g_pyeongtaek_1", "name": "오산역 환승센터 상권", "lat": 37.1475, "lng": 127.0775, "address": "오산역", "type": "subway", "region": "osan" },
+    { "id": "hs_g_pyeongtaek_2", "name": "평택역 로데오거리", "lat": 36.9915, "lng": 127.0850, "address": "평택역", "type": "nightlife", "region": "pyeongtaek" },
+    { "id": "hs_g_pyeongtaek_3", "name": "평택 송탄출장소 상권", "lat": 37.0845, "lng": 127.0585, "address": "송탄", "type": "nightlife", "region": "pyeongtaek" },
+    { "id": "hs_g_pyeongtaek_4", "name": "평택 고덕신도시 상권", "lat": 37.0345, "lng": 127.0545, "address": "고덕신도시", "type": "nightlife", "region": "pyeongtaek" },
+
+    { "id": "hs_g_siheung_1", "name": "시흥 정왕동 로데오거리", "lat": 37.3450, "lng": 126.7380, "address": "정왕동", "type": "nightlife", "region": "siheung" },
+    { "id": "hs_g_siheung_2", "name": "시흥 배곧신도시 상권", "lat": 37.3565, "lng": 126.7305, "address": "배곧신도시", "type": "nightlife", "region": "siheung" },
+
+    { "id": "hs_g_gwangmyeong_1", "name": "광명 하안동 상권", "lat": 37.4565, "lng": 126.8835, "address": "하안동", "type": "nightlife", "region": "gwangmyeong" },
+    { "id": "hs_g_gwangmyeong_2", "name": "광명 철산역 로데오거리", "lat": 37.4785, "lng": 126.8625, "address": "철산역", "type": "nightlife", "region": "gwangmyeong" },
+
+    { "id": "hs_g_hanam_1", "name": "하남 미사역 상권", "lat": 37.5585, "lng": 127.1925, "address": "미사역", "type": "nightlife", "region": "hanam" },
+    { "id": "hs_g_hanam_2", "name": "하남 스타필드 상권", "lat": 37.5455, "lng": 127.2255, "address": "스타필드하남", "type": "nightlife", "region": "hanam" },
+
+    { "id": "hs_g_goyang_1", "name": "정발산역 라페스타", "lat": 37.6585, "lng": 126.7735, "address": "라페스타", "type": "nightlife", "region": "goyang" },
+    { "id": "hs_g_goyang_2", "name": "정발산역 웨스턴돔", "lat": 37.6550, "lng": 126.7710, "address": "웨스턴돔", "type": "nightlife", "region": "goyang" },
+    { "id": "hs_g_goyang_3", "name": "화정역 로데오거리", "lat": 37.6315, "lng": 126.8320, "address": "화정역", "type": "nightlife", "region": "goyang" },
+    { "id": "hs_g_goyang_4", "name": "대화역 킨텍스 상권", "lat": 37.6760, "lng": 126.7475, "address": "대화역", "type": "subway", "region": "goyang" },
+    { "id": "hs_g_goyang_5", "name": "백석역 벨라시타 상권", "lat": 37.6395, "lng": 126.7885, "address": "백석역", "type": "nightlife", "region": "goyang" },
+
+    { "id": "hs_g_bucheon_1", "name": "부천 상동역 상업지구", "lat": 37.5050, "lng": 126.7530, "address": "상동역", "type": "nightlife", "region": "bucheon" },
+    { "id": "hs_g_bucheon_2", "name": "부천 중동 로데오거리", "lat": 37.5030, "lng": 126.7760, "address": "중동역", "type": "nightlife", "region": "bucheon" },
+    { "id": "hs_g_bucheon_3", "name": "부천역 북부 로데오거리", "lat": 37.4845, "lng": 126.7825, "address": "부천역", "type": "nightlife", "region": "bucheon" },
+    { "id": "hs_g_bucheon_4", "name": "부천 송내역 로데오거리", "lat": 37.4845, "lng": 126.7535, "address": "송내역", "type": "nightlife", "region": "bucheon" },
+
+    { "id": "hs_g_gimpo_1", "name": "김포 장기동 먹자골목", "lat": 37.6435, "lng": 126.6715, "address": "장기동", "type": "nightlife", "region": "gimpo" },
+    { "id": "hs_g_gimpo_2", "name": "김포 구래동 상업지구", "lat": 37.6465, "lng": 126.6435, "address": "구래동", "type": "nightlife", "region": "gimpo" },
+
+    { "id": "hs_g_paju_1", "name": "파주 운정 야당역 상권", "lat": 37.7125, "lng": 126.7675, "address": "야당역", "type": "nightlife", "region": "paju" },
+    { "id": "hs_g_paju_2", "name": "파주 금촌역 로데오", "lat": 37.7615, "lng": 126.7725, "address": "금촌역", "type": "nightlife", "region": "paju" },
+
+    { "id": "hs_g_uijeongbu_1", "name": "의정부역 로데오거리", "lat": 37.7380, "lng": 127.0450, "address": "의정부역", "type": "nightlife", "region": "uijeongbu" },
+    { "id": "hs_g_uijeongbu_2", "name": "의정부 민락동 상권", "lat": 37.7535, "lng": 127.1025, "address": "민락동", "type": "nightlife", "region": "uijeongbu" },
+
+    { "id": "hs_g_guri_1", "name": "구리 수택동 먹자골목", "lat": 37.5935, "lng": 127.1425, "address": "구리역", "type": "nightlife", "region": "guri" },
+    { "id": "hs_g_namyangju_1", "name": "남양주 다산신도시 상권", "lat": 37.6285, "lng": 127.1525, "address": "다산동", "type": "nightlife", "region": "namyangju" },
+    { "id": "hs_g_namyangju_2", "name": "남양주 별내 카페거리", "lat": 37.6455, "lng": 127.1235, "address": "별내", "type": "nightlife", "region": "namyangju" },
+
+    { "id": "hs_i_01", "name": "인천 구월동 로데오거리", "lat": 37.4485, "lng": 126.7015, "address": "구월동", "type": "nightlife", "region": "incheon" },
+    { "id": "hs_i_02", "name": "인천 부평역 로데오거리", "lat": 37.4965, "lng": 126.7245, "address": "부평역", "type": "nightlife", "region": "incheon" },
+    { "id": "hs_i_03", "name": "인천 주안역 먹자골목", "lat": 37.4640, "lng": 126.6800, "address": "주안역", "type": "nightlife", "region": "incheon" },
+    { "id": "hs_i_04", "name": "인천 송도 센트럴파크 상권", "lat": 37.3915, "lng": 126.6385, "address": "송도센트럴파크", "type": "nightlife", "region": "incheon" },
+    { "id": "hs_i_05", "name": "인천 청라 커넬웨이 상권", "lat": 37.5315, "lng": 126.6385, "address": "청라국제도시", "type": "nightlife", "region": "incheon" },
+    { "id": "hs_i_06", "name": "인천 연수동 먹자골목", "lat": 37.4085, "lng": 126.6745, "address": "연수동", "type": "nightlife", "region": "incheon" },
+    { "id": "hs_i_07", "name": "인천 계산택지 상권", "lat": 37.5365, "lng": 126.7285, "address": "계산택지", "type": "nightlife", "region": "incheon" }
+  ];
 
   const WISU_BOUNDARY_POINTS = [
     { name: "안양 석수동 경계 (인천/부천/서울 방면)", lat: 37.4265, lng: 126.9050, address: "석수동" },
@@ -378,6 +500,14 @@
     { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway", isWisu: true },
     { name: "금정역 먹자골목", lat: 37.3721, lng: 126.9438, address: "금정역", type: "subway", isWisu: true }
   ];
+
+  function getMasterHotspotsFromStorage() {
+    const saved = localStorage.getItem('sudataxi_master_hotspots');
+    if (saved) {
+      try { return JSON.parse(saved); } catch(e) {}
+    }
+    return DEFAULT_MASTER_HOTSPOTS;
+  }
 
   function getStraightDistanceKm(lat1, lon1, lat2, lon2) {
     const R = 6371;
@@ -434,8 +564,8 @@
     return waypoints;
   }
 
-  async function fetchPOIsAroundPoint(lat, lng, radiusMeter = 1500) {
-    const query = `[out:json][timeout:5];(node(around:${radiusMeter},${lat},${lng})["amenity"~"bar|pub|nightclub|karaoke_box"]["name"];node(around:${radiusMeter},${lat},${lng})["shop"="alcohol"]["name"];node(around:${radiusMeter},${lat},${lng})["railway"="station"]["name"];);out 15;`;
+  async function fetchPOIsAroundPoint(lat, lng, radiusMeter = 2000) {
+    const query = `[out:json][timeout:4];(node(around:${radiusMeter},${lat},${lng})["amenity"~"bar|pub|nightclub|karaoke_box"]["name"];node(around:${radiusMeter},${lat},${lng})["shop"="alcohol"]["name"];node(around:${radiusMeter},${lat},${lng})["railway"="station"]["name"];);out 15;`;
     try {
       const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query });
       const data = await res.json();
@@ -515,7 +645,6 @@
   function toggleTimer() {
     initOrResumeAudioContext();
     requestNotificationPermission();
-    
     const btn = document.getElementById('timer-display-btn');
     if (timerRemainingSec <= 0) {
       timerRemainingSec = timerPresetMin * 60;
@@ -581,16 +710,16 @@
   }
   function getDynamicTimeCategoryBonus(itemType, itemName, nowHour) {
     let bonus = 0;
-    const isNightlife = (itemType === 'nightlife' || itemName.includes('먹자골목') || itemName.includes('포차') || itemName.includes('주점') || itemName.includes('로데오'));
-    const isCommuteHub = (itemType === 'subway' || itemType === 'office' || itemName.includes('역') || itemName.includes('지식정보타운') || itemName.includes('테크노밸리'));
+    const isNightlife = (itemType === 'nightlife' || itemName.includes('먹자골목') || itemName.includes('포차') || itemName.includes('주점') || itemName.includes('로데오') || itemName.includes('광장'));
+    const isCommuteHub = (itemType === 'subway' || itemType === 'office' || itemName.includes('역'));
     
     if (nowHour >= 21 || nowHour < 2) {
-      if (isNightlife) bonus += 35;
-      else bonus += 10;
+      if (isNightlife) bonus += 40;
+      else bonus += 15;
     } else if (nowHour >= 7 && nowHour < 10) {
-      if (isCommuteHub) bonus += 30;
+      if (isCommuteHub) bonus += 35;
     } else if (nowHour >= 18 && nowHour < 21) {
-      bonus += 20;
+      bonus += 25;
     } else {
       bonus += 10;
     }
@@ -645,6 +774,7 @@
     return JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
   }
 
+  /* 🌟 가짜 인덕원 기본값 완전히 제거 - 실시간 위치 직접 수신 */
   function executeSearch() {
     const locText = document.getElementById('loc-text');
     if (locText) locText.innerText = '📍 실시간 GPS 위치 수신 중...';
@@ -672,10 +802,11 @@
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
-    if (logEl) logEl.innerText = `현재 위치에서 목적지 방향 5km 스캔 연산 중...`;
+    if (logEl) logEl.innerText = `경로 주변 밴드 스캔 및 마스터 100선 연산 중...`;
     
     const weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng);
     const customHotspots = getCustomHotspots();
+    const masterHotspots = getMasterHotspotsFromStorage();
     
     let finalTarget = null;
     let mainRouteGeometry = [];
@@ -700,13 +831,15 @@
       mainRouteGeometry = road.geometryCoords || [];
     }
 
-    const startPoisPromise = fetchPOIsAroundPoint(currentPos.lat, currentPos.lng, 2000);
+    // 1단계: 실시간 API 스캔 (출발지 및 경로상 Waypoints 5km 간격)
+    const startPoisPromise = fetchPOIsAroundPoint(currentPos.lat, currentPos.lng, 2500);
     const waypoints = extractPathWaypointsEvery5km(mainRouteGeometry, 5.0);
-    const waypointPoisPromises = waypoints.map(wp => fetchPOIsAroundPoint(wp.lat, wp.lng, 1500));
+    const waypointPoisPromises = waypoints.map(wp => fetchPOIsAroundPoint(wp.lat, wp.lng, 2000));
 
     const poiResults = await Promise.all([startPoisPromise, ...waypointPoisPromises]);
     
-    let rawPool = [...customHotspots];
+    // 2단계: 3중 하이브리드 풀 구성 (나만의 장소 + 수도권 마스터 100선 + 실시간 API)
+    let rawPool = [...customHotspots, ...masterHotspots];
     poiResults.forEach(list => { rawPool.push(...list); });
 
     const nowHour = new Date().getHours();
@@ -717,15 +850,17 @@
       }
 
       const directDist = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
-      let isNearStep1 = directDist <= 2.0;
+      let isNearStep1 = directDist <= 4.0; // 현위치 근접 밴드
 
       const road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, item.lat, item.lng);
-      let score = Math.max(10, 300 - Math.round(road.distanceKm * 25));
+      let score = Math.max(10, 350 - Math.round(road.distanceKm * 18));
 
-      if (isNearStep1) score += 120;
-      else score += 50;
+      if (isNearStep1) score += 140;
+      else score += 60;
 
-      if (item.isCustom) score += 30;
+      if (item.isCustom) score += 50; // 나만의 장소 최우선 가점
+      else if (item.region || item.id?.startsWith('hs_')) score += 35; // 마스터 핫플 가점
+
       score += getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
       if (weatherData.isRainOrSnow) score += 20;
       
@@ -739,13 +874,14 @@
         score: Math.max(10, score), 
         isNearStep1,
         logCount: logResult.count,
-        isTimeMatch: logResult.isTimeMatch
+        isTimeMatch: logResult.isTimeMatch,
+        isMasterDb: !item.isCustom && (item.region !== undefined || item.id?.startsWith('hs_'))
       };
     }));
 
     let selectedRoute = [];
-    let validPool = scoredPool.filter(p => p.score >= 40 && p.name !== finalTarget.name);
-    validPool.sort((a, b) => a.dist - b.dist);
+    let validPool = scoredPool.filter(p => p.score >= 35 && p.name !== finalTarget.name);
+    validPool.sort((a, b) => b.score - a.score); // 점수 높은 순으로 유연한 제안
 
     const maxCards = currentMode === 1 ? 3 : 2;
     for (let candidate of validPool) {
@@ -765,8 +901,8 @@
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
       logEl.innerText = selectedRoute.length > 0 
-        ? `방금 · 모드 ${currentMode} 연산 완료 · 목적지 방향 경로 핫플 ${selectedRoute.length}곳 안내`
-        : `방금 · 모드 ${currentMode} 연산 완료 · 경로상 핫플 없음 (${finalTarget.name} 직행)`;
+        ? `방금 · 모드 ${currentMode} 연산 완료 · 경로 주변 추천 핫플 ${selectedRoute.length}곳 제안`
+        : `방금 · 모드 ${currentMode} 연산 완료 · 주변 핫플 없음 (${finalTarget.name} 직행)`;
     }
     
     let subFinalCandidates = [];
@@ -805,9 +941,9 @@
         </div>
         <div class="tag-group">
           ${item.isTimeMatch ? '<span class="tag timematch">🔥현재시간대콜집중</span>' : ''}
-          ${item.isNearStep1 ? '<span class="tag near">#출발지2km초근거리</span>' : '<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#목적지방향5km스캔</span>'}
+          ${item.isNearStep1 ? '<span class="tag near">#현위치근접상권</span>' : '<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#경로주변밴드스캔</span>'}
+          ${item.isMasterDb ? '<span class="tag masterdb">#수도권마스터핫플</span>' : ''}
           ${item.isCustom ? '<span class="tag custom">#나만의핫플</span>' : ''}
-          ${item.isWisu ? '<span class="tag wisu">#위수지역</span>' : ''}
           ${item.logCount > 0 ? `<span class="tag logmatch">#누적콜 ${item.logCount}건</span>` : ''}
         </div>
       `;
@@ -816,7 +952,7 @@
 
     const finalCard = document.createElement('div');
     finalCard.className = 'card final-card';
-    const targetLabel = currentMode === 1 ? '최종번화가' : '최단위수경계직행';
+    const targetLabel = currentMode === 1 ? '최종번화가' : '최단위수경계복귀';
     const finalBadgeNum = routeCards.length + 1;
 
     finalCard.innerHTML = `
@@ -835,7 +971,7 @@
           <button class="action-btn map-open-btn" data-name="${finalTarget.name}" data-lat="${finalTarget.lat}" data-lng="${finalTarget.lng}">🗺️ 카카오맵</button>
         </div>
       </div>
-      <div class="sub-info">${routeCards.length > 0 ? '경로상 핫플 경유 후 이동 · ' : '경유지 없음 · 즉시 직행 · '}${finalTarget.dist.toFixed(1)}km</div>
+      <div class="sub-info">${routeCards.length > 0 ? '경로 주변 상권 제안 후 이동 · ' : '경유지 없음 · 즉시 직행 · '}${finalTarget.dist.toFixed(1)}km</div>
     `;
     listEl.appendChild(finalCard);
     
@@ -880,7 +1016,6 @@
 
   function renderCallMapView() {
     if (typeof L === 'undefined') return;
-    
     const centerPos = currentPos || { lat: 37.4048, lng: 126.9767 };
     
     if (!callMapViewLeaflet) {
@@ -1105,7 +1240,11 @@
     });
   }
   function exportCallLogs() {
-    const data = { call_logs: JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]'), custom_hotspots: JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]') };
+    const data = { 
+      call_logs: JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]'), 
+      custom_hotspots: JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]'),
+      master_hotspots: getMasterHotspotsFromStorage()
+    };
     const jsonStr = JSON.stringify(data, null, 2);
     try {
       const blob = new Blob([jsonStr], { type: 'application/json' });
@@ -1129,12 +1268,15 @@
         const json = JSON.parse(evt.target.result);
         let existingLogs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
         let existingHotspots = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
-        let importedLogs = [];
-        let importedHotspots = [];
-        if (json.call_logs && Array.isArray(json.call_logs)) importedLogs = json.call_logs;
-        else if (Array.isArray(json)) importedLogs = json;
-        if (json.custom_hotspots && Array.isArray(json.custom_hotspots)) importedHotspots = json.custom_hotspots;
         
+        let importedLogs = json.call_logs || (Array.isArray(json) ? json : []);
+        let importedHotspots = json.custom_hotspots || [];
+        let importedMaster = json.master_hotspots || json.hotspots || null;
+        
+        if (importedMaster && Array.isArray(importedMaster)) {
+          localStorage.setItem('sudataxi_master_hotspots', JSON.stringify(importedMaster));
+        }
+
         let logMap = new Map();
         existingLogs.forEach(item => { logMap.set(item.id || `${item.timestamp}_${item.lat}_${item.lng}`, item); });
         importedLogs.forEach(item => { logMap.set(item.id || `${item.timestamp}_${item.lat}_${item.lng}`, item); });
@@ -1149,11 +1291,11 @@
         localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(mergedHotspots));
         updateCallLogStats();
         updateCustomHotspotUI();
-        showToast(`🎉 병합 완료! (콜 ${mergedLogs.length}건, 장소 ${mergedHotspots.length}개)`);
+        showToast(`🎉 마스터 DB 및 백업 병합 완료!`);
         if (currentMode === 3) renderCallMapView();
         else calculateAndRender();
       } catch(err) {
-        showToast('❌ 올바르지 않은 백업 파일입니다.');
+        showToast('❌ 올바르지 않은 백업/마스터 JSON 파일입니다.');
       } finally {
         e.target.value = '';
       }
@@ -1164,6 +1306,7 @@
     };
     reader.readAsText(file);
   }
+
   window.addEventListener('DOMContentLoaded', () => {
     updateCallLogStats();
     updateCustomHotspotUI();
