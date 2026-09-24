@@ -94,7 +94,6 @@
     
     .card.final-card { background: var(--final-card-bg); border: 1.5px solid var(--theme-accent); box-shadow: 0 0 12px var(--final-card-glow); }
     
-    /* 서브 목적지 카드 스타일 */
     .sub-final-section { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
     .sub-final-title { font-size: 13px; font-weight: 800; color: var(--theme-accent); margin-bottom: 2px; }
     .sub-final-list { display: flex; flex-direction: column; gap: 10px; }
@@ -617,14 +616,15 @@
   }
 
   /* -------------------------------------------------------------
-     [알고리즘 완전히 재수정] 
-     1. 500m(0.5km) 이내 1순위 거점 건너뛰기 연산 검증 및 보정
-     2. 4번 최종 목적지 방향 이탈(삥 둘러가기) 완벽 차단
+     [알고리즘 완전 개편]
+     1. 500m 이내 거점 패스 후 4번 목적지 선정
+     2. 4번 목적지까지 길목에 유효 핫플 없으면 단독 직행 (억지 3개 제거)
+     3. 50점 미만 저득점 경유지 완벽 차단
      ------------------------------------------------------------- */
   async function calculateAndRender() {
     if (!currentPos) currentPos = { lat: 37.4048, lng: 126.9767 };
     const logEl = document.getElementById('pipeline-log');
-    if (logEl) logEl.innerText = `실시간 도로망(OSRM) 모드 ${currentMode} 동선 정밀 연산 중...`;
+    if (logEl) logEl.innerText = `실시간 도로망(OSRM) 모드 ${currentMode} 동선 연산 중...`;
     
     const radius = currentMode === 1 ? 5000 : 15000;
     
@@ -645,7 +645,7 @@
     }
     const nowHour = new Date().getHours();
     
-    // 1. 모든 거점에 대한 실주행 거리 및 기본 점수 우선 연산
+    // 1. 거점별 실주행 거리 및 기본 점수 연산
     let scoredTargets = await Promise.all(searchTargetPool.map(async h => {
       const road = await fetchRealRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
       let targetScore = Math.max(10, 500 - Math.round(road.distanceKm * 20));
@@ -658,20 +658,14 @@
       };
     }));
     
-    // 거리순 및 점수순 정렬
-    scoredTargets.sort((a, b) => a.dist - b.dist);
-    
-    // ⭐ [ 핵심 500m 검증 규칙 ]
-    // 가장 가까운 1순위 거점이 0.5km(500m) 이내이면, 그 거점은 4번(최종) 목적지에서 완전히 제외!
+    // ⭐ [500m 검증 로직] 500m(0.5km) 초과 거점 중 점수 높은 곳을 4번 목적지로 결정
     let finalTarget = null;
     let farTargets = scoredTargets.filter(t => t.dist > 0.5);
     
     if (farTargets.length > 0) {
-      // 500m 초과하는 거점 중 콜 점수가 가장 높은 곳을 4번 최종 목적지로 선정
       farTargets.sort((a, b) => b.targetScore - a.targetScore);
       finalTarget = farTargets[0];
     } else {
-      // 모든 거점이 500m 이내인 특수 상황이면 가장 멀리 있는 곳 선택
       scoredTargets.sort((a, b) => b.dist - a.dist);
       finalTarget = scoredTargets[0];
     }
@@ -681,9 +675,14 @@
     // 확정된 4번 목적지 방향각 연산
     const finalBearing = getBearing(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
     
-    // 2. 경유 후보지(1~3번) 연산 - 4번 목적지로 향하는 동선 길목만 필터링
+    // 2. 경유 후보지(1~3번) 연산 - 4번 목적지로 향하는 동선 길목만 엄격 선별
     const limitedPool = pool.slice(0, 35);
     let scoredPool = await Promise.all(limitedPool.map(async item => {
+      // 4번 목적지와 동일하거나 너무 가까운 곳 제외
+      if (item.name === finalTarget.name || getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng) < 0.8) {
+        return { ...item, score: -999 };
+      }
+
       const road = await fetchRealRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
       
       let score = Math.max(10, 150 - Math.round(road.distanceKm * 10));
@@ -706,14 +705,12 @@
           score = -999;
         }
       } else {
-        // [모드 1 강한 조건] 
-        // 1) 4번 목적지 방향과 60도 이내이어야 함
-        // 2) 4번 목적지보다 더 멀리 돌아가는 위치는 탈락 (dist < finalTarget.dist)
-        if (angleDiff <= 60 && road.distanceKm < finalTarget.dist) {
+        // [모드 1] 4번 목적지 진행 방향(60도 이내) 및 목적지보다 전진 위치(dist < finalTarget.dist * 0.85)
+        if (angleDiff <= 60 && road.distanceKm < finalTarget.dist * 0.85) {
           score += 30;
           if (road.distanceKm <= 2.0) isNearStep1 = true;
         } else {
-          score = -999; // 완전히 돌아가는 장소 제외
+          score = -999; // 돌아가는 동선 탈락
         }
       }
       return { 
@@ -729,7 +726,8 @@
     
     let selectedRoute = [];
     if (currentMode === 1) {
-      let validPool = scoredPool.filter(p => p.score > 0 && p.name !== finalTarget.name);
+      // ⭐ [수정] 점수 50점 이상인 '진짜 유효한 길목 핫플'만 경유지로 채움 (억지 채우기 금지)
+      let validPool = scoredPool.filter(p => p.score >= 50 && p.name !== finalTarget.name);
       validPool.sort((a, b) => b.score - a.score);
       
       for (let candidate of validPool) {
@@ -738,10 +736,10 @@
         }
         if (selectedRoute.length === 3) break;
       }
-      // 현재 위치 기준으로 거리가 가까운 순서로 전진 정렬
+      // 거리순 정렬
       selectedRoute.sort((a, b) => a.dist - b.dist);
     } else {
-      let validPool = scoredPool.filter(p => p.score > 0 && p.name !== finalTarget.name && p.dist <= 2.0);
+      let validPool = scoredPool.filter(p => p.score >= 50 && p.name !== finalTarget.name && p.dist <= 2.0);
       validPool.sort((a, b) => b.dist - a.dist);
       if (validPool.length > 0) {
         selectedRoute.push(validPool[0]);
@@ -757,7 +755,9 @@
     const mapBtn = document.getElementById('btn-show-map');
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
-      logEl.innerText = `방금 · 모드 ${currentMode} 연산 완료 · 500m 이탈 검증 및 길목 경유지 ${selectedRoute.length}곳 안내`;
+      logEl.innerText = selectedRoute.length > 0 
+        ? `방금 · 모드 ${currentMode} 연산 완료 · 길목 경유지 ${selectedRoute.length}곳 안내`
+        : `방금 · 모드 ${currentMode} 연산 완료 · 길목 핫플 없음 (목적지 즉시 직행)`;
     }
     let subFinalCandidates = [];
     if (currentMode === 1) {
@@ -775,6 +775,7 @@
     if (!listEl) return;
     listEl.innerHTML = '';
     
+    // 경유지가 있을 때만 1, 2, 3번 카드 출력
     routeCards.forEach((item, index) => {
       const card = document.createElement('div');
       card.className = 'card';
@@ -803,14 +804,18 @@
       `;
       listEl.appendChild(card);
     });
+
+    // 최종 목적지 카드 (경유지가 없으면 1번, 있으면 2~4번 번호 부여)
     const finalCard = document.createElement('div');
     finalCard.className = 'card final-card';
     const targetLabel = currentMode === 1 ? '최종번화가' : '최종위수직행';
+    const finalBadgeNum = routeCards.length + 1;
+
     finalCard.innerHTML = `
       <div class="card-main-content">
         <div class="card-top-row">
           <div class="card-title-group">
-            <div class="num-badge">${routeCards.length + 1}</div>
+            <div class="num-badge">${finalBadgeNum}</div>
             <div class="place-info">
               <div class="place-name">${finalTarget.name}</div>
               <div class="score-dist">실주행 ${finalTarget.dist.toFixed(1)}km (약 ${finalTarget.estimatedTimeMin || 0}분) · ${finalTarget.score}점 ${getScoreLevelBadge(finalTarget.score)} [${targetLabel}]</div>
