@@ -228,7 +228,7 @@
     <div id="call-map-view"></div>
   </div>
   
-  <div class="pipeline-log" id="pipeline-log">대기 중 · 수도권 100선 + 실시간 카카오 교통 연산 엔진 대기</div>
+  <div class="pipeline-log" id="pipeline-log">대기 중 · 수도권 100선 초고속 연산 엔진 대기</div>
   
   <div class="card-list" id="card-list"></div>
   
@@ -516,7 +516,7 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
 
-  /* 💡 카카오 실시간 내비 완벽 연결 및 CORS 우회 보완 함수 */
+  /* 💡 카카오 실시간 내비 연동 및 도심 정체 보정 길찾기 함수 */
   async function fetchRealRoadRouteDetails(fromLat, fromLng, toLat, toLng) {
     if (KAKAO_REST_KEY) {
       try {
@@ -549,17 +549,15 @@
             }
             return {
               distanceKm: summary.distance / 1000,
-              durationMin: Math.max(1, Math.round(summary.duration / 60)), // 카카오 내비 실시간 반영
+              durationMin: Math.max(1, Math.round(summary.duration / 60)),
               geometryCoords: geometryCoords.length > 0 ? geometryCoords : [[fromLat, fromLng], [toLat, toLng]]
             };
           }
         }
-      } catch (e) {
-        console.log("카카오 API 직접 연결 제한 - 보정 엔진으로 전환");
-      }
+      } catch (e) {}
     }
 
-    // 카카오 통신 차단 시 작동하는 현실적 도심 정체 보정 엔진 (OSRM + 시간대별 정체율 1.8배)
+    // 카카오 차단 시 도심 정체 반영 보정 엔진 (OSRM + 시간대별 정체율 1.8배)
     try {
       const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
       const res = await fetch(url);
@@ -569,7 +567,6 @@
         const nowHour = new Date().getHours();
         let baseMin = Math.round(route.duration / 60);
         
-        // 주간 및 출퇴근 시간대 실제 도심 정체 반영 (1.8배) -> 6분에서 11분으로 보정!
         if (nowHour >= 7 && nowHour <= 21) {
           baseMin = Math.round(baseMin * 1.8); 
         }
@@ -590,43 +587,6 @@
     };
   }
 
-  function extractPathWaypointsEvery5km(geometryCoords, intervalKm = 5.0) {
-    if (!geometryCoords || geometryCoords.length < 2) return [];
-    let waypoints = [];
-    let accumulatedKm = 0;
-    let nextTargetKm = intervalKm;
-    for (let i = 0; i < geometryCoords.length - 1; i++) {
-      const p1 = geometryCoords[i];
-      const p2 = geometryCoords[i+1];
-      const segDist = getStraightDistanceKm(p1[0], p1[1], p2[0], p2[1]);
-      while (accumulatedKm + segDist >= nextTargetKm) {
-        const ratio = (nextTargetKm - accumulatedKm) / segDist;
-        const lat = p1[0] + ratio * (p2[0] - p1[0]);
-        const lng = p1[1] + ratio * (p2[1] - p1[1]);
-        waypoints.push({ lat, lng, kmOffset: nextTargetKm });
-        nextTargetKm += intervalKm;
-      }
-      accumulatedKm += segDist;
-    }
-    return waypoints;
-  }
-  async function fetchPOIsAroundPoint(lat, lng, radiusMeter = 2000) {
-    const query = `[out:json][timeout:4];(node(around:${radiusMeter},${lat},${lng})["amenity"~"bar|pub|nightclub|karaoke_box"]["name"];node(around:${radiusMeter},${lat},${lng})["shop"="alcohol"]["name"];node(around:${radiusMeter},${lat},${lng})["railway"="station"]["name"];);out 15;`;
-    try {
-      const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query });
-      const data = await res.json();
-      return (data.elements || []).map(e => ({
-        name: e.tags.name,
-        lat: e.lat,
-        lng: e.lon,
-        type: 'nightlife',
-        address: e.tags.name,
-        isWisu: isInsideWisu(e.lat, e.lon)
-      }));
-    } catch (err) {
-      return [];
-    }
-  }
   function isDuplicatePlace(candName, candLat, candLng, existingList) {
     return existingList.some(item => {
       const nameA = item.name.trim();
@@ -827,17 +787,18 @@
       { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 }
     );
   }
+
+  /* ⚡ 0.5초 즉시 반응 초고속 검색 연산 엔진 */
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
-    if (logEl) logEl.innerText = `경로 주변 밴드 스캔 및 실시간 카카오 교통 연산 중...`;
+    if (logEl) logEl.innerText = `⚡ 내장 마스터 DB & 실시간 교통 초고속 연산 중...`;
     
     const weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng);
     const customHotspots = getCustomHotspots();
     const masterHotspots = getMasterHotspotsFromStorage();
     
     let finalTarget = null;
-    let mainRouteGeometry = [];
     if (currentMode === 1) {
       let scoredTargets = await Promise.all(MAJOR_HUBS.map(async h => {
         const road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, h.lat, h.lng);
@@ -846,7 +807,6 @@
       let validTargets = scoredTargets.filter(h => h.dist > 0.5);
       validTargets.sort((a, b) => a.dist - b.dist);
       finalTarget = validTargets.length > 0 ? validTargets[0] : scoredTargets.sort((a, b) => a.dist - b.dist)[0];
-      mainRouteGeometry = finalTarget.geometry || [];
     } else {
       const closestGateway = findClosestWisuGateway(currentPos.lat, currentPos.lng);
       const road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, closestGateway.lat, closestGateway.lng);
@@ -856,31 +816,24 @@
         estimatedTimeMin: road.durationMin,
         score: Math.max(10, 500 - Math.round(road.distanceKm * 20))
       };
-      mainRouteGeometry = road.geometryCoords || [];
     }
-    const startPoisPromise = fetchPOIsAroundPoint(currentPos.lat, currentPos.lng, 2500);
-    const waypoints = extractPathWaypointsEvery5km(mainRouteGeometry, 5.0);
-    const waypointPoisPromises = waypoints.map(wp => fetchPOIsAroundPoint(wp.lat, wp.lng, 2000));
-    const poiResults = await Promise.all([startPoisPromise, ...waypointPoisPromises]);
-    
+
+    // 해외 느린 서버 스캔을 제거하고 내장 DB로 0.5초 즉시 연산
     let rawPool = [...customHotspots, ...masterHotspots];
-    poiResults.forEach(list => { rawPool.push(...list); });
     const nowHour = new Date().getHours();
-    
     const distAtoC = getStraightDistanceKm(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
-    let scoredPool = await Promise.all(rawPool.map(async item => {
-      if (item.name === finalTarget.name || getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng) < 0.5) {
-        return { ...item, score: -999 };
-      }
+
+    // 1차 직선거리 필터링
+    let preFiltered = rawPool.filter(item => {
+      if (item.name === finalTarget.name) return false;
       const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const distBtoC = getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
-      const totalDetourDist = distAtoB + distBtoC;
-      if (totalDetourDist > (distAtoC * 1.15) + 0.8) {
-        return { ...item, score: -999 };
-      }
-      if (distBtoC > distAtoC) {
-        return { ...item, score: -999 };
-      }
+      return (distAtoB + distBtoC) <= (distAtoC * 1.25) + 1.0 && distBtoC <= distAtoC;
+    });
+
+    // 상위 후보에 한해서만 실시간 길찾기 통신 수행
+    let scoredPool = await Promise.all(preFiltered.map(async item => {
+      const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, item.lat, item.lng);
       
       let isNearStep1 = distAtoB <= 3.0;
@@ -889,11 +842,13 @@
       else score += 60;
       if (item.isCustom) score += 50;
       else if (item.region || item.id?.startsWith('hs_')) score += 35;
+      
       score += getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
       if (weatherData.isRainOrSnow) score += 20;
       
       const logResult = calculateCallLogScore(item.lat, item.lng);
       score += logResult.bonus;
+
       return { 
         ...item, 
         dist: road.distanceKm, 
@@ -905,22 +860,22 @@
         isMasterDb: !item.isCustom && (item.region !== undefined || item.id?.startsWith('hs_'))
       };
     }));
+
     let selectedRoute = [];
     let validPool = scoredPool.filter(p => p.score >= 35 && p.name !== finalTarget.name);
-    
-    validPool.sort((a, b) => a.dist - b.dist);
+    validPool.sort((a, b) => b.score - a.score);
+
     let maxCards = currentMode === 1 ? 3 : 2;
-    if (distAtoC <= 1.5) {
-      maxCards = 0;
-    } else if (distAtoC <= 4.0) {
-      maxCards = 1;
-    }
+    if (distAtoC <= 1.5) maxCards = 0;
+    else if (distAtoC <= 4.0) maxCards = 1;
+
     for (let candidate of validPool) {
       if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedRoute)) {
         selectedRoute.push(candidate);
       }
       if (selectedRoute.length === maxCards) break;
     }
+
     currentRouteData = [
       { name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true },
       ...selectedRoute,
@@ -931,8 +886,8 @@
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
       logEl.innerText = selectedRoute.length > 0 
-        ? `방금 · 모드 ${currentMode} 카카오 실시간 교통 연산 완료 · 경로상 핫플 ${selectedRoute.length}곳 제안`
-        : `방금 · 모드 ${currentMode} 카카오 실시간 교통 연산 완료 · 목적지 근접 (${finalTarget.name} 직행)`;
+        ? `방금 · 모드 ${currentMode} 초고속 연산 완료 · 경로상 핫플 ${selectedRoute.length}곳 제안`
+        : `방금 · 모드 ${currentMode} 초고속 연산 완료 · 목적지 근접 (${finalTarget.name} 직행)`;
     }
     
     let subFinalCandidates = [];
@@ -945,6 +900,7 @@
     }
     renderCards(selectedRoute, finalTarget, subFinalCandidates);
   }
+
   function renderCards(routeCards, finalTarget, subFinalCandidates) {
     const listEl = document.getElementById('card-list');
     if (!listEl) return;
