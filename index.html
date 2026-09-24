@@ -4,15 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>수다택시 K</title>
+  
+  <!-- PWA Manifest 연동 -->
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
+  
+  <!-- iOS Safari (아이폰) 홈 화면 추가 아이콘 설정 -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="수다택시K">
-  
   <link rel="apple-touch-icon" href="./icon-180.png">
   <link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png">
   <link rel="apple-touch-icon" sizes="1024x1024" href="./icon-1024.png">
+  
+  <!-- 파비콘 및 브라우저 기본 아이콘 -->
   <link rel="shortcut icon" href="./icon-192.png">
   <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
@@ -1193,7 +1198,6 @@
     });
   }
 
-  // 🌟 [수정 완료] 모바일/스마트폰 다운로드 동작을 완벽하게 수정한 내보내기 함수
   function exportCallLogs() {
     const data = { 
       call_logs: JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]'), 
@@ -1202,23 +1206,34 @@
     };
     const jsonStr = JSON.stringify(data, null, 2);
 
+    const today = new Date();
+    const dateStr = today.getFullYear() +
+      String(today.getMonth() + 1).padStart(2, '0') +
+      String(today.getDate()).padStart(2, '0');
+    
+    const defaultFileName = `sudataxi_backup_${dateStr}`;
+    let userFileName = prompt('💾 저장할 백업 파일 이름을 입력하세요:', defaultFileName);
+    
+    if (userFileName === null) return;
+    
+    userFileName = userFileName.trim();
+    if (!userFileName) userFileName = defaultFileName;
+    if (!userFileName.endsWith('.json')) userFileName += '.json';
+
     try {
       const blob = new Blob([jsonStr], { type: 'application/json' });
-      // 💡 URL.createElement 오타 수정 -> URL.createObjectURL 정상 적용
       const blobUrl = URL.createObjectURL(blob); 
       
       const a = document.createElement('a');
       a.href = blobUrl;
-      a.download = `sudataxi_backup_${Date.now()}.json`;
+      a.download = userFileName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       
-      // 메모리 해제
       setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-      showToast('📥 백업 파일 다운로드가 시작되었습니다!');
+      showToast(`📥 [${userFileName}] 다운로드 시작!`);
     } catch(e) {
-      // 만약의 파일 다운로드 차단 시 클립보드 복사 대체
       try {
         navigator.clipboard.writeText(jsonStr);
         showToast('📋 파일 생성 대신 텍스트 복사 완료!');
