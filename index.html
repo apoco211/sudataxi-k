@@ -7,7 +7,7 @@
 
   <!-- PWA & iOS 홈 아이콘 설정 -->
   <link rel="manifest" href="./manifest.json">
-  <meta name="theme-color" content="#22C55E">
+  <meta name="theme-color" content="#FFC800">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="수다택시K">
@@ -27,37 +27,40 @@
   
   <style>
     :root {
-      --theme-accent: #22C55E;
-      --theme-bg-dark: #122318;
-      --theme-border: #1C3D29;
+      --theme-accent: #FFC800;
+      --theme-bg-dark: #2A2210;
+      --theme-border: #3A2E0A;
       --theme-text-on-accent: #000000;
-      --final-card-bg: #102619;
-      --final-card-glow: rgba(34, 197, 94, 0.25);
+      --final-card-bg: #2B2505;
+      --final-card-glow: rgba(255, 200, 0, 0.2);
     }
 
+    /* 모드 1: 기존 노란색 테마 */
     body.mode-1 {
-      --theme-accent: #22C55E;
-      --theme-bg-dark: #122318;
-      --theme-border: #1C3D29;
+      --theme-accent: #FFC800;
+      --theme-bg-dark: #2A2210;
+      --theme-border: #3A2E0A;
       --theme-text-on-accent: #000000;
-      --final-card-bg: #102619;
-      --final-card-glow: rgba(34, 197, 94, 0.25);
+      --final-card-bg: #2B2505;
+      --final-card-glow: rgba(255, 200, 0, 0.2);
     }
+    /* 모드 2: 기존 주황색 테마 */
     body.mode-2 {
-      --theme-accent: #10B981;
-      --theme-bg-dark: #0D241C;
-      --theme-border: #164E3D;
-      --theme-text-on-accent: #000000;
-      --final-card-bg: #0B211A;
-      --final-card-glow: rgba(16, 185, 129, 0.25);
+      --theme-accent: #FF6B00;
+      --theme-bg-dark: #2A1A0A;
+      --theme-border: #3A1F0A;
+      --theme-text-on-accent: #FFFFFF;
+      --final-card-bg: #2A1A0A;
+      --final-card-glow: rgba(255, 107, 0, 0.2);
     }
+    /* 모드 3: 눈이 편안한 은은한 민트 틸 테마 */
     body.mode-3 {
-      --theme-accent: #84CC16;
-      --theme-bg-dark: #19240D;
-      --theme-border: #2D4212;
-      --theme-text-on-accent: #000000;
-      --final-card-bg: #15220B;
-      --final-card-glow: rgba(132, 204, 22, 0.25);
+      --theme-accent: #14B8A6;
+      --theme-bg-dark: #0F2926;
+      --theme-border: #134E4A;
+      --theme-text-on-accent: #FFFFFF;
+      --final-card-bg: #0D211F;
+      --final-card-glow: rgba(20, 184, 166, 0.2);
     }
     
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -93,9 +96,9 @@
     .score-dist { font-size: 13px; font-weight: 800; color: var(--theme-accent); font-family: monospace; margin-top: 4px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
     
     .level-badge { font-weight: 900; padding: 2px 6px; border-radius: 6px; font-size: 11px; display: inline-flex; align-items: center; gap: 2px; }
-    .level-high { background: rgba(34, 197, 94, 0.2); color: #4ADE80; border: 1px solid #4ADE80; }
-    .level-mid { background: rgba(234, 179, 8, 0.2); color: #FACC15; border: 1px solid #FACC15; }
-    .level-low { background: rgba(239, 68, 68, 0.2); color: #F87171; border: 1px solid #F87171; }
+    .level-high { background: rgba(74, 222, 128, 0.2); color: #4ADE80; border: 1px solid #4ADE80; }
+    .level-mid { background: rgba(255, 200, 0, 0.2); color: #FFC800; border: 1px solid #FFC800; }
+    .level-low { background: rgba(255, 107, 107, 0.2); color: #FF6B6B; border: 1px solid #FF6B6B; }
     
     .card-btn-row { display: flex; gap: 8px; margin-top: 4px; }
     .action-btn { flex: 1; height: 40px; font-weight: 800; font-size: 13px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
@@ -104,11 +107,11 @@
     
     .tag-group { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
     .tag { font-size: 11px; padding: 2px 6px; border-radius: 6px; background: #2A2A2A; color: #A0A0A0; }
-    .tag.near { background: #064E3B; color: #6EE7B7; border: 1px solid #059669; font-weight: 700; }
+    .tag.near { background: #1E3A8A; color: #93C5FD; border: 1px solid #3B82F6; font-weight: 700; }
     .tag.wisu { background: var(--theme-bg-dark); color: var(--theme-accent); border: 1px solid var(--theme-border); }
-    .tag.custom { background: #14382B; color: #A7F3D0; border: 1px solid #10B981; font-weight: 700; }
-    .tag.logmatch { background: #1E293B; color: #94A3B8; border: 1px solid #475569; font-weight: 700; }
-    .tag.timematch { background: #14532D; color: #4ADE80; border: 1px solid #22C55E; font-weight: 800; }
+    .tag.custom { background: #3B0764; color: #E9D5FF; border: 1px solid #7E22CE; font-weight: 700; }
+    .tag.logmatch { background: #2B1F3D; color: #C084FC; border: 1px solid #5B21B6; font-weight: 700; }
+    .tag.timematch { background: #065F46; color: #34D399; border: 1px solid #10B981; font-weight: 800; }
     .sub-info { font-size: 12px; color: #8A8A8A; margin-top: 8px; border-top: 1px solid #2A2A2A; padding-top: 8px; }
     
     .card.final-card { background: var(--final-card-bg); border: 1.5px solid var(--theme-accent); box-shadow: 0 0 12px var(--final-card-glow); }
@@ -140,7 +143,7 @@
     .backup-btn { flex: 1; height: 40px; background: #2A2A2A; color: #FFFFFF; font-weight: 800; border: 1px solid #3A3A3A; border-radius: 10px; cursor: pointer; font-size: 13px; }
     
     .custom-section { margin-top: 12px; border-top: 1px dashed #3A3A3A; padding-top: 10px; }
-    .add-custom-btn { width: 100%; height: 42px; background: #12281D; color: #A7F3D0; border: 1px solid #059669; font-weight: 800; font-size: 13px; border-radius: 10px; cursor: pointer; }
+    .add-custom-btn { width: 100%; height: 42px; background: #2A1A3A; color: #D8B4FE; border: 1px solid #6B21A8; font-weight: 800; font-size: 13px; border-radius: 10px; cursor: pointer; }
     
     .recent-log-item { display: flex; align-items: center; justify-content: space-between; background: #242424; border: 1px solid #2E2E2E; border-radius: 6px; padding: 6px 8px; }
     .recent-log-time { font-size: 11px; font-weight: 700; color: #E0E0E0; white-space: nowrap; }
@@ -151,7 +154,7 @@
     .timer-mode-btn { flex: 1; background: #2A2A2A; color: #8A8A8A; font-size: 10px; font-weight: 800; border: 1px solid #3A3A3A; border-radius: 6px; cursor: pointer; }
     .timer-mode-btn.active { background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; border-color: var(--theme-accent) !important; }
     .timer-display-btn { flex: 1; background: #2A2A2A; border: 1px solid #3A3A3A; color: #FFFFFF; font-size: 13px; font-weight: 900; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .timer-display-btn.running { background: #12281D; color: var(--theme-accent); border-color: var(--theme-accent); }
+    .timer-display-btn.running { background: #3A2E0A; color: var(--theme-accent); border-color: var(--theme-accent); }
     .timer-display-btn.finished { background: #4A1A1A; color: #FF5555; border-color: #FF5555; animation: alertBlink 1s infinite; }
     
     @keyframes alertBlink {
@@ -169,16 +172,17 @@
     #route-map { width: 100%; height: 100%; min-height: 350px; flex: 1; background: #121212; z-index: 1; }
     .leaflet-tile-pane { filter: brightness(1.1) contrast(1.4); }
     .custom-map-marker { width: 34px; height: 34px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 16px; display: flex; align-items: center; justify-content: center; border: 2.5px solid #FFFFFF; box-shadow: 0 3px 8px rgba(0,0,0,0.8); }
-    .custom-map-marker.current { background: #22C55E; color: #000000; font-size: 18px; }
+    .custom-map-marker.current { background: #34D399; color: #000000; font-size: 18px; }
     .leaflet-popup-content { font-size: 15px; font-weight: 800; color: #111; }
 
+    /* 모드 3 지도 점 마커 (눈이 편한 민트 틸/슬레이트) */
     .call-dot-marker { border-radius: 50%; border: 2px solid #FFFFFF; box-shadow: 0 0 6px rgba(0,0,0,0.8); }
-    .call-dot-marker.active-time { background: #22C55E; animation: activePulseGreen 1.5s infinite; }
+    .call-dot-marker.active-time { background: #14B8A6; animation: activePulseTeal 1.5s infinite; }
     .call-dot-marker.other-time { background: #64748B; opacity: 0.75; }
-    @keyframes activePulseGreen {
-      0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-      70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
-      100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+    @keyframes activePulseTeal {
+      0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.7); }
+      70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(20, 184, 166, 0); }
+      100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(20, 184, 166, 0); }
     }
   </style>
 </head>
@@ -207,7 +211,7 @@
 
   <div id="heatmap-container">
     <div class="map-legend">
-      <div class="legend-item"><span class="dot-sample" style="background:#22C55E;"></span> 현재시간대 집중 (+-1시간)</div>
+      <div class="legend-item"><span class="dot-sample" style="background:#14B8A6;"></span> 현재시간대 집중 (+-1시간)</div>
       <div class="legend-item"><span class="dot-sample" style="background:#64748B;"></span> 기타 시간대 콜</div>
     </div>
     <div id="call-map-view"></div>
@@ -235,7 +239,7 @@
     
     <div class="custom-section">
       <button class="add-custom-btn" id="btn-add-custom">⭐ 현재 위치를 '나만의 콜 장소'로 직접 등록</button>
-      <div style="font-size: 11px; font-weight: 800; color: #A7F3D0; margin: 8px 0 4px 0;">📍 나만의 콜 장소 목록</div>
+      <div style="font-size: 11px; font-weight: 800; color: #C084FC; margin: 8px 0 4px 0;">📍 나만의 콜 장소 목록</div>
       <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 4px;"></div>
     </div>
   </div>
@@ -987,7 +991,7 @@
         <b>📍 탑승 기록</b><br>
         시간: ${logDate.toLocaleTimeString()}<br>
         날짜: ${logDate.toLocaleDateString()}<br>
-        ${isActiveTime ? '<span style="color:#22C55E; font-weight:900;">🔥 현재시간 집중지점</span>' : ''}
+        ${isActiveTime ? '<span style="color:#14B8A6; font-weight:900;">🔥 현재시간 집중지점</span>' : ''}
       `);
     });
 
@@ -1009,7 +1013,7 @@
       leafletMap.invalidateSize();
       leafletMap.eachLayer(l => { if (l instanceof L.Marker || l instanceof L.Polyline) leafletMap.removeLayer(l); });
       
-      const themeColor = currentMode === 1 ? '#22C55E' : '#10B981';
+      const themeColor = currentMode === 1 ? '#FFC800' : (currentMode === 2 ? '#FF6B00' : '#14B8A6');
       const markerCoords = currentRouteData.map(pt => [pt.lat, pt.lng]);
       
       currentRouteData.forEach((pt, idx) => {
