@@ -35,7 +35,6 @@
       --final-card-glow: rgba(255, 200, 0, 0.2);
     }
 
-    /* 모드 1: 기존 노란색 테마 */
     body.mode-1 {
       --theme-accent: #FFC800;
       --theme-bg-dark: #2A2210;
@@ -44,7 +43,6 @@
       --final-card-bg: #2B2505;
       --final-card-glow: rgba(255, 200, 0, 0.2);
     }
-    /* 모드 2: 기존 주황색 테마 */
     body.mode-2 {
       --theme-accent: #FF6B00;
       --theme-bg-dark: #2A1A0A;
@@ -53,7 +51,6 @@
       --final-card-bg: #2A1A0A;
       --final-card-glow: rgba(255, 107, 0, 0.2);
     }
-    /* 모드 3: 눈이 편안하고 산뜻한 포레스트 그린 테마 */
     body.mode-3 {
       --theme-accent: #22C55E;
       --theme-bg-dark: #0D2418;
@@ -175,7 +172,6 @@
     .custom-map-marker.current { background: #22C55E; color: #000000; font-size: 18px; }
     .leaflet-popup-content { font-size: 15px; font-weight: 800; color: #111; }
 
-    /* 모드 3 지도 점 마커 (포레스트 그린) */
     .call-dot-marker { border-radius: 50%; border: 2px solid #FFFFFF; box-shadow: 0 0 6px rgba(0,0,0,0.8); }
     .call-dot-marker.active-time { background: #22C55E; animation: activePulseGreen 1.5s infinite; }
     .call-dot-marker.other-time { background: #64748B; opacity: 0.75; }
@@ -362,9 +358,9 @@
     triggerSystemNotification();
   }
 
-  /* 위수지역 경계 좌표점 모음 (안양/군포/의왕/과천 외곽 테두리) */
+  /* 4개 위수도시 (안양/군포/의왕/과천) 외곽 관문 경계점 */
   const WISU_BOUNDARY_POINTS = [
-    { name: "안양 석수동 경계 (인천/부천 방면)", lat: 37.4265, lng: 126.9050, address: "석수동" },
+    { name: "안양 석수동 경계 (인천/부천/서울 방면)", lat: 37.4265, lng: 126.9050, address: "석수동" },
     { name: "안양 박달동 경계 (시흥/인천 방면)", lat: 37.4080, lng: 126.8920, address: "박달동" },
     { name: "안양 만안구 경계", lat: 37.3850, lng: 126.9100, address: "안양동" },
     { name: "군포 대야미/부곡 경계 (안산 방면)", lat: 37.3320, lng: 126.9150, address: "대야미동" },
@@ -382,7 +378,6 @@
     return wisuBoxes.some(b => lat >= b.minLat && lat <= b.maxLat && lng >= b.minLng && lng <= b.maxLng);
   }
 
-  /* 현재 위치에서 가장 가까운 위수지역 경계점 실시간 계산 */
   function findClosestWisuGateway(currentLat, currentLng) {
     let minDistance = Infinity;
     let closestPoint = WISU_BOUNDARY_POINTS[0];
@@ -406,12 +401,16 @@
     { name: "금정역 먹자골목", lat: 37.3721, lng: 126.9438, address: "금정역", type: "subway", isWisu: true }
   ];
 
+  /* 수도권 주요 타지역 백업 거점 (인천/부천/시흥/안산 등) */
   const REGIONAL_HOTSPOTS_PRESET = [
+    { name: "부평역 테마거리", lat: 37.4895, lng: 126.7239, address: "부평역", type: "nightlife", isWisu: false },
+    { name: "인천 구월동 로데오거리", lat: 37.4452, lng: 126.7015, address: "구월동", type: "nightlife", isWisu: false },
+    { name: "부천역 로데오거리", lat: 37.4840, lng: 126.7830, address: "부천역", type: "nightlife", isWisu: false },
+    { name: "부천 신중동역 먹자골목", lat: 37.5030, lng: 126.7760, address: "신중동역", type: "nightlife", isWisu: false },
+    { name: "인천 송도 타임스페이스", lat: 37.3840, lng: 126.6500, address: "송도동", type: "nightlife", isWisu: false },
+    { name: "시흥 배곧신도시 중심상가", lat: 37.3700, lng: 126.7330, address: "배곧동", type: "nightlife", isWisu: false },
     { name: "안산 중앙역 로데오거리", lat: 37.3186, lng: 126.8383, address: "중앙역", type: "nightlife", isWisu: false },
-    { name: "안산 상록수역 먹자골목", lat: 37.3025, lng: 126.8664, address: "상록수역", type: "subway", isWisu: false },
-    { name: "안산 한대앞역 상권", lat: 37.3097, lng: 126.8532, address: "한대앞역", type: "subway", isWisu: false },
-    { name: "안산 고잔신도시 먹자골목", lat: 37.3168, lng: 126.8231, address: "고잔역", type: "nightlife", isWisu: false },
-    { name: "안산 선부역 동명상가", lat: 37.3341, lng: 126.8123, address: "선부역", type: "nightlife", isWisu: false }
+    { name: "안산 상록수역 먹자골목", lat: 37.3025, lng: 126.8664, address: "상록수역", type: "subway", isWisu: false }
   ];
 
   function getStraightDistanceKm(lat1, lon1, lat2, lon2) {
@@ -423,31 +422,45 @@
               Math.sin(dLon/2) * Math.sin(dLon/2);
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
-  function getBearing(lat1, lon1, lat2, lon2) {
-    const y = Math.sin((lon2 - lon1) * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180);
-    const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
-              Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos((lon2 - lon1) * Math.PI / 180);
-    return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+
+  /* 점과 선분(도로 구간) 간의 수직 실효거리 계산 함수 (경로선에 접해 있는지 판별) */
+  function getDistanceToSegmentKm(pLat, pLng, aLat, aLng, bLat, bLng) {
+    const dAB = getStraightDistanceKm(aLat, aLng, bLat, bLng);
+    if (dAB === 0) return getStraightDistanceKm(pLat, pLng, aLat, aLng);
+    
+    // 투영 비율 t 계산
+    const t = ((pLat - aLat) * (bLat - aLat) + (pLng - aLng) * (bLng - aLng)) / Math.pow(dAB * 0.009, 2);
+    const clampedT = Math.max(0, Math.min(1, t));
+    
+    const projLat = aLat + clampedT * (bLat - aLat);
+    const projLng = aLng + clampedT * (bLng - aLng);
+    
+    return getStraightDistanceKm(pLat, pLng, projLat, projLng);
   }
-  async function fetchRealRoadRoute(fromLat, fromLng, toLat, toLng) {
+
+  /* OSRM 다중점 경로 연산 함수 (국도 우선 파라미터) */
+  async function fetchRealRoadRouteDetails(fromLat, fromLng, toLat, toLng) {
     try {
-      const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=false`;
+      const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
       const res = await fetch(url);
       const data = await res.json();
       if (data.routes && data.routes.length > 0) {
         const route = data.routes[0];
         return {
           distanceKm: route.distance / 1000,
-          durationMin: Math.max(1, Math.round(route.duration / 60))
+          durationMin: Math.max(1, Math.round(route.duration / 60)),
+          geometryCoords: route.geometry.coordinates.map(c => [c[1], c[0]]) // [lat, lng]
         };
       }
     } catch (e) {}
     const fallbackDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng) * 1.3;
     return {
       distanceKm: fallbackDist,
-      durationMin: Math.max(1, Math.round((fallbackDist / 32.0) * 60))
+      durationMin: Math.max(1, Math.round((fallbackDist / 32.0) * 60)),
+      geometryCoords: [[fromLat, fromLng], [toLat, toLng]]
     };
   }
+
   function isDuplicatePlace(candName, candLat, candLng, existingList) {
     return existingList.some(item => {
       const nameA = item.name.trim();
@@ -457,6 +470,7 @@
       return sameName || closeDist;
     });
   }
+
   function setMode(mode) {
     currentMode = mode;
     document.body.className = `mode-${mode}`;
@@ -477,6 +491,7 @@
       executeSearch();
     }
   }
+
   function getScoreLevelBadge(score) {
     if (score >= 70) return '<span class="level-badge level-high">🔥 높음</span>';
     if (score >= 45) return '<span class="level-badge level-mid">⚡ 보통</span>';
@@ -721,7 +736,7 @@
   async function calculateAndRender() {
     if (!currentPos) currentPos = { lat: 37.4048, lng: 126.9767 };
     const logEl = document.getElementById('pipeline-log');
-    if (logEl) logEl.innerText = `실시간 도로망(OSRM) 모드 ${currentMode} 동선 연산 중...`;
+    if (logEl) logEl.innerText = `실시간 국도/도로망 모드 ${currentMode} 동선 연산 중...`;
     
     const radius = currentMode === 1 ? 5000 : 15000;
     
@@ -733,74 +748,84 @@
     const customHotspots = getCustomHotspots();
     let pool = [];
     let finalTarget = null;
+    let mainRouteGeometry = [];
 
     if (currentMode === 1) {
       pool = [...customHotspots, ...overpassData, ...MAJOR_HUBS].filter(p => isInsideWisu(p.lat, p.lng));
       let scoredTargets = await Promise.all(MAJOR_HUBS.map(async h => {
-        const road = await fetchRealRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
-        return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: Math.max(10, 500 - Math.round(road.distanceKm * 20)) };
+        const road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, h.lat, h.lng);
+        return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: Math.max(10, 500 - Math.round(road.distanceKm * 20)), geometry: road.geometryCoords };
       }));
       scoredTargets.sort((a, b) => b.score - a.score);
       finalTarget = scoredTargets[0] || MAJOR_HUBS[0];
+      mainRouteGeometry = finalTarget.geometry || [];
     } else {
-      // 모드2: 실시간으로 현재 위치에서 가장 가까운 위수 경계 지점 연산
+      // 모드2: 실시간 최단 위수 경계점 및 주행 경로 연산
       const closestGateway = findClosestWisuGateway(currentPos.lat, currentPos.lng);
-      const road = await fetchRealRoadRoute(currentPos.lat, currentPos.lng, closestGateway.lat, closestGateway.lng);
+      const road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, closestGateway.lat, closestGateway.lng);
       finalTarget = {
         ...closestGateway,
         dist: road.distanceKm,
         estimatedTimeMin: road.durationMin,
         score: Math.max(10, 500 - Math.round(road.distanceKm * 20))
       };
+      mainRouteGeometry = road.geometryCoords || [];
       pool = [...customHotspots, ...overpassData, ...REGIONAL_HOTSPOTS_PRESET];
     }
 
     const nowHour = new Date().getHours();
-    const finalBearing = getBearing(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
     
-    const limitedPool = pool.slice(0, 35);
+    const limitedPool = pool.slice(0, 40);
     let scoredPool = await Promise.all(limitedPool.map(async item => {
       if (item.name === finalTarget.name || getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng) < 0.8) {
         return { ...item, score: -999 };
       }
 
-      const road = await fetchRealRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
-      
+      const directDist = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
+      let isNearStep1 = directDist <= 2.0; // 1단계: 반경 1~2km 초근거리 (방향 무관)
+
+      let isPathConnected = false;
+      let minDistanceToPath = Infinity;
+
+      // 2단계: 실제 도로망 경로(Path) 상에 접해 있는지 오차거리 계산
+      if (!isNearStep1 && mainRouteGeometry.length > 1) {
+        for (let i = 0; i < mainRouteGeometry.length - 1; i++) {
+          const d = getDistanceToSegmentKm(
+            item.lat, item.lng,
+            mainRouteGeometry[i][0], mainRouteGeometry[i][1],
+            mainRouteGeometry[i+1][0], mainRouteGeometry[i+1][1]
+          );
+          if (d < minDistanceToPath) minDistanceToPath = d;
+        }
+        if (minDistanceToPath <= 1.5) { // 국도 경로선 주변 1.5km 이내 핫플 허용
+          isPathConnected = true;
+        }
+      }
+
+      if (!isNearStep1 && !isPathConnected && currentMode === 2) {
+        return { ...item, score: -999 };
+      }
+
+      const road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, item.lat, item.lng);
       let score = Math.max(10, 150 - Math.round(road.distanceKm * 10));
+
+      if (isNearStep1) score += 120; // 초근거리 가산점
+      if (isPathConnected) score += 60; // 국도 복귀 경로선 가산점
       if (item.isCustom) score += 25;
+      
       score += getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
       if (weatherData.isRainOrSnow) score += 20;
       
       const logResult = calculateCallLogScore(item.lat, item.lng);
       score += logResult.bonus;
-      
-      const itemBearing = getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng);
-      let angleDiff = Math.abs(finalBearing - itemBearing);
-      if (angleDiff > 180) angleDiff = 360 - angleDiff;
-      
-      let isNearStep1 = false;
-      if (currentMode === 2) {
-        if (road.distanceKm <= 2.0 && angleDiff <= 40) {
-          score += 100; 
-          isNearStep1 = true;
-        } else {
-          score = -999;
-        }
-      } else {
-        if (angleDiff <= 60 && road.distanceKm < finalTarget.dist * 0.85) {
-          score += 30;
-          if (road.distanceKm <= 2.0) isNearStep1 = true;
-        } else {
-          score = -999;
-        }
-      }
+
       return { 
         ...item, 
         dist: road.distanceKm, 
         estimatedTimeMin: road.durationMin,
         score: Math.max(10, score), 
-        delta: angleDiff, 
         isNearStep1,
+        isPathConnected,
         logCount: logResult.count,
         isTimeMatch: logResult.isTimeMatch
       };
@@ -819,11 +844,17 @@
       }
       selectedRoute.sort((a, b) => a.dist - b.dist);
     } else {
-      let validPool = scoredPool.filter(p => p.score >= 50 && p.name !== finalTarget.name && p.dist <= 2.0);
-      validPool.sort((a, b) => b.dist - a.dist);
-      if (validPool.length > 0) {
-        selectedRoute.push(validPool[0]);
+      let validPool = scoredPool.filter(p => p.score >= 50 && p.name !== finalTarget.name);
+      validPool.sort((a, b) => b.score - a.score);
+      
+      // 초근거리(1~2km) 및 국도 경로상 핫플 우선 채택
+      for (let candidate of validPool) {
+        if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedRoute)) {
+          selectedRoute.push(candidate);
+        }
+        if (selectedRoute.length === 2) break;
       }
+      selectedRoute.sort((a, b) => a.dist - b.dist);
     }
     
     currentRouteData = [
@@ -836,8 +867,8 @@
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
       logEl.innerText = selectedRoute.length > 0 
-        ? `방금 · 모드 ${currentMode} 연산 완료 · 길목 경유지 ${selectedRoute.length}곳 안내`
-        : `방금 · 모드 ${currentMode} 연산 완료 · 길목 핫플 없음 (최단 경계로 즉시 직행)`;
+        ? `방금 · 모드 ${currentMode} 연산 완료 · 국도 이동 경로 핫플 ${selectedRoute.length}곳 안내`
+        : `방금 · 모드 ${currentMode} 연산 완료 · 주변 및 경로상 핫플 없음 (최단 경계로 직행)`;
     }
     let subFinalCandidates = [];
     if (currentMode === 1) {
@@ -876,6 +907,7 @@
         <div class="tag-group">
           ${item.isTimeMatch ? '<span class="tag timematch">🔥현재시간대콜집중</span>' : ''}
           ${item.isNearStep1 ? '<span class="tag near">#1-2km초근거리</span>' : ''}
+          ${item.isPathConnected ? '<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#복귀국도경로선</span>' : ''}
           ${item.isCustom ? '<span class="tag custom">#나만의핫플</span>' : ''}
           ${item.isWisu ? '<span class="tag wisu">#위수지역</span>' : ''}
           ${item.logCount > 0 ? `<span class="tag logmatch">#누적콜 ${item.logCount}건</span>` : ''}
@@ -905,7 +937,7 @@
           <button class="action-btn map-open-btn" data-name="${finalTarget.name}" data-lat="${finalTarget.lat}" data-lng="${finalTarget.lng}">🗺️ 카카오맵</button>
         </div>
       </div>
-      <div class="sub-info">${routeCards.length > 0 ? '길목 핫플 경유 후 직행 · ' : '경유지 없음 · 최단 위수 경계 즉시 직행 · '}${finalTarget.dist.toFixed(1)}km</div>
+      <div class="sub-info">${routeCards.length > 0 ? '경로상 핫플 경유 후 복귀 · ' : '경유지 없음 · 최단 위수 경계 즉시 직행 · '}${finalTarget.dist.toFixed(1)}km</div>
     `;
     listEl.appendChild(finalCard);
     
