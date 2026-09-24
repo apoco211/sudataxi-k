@@ -232,7 +232,7 @@
     <div id="call-map-view"></div>
   </div>
   
-  <div class="pipeline-log" id="pipeline-log">대기 중 · 수도권 100선 + 하이브리드 동선 스캔 엔진 대기</div>
+  <div class="pipeline-log" id="pipeline-log">대기 중 · 수도권 100선 + 실시간 카카오 교통 연산 엔진 대기</div>
   
   <div class="card-list" id="card-list"></div>
   
@@ -284,6 +284,8 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+  const KAKAO_REST_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
+  
   let currentMode = 1;
   let currentPos = null;
   let leafletMap = null;
@@ -517,7 +519,45 @@
               Math.sin(dLon/2) * Math.sin(dLon/2);
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
+
+  /* 💡 카카오모빌리티 실시간 길찾기 API 연동 (실시간 교통 반영) */
   async function fetchRealRoadRouteDetails(fromLat, fromLng, toLat, toLng) {
+    if (KAKAO_REST_KEY) {
+      try {
+        const url = `https://apis-naver.kakaomobility.com/v1/directions?origin=${fromLng},${fromLat}&destination=${toLng},${toLat}&priority=RECOMMEND`;
+        const res = await fetch(url, {
+          method: 'GET',
+          headers: { 'Authorization': `KakaoAK ${KAKAO_REST_KEY}` }
+        });
+        const data = await res.json();
+        if (data.routes && data.routes.length > 0 && data.routes[0].result_code === 0) {
+          const route = data.routes[0];
+          const summary = route.summary;
+          let geometryCoords = [];
+          
+          if (route.sections) {
+            route.sections.forEach(sec => {
+              if (sec.roads) {
+                sec.roads.forEach(road => {
+                  if (road.vertexes) {
+                    for (let i = 0; i < road.vertexes.length; i += 2) {
+                      geometryCoords.push([road.vertexes[i+1], road.vertexes[i]]);
+                    }
+                  }
+                });
+              }
+            });
+          }
+          return {
+            distanceKm: summary.distance / 1000,
+            durationMin: Math.max(1, Math.round(summary.duration / 60)), // 🔥 카카오 내비 기준 실시간 차막힘 반영!
+            geometryCoords: geometryCoords.length > 0 ? geometryCoords : [[fromLat, fromLng], [toLat, toLng]]
+          };
+        }
+      } catch (e) {}
+    }
+
+    // 카카오 API 오류 발생 시 기존 무료 OSRM으로 자동 전환 (Fallback)
     try {
       const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
       const res = await fetch(url);
@@ -531,6 +571,7 @@
         };
       }
     } catch (e) {}
+
     const fallbackDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng) * 1.3;
     return {
       distanceKm: fallbackDist,
@@ -538,6 +579,7 @@
       geometryCoords: [[fromLat, fromLng], [toLat, toLng]]
     };
   }
+
   function extractPathWaypointsEvery5km(geometryCoords, intervalKm = 5.0) {
     if (!geometryCoords || geometryCoords.length < 2) return [];
     let waypoints = [];
@@ -778,7 +820,7 @@
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
-    if (logEl) logEl.innerText = `경로 주변 밴드 스캔 및 마스터 100선 연산 중...`;
+    if (logEl) logEl.innerText = `경로 주변 밴드 스캔 및 실시간 카카오 교통 연산 중...`;
     
     const weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng);
     const customHotspots = getCustomHotspots();
@@ -879,15 +921,16 @@
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
       logEl.innerText = selectedRoute.length > 0 
-        ? `방금 · 모드 ${currentMode} 연산 완료 · 사이 경로상 핫플 ${selectedRoute.length}곳 제안`
-        : `방금 · 모드 ${currentMode} 연산 완료 · 목적지 근접 (${finalTarget.name} 직행)`;
+        ? `방금 · 모드 ${currentMode} 카카오 실시간 교통 연산 완료 · 경로상 핫플 ${selectedRoute.length}곳 제안`
+        : `방금 · 모드 ${currentMode} 카카오 실시간 교통 연산 완료 · 목적지 근접 (${finalTarget.name} 직행)`;
     }
     
     let subFinalCandidates = [];
     if (currentMode === 1) {
-      subFinalCandidates = MAJOR_HUBS.filter(h => h.name !== finalTarget.name).map(h => {
-        return { ...h, dist: getStraightDistanceKm(currentPos.lat, currentPos.lng, h.lat, h.lng), estimatedTimeMin: 5, score: 50 };
-      });
+      subFinalCandidates = await Promise.all(MAJOR_HUBS.filter(h => h.name !== finalTarget.name).map(async h => {
+        const road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, h.lat, h.lng);
+        return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: 50 };
+      }));
       subFinalCandidates.sort((a, b) => a.dist - b.dist);
     }
     renderCards(selectedRoute, finalTarget, subFinalCandidates);
@@ -907,7 +950,7 @@
               <div class="num-badge">${index + 1}</div>
               <div class="place-info">
                 <div class="place-name">${item.name}</div>
-                <div class="score-dist">실주행 ${item.dist.toFixed(1)}km (약 ${item.estimatedTimeMin}분) · ${item.score}점 ${getScoreLevelBadge(item.score)}</div>
+                <div class="score-dist">카카오 실시간 ${item.dist.toFixed(1)}km (약 ${item.estimatedTimeMin}분) · ${item.score}점 ${getScoreLevelBadge(item.score)}</div>
               </div>
             </div>
           </div>
@@ -937,7 +980,7 @@
             <div class="num-badge">${finalBadgeNum}</div>
             <div class="place-info">
               <div class="place-name">${finalTarget.name}</div>
-              <div class="score-dist">실주행 ${finalTarget.dist.toFixed(1)}km (약 ${finalTarget.estimatedTimeMin || 0}분) · ${finalTarget.score}점 ${getScoreLevelBadge(finalTarget.score)} [${targetLabel}]</div>
+              <div class="score-dist">카카오 실시간 ${finalTarget.dist.toFixed(1)}km (약 ${finalTarget.estimatedTimeMin || 0}분) · ${finalTarget.score}점 ${getScoreLevelBadge(finalTarget.score)} [${targetLabel}]</div>
             </div>
           </div>
         </div>
@@ -961,7 +1004,7 @@
               <div class="sub-final-top">
                 <div class="sub-final-info">
                   <div class="sub-final-name">${sub.name}</div>
-                  <div class="sub-final-meta">실주행 ${sub.dist.toFixed(1)}km (약 ${sub.estimatedTimeMin}분) · ${sub.score}점</div>
+                  <div class="sub-final-meta">카카오 실시간 ${sub.dist.toFixed(1)}km (약 ${sub.estimatedTimeMin}분) · ${sub.score}점</div>
                 </div>
                 ${getScoreLevelBadge(sub.score)}
               </div>
@@ -1062,16 +1105,21 @@
         L.marker([pt.lat, pt.lng], { icon: L.divIcon({ html, className: '', iconSize: [30, 30], iconAnchor: [15, 15] }) })
           .addTo(leafletMap).bindPopup(`<b>${pt.name}</b>`);
       });
+      
       try {
-        const coordsStr = currentRouteData.map(pt => `${pt.lng},${pt.lat}`).join(';');
-        const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson`;
-        const res = await fetch(osrmUrl);
-        const data = await res.json();
-        if (data.routes && data.routes.length > 0) {
-          const roadCoords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-          L.polyline(roadCoords, { color: themeColor, weight: 6, opacity: 0.95 }).addTo(leafletMap);
+        let allRoadCoords = [];
+        for (let i = 0; i < currentRouteData.length - 1; i++) {
+          const start = currentRouteData[i];
+          const end = currentRouteData[i+1];
+          const legDetails = await fetchRealRoadRouteDetails(start.lat, start.lng, end.lat, end.lng);
+          if (legDetails.geometryCoords && legDetails.geometryCoords.length > 0) {
+            allRoadCoords.push(...legDetails.geometryCoords);
+          }
+        }
+        if (allRoadCoords.length > 0) {
+          L.polyline(allRoadCoords, { color: themeColor, weight: 6, opacity: 0.95 }).addTo(leafletMap);
         } else {
-          throw new Error("No OSRM Route");
+          throw new Error("No Kakao Route Coords");
         }
       } catch (err) {
         L.polyline(markerCoords, { color: themeColor, weight: 5, opacity: 0.9, dashArray: '6, 8' }).addTo(leafletMap);
