@@ -119,6 +119,7 @@
     .tag.logmatch { background: #2B1F3D; color: #C084FC; border: 1px solid #5B21B6; font-weight: 700; }
     .tag.timematch { background: #065F46; color: #34D399; border: 1px solid #10B981; font-weight: 800; }
     .tag.masterdb { background: #581C87; color: #F3E8FF; border: 1px solid #9333EA; font-weight: 700; }
+    .tag.livekakaomap { background: #854D0E; color: #FEF08A; border: 1px solid #EAB308; font-weight: 800; }
     .sub-info { font-size: 11px; color: #8A8A8A; margin-top: 6px; border-top: 1px solid #2A2A2A; padding-top: 6px; }
     
     .card.final-card { background: var(--final-card-bg); border: 1.5px solid var(--theme-accent); box-shadow: 0 0 8px var(--final-card-glow); }
@@ -517,6 +518,55 @@
     }
   }
 
+  /* 🔍 [신규] 카카오 장소 검색 API 기반 주변 실시간 상권 핫플 라이브 수집 */
+  async function fetchLiveKakaoHotspots(lat, lng) {
+    if (!KAKAO_REST_KEY) return [];
+    
+    const nowHour = new Date().getHours();
+    let keywords = ['지하철역', '병원'];
+    if (nowHour >= 18 || nowHour < 4) {
+      keywords = ['먹자골목', '로데오', '지하철역', '주점'];
+    } else if (nowHour >= 12 && nowHour < 18) {
+      keywords = ['학원가', '병원', '지하철역'];
+    }
+
+    let liveHotspots = [];
+    for (let kw of keywords) {
+      try {
+        const kakaoUrl = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(kw)}&x=${lng}&y=${lat}&radius=4000&sort=distance`;
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(kakaoUrl)}`;
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 1500);
+        
+        const res = await fetch(proxyUrl, {
+          method: 'GET',
+          headers: { 'Authorization': `KakaoAK ${KAKAO_REST_KEY}` },
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.documents && data.documents.length > 0) {
+            data.documents.slice(0, 3).forEach(place => {
+              liveHotspots.push({
+                id: 'kakao_live_' + place.id,
+                name: place.place_name,
+                lat: parseFloat(place.y),
+                lng: parseFloat(place.x),
+                address: place.address_name || place.road_address_name,
+                type: kw.includes('역') ? 'subway' : (kw.includes('병원') ? 'hospital' : 'nightlife'),
+                isLiveKakao: true
+              });
+            });
+          }
+        }
+      } catch(e) {}
+    }
+    return liveHotspots;
+  }
+
   function parseDateSafely(dateStr) {
     if (!dateStr) return new Date(0);
     if (dateStr instanceof Date) return dateStr;
@@ -530,11 +580,9 @@
     return new Date(0);
   }
 
-  /* 💡 [수정] OSRM / 곡선 도로 좌표 연산 보장 엔진 */
   async function fetchRealRoadRouteDetails(fromLat, fromLng, toLat, toLng) {
     const directDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng);
     
-    // API 연결 실패 시 직선 대신 주요 도로를 지나는 구불구불한 보정 궤적 생성
     const midLat = (fromLat + toLat) / 2;
     const midLng = (fromLng + toLng) / 2;
     const fallbackCoords = [
@@ -705,11 +753,13 @@
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
-    if (logEl) logEl.innerText = `⚡ [모드 ${currentMode}] 복귀 동선 연산 중...`;
+    if (logEl) logEl.innerText = `⚡ [모드 ${currentMode}] 카카오 실시간 상권 + 복귀 동선 연산 중...`;
     
     let weatherData = { isRainOrSnow: false };
     try { weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng); } catch(e) {}
 
+    // 카카오 지도 API를 활용해 내 주변 주변 상권 실시간 추가 수집
+    const liveKakaoHotspots = await fetchLiveKakaoHotspots(currentPos.lat, currentPos.lng);
     const customHotspots = getCustomHotspots();
     const masterHotspots = getMasterHotspotsFromStorage();
     const nowHour = new Date().getHours();
@@ -734,7 +784,8 @@
       };
     }
 
-    let rawPool = [...customHotspots, ...masterHotspots].filter(item => {
+    // 마스터 DB + 직접 저장 장소 + 카카오 실시간 라이브 탐색 장소 통합
+    let rawPool = [...liveKakaoHotspots, ...customHotspots, ...masterHotspots].filter(item => {
       const nameA = item.name.replace(/\s+/g, '').substring(0, 3);
       const nameB = finalTarget.name.replace(/\s+/g, '').substring(0, 3);
       return nameA !== nameB;
@@ -756,7 +807,9 @@
       let score = Math.max(10, 350 - Math.round(road.distanceKm * 18));
       if (isNearStep1) score += 140;
       else score += 60;
+      
       if (item.isCustom) score += 50;
+      else if (item.isLiveKakao) score += 45; // 카카오 실시간 라이브 검색 장소 가산점
       else if (item.region || item.id?.startsWith('hs_')) score += 35;
       
       score += getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
@@ -774,7 +827,7 @@
         isNearStep1,
         logCount: logResult.count,
         isTimeMatch: logResult.isTimeMatch,
-        isMasterDb: !item.isCustom && (item.region !== undefined || item.id?.startsWith('hs_'))
+        isMasterDb: !item.isCustom && !item.isLiveKakao && (item.region !== undefined || item.id?.startsWith('hs_'))
       };
     }));
 
@@ -804,8 +857,8 @@
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
       logEl.innerText = selectedCandidates.length > 0 
-        ? `방금 · 모드 ${currentMode} 복귀 동선 연산 완료 · 추천 거점 ${selectedCandidates.length}곳 제안`
-        : `방금 · 모드 ${currentMode} 복귀 동선 연산 완료 · 목적지 근접 (${finalTarget.name} 직행)`;
+        ? `방금 · 모드 ${currentMode} (카카오 탐색 포함) 연산 완료 · 추천 거점 ${selectedCandidates.length}곳 제안`
+        : `방금 · 모드 ${currentMode} 연산 완료 · 목적지 근접 (${finalTarget.name} 직행)`;
     }
     
     let subFinalCandidates = [];
@@ -844,6 +897,7 @@
           </div>
         </div>
         <div class="tag-group">
+          ${item.isLiveKakao ? '<span class="tag livekakaomap">⚡카카오실시간상권</span>' : ''}
           ${item.isTimeMatch ? '<span class="tag timematch">🔥현재시간대콜집중</span>' : ''}
           ${item.isNearStep1 ? '<span class="tag near">#현위치근접거점</span>' : '<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#이동경로사이</span>'}
           ${item.isMasterDb ? '<span class="tag masterdb">#수도권마스터DB</span>' : ''}
@@ -967,7 +1021,6 @@
     document.getElementById('pipeline-log').innerText = `콜 지도 모드 · 전체 ${logs.length}건 중 현재 시간대(${currentHour}시 기준) 콜 ${activeCount}건 집중`;
   }
 
-  /* 🗺️ [수정] 실제 도로 곡선 보장 지도 모달 */
   async function openRouteMapModal() {
     if (typeof L === 'undefined') {
       showToast('지도 로딩 중입니다.');
