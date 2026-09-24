@@ -56,114 +56,115 @@
     }
     
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background-color: #121212; color: #FFFFFF; max-width: 430px; margin: 0 auto; padding: 16px 16px 140px 16px; min-height: 100vh; transition: all 0.3s ease; }
+    body { background-color: #121212; color: #FFFFFF; max-width: 430px; margin: 0 auto; padding: 12px 12px 130px 12px; min-height: 100vh; transition: all 0.3s ease; }
     
     /* 2주 주기 핫플 업데이트 알림 배너 스타일 */
     .update-banner {
       background-color: #3A2E0A;
       border: 1px solid var(--theme-accent);
-      border-radius: 12px;
-      padding: 10px 12px;
-      font-size: 12px;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 11px;
       color: #FFD700;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       display: none;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
     }
-    .banner-content { display: flex; flex-direction: column; gap: 8px; }
+    .banner-content { display: flex; flex-direction: column; gap: 6px; }
     .banner-btns { display: flex; gap: 6px; }
-    .btn-update { flex: 1; background-color: var(--theme-accent); color: var(--theme-text-on-accent); border: none; padding: 6px; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 11px; }
-    .btn-close { background-color: #2A2A2A; color: #CCCCCC; border: 1px solid #444; padding: 6px 10px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 11px; }
+    .btn-update { flex: 1; background-color: var(--theme-accent); color: var(--theme-text-on-accent); border: none; padding: 5px; border-radius: 6px; font-weight: 900; cursor: pointer; font-size: 11px; }
+    .btn-close { background-color: #2A2A2A; color: #CCCCCC; border: 1px solid #444; padding: 5px 8px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 11px; }
 
-    .header { text-align: center; font-size: 22px; font-weight: 900; color: var(--theme-accent); margin-bottom: 12px; }
-    .mode-container { display: flex; gap: 6px; margin-bottom: 12px; }
-    .mode-pill { flex: 1; height: 38px; border-radius: 12px; background: #2A2A2A; color: #8A8A8A; font-size: 12px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+    .header { text-align: center; font-size: 20px; font-weight: 900; color: var(--theme-accent); margin-bottom: 10px; }
+    .mode-container { display: flex; gap: 6px; margin-bottom: 10px; }
+    .mode-pill { flex: 1; height: 34px; border-radius: 10px; background: #2A2A2A; color: #8A8A8A; font-size: 12px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
     .mode-pill.active { background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; }
     
-    .loc-bar { background: var(--theme-bg-dark); height: 44px; border: 1px solid var(--theme-border); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-size: 12px; color: var(--theme-accent); margin-bottom: 12px; }
-    .refresh-btn { background: none; border: none; color: var(--theme-accent); font-size: 16px; cursor: pointer; }
+    .loc-bar { background: var(--theme-bg-dark); height: 38px; border: 1px solid var(--theme-border); border-radius: 10px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; font-size: 11px; color: var(--theme-accent); margin-bottom: 10px; }
+    .refresh-btn { background: none; border: none; color: var(--theme-accent); font-size: 15px; cursor: pointer; }
     
-    .btn-group-main { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-    .big-btn { width: 100%; height: 60px; background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; font-size: 18px; font-weight: 900; border: none; border-radius: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px var(--theme-border); }
+    .btn-group-main { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+    .big-btn { width: 100%; height: 50px; background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; font-size: 16px; font-weight: 900; border: none; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 3px 10px var(--theme-border); }
     .big-btn:active { opacity: 0.9; transform: scale(0.99); }
     
-    .map-btn { width: 100%; height: 44px; background: #2A2A2A; color: #FFFFFF; font-size: 14px; font-weight: 800; border: 1px solid var(--theme-border); border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .map-btn { width: 100%; height: 38px; background: #2A2A2A; color: #FFFFFF; font-size: 13px; font-weight: 800; border: 1px solid var(--theme-border); border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
     
-    .pipeline-log { font-family: monospace; font-size: 11px; color: #8A8A8A; margin: 4px 0 16px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pipeline-log { font-family: monospace; font-size: 11px; color: #8A8A8A; margin: 2px 0 10px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     
-    .card-list { display: flex; flex-direction: column; gap: 12px; }
-    .card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 20px; padding: 14px; position: relative; }
+    /* 🌟 컴팩트하게 줄인 카드 디자인 */
+    .card-list { display: flex; flex-direction: column; gap: 8px; }
+    .card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 14px; padding: 10px 12px; position: relative; }
     
-    .card-main-content { display: flex; flex-direction: column; gap: 10px; }
-    .card-top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
-    .card-title-group { display: flex; align-items: flex-start; gap: 10px; flex: 1; min-width: 0; }
+    .card-main-content { display: flex; flex-direction: column; gap: 6px; }
+    .card-top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
+    .card-title-group { display: flex; align-items: flex-start; gap: 8px; flex: 1; min-width: 0; }
     
-    .num-badge { width: 28px; height: 28px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 15px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .num-badge { width: 24px; height: 24px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
     .place-info { flex: 1; min-width: 0; }
-    .place-name { font-size: 17px; font-weight: 900; color: #FFFFFF; word-break: keep-all; line-height: 1.3; }
+    .place-name { font-size: 15px; font-weight: 900; color: #FFFFFF; word-break: keep-all; line-height: 1.25; }
     
-    .score-dist { font-size: 13px; font-weight: 800; color: var(--theme-accent); font-family: monospace; margin-top: 4px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .score-dist { font-size: 12px; font-weight: 800; color: var(--theme-accent); font-family: monospace; margin-top: 2px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
     
-    .level-badge { font-weight: 900; padding: 2px 6px; border-radius: 6px; font-size: 11px; display: inline-flex; align-items: center; gap: 2px; }
+    .level-badge { font-weight: 900; padding: 1px 5px; border-radius: 4px; font-size: 10px; display: inline-flex; align-items: center; gap: 2px; }
     .level-high { background: rgba(74, 222, 128, 0.2); color: #4ADE80; border: 1px solid #4ADE80; }
     .level-mid { background: rgba(255, 200, 0, 0.2); color: #FFC800; border: 1px solid #FFC800; }
     .level-low { background: rgba(255, 107, 107, 0.2); color: #FF6B6B; border: 1px solid #FF6B6B; }
     
-    .card-btn-row { display: flex; gap: 8px; margin-top: 4px; }
-    .action-btn { flex: 1; height: 40px; font-weight: 800; font-size: 13px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .card-btn-row { display: flex; gap: 6px; margin-top: 2px; }
+    .action-btn { flex: 1; height: 34px; font-weight: 800; font-size: 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
     .copy-btn { background: #2C2C2C; color: #CCCCCC; border: 1px solid #444444; }
     .map-open-btn { background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; border: none; }
     
-    .tag-group { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-    .tag { font-size: 11px; padding: 2px 6px; border-radius: 6px; background: #2A2A2A; color: #A0A0A0; }
+    .tag-group { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+    .tag { font-size: 10px; padding: 1px 5px; border-radius: 4px; background: #2A2A2A; color: #A0A0A0; }
     .tag.near { background: #1E3A8A; color: #93C5FD; border: 1px solid #3B82F6; font-weight: 700; }
     .tag.wisu { background: var(--theme-bg-dark); color: var(--theme-accent); border: 1px solid var(--theme-border); }
     .tag.custom { background: #3B0764; color: #E9D5FF; border: 1px solid #7E22CE; font-weight: 700; }
     .tag.logmatch { background: #2B1F3D; color: #C084FC; border: 1px solid #5B21B6; font-weight: 700; }
     .tag.timematch { background: #065F46; color: #34D399; border: 1px solid #10B981; font-weight: 800; }
     .tag.masterdb { background: #581C87; color: #F3E8FF; border: 1px solid #9333EA; font-weight: 700; }
-    .sub-info { font-size: 12px; color: #8A8A8A; margin-top: 8px; border-top: 1px solid #2A2A2A; padding-top: 8px; }
+    .sub-info { font-size: 11px; color: #8A8A8A; margin-top: 6px; border-top: 1px solid #2A2A2A; padding-top: 6px; }
     
-    .card.final-card { background: var(--final-card-bg); border: 1.5px solid var(--theme-accent); box-shadow: 0 0 12px var(--final-card-glow); }
+    .card.final-card { background: var(--final-card-bg); border: 1.5px solid var(--theme-accent); box-shadow: 0 0 8px var(--final-card-glow); }
     
-    .sub-final-section { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
-    .sub-final-title { font-size: 13px; font-weight: 800; color: var(--theme-accent); margin-bottom: 2px; }
-    .sub-final-list { display: flex; flex-direction: column; gap: 10px; }
-    .sub-final-card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
-    .sub-final-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .sub-final-section { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .sub-final-title { font-size: 12px; font-weight: 800; color: var(--theme-accent); margin-bottom: 2px; }
+    .sub-final-list { display: flex; flex-direction: column; gap: 8px; }
+    .sub-final-card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+    .sub-final-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; }
     .sub-final-info { flex: 1; min-width: 0; }
-    .sub-final-name { font-size: 15px; font-weight: 900; color: #FFFFFF; margin-bottom: 2px; }
-    .sub-final-meta { font-size: 12px; font-weight: 800; color: var(--theme-accent); font-family: monospace; }
-    .sub-btn-row { display: flex; gap: 8px; margin-top: 4px; padding-top: 8px; border-top: 1px solid #2A2A2A; }
-    .sub-action-btn { flex: 1; height: 36px; font-weight: 800; font-size: 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
+    .sub-final-name { font-size: 14px; font-weight: 900; color: #FFFFFF; margin-bottom: 1px; }
+    .sub-final-meta { font-size: 11px; font-weight: 800; color: var(--theme-accent); font-family: monospace; }
+    .sub-btn-row { display: flex; gap: 6px; margin-top: 2px; padding-top: 6px; border-top: 1px solid #2A2A2A; }
+    .sub-action-btn { flex: 1; height: 32px; font-weight: 800; font-size: 11px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
     .sub-copy-btn { background: #2C2C2C; color: #CCCCCC; border: 1px solid #444444; }
     .sub-map-btn { background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; border: none; }
 
-    #heatmap-container { display: none; flex-direction: column; gap: 10px; margin-bottom: 16px; }
-    #call-map-view { width: 100%; height: 380px; background: #1E1E1E; border-radius: 20px; border: 1.5px solid var(--theme-accent); overflow: hidden; }
-    .map-legend { display: flex; align-items: center; justify-content: space-between; background: #1E1E1E; padding: 8px 12px; border-radius: 12px; border: 1px solid #2A2A2A; font-size: 11px; }
+    #heatmap-container { display: none; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    #call-map-view { width: 100%; height: 340px; background: #1E1E1E; border-radius: 16px; border: 1.5px solid var(--theme-accent); overflow: hidden; }
+    .map-legend { display: flex; align-items: center; justify-content: space-between; background: #1E1E1E; padding: 6px 10px; border-radius: 10px; border: 1px solid #2A2A2A; font-size: 11px; }
     .legend-item { display: flex; align-items: center; gap: 4px; font-weight: 700; }
-    .dot-sample { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .dot-sample { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 
-    .backup-section { margin-top: 20px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 16px; padding: 14px; }
-    .backup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .backup-title { font-size: 14px; font-weight: 800; color: var(--theme-accent); }
-    .backup-count { font-size: 12px; color: #8A8A8A; }
-    .backup-btn-group { display: flex; gap: 8px; }
-    .backup-btn { flex: 1; height: 40px; background: #2A2A2A; color: #FFFFFF; font-weight: 800; border: 1px solid #3A3A3A; border-radius: 10px; cursor: pointer; font-size: 13px; }
+    .backup-section { margin-top: 14px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 14px; padding: 12px; }
+    .backup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .backup-title { font-size: 13px; font-weight: 800; color: var(--theme-accent); }
+    .backup-count { font-size: 11px; color: #8A8A8A; }
+    .backup-btn-group { display: flex; gap: 6px; }
+    .backup-btn { flex: 1; height: 36px; background: #2A2A2A; color: #FFFFFF; font-weight: 800; border: 1px solid #3A3A3A; border-radius: 8px; cursor: pointer; font-size: 12px; }
     
-    .custom-section { margin-top: 12px; border-top: 1px dashed #3A3A3A; padding-top: 10px; }
-    .add-custom-btn { width: 100%; height: 42px; background: #2A1A3A; color: #D8B4FE; border: 1px solid #6B21A8; font-weight: 800; font-size: 13px; border-radius: 10px; cursor: pointer; }
+    .custom-section { margin-top: 10px; border-top: 1px dashed #3A3A3A; padding-top: 8px; }
+    .add-custom-btn { width: 100%; height: 38px; background: #2A1A3A; color: #D8B4FE; border: 1px solid #6B21A8; font-weight: 800; font-size: 12px; border-radius: 8px; cursor: pointer; }
     
-    .recent-log-item { display: flex; align-items: center; justify-content: space-between; background: #242424; border: 1px solid #2E2E2E; border-radius: 6px; padding: 6px 8px; }
+    .recent-log-item { display: flex; align-items: center; justify-content: space-between; background: #242424; border: 1px solid #2E2E2E; border-radius: 6px; padding: 5px 8px; }
     .recent-log-time { font-size: 11px; font-weight: 700; color: #E0E0E0; white-space: nowrap; }
     
-    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 74px; background: rgba(26,26,26,0.95); backdrop-filter: blur(10px); border-top: 2px solid var(--theme-accent); display: flex; align-items: center; gap: 8px; padding: 8px 12px; z-index: 100; max-width: 430px; margin: 0 auto; }
-    .timer-container { flex: 1; height: 100%; display: flex; flex-direction: column; gap: 4px; }
-    .timer-mode-selector { display: flex; gap: 4px; height: 20px; }
-    .timer-mode-btn { flex: 1; background: #2A2A2A; color: #8A8A8A; font-size: 10px; font-weight: 800; border: 1px solid #3A3A3A; border-radius: 6px; cursor: pointer; }
+    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 68px; background: rgba(26,26,26,0.95); backdrop-filter: blur(10px); border-top: 2px solid var(--theme-accent); display: flex; align-items: center; gap: 6px; padding: 6px 10px; z-index: 100; max-width: 430px; margin: 0 auto; }
+    .timer-container { flex: 1; height: 100%; display: flex; flex-direction: column; gap: 3px; }
+    .timer-mode-selector { display: flex; gap: 3px; height: 18px; }
+    .timer-mode-btn { flex: 1; background: #2A2A2A; color: #8A8A8A; font-size: 10px; font-weight: 800; border: 1px solid #3A3A3A; border-radius: 4px; cursor: pointer; }
     .timer-mode-btn.active { background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; border-color: var(--theme-accent) !important; }
-    .timer-display-btn { flex: 1; background: #2A2A2A; border: 1px solid #3A3A3A; color: #FFFFFF; font-size: 13px; font-weight: 900; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .timer-display-btn { flex: 1; background: #2A2A2A; border: 1px solid #3A3A3A; color: #FFFFFF; font-size: 12px; font-weight: 900; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .timer-display-btn.running { background: #3A2E0A; color: var(--theme-accent); border-color: var(--theme-accent); }
     .timer-display-btn.finished { background: #4A1A1A; color: #FF5555; border-color: #FF5555; animation: alertBlink 1s infinite; }
     
@@ -171,26 +172,26 @@
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
     }
-    .save-call-btn { flex: 1; height: 100%; background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; font-weight: 900; font-size: 14px; border: none; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.2; word-break: keep-all; }
+    .save-call-btn { flex: 1; height: 100%; background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; font-weight: 900; font-size: 13px; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.15; word-break: keep-all; }
     
     .map-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
     .map-modal-overlay.active { display: flex; }
-    .map-modal-content { width: 100%; max-width: 430px; height: 75vh; background: #1E1E1E; border-top-left-radius: 24px; border-top-right-radius: 24px; border-top: 2px solid var(--theme-accent); display: flex; flex-direction: column; overflow: hidden; }
-    .map-modal-header { padding: 14px 16px; background: #121212; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2A2A2A; flex-shrink: 0; }
-    .map-modal-title { font-size: 16px; font-weight: 800; color: var(--theme-accent); }
-    .map-modal-close { background: none; border: none; color: #8A8A8A; font-size: 20px; font-weight: 900; cursor: pointer; }
+    .map-modal-content { width: 100%; max-width: 430px; height: 75vh; background: #1E1E1E; border-top-left-radius: 20px; border-top-right-radius: 20px; border-top: 2px solid var(--theme-accent); display: flex; flex-direction: column; overflow: hidden; }
+    .map-modal-header { padding: 12px 14px; background: #121212; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2A2A2A; flex-shrink: 0; }
+    .map-modal-title { font-size: 15px; font-weight: 800; color: var(--theme-accent); }
+    .map-modal-close { background: none; border: none; color: #8A8A8A; font-size: 18px; font-weight: 900; cursor: pointer; }
     #route-map { width: 100%; height: 100%; min-height: 350px; flex: 1; background: #121212; z-index: 1; }
     .leaflet-tile-pane { filter: brightness(1.1) contrast(1.4); }
-    .custom-map-marker { width: 34px; height: 34px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 16px; display: flex; align-items: center; justify-content: center; border: 2.5px solid #FFFFFF; box-shadow: 0 3px 8px rgba(0,0,0,0.8); }
-    .custom-map-marker.current { background: #22C55E; color: #000000; font-size: 18px; }
-    .leaflet-popup-content { font-size: 15px; font-weight: 800; color: #111; }
+    .custom-map-marker { width: 30px; height: 30px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 15px; display: flex; align-items: center; justify-content: center; border: 2px solid #FFFFFF; box-shadow: 0 2px 6px rgba(0,0,0,0.8); }
+    .custom-map-marker.current { background: #22C55E; color: #000000; font-size: 16px; }
+    .leaflet-popup-content { font-size: 14px; font-weight: 800; color: #111; }
 
     .call-dot-marker { border-radius: 50%; border: 2px solid #FFFFFF; box-shadow: 0 0 6px rgba(0,0,0,0.8); }
     .call-dot-marker.active-time { background: #22C55E; animation: activePulseGreen 1.5s infinite; }
     .call-dot-marker.other-time { background: #64748B; opacity: 0.75; }
     @keyframes activePulseGreen {
       0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-      70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+      70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
       100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
     }
   </style>
@@ -253,15 +254,15 @@
       <input type="file" id="import-file-input" accept=".json,application/json" style="display: none;">
     </div>
     
-    <div style="margin-top: 10px; border-top: 1px dashed #3A3A3A; padding-top: 8px;">
-      <div style="font-size: 11px; font-weight: 800; color: #8A8A8A; margin-bottom: 6px;">🕒 최근 저장 목록 (최신 5개)</div>
-      <div id="recent-logs-list" style="display: flex; flex-direction: column; gap: 4px;"></div>
+    <div style="margin-top: 8px; border-top: 1px dashed #3A3A3A; padding-top: 6px;">
+      <div style="font-size: 11px; font-weight: 800; color: #8A8A8A; margin-bottom: 4px;">🕒 최근 저장 목록 (최신 5개)</div>
+      <div id="recent-logs-list" style="display: flex; flex-direction: column; gap: 3px;"></div>
     </div>
     
     <div class="custom-section">
       <button class="add-custom-btn" id="btn-add-custom">⭐ 현재 위치를 '나만의 콜 장소'로 직접 등록</button>
-      <div style="font-size: 11px; font-weight: 800; color: #C084FC; margin: 8px 0 4px 0;">📍 나만의 콜 장소 목록</div>
-      <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 4px;"></div>
+      <div style="font-size: 11px; font-weight: 800; color: #C084FC; margin: 6px 0 3px 0;">📍 나만의 콜 장소 목록</div>
+      <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 3px;"></div>
     </div>
   </div>
   
@@ -276,7 +277,7 @@
     <button class="save-call-btn" id="btn-save-call">📍 고객 탑승<br>위치 저장</button>
   </div>
   
-  <div class="toast-banner" id="toast-banner" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 13px; padding: 10px 18px; border-radius: 20px; z-index: 300; display: none; box-shadow: 0 4px 16px rgba(0,0,0,0.6);"></div>
+  <div class="toast-banner" id="toast-banner" style="position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 12px; padding: 8px 16px; border-radius: 16px; z-index: 300; display: none; box-shadow: 0 3px 12px rgba(0,0,0,0.6);"></div>
   
   <div class="map-modal-overlay" id="map-modal">
     <div class="map-modal-content">
@@ -1056,7 +1057,7 @@
     callMapViewLeaflet.eachLayer(l => { if (l instanceof L.Marker) callMapViewLeaflet.removeLayer(l); });
 
     L.marker([centerPos.lat, centerPos.lng], {
-      icon: L.divIcon({ html: '<div class="custom-map-marker current">📍</div>', className: '', iconSize: [34, 34], iconAnchor: [17, 17] })
+      icon: L.divIcon({ html: '<div class="custom-map-marker current">📍</div>', className: '', iconSize: [30, 30], iconAnchor: [15, 15] })
     }).addTo(callMapViewLeaflet).bindPopup('<b>현재 위치</b>');
 
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
@@ -1083,7 +1084,7 @@
       if (isActiveTime) activeCount++;
 
       const markerClass = isActiveTime ? 'call-dot-marker active-time' : 'call-dot-marker other-time';
-      const markerSize = isActiveTime ? 18 : 12;
+      const markerSize = isActiveTime ? 16 : 10;
 
       L.marker([logLat, logLng], {
         icon: L.divIcon({
@@ -1124,7 +1125,7 @@
       currentRouteData.forEach((pt, idx) => {
         let badgeNum = pt.isFinal ? currentRouteData.length - 1 : idx;
         let html = pt.isCurrent ? '<div class="custom-map-marker current">📍</div>' : `<div class="custom-map-marker" style="background:${themeColor};">${badgeNum}</div>`;
-        L.marker([pt.lat, pt.lng], { icon: L.divIcon({ html, className: '', iconSize: [34, 34], iconAnchor: [17, 17] }) })
+        L.marker([pt.lat, pt.lng], { icon: L.divIcon({ html, className: '', iconSize: [30, 30], iconAnchor: [15, 15] }) })
           .addTo(leafletMap).bindPopup(`<b>${pt.name}</b>`);
       });
       try {
@@ -1141,7 +1142,7 @@
       } catch (err) {
         L.polyline(markerCoords, { color: themeColor, weight: 5, opacity: 0.9, dashArray: '6, 8' }).addTo(leafletMap);
       }
-      leafletMap.fitBounds(L.latLngBounds(markerCoords), { padding: [50, 50] });
+      leafletMap.fitBounds(L.latLngBounds(markerCoords), { padding: [40, 40] });
     }, 200);
   }
   function closeRouteMapModal() {
@@ -1365,7 +1366,7 @@
   window.addEventListener('DOMContentLoaded', () => {
     updateCallLogStats();
     updateCustomHotspotUI();
-    checkHotspotUpdateReminder(); // 2주 주기 체크 실행
+    checkHotspotUpdateReminder();
 
     document.getElementById('btn-mode1').addEventListener('click', () => setMode(1));
     document.getElementById('btn-mode2').addEventListener('click', () => setMode(2));
