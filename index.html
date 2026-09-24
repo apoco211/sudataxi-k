@@ -837,12 +837,18 @@
     let mainRouteGeometry = [];
 
     if (currentMode === 1) {
+      // 🌟 [핵심 수정 1] 0.5km(500m) 이내에 존재하는 최종목적지는 이미 도착한 것으로 간주하여 제외!
       let scoredTargets = await Promise.all(MAJOR_HUBS.map(async h => {
         const road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, h.lat, h.lng);
         return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: 100, geometry: road.geometryCoords };
       }));
-      scoredTargets.sort((a, b) => a.dist - b.dist);
-      finalTarget = scoredTargets[0] || MAJOR_HUBS[0];
+
+      // 현위치에서 0.5km 이상 떨어진 '다음 거점'들만 필터링
+      let validTargets = scoredTargets.filter(h => h.dist > 0.5);
+      validTargets.sort((a, b) => a.dist - b.dist);
+
+      // 만약 전부 500m 이내면 전체 중 최단거리 선택, 아니면 500m 바깥의 가장 가까운 거점 선택!
+      finalTarget = validTargets.length > 0 ? validTargets[0] : scoredTargets.sort((a, b) => a.dist - b.dist)[0];
       mainRouteGeometry = finalTarget.geometry || [];
     } else {
       const closestGateway = findClosestWisuGateway(currentPos.lat, currentPos.lng);
@@ -867,34 +873,31 @@
 
     const nowHour = new Date().getHours();
     
-    // 🌟 핵심: [현위치 -> 최종목적지] 직선거리 A-C
+    // A-C 간 최단 직선 거리
     const distAtoC = getStraightDistanceKm(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
 
     let scoredPool = await Promise.all(rawPool.map(async item => {
-      // 1) 목적지 자체이거나 0.5km 이내면 제외
+      // 1) 목적지 자체이거나 0.5km 이내면 경유지 대상에서 제외
       if (item.name === finalTarget.name || getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng) < 0.5) {
         return { ...item, score: -999 };
       }
 
-      // 🎯 [핵심 검증 수식] A(현위치) -> B(후보지) -> C(목적지) 우회 판정
+      // 🎯 [핵심 수정 2] A(현위치) -> B(후보지) -> C(목적지) 엄격한 경로 우회율 검증
       const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const distBtoC = getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
-      
-      // B를 경유하는 직선 총거리 (A->B + B->C)
       const totalDetourDist = distAtoB + distBtoC;
 
-      // ❌ [조건 1] 현위치-목적지 사이(선분 타원 축)를 벗어나는 장소 무조건 탈락!
-      // (B를 거쳐가는 총거리가 A-C 직행거리보다 15% 이상 길어지면 '사이'가 아니므로 완전 차단)
+      // ❌ B를 경유할 때 총 거리가 직행 거리에 비해 15% 이상 늘어나면 무조건 제외 (-999점)
       if (totalDetourDist > (distAtoC * 1.15) + 0.8) {
         return { ...item, score: -999 };
       }
 
-      // ❌ [조건 2] 목적지를 지나쳐서 멀어지는 방향(B->C가 A->C보다 긺) 무조건 탈락!
+      // ❌ 목적지 C를 지나쳐 넘어가는 장소 제외
       if (distBtoC > distAtoC) {
         return { ...item, score: -999 };
       }
 
-      // 실주행 상세 연산
+      // 실주행 길찾기 상세 연산
       const road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, item.lat, item.lng);
       
       let isNearStep1 = distAtoB <= 3.0;
@@ -927,12 +930,14 @@
     let selectedRoute = [];
     let validPool = scoredPool.filter(p => p.score >= 35 && p.name !== finalTarget.name);
     
-    // A와 C 사이 경로상에서 '진행 순서대로'(현위치에서 가까운 순) 정렬
+    // 현위치에서 가까운 순서대로 정렬
     validPool.sort((a, b) => a.dist - b.dist);
 
-    // 목적지와의 거리가 5km 이하로 가까워지면 사이 경유지를 최대 1개만 노출
+    // 🌟 [핵심 수정 3] 최종목적지가 1.5km 이내로 코앞이면 경유 카드를 0개로 제한하여 불필요한 추천 완벽 차단!
     let maxCards = currentMode === 1 ? 3 : 2;
-    if (distAtoC <= 5.0) {
+    if (distAtoC <= 1.5) {
+      maxCards = 0;
+    } else if (distAtoC <= 4.0) {
       maxCards = 1;
     }
 
@@ -954,7 +959,7 @@
     if (logEl) {
       logEl.innerText = selectedRoute.length > 0 
         ? `방금 · 모드 ${currentMode} 연산 완료 · 사이 경로상 핫플 ${selectedRoute.length}곳 제안`
-        : `방금 · 모드 ${currentMode} 연산 완료 · 사이 경로 핫플 없음 (${finalTarget.name} 직행)`;
+        : `방금 · 모드 ${currentMode} 연산 완료 · 목적지 근접 (${finalTarget.name} 직행)`;
     }
     
     let subFinalCandidates = [];
@@ -1300,7 +1305,7 @@
     const jsonStr = JSON.stringify(data, null, 2);
     try {
       const blob = new Blob([jsonStr], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
+      const url = URL.createElement(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `sudataxi_backup_${Date.now()}.json`;
