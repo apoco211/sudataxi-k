@@ -539,7 +539,6 @@
       geometryCoords: [[fromLat, fromLng], [toLat, toLng]]
     };
 
-    // 1차: OSRM 도로 망 데이터 사용 (가장 빠르고 정확한 도로 궤적 확보)
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 1200);
@@ -563,7 +562,6 @@
       }
     } catch (e) {}
 
-    // 2차: 카카오 내비 API 우회 호출
     if (KAKAO_REST_KEY) {
       try {
         const kakaoUrl = `https://apis-naver.kakaomobility.com/v1/directions?origin=${fromLng},${fromLat}&destination=${toLng},${toLat}&priority=RECOMMEND`;
@@ -728,30 +726,33 @@
     );
   }
 
+  /* 장소 중복 체크 (이름 앞 3글자 비교 및 1.2km 이내 거리 체크) */
   function isDuplicatePlace(candName, candLat, candLng, existingList) {
     return existingList.some(item => {
-      const nameA = item.name.trim();
-      const nameB = candName.trim();
+      const nameA = item.name.replace(/\s+/g, '').substring(0, 3);
+      const nameB = candName.replace(/\s+/g, '').substring(0, 3);
       const sameName = nameA === nameB || nameA.includes(nameB) || nameB.includes(nameA);
-      const closeDist = getStraightDistanceKm(item.lat, item.lng, candLat, candLng) < 1.0;
+      const closeDist = getStraightDistanceKm(item.lat, item.lng, candLat, candLng) < 1.2;
       return sameName || closeDist;
     });
   }
 
-  /* ⚡ 도로 좌표(geometryCoords) 보존 연산 엔진 */
+  /* ⚡ [모드 2 원칙 완벽 구현 엔진] */
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
-    if (logEl) logEl.innerText = `⚡ 다중 거점(역/병원/학원/상권) 초고속 연산 중...`;
+    if (logEl) logEl.innerText = `⚡ [모드 ${currentMode}] 순차 복귀 동선 연산 중...`;
     
     let weatherData = { isRainOrSnow: false };
     try { weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng); } catch(e) {}
 
     const customHotspots = getCustomHotspots();
     const masterHotspots = getMasterHotspotsFromStorage();
+    const nowHour = new Date().getHours();
     
     let finalTarget = null;
     if (currentMode === 1) {
+      // [모드 1] 위수 내부: 주요 거점 중 최단거리
       let scoredTargets = await Promise.all(MAJOR_HUBS.map(async h => {
         let road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, h.lat, h.lng);
         return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: 100, geometryCoords: road.geometryCoords };
@@ -759,6 +760,7 @@
       scoredTargets.sort((a, b) => a.dist - b.dist);
       finalTarget = scoredTargets[0];
     } else {
+      // [모드 2] 외곽/복귀: 무조건 '최단 위수 경계 지점'을 최종 목적지로 지정
       const closestGateway = findClosestWisuGateway(currentPos.lat, currentPos.lng);
       let road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, closestGateway.lat, closestGateway.lng);
       finalTarget = {
@@ -770,15 +772,20 @@
       };
     }
 
-    let rawPool = [...customHotspots, ...masterHotspots];
-    const nowHour = new Date().getHours();
+    // 최종 목적지와 명칭이 중복되는 경우 추천 후보군에서 제외
+    let rawPool = [...customHotspots, ...masterHotspots].filter(item => {
+      const nameA = item.name.replace(/\s+/g, '').substring(0, 3);
+      const nameB = finalTarget.name.replace(/\s+/g, '').substring(0, 3);
+      return nameA !== nameB;
+    });
+
     const distAtoC = getStraightDistanceKm(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
 
+    // 복귀 길목 방향(진행 방향) 거점만 1차 필터링
     let preFiltered = rawPool.filter(item => {
-      if (item.name === finalTarget.name) return false;
       const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const distBtoC = getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
-      return (distAtoB + distBtoC) <= (distAtoC * 1.35) + 2.0 && distBtoC <= distAtoC;
+      return (distAtoB + distBtoC) <= (distAtoC * 1.35) + 1.5 && distBtoC < distAtoC;
     });
 
     let scoredPool = await Promise.all(preFiltered.map(async item => {
@@ -811,33 +818,36 @@
       };
     }));
 
-    let selectedRoute = [];
-    let validPool = scoredPool.filter(p => p.score >= 20 && p.name !== finalTarget.name);
+    // 점수 높은 거점 필터링
+    let validPool = scoredPool.filter(p => p.score >= 20);
     validPool.sort((a, b) => b.score - a.score);
 
+    let selectedCandidates = [];
     let maxCards = currentMode === 1 ? 3 : 2;
-    if (distAtoC <= 1.5) maxCards = 0;
-    else if (distAtoC <= 4.0) maxCards = 1;
+    if (distAtoC <= 2.0) maxCards = 0;
 
     for (let candidate of validPool) {
-      if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedRoute)) {
-        selectedRoute.push(candidate);
+      if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedCandidates)) {
+        selectedCandidates.push(candidate);
       }
-      if (selectedRoute.length === maxCards) break;
+      if (selectedCandidates.length === maxCards) break;
     }
+
+    // ⭐ [핵심 복구] 현위치에서 가까운 순서대로 정렬하여 갈지자 꼬임 동선 방지!
+    selectedCandidates.sort((a, b) => a.dist - b.dist);
 
     currentRouteData = [
       { name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true },
-      ...selectedRoute,
+      ...selectedCandidates,
       { ...finalTarget, isFinal: true }
     ];
     
     const mapBtn = document.getElementById('btn-show-map');
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
-      logEl.innerText = selectedRoute.length > 0 
-        ? `방금 · 모드 ${currentMode} 다중 거점 연산 완료 · 추천 거점 ${selectedRoute.length}곳 제안`
-        : `방금 · 모드 ${currentMode} 다중 거점 연산 완료 · 목적지 근접 (${finalTarget.name} 직행)`;
+      logEl.innerText = selectedCandidates.length > 0 
+        ? `방금 · 모드 ${currentMode} 복귀 동선 연산 완료 · 추천 거점 ${selectedCandidates.length}곳 제안`
+        : `방금 · 모드 ${currentMode} 복귀 동선 연산 완료 · 목적지 근접 (${finalTarget.name} 직행)`;
     }
     
     let subFinalCandidates = [];
@@ -848,7 +858,7 @@
       }));
       subFinalCandidates.sort((a, b) => a.dist - b.dist);
     }
-    renderCards(selectedRoute, finalTarget, subFinalCandidates);
+    renderCards(selectedCandidates, finalTarget, subFinalCandidates);
   }
 
   function renderCards(routeCards, finalTarget, subFinalCandidates) {
