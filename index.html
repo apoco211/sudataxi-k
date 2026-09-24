@@ -58,7 +58,6 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background-color: #121212; color: #FFFFFF; max-width: 430px; margin: 0 auto; padding: 12px 12px 130px 12px; min-height: 100vh; transition: all 0.3s ease; }
     
-    /* 2주 주기 핫플 업데이트 알림 배너 스타일 */
     .update-banner {
       background-color: #3A2E0A;
       border: 1px solid var(--theme-accent);
@@ -91,7 +90,6 @@
     
     .pipeline-log { font-family: monospace; font-size: 11px; color: #8A8A8A; margin: 2px 0 10px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     
-    /* 🌟 컴팩트하게 줄인 카드 디자인 */
     .card-list { display: flex; flex-direction: column; gap: 8px; }
     .card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 14px; padding: 10px 12px; position: relative; }
     
@@ -198,7 +196,6 @@
 </head>
 <body class="mode-1">
 
-  <!-- 💡 2주 주기 핫플 업데이트 리마인더 배너 -->
   <div id="hotspotUpdateBanner" class="update-banner">
     <div class="banner-content">
       <span>💡 <strong>[수다택시 K]</strong> 핫플 데이터를 검토한 지 2주가 지났어요! 최신 상권을 반영해 볼까요?</span>
@@ -367,7 +364,6 @@
     triggerSystemNotification();
   }
 
-  /* 🌟 수도권 마스터 핫플 100선 내장 DB */
   const DEFAULT_MASTER_HOTSPOTS = [
     { "id": "hs_s_01", "name": "강남역 상업지구", "lat": 37.4981, "lng": 127.0276, "address": "강남역", "type": "nightlife", "region": "seoul" },
     { "id": "hs_s_02", "name": "역삼역 테헤란로 상권", "lat": 37.5006, "lng": 127.0364, "address": "역삼역", "type": "office", "region": "seoul" },
@@ -804,7 +800,6 @@
     return JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
   }
 
-  /* 🌟 실시간 위치 직접 수신 */
   function executeSearch() {
     const locText = document.getElementById('loc-text');
     if (locText) locText.innerText = '📍 실시간 GPS 위치 수신 중...';
@@ -871,16 +866,38 @@
     poiResults.forEach(list => { rawPool.push(...list); });
 
     const nowHour = new Date().getHours();
+    
+    // 🌟 핵심: [현위치 -> 최종목적지] 직선거리 A-C
+    const distAtoC = getStraightDistanceKm(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
 
     let scoredPool = await Promise.all(rawPool.map(async item => {
+      // 1) 목적지 자체이거나 0.5km 이내면 제외
       if (item.name === finalTarget.name || getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng) < 0.5) {
         return { ...item, score: -999 };
       }
 
-      const directDist = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
-      let isNearStep1 = directDist <= 4.0;
+      // 🎯 [핵심 검증 수식] A(현위치) -> B(후보지) -> C(목적지) 우회 판정
+      const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
+      const distBtoC = getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
+      
+      // B를 경유하는 직선 총거리 (A->B + B->C)
+      const totalDetourDist = distAtoB + distBtoC;
 
+      // ❌ [조건 1] 현위치-목적지 사이(선분 타원 축)를 벗어나는 장소 무조건 탈락!
+      // (B를 거쳐가는 총거리가 A-C 직행거리보다 15% 이상 길어지면 '사이'가 아니므로 완전 차단)
+      if (totalDetourDist > (distAtoC * 1.15) + 0.8) {
+        return { ...item, score: -999 };
+      }
+
+      // ❌ [조건 2] 목적지를 지나쳐서 멀어지는 방향(B->C가 A->C보다 긺) 무조건 탈락!
+      if (distBtoC > distAtoC) {
+        return { ...item, score: -999 };
+      }
+
+      // 실주행 상세 연산
       const road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, item.lat, item.lng);
+      
+      let isNearStep1 = distAtoB <= 3.0;
       let score = Math.max(10, 350 - Math.round(road.distanceKm * 18));
 
       if (isNearStep1) score += 140;
@@ -909,9 +926,16 @@
 
     let selectedRoute = [];
     let validPool = scoredPool.filter(p => p.score >= 35 && p.name !== finalTarget.name);
-    validPool.sort((a, b) => b.score - a.score);
+    
+    // A와 C 사이 경로상에서 '진행 순서대로'(현위치에서 가까운 순) 정렬
+    validPool.sort((a, b) => a.dist - b.dist);
 
-    const maxCards = currentMode === 1 ? 3 : 2;
+    // 목적지와의 거리가 5km 이하로 가까워지면 사이 경유지를 최대 1개만 노출
+    let maxCards = currentMode === 1 ? 3 : 2;
+    if (distAtoC <= 5.0) {
+      maxCards = 1;
+    }
+
     for (let candidate of validPool) {
       if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedRoute)) {
         selectedRoute.push(candidate);
@@ -929,8 +953,8 @@
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
       logEl.innerText = selectedRoute.length > 0 
-        ? `방금 · 모드 ${currentMode} 연산 완료 · 경로 주변 추천 핫플 ${selectedRoute.length}곳 제안`
-        : `방금 · 모드 ${currentMode} 연산 완료 · 주변 핫플 없음 (${finalTarget.name} 직행)`;
+        ? `방금 · 모드 ${currentMode} 연산 완료 · 사이 경로상 핫플 ${selectedRoute.length}곳 제안`
+        : `방금 · 모드 ${currentMode} 연산 완료 · 사이 경로 핫플 없음 (${finalTarget.name} 직행)`;
     }
     
     let subFinalCandidates = [];
@@ -969,7 +993,7 @@
         </div>
         <div class="tag-group">
           ${item.isTimeMatch ? '<span class="tag timematch">🔥현재시간대콜집중</span>' : ''}
-          ${item.isNearStep1 ? '<span class="tag near">#현위치근접상권</span>' : '<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#경로주변밴드스캔</span>'}
+          ${item.isNearStep1 ? '<span class="tag near">#현위치근접상권</span>' : '<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#이동경로사이</span>'}
           ${item.isMasterDb ? '<span class="tag masterdb">#수도권마스터핫플</span>' : ''}
           ${item.isCustom ? '<span class="tag custom">#나만의핫플</span>' : ''}
           ${item.logCount > 0 ? `<span class="tag logmatch">#누적콜 ${item.logCount}건</span>` : ''}
@@ -999,7 +1023,7 @@
           <button class="action-btn map-open-btn" data-name="${finalTarget.name}" data-lat="${finalTarget.lat}" data-lng="${finalTarget.lng}">🗺️ 카카오맵</button>
         </div>
       </div>
-      <div class="sub-info">${routeCards.length > 0 ? '경로 주변 상권 제안 후 이동 · ' : '경유지 없음 · 즉시 직행 · '}${finalTarget.dist.toFixed(1)}km</div>
+      <div class="sub-info">${routeCards.length > 0 ? '이동 경로 사이 상권 경유 후 이동 · ' : '경유지 없음 · 즉시 직행 권장 · '}${finalTarget.dist.toFixed(1)}km 남음</div>
     `;
     listEl.appendChild(finalCard);
     
@@ -1335,7 +1359,6 @@
     reader.readAsText(file);
   }
 
-  /* 💡 2주 주기 업데이트 체크 로직 */
   function checkHotspotUpdateReminder() {
     const LAST_UPDATE_KEY = 'suhda_last_hotspot_update';
     const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
