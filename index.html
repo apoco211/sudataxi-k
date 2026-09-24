@@ -406,7 +406,7 @@
     return { ...closestPoint, type: "gateway", isWisu: true };
   }
 
-  /* 🔍 [신규] 카카오 API 기반 최단 위수 경계 지점 실시간 검색 */
+  /* 🔍 카카오 API 기반 최단 위수 경계 지점 실시간 검색 */
   async function fetchRealtimeWisuGateway(currentLat, currentLng) {
     if (!KAKAO_REST_KEY) return findClosestWisuGatewayFallback(currentLat, currentLng);
 
@@ -799,11 +799,11 @@
     });
   }
 
-  /* ⚡ [모드 2: 실시간 복귀 경계 + 반경 1~3km 현위치 근접 핫플 최우선 적용 엔진] */
+  /* ⚡ [모드 2: 동선 꼬임 방지 완벽 정립 연산 엔진] */
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
-    if (logEl) logEl.innerText = `⚡ [모드 ${currentMode}] 실시간 복귀 경계 & 근접 핫플 연산 중...`;
+    if (logEl) logEl.innerText = `⚡ [모드 ${currentMode}] 순차 동선 연산 중...`;
     
     let weatherData = { isRainOrSnow: false };
     try { weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng); } catch(e) {}
@@ -812,9 +812,12 @@
     const customHotspots = getCustomHotspots();
     const masterHotspots = getMasterHotspotsFromStorage();
     const nowHour = new Date().getHours();
+    const inWisu = isInsideWisu(currentPos.lat, currentPos.lng);
     
     let finalTarget = null;
-    if (currentMode === 1) {
+    
+    // 모드 1이거나, 모드 2이더라도 이미 위수 안인 경우: 주요 번화가를 최종 목적지로 설정
+    if (currentMode === 1 || (currentMode === 2 && inWisu)) {
       let scoredTargets = await Promise.all(MAJOR_HUBS.map(async h => {
         let road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, h.lat, h.lng);
         return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: 100, geometryCoords: road.geometryCoords };
@@ -822,7 +825,7 @@
       scoredTargets.sort((a, b) => a.dist - b.dist);
       finalTarget = scoredTargets[0];
     } else {
-      // 📍 [모드 2] 카카오 API 기반 실시간 최단 위수 경계 검색
+      // 📍 [모드 2 외곽] 실시간 최단 위수 경계 지점 최종 목적지 강제 지정
       const closestGateway = await fetchRealtimeWisuGateway(currentPos.lat, currentPos.lng);
       let road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, closestGateway.lat, closestGateway.lng);
       finalTarget = {
@@ -842,13 +845,12 @@
 
     const distAtoC = getStraightDistanceKm(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
 
-    // ⭐ [모드 2 원칙] 1) 현위치 반경 3km 이내 근접 핫플 OR 2) 복귀 길목 거점
     let preFiltered = rawPool.filter(item => {
       const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const distBtoC = getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
       
-      const isNearStep1 = distAtoB <= 3.0; // 반경 3km 이내 근접 핫플
-      const isAlongPath = (distAtoB + distBtoC) <= (distAtoC * 1.35) + 1.5 && distBtoC < distAtoC; // 복귀 길목
+      const isNearStep1 = distAtoB <= 3.0;
+      const isAlongPath = (distAtoB + distBtoC) <= (distAtoC * 1.35) + 1.5 && distBtoC < distAtoC;
       
       return isNearStep1 || isAlongPath;
     });
@@ -860,7 +862,6 @@
       let isNearStep1 = distAtoB <= 3.0;
       let score = Math.max(10, 350 - Math.round(road.distanceKm * 18));
       
-      // ⭐ 현위치 근접 핫플(+140점) 최우선 점수 가산
       if (isNearStep1) score += 140;
       else score += 60;
       
@@ -887,7 +888,8 @@
       };
     }));
 
-    let validPool = scoredPool.filter(p => p.score >= 20);
+    // ⭐ [핵심 보완] 복귀 목적지(finalTarget.dist)보다 멀리 있는 핫플은 완전 배제 (거리 역전/동선 꼬임 차단)
+    let validPool = scoredPool.filter(p => p.score >= 20 && p.dist < finalTarget.dist);
     validPool.sort((a, b) => b.score - a.score);
 
     let selectedCandidates = [];
@@ -901,7 +903,7 @@
       if (selectedCandidates.length === maxCards) break;
     }
 
-    // ⭐ 거리순 순차 정렬 (현재위치 -> 근접핫플 -> 복귀길목 -> 최단경계)
+    // ⭐ 거리 순서대로 오름차순 정렬 (현재위치 -> 1번 거점 -> 2번 목적지)
     selectedCandidates.sort((a, b) => a.dist - b.dist);
 
     currentRouteData = [
@@ -914,12 +916,12 @@
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
       logEl.innerText = selectedCandidates.length > 0 
-        ? `방금 · 모드 ${currentMode} (실시간 복귀경계 + 근접핫플) 연산 완료`
+        ? `방금 · 모드 ${currentMode} 순차 동선 연산 완료 (추천 ${selectedCandidates.length}곳)`
         : `방금 · 모드 ${currentMode} 연산 완료 · 목적지 근접 (${finalTarget.name} 직행)`;
     }
     
     let subFinalCandidates = [];
-    if (currentMode === 1) {
+    if (currentMode === 1 || (currentMode === 2 && inWisu)) {
       subFinalCandidates = await Promise.all(MAJOR_HUBS.filter(h => h.name !== finalTarget.name).map(async h => {
         let road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, h.lat, h.lng);
         return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: 50 };
@@ -966,7 +968,7 @@
     });
     const finalCard = document.createElement('div');
     finalCard.className = 'card final-card';
-    const targetLabel = currentMode === 1 ? '최종번화가' : '실시간최단위수경계복귀';
+    const targetLabel = (currentMode === 1 || isInsideWisu(currentPos.lat, currentPos.lng)) ? '최종번화가' : '실시간최단위수경계복귀';
     const finalBadgeNum = routeCards.length + 1;
     finalCard.innerHTML = `
       <div class="card-main-content">
@@ -984,11 +986,11 @@
           <button class="action-btn map-open-btn" data-name="${finalTarget.name}" data-lat="${finalTarget.lat}" data-lng="${finalTarget.lng}">🗺️ 카카오맵</button>
         </div>
       </div>
-      <div class="sub-info">${routeCards.length > 0 ? '근접 핫플/길목 거점 경유 후 복귀 · ' : '경유지 없음 · 즉시 복귀 직행 권장 · '}${finalTarget.dist.toFixed(1)}km 남음</div>
+      <div class="sub-info">${routeCards.length > 0 ? '경유지 탐색 후 순차 이동 · ' : '경유지 없음 · 즉시 직행 권장 · '}${finalTarget.dist.toFixed(1)}km 남음</div>
     `;
     listEl.appendChild(finalCard);
     
-    if (currentMode === 1 && subFinalCandidates && subFinalCandidates.length > 0) {
+    if ((currentMode === 1 || isInsideWisu(currentPos.lat, currentPos.lng)) && subFinalCandidates && subFinalCandidates.length > 0) {
       const subSection = document.createElement('div');
       subSection.className = 'sub-final-section';
       subSection.innerHTML = `
