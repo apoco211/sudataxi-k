@@ -5,11 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>수다택시 K</title>
   
-  <!-- PWA Manifest 연동 -->
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
   
-  <!-- iOS Safari (아이폰) 홈 화면 추가 아이콘 설정 -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="수다택시K">
@@ -17,7 +15,6 @@
   <link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png">
   <link rel="apple-touch-icon" sizes="1024x1024" href="./icon-1024.png">
   
-  <!-- 파비콘 및 브라우저 기본 아이콘 -->
   <link rel="shortcut icon" href="./icon-192.png">
   <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
@@ -118,7 +115,6 @@
     .tag-group { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
     .tag { font-size: 10px; padding: 1px 5px; border-radius: 4px; background: #2A2A2A; color: #A0A0A0; }
     .tag.near { background: #1E3A8A; color: #93C5FD; border: 1px solid #3B82F6; font-weight: 700; }
-    .tag.wisu { background: var(--theme-bg-dark); color: var(--theme-accent); border: 1px solid var(--theme-border); }
     .tag.custom { background: #3B0764; color: #E9D5FF; border: 1px solid #7E22CE; font-weight: 700; }
     .tag.logmatch { background: #2B1F3D; color: #C084FC; border: 1px solid #5B21B6; font-weight: 700; }
     .tag.timematch { background: #065F46; color: #34D399; border: 1px solid #10B981; font-weight: 800; }
@@ -520,28 +516,26 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
 
-  /* 💡 PWA 브라우저 CORS 막힘 해결 및 카카오 실시간 내비 완벽 연동 */
+  /* 💡 카카오 실시간 내비 완벽 연결 및 CORS 우회 보완 함수 */
   async function fetchRealRoadRouteDetails(fromLat, fromLng, toLat, toLng) {
     if (KAKAO_REST_KEY) {
       try {
-        const url = `https://apis-naver.kakaomobility.com/v1/directions?origin=${fromLng},${fromLat}&destination=${toLng},${toLat}&priority=RECOMMEND`;
-        const res = await fetch(url, {
+        const kakaoUrl = `https://apis-naver.kakaomobility.com/v1/directions?origin=${fromLng},${fromLat}&destination=${toLng},${toLat}&priority=RECOMMEND`;
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(kakaoUrl)}`;
+        
+        const res = await fetch(proxyUrl, {
           method: 'GET',
-          headers: { 
-            'Authorization': `KakaoAK ${KAKAO_REST_KEY}`,
-            'Content-Type': 'application/json'
-          }
+          headers: { 'Authorization': `KakaoAK ${KAKAO_REST_KEY}` }
         });
         
         if (res.ok) {
           const data = await res.json();
           if (data.routes && data.routes.length > 0 && data.routes[0].result_code === 0) {
-            const route = data.routes[0];
-            const summary = route.summary;
+            const summary = data.routes[0].summary;
             let geometryCoords = [];
             
-            if (route.sections) {
-              route.sections.forEach(sec => {
+            if (data.routes[0].sections) {
+              data.routes[0].sections.forEach(sec => {
                 if (sec.roads) {
                   sec.roads.forEach(road => {
                     if (road.vertexes) {
@@ -555,17 +549,17 @@
             }
             return {
               distanceKm: summary.distance / 1000,
-              durationMin: Math.max(1, Math.round(summary.duration / 60)), // 🔥 카카오 내비와 100% 일치하는 실시간 소요시간!
+              durationMin: Math.max(1, Math.round(summary.duration / 60)), // 카카오 내비 실시간 반영
               geometryCoords: geometryCoords.length > 0 ? geometryCoords : [[fromLat, fromLng], [toLat, toLng]]
             };
           }
         }
       } catch (e) {
-        console.log("카카오 API 호출 예외 발생, OSRM 대체 사용");
+        console.log("카카오 API 직접 연결 제한 - 보정 엔진으로 전환");
       }
     }
 
-    // 만약 카카오 API 키 권한 문제나 CORS로 차단될 경우 보정된 시간 적용
+    // 카카오 통신 차단 시 작동하는 현실적 도심 정체 보정 엔진 (OSRM + 시간대별 정체율 1.8배)
     try {
       const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
       const res = await fetch(url);
@@ -575,9 +569,9 @@
         const nowHour = new Date().getHours();
         let baseMin = Math.round(route.duration / 60);
         
-        // 낮/출퇴근 시간대 정체 현실화 보정 (1.6배)
-        if (nowHour >= 7 && nowHour <= 20) {
-          baseMin = Math.round(baseMin * 1.6);
+        // 주간 및 출퇴근 시간대 실제 도심 정체 반영 (1.8배) -> 6분에서 11분으로 보정!
+        if (nowHour >= 7 && nowHour <= 21) {
+          baseMin = Math.round(baseMin * 1.8); 
         }
         
         return {
@@ -591,7 +585,7 @@
     const fallbackDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng) * 1.3;
     return {
       distanceKm: fallbackDist,
-      durationMin: Math.max(1, Math.round((fallbackDist / 20.0) * 60)), // 시속 20km 기준 현실적 보정
+      durationMin: Math.max(1, Math.round((fallbackDist / 18.0) * 60)),
       geometryCoords: [[fromLat, fromLng], [toLat, toLng]]
     };
   }
