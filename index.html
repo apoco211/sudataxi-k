@@ -187,7 +187,7 @@
   </div>
   
   <div class="loc-bar">
-    <span id="loc-text">📍 GPS 위치 확인 중...</span>
+    <span id="loc-text">📍 GPS 위치 수신 중...</span>
     <button class="refresh-btn" id="btn-refresh">⟳</button>
   </div>
   
@@ -645,7 +645,6 @@
     return JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
   }
 
-  /* 가짜 인덕원 기본값 완전히 제거 - 실시간 위치 직접 수신 */
   function executeSearch() {
     const locText = document.getElementById('loc-text');
     if (locText) locText.innerText = '📍 실시간 GPS 위치 수신 중...';
@@ -682,7 +681,6 @@
     let mainRouteGeometry = [];
 
     if (currentMode === 1) {
-      // 모드 1: 내 현위치 기준 최단거리 주요 번화가를 목적지로 잡음
       let scoredTargets = await Promise.all(MAJOR_HUBS.map(async h => {
         const road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, h.lat, h.lng);
         return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: 100, geometry: road.geometryCoords };
@@ -691,7 +689,6 @@
       finalTarget = scoredTargets[0] || MAJOR_HUBS[0];
       mainRouteGeometry = finalTarget.geometry || [];
     } else {
-      // 모드 2: 최단 위수 경계점 연산
       const closestGateway = findClosestWisuGateway(currentPos.lat, currentPos.lng);
       const road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, closestGateway.lat, closestGateway.lng);
       finalTarget = {
@@ -703,10 +700,7 @@
       mainRouteGeometry = road.geometryCoords || [];
     }
 
-    // 1단계: 출발지 2km 초근거리 POI 스캔
     const startPoisPromise = fetchPOIsAroundPoint(currentPos.lat, currentPos.lng, 2000);
-    
-    // 2단계: 목적지 방향 5km 간격 거점(Waypoints) 스캔
     const waypoints = extractPathWaypointsEvery5km(mainRouteGeometry, 5.0);
     const waypointPoisPromises = waypoints.map(wp => fetchPOIsAroundPoint(wp.lat, wp.lng, 1500));
 
