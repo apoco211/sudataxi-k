@@ -358,7 +358,6 @@
     triggerSystemNotification();
   }
 
-  // 역, 병원, 학원가, 관공서, 유흥가가 통합 반영된 수도권 주요 다중 거점 DB
   const DEFAULT_MASTER_HOTSPOTS = [
     { "id": "hs_g_anyang_1", "name": "평촌역 먹자골목 및 한림대병원", "lat": 37.3942, "lng": 126.9638, "address": "평촌역", "type": "subway_hospital", "region": "anyang" },
     { "id": "hs_g_anyang_2", "name": "범계역 로데오거리 및 학원가", "lat": 37.3917, "lng": 126.9145, "address": "범계역", "type": "subway_academy", "region": "anyang" },
@@ -433,17 +432,29 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
 
-  /* 💡 카카오 실시간 내비 연동 및 도심 정체 보정 길찾기 함수 */
+  /* 💡 카카오 실시간 내비 연동 및 타임아웃/에러 안전 길찾기 */
   async function fetchRealRoadRouteDetails(fromLat, fromLng, toLat, toLng) {
+    const fallbackDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng) * 1.3;
+    const fallbackResult = {
+      distanceKm: fallbackDist,
+      durationMin: Math.max(1, Math.round((fallbackDist / 20.0) * 60)),
+      geometryCoords: [[fromLat, fromLng], [toLat, toLng]]
+    };
+
     if (KAKAO_REST_KEY) {
       try {
         const kakaoUrl = `https://apis-naver.kakaomobility.com/v1/directions?origin=${fromLng},${fromLat}&destination=${toLng},${toLat}&priority=RECOMMEND`;
         const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(kakaoUrl)}`;
         
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 1200); // 1.2초 타임아웃
+        
         const res = await fetch(proxyUrl, {
           method: 'GET',
-          headers: { 'Authorization': `KakaoAK ${KAKAO_REST_KEY}` }
+          headers: { 'Authorization': `KakaoAK ${KAKAO_REST_KEY}` },
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
         
         if (res.ok) {
           const data = await res.json();
@@ -475,18 +486,18 @@
     }
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 1000); // 1초 타임아웃
       const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
-      const res = await fetch(url);
+      const res = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      
       const data = await res.json();
       if (data.routes && data.routes.length > 0) {
         const route = data.routes[0];
         const nowHour = new Date().getHours();
         let baseMin = Math.round(route.duration / 60);
-        
-        if (nowHour >= 7 && nowHour <= 21) {
-          baseMin = Math.round(baseMin * 1.8); 
-        }
-        
+        if (nowHour >= 7 && nowHour <= 21) baseMin = Math.round(baseMin * 1.8);
         return {
           distanceKm: route.distance / 1000,
           durationMin: Math.max(1, baseMin),
@@ -495,15 +506,9 @@
       }
     } catch (e) {}
 
-    const fallbackDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng) * 1.3;
-    return {
-      distanceKm: fallbackDist,
-      durationMin: Math.max(1, Math.round((fallbackDist / 18.0) * 60)),
-      geometryCoords: [[fromLat, fromLng], [toLat, toLng]]
-    };
+    return fallbackResult;
   }
 
-  // 💡 핵심: 시간대별 거점 유형(역, 병원, 학원, 유흥가) 맞춤 가산점 알고리즘
   function getDynamicTimeCategoryBonus(itemType, itemName, nowHour) {
     let bonus = 0;
     const type = itemType || '';
@@ -514,28 +519,21 @@
     const isSubway = type.includes('subway') || name.includes('역') || name.includes('터미널');
     const isNightlife = type.includes('nightlife') || name.includes('먹자골목') || name.includes('포차') || name.includes('주점') || name.includes('로데오');
 
-    // 1. 오전 출근/진료 시간대 (07시 ~ 11시)
     if (nowHour >= 7 && nowHour < 12) {
-      if (isSubway) bonus += 45;      // 출근 지하철역 극대화
-      if (isHospital) bonus += 40;    // 오전 외래 환자/보호자 콜
-      if (isNightlife) bonus -= 20;   // 아침 먹자골목 감점
-    } 
-    // 2. 낮/오후 시간대 (12시 ~ 17시)
-    else if (nowHour >= 12 && nowHour < 18) {
-      if (isHospital) bonus += 35;    // 퇴원/통원 환자
-      if (isAcademy) bonus += 30;     // 등원/픽업
-      if (isSubway) bonus += 25;      // 거점 역 이동
-    } 
-    // 3. 저녁/퇴근 시간대 (18시 ~ 20시)
-    else if (nowHour >= 18 && nowHour < 21) {
-      if (isSubway) bonus += 35;      // 퇴근길
-      if (isAcademy) bonus += 35;     // 학원 하원길
-      if (isNightlife) bonus += 20;   // 저녁 1차
-    } 
-    // 4. 심야/유흥 시간대 (21시 ~ 03시)
-    else {
-      if (isNightlife) bonus += 45;   // 밤샘 유흥가/먹자골목 최우선
-      if (isSubway) bonus += 25;      // 막차 승객
+      if (isSubway) bonus += 45;
+      if (isHospital) bonus += 40;
+      if (isNightlife) bonus -= 20;
+    } else if (nowHour >= 12 && nowHour < 18) {
+      if (isHospital) bonus += 35;
+      if (isAcademy) bonus += 30;
+      if (isSubway) bonus += 25;
+    } else if (nowHour >= 18 && nowHour < 21) {
+      if (isSubway) bonus += 35;
+      if (isAcademy) bonus += 35;
+      if (isNightlife) bonus += 20;
+    } else {
+      if (isNightlife) bonus += 45;
+      if (isSubway) bonus += 25;
     }
 
     return bonus;
@@ -605,20 +603,27 @@
     );
   }
 
-  /* ⚡ 다중 거점(역/병원/학원) 초고속 연산 엔진 */
+  /* ⚡ 멈춤 방지 완벽 예외 처리 및 초고속 연산 엔진 */
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
     if (logEl) logEl.innerText = `⚡ 다중 거점(역/병원/학원/상권) 초고속 연산 중...`;
     
-    const weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng);
+    let weatherData = { isRainOrSnow: false };
+    try {
+      weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng);
+    } catch(e) {}
+
     const customHotspots = getCustomHotspots();
     const masterHotspots = getMasterHotspotsFromStorage();
     
     let finalTarget = null;
     if (currentMode === 1) {
       let scoredTargets = await Promise.all(MAJOR_HUBS.map(async h => {
-        const road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, h.lat, h.lng);
+        let road = { distanceKm: getStraightDistanceKm(currentPos.lat, currentPos.lng, h.lat, h.lng) * 1.3, durationMin: 5 };
+        try {
+          road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, h.lat, h.lng);
+        } catch(e) {}
         return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: 100, geometry: road.geometryCoords };
       }));
       let validTargets = scoredTargets.filter(h => h.dist > 0.5);
@@ -626,7 +631,10 @@
       finalTarget = validTargets.length > 0 ? validTargets[0] : scoredTargets.sort((a, b) => a.dist - b.dist)[0];
     } else {
       const closestGateway = findClosestWisuGateway(currentPos.lat, currentPos.lng);
-      const road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, closestGateway.lat, closestGateway.lng);
+      let road = { distanceKm: getStraightDistanceKm(currentPos.lat, currentPos.lng, closestGateway.lat, closestGateway.lng) * 1.3, durationMin: 5 };
+      try {
+        road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, closestGateway.lat, closestGateway.lng);
+      } catch(e) {}
       finalTarget = {
         ...closestGateway,
         dist: road.distanceKm,
@@ -648,7 +656,11 @@
 
     let scoredPool = await Promise.all(preFiltered.map(async item => {
       const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
-      const road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, item.lat, item.lng);
+      let road = { distanceKm: distAtoB * 1.3, durationMin: Math.max(1, Math.round((distAtoB * 1.3 / 20) * 60)) };
+      
+      try {
+        road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, item.lat, item.lng);
+      } catch(e) {}
       
       let isNearStep1 = distAtoB <= 3.0;
       let score = Math.max(10, 350 - Math.round(road.distanceKm * 18));
@@ -657,7 +669,6 @@
       if (item.isCustom) score += 50;
       else if (item.region || item.id?.startsWith('hs_')) score += 35;
       
-      // 🔥 역, 병원, 학원가, 상권 시간대별 가산점 적용
       score += getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
       if (weatherData.isRainOrSnow) score += 20;
       
@@ -708,7 +719,10 @@
     let subFinalCandidates = [];
     if (currentMode === 1) {
       subFinalCandidates = await Promise.all(MAJOR_HUBS.filter(h => h.name !== finalTarget.name).map(async h => {
-        const road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, h.lat, h.lng);
+        let road = { distanceKm: getStraightDistanceKm(currentPos.lat, currentPos.lng, h.lat, h.lng) * 1.3, durationMin: 5 };
+        try {
+          road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, h.lat, h.lng);
+        } catch(e) {}
         return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: 50 };
       }));
       subFinalCandidates.sort((a, b) => a.dist - b.dist);
