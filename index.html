@@ -393,7 +393,7 @@
     return wisuBoxes.some(b => lat >= b.minLat && lat <= b.maxLat && lng >= b.minLng && lng <= b.maxLng);
   }
 
-  function findClosestWisuGateway(currentLat, currentLng) {
+  function findClosestWisuGatewayFallback(currentLat, currentLng) {
     let minDistance = Infinity;
     let closestPoint = WISU_BOUNDARY_POINTS[0];
     WISU_BOUNDARY_POINTS.forEach(pt => {
@@ -404,6 +404,55 @@
       }
     });
     return { ...closestPoint, type: "gateway", isWisu: true };
+  }
+
+  /* 🔍 [신규] 카카오 API 기반 최단 위수 경계 지점 실시간 검색 */
+  async function fetchRealtimeWisuGateway(currentLat, currentLng) {
+    if (!KAKAO_REST_KEY) return findClosestWisuGatewayFallback(currentLat, currentLng);
+
+    try {
+      const regionUrl = `https://dapi.kakao.com/v2/local/geo/coord2regioncode.json?x=${currentLng}&y=${currentLat}`;
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(regionUrl)}`;
+      
+      const res = await fetch(proxyUrl, {
+        headers: { 'Authorization': `KakaoAK ${KAKAO_REST_KEY}` }
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const currentRegion = data.documents?.[0]?.region_2depth_name || "";
+
+        let targetKeyword = "의왕 월암동 경계";
+        if (currentRegion.includes("수원")) targetKeyword = "의왕 월암동";
+        else if (currentRegion.includes("안산")) targetKeyword = "군포 대야미역";
+        else if (currentRegion.includes("시흥") || currentRegion.includes("인천")) targetKeyword = "안양 박달동";
+        else if (currentRegion.includes("서울") || currentRegion.includes("성남")) targetKeyword = "과천 선바위역";
+
+        const searchUrl = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(targetKeyword)}&x=${currentLng}&y=${currentLat}&sort=distance`;
+        const searchProxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(searchUrl)}`;
+        
+        const searchRes = await fetch(searchProxyUrl, {
+          headers: { 'Authorization': `KakaoAK ${KAKAO_REST_KEY}` }
+        });
+
+        if (searchRes.ok) {
+          const searchData = await searchRes.json();
+          if (searchData.documents && searchData.documents.length > 0) {
+            const place = searchData.documents[0];
+            return {
+              name: `${place.place_name} (실시간 복귀경계)`,
+              lat: parseFloat(place.y),
+              lng: parseFloat(place.x),
+              address: place.address_name,
+              type: "gateway",
+              isWisu: true
+            };
+          }
+        }
+      }
+    } catch (e) {}
+
+    return findClosestWisuGatewayFallback(currentLat, currentLng);
   }
 
   const MAJOR_HUBS = [
@@ -518,7 +567,7 @@
     }
   }
 
-  /* 🔍 [신규] 카카오 장소 검색 API 기반 주변 실시간 상권 핫플 라이브 수집 */
+  /* 🔍 카카오 장소 검색 API 기반 주변 실시간 상권 핫플 라이브 수집 */
   async function fetchLiveKakaoHotspots(lat, lng) {
     if (!KAKAO_REST_KEY) return [];
     
@@ -533,7 +582,7 @@
     let liveHotspots = [];
     for (let kw of keywords) {
       try {
-        const kakaoUrl = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(kw)}&x=${lng}&y=${lat}&radius=4000&sort=distance`;
+        const kakaoUrl = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(kw)}&x=${lng}&y=${lat}&radius=3000&sort=distance`;
         const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(kakaoUrl)}`;
         
         const controller = new AbortController();
@@ -750,15 +799,15 @@
     });
   }
 
+  /* ⚡ [모드 2: 실시간 복귀 경계 + 반경 1~3km 현위치 근접 핫플 최우선 적용 엔진] */
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
-    if (logEl) logEl.innerText = `⚡ [모드 ${currentMode}] 카카오 실시간 상권 + 복귀 동선 연산 중...`;
+    if (logEl) logEl.innerText = `⚡ [모드 ${currentMode}] 실시간 복귀 경계 & 근접 핫플 연산 중...`;
     
     let weatherData = { isRainOrSnow: false };
     try { weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng); } catch(e) {}
 
-    // 카카오 지도 API를 활용해 내 주변 주변 상권 실시간 추가 수집
     const liveKakaoHotspots = await fetchLiveKakaoHotspots(currentPos.lat, currentPos.lng);
     const customHotspots = getCustomHotspots();
     const masterHotspots = getMasterHotspotsFromStorage();
@@ -773,7 +822,8 @@
       scoredTargets.sort((a, b) => a.dist - b.dist);
       finalTarget = scoredTargets[0];
     } else {
-      const closestGateway = findClosestWisuGateway(currentPos.lat, currentPos.lng);
+      // 📍 [모드 2] 카카오 API 기반 실시간 최단 위수 경계 검색
+      const closestGateway = await fetchRealtimeWisuGateway(currentPos.lat, currentPos.lng);
       let road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, closestGateway.lat, closestGateway.lng);
       finalTarget = {
         ...closestGateway,
@@ -784,7 +834,6 @@
       };
     }
 
-    // 마스터 DB + 직접 저장 장소 + 카카오 실시간 라이브 탐색 장소 통합
     let rawPool = [...liveKakaoHotspots, ...customHotspots, ...masterHotspots].filter(item => {
       const nameA = item.name.replace(/\s+/g, '').substring(0, 3);
       const nameB = finalTarget.name.replace(/\s+/g, '').substring(0, 3);
@@ -793,10 +842,15 @@
 
     const distAtoC = getStraightDistanceKm(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
 
+    // ⭐ [모드 2 원칙] 1) 현위치 반경 3km 이내 근접 핫플 OR 2) 복귀 길목 거점
     let preFiltered = rawPool.filter(item => {
       const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const distBtoC = getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
-      return (distAtoB + distBtoC) <= (distAtoC * 1.35) + 1.5 && distBtoC < distAtoC;
+      
+      const isNearStep1 = distAtoB <= 3.0; // 반경 3km 이내 근접 핫플
+      const isAlongPath = (distAtoB + distBtoC) <= (distAtoC * 1.35) + 1.5 && distBtoC < distAtoC; // 복귀 길목
+      
+      return isNearStep1 || isAlongPath;
     });
 
     let scoredPool = await Promise.all(preFiltered.map(async item => {
@@ -805,11 +859,13 @@
       
       let isNearStep1 = distAtoB <= 3.0;
       let score = Math.max(10, 350 - Math.round(road.distanceKm * 18));
+      
+      // ⭐ 현위치 근접 핫플(+140점) 최우선 점수 가산
       if (isNearStep1) score += 140;
       else score += 60;
       
       if (item.isCustom) score += 50;
-      else if (item.isLiveKakao) score += 45; // 카카오 실시간 라이브 검색 장소 가산점
+      else if (item.isLiveKakao) score += 45;
       else if (item.region || item.id?.startsWith('hs_')) score += 35;
       
       score += getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
@@ -845,6 +901,7 @@
       if (selectedCandidates.length === maxCards) break;
     }
 
+    // ⭐ 거리순 순차 정렬 (현재위치 -> 근접핫플 -> 복귀길목 -> 최단경계)
     selectedCandidates.sort((a, b) => a.dist - b.dist);
 
     currentRouteData = [
@@ -857,7 +914,7 @@
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
       logEl.innerText = selectedCandidates.length > 0 
-        ? `방금 · 모드 ${currentMode} (카카오 탐색 포함) 연산 완료 · 추천 거점 ${selectedCandidates.length}곳 제안`
+        ? `방금 · 모드 ${currentMode} (실시간 복귀경계 + 근접핫플) 연산 완료`
         : `방금 · 모드 ${currentMode} 연산 완료 · 목적지 근접 (${finalTarget.name} 직행)`;
     }
     
@@ -897,9 +954,9 @@
           </div>
         </div>
         <div class="tag-group">
+          ${item.isNearStep1 ? '<span class="tag near">#현위치근접거점</span>' : '<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#이동경로사이</span>'}
           ${item.isLiveKakao ? '<span class="tag livekakaomap">⚡카카오실시간상권</span>' : ''}
           ${item.isTimeMatch ? '<span class="tag timematch">🔥현재시간대콜집중</span>' : ''}
-          ${item.isNearStep1 ? '<span class="tag near">#현위치근접거점</span>' : '<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#이동경로사이</span>'}
           ${item.isMasterDb ? '<span class="tag masterdb">#수도권마스터DB</span>' : ''}
           ${item.isCustom ? '<span class="tag custom">#나만의핫플</span>' : ''}
           ${item.logCount > 0 ? `<span class="tag logmatch">#누적콜 ${item.logCount}건</span>` : ''}
@@ -909,7 +966,7 @@
     });
     const finalCard = document.createElement('div');
     finalCard.className = 'card final-card';
-    const targetLabel = currentMode === 1 ? '최종번화가' : '최단위수경계복귀';
+    const targetLabel = currentMode === 1 ? '최종번화가' : '실시간최단위수경계복귀';
     const finalBadgeNum = routeCards.length + 1;
     finalCard.innerHTML = `
       <div class="card-main-content">
@@ -927,7 +984,7 @@
           <button class="action-btn map-open-btn" data-name="${finalTarget.name}" data-lat="${finalTarget.lat}" data-lng="${finalTarget.lng}">🗺️ 카카오맵</button>
         </div>
       </div>
-      <div class="sub-info">${routeCards.length > 0 ? '이동 경로 사이 거점 경유 후 이동 · ' : '경유지 없음 · 즉시 직행 권장 · '}${finalTarget.dist.toFixed(1)}km 남음</div>
+      <div class="sub-info">${routeCards.length > 0 ? '근접 핫플/길목 거점 경유 후 복귀 · ' : '경유지 없음 · 즉시 복귀 직행 권장 · '}${finalTarget.dist.toFixed(1)}km 남음</div>
     `;
     listEl.appendChild(finalCard);
     
