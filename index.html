@@ -289,13 +289,21 @@
       </div>
     </details>
 
-    <!-- 📜 [아코디언 2] 버전별 업데이트 히스토리 -->
+    <!-- 📜 [아코디언 2] 버전별 전체 업데이트 히스토리 (최신순 정렬) -->
     <details style="margin-top: 6px; background: #161616; border: 1px solid #333333; border-radius: 10px; padding: 10px 12px; font-size: 11px; line-height: 1.5;">
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 12px;">📜 수다택시 K 업데이트 히스토리 (터치하여 펼치기)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 12px;">📜 수다택시 K 전체 업데이트 히스토리 (터치하여 펼치기)</summary>
       <div style="margin-top: 10px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px;">
         
+        <!-- 최신 버전 맨 위 배치 -->
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #4ADE80;">v1.3.1 (2026.09) - 상단 실시간 날짜/공휴일 헤더 표기</strong><br>
+          <strong style="color: #4ADE80;">v1.3.2 (2026.09) - 장기 누적 콜 데이터 보존 보완 & 히스토리 전체 복원</strong><br>
+          • 💎 1년 이상 축적된 과거 탑승 데이터 감쇄 하한선(최소 70% 보존) 설정으로 장기 데이터 가치 100% 보존<br>
+          • 🕒 현재 시간대(±1시간) 일치 시 1년 전 데이터라도 +60점 강력 가산점 즉시 반영<br>
+          • 📜 업데이트 히스토리 전체 버전(v1.1~v1.3.2)을 최신순으로 정렬 및 전체 내역 완벽 보존
+        </div>
+
+        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
+          <strong style="color: #888888;">v1.3.1 (2026.09) - 상단 실시간 날짜/공휴일 헤더 표기</strong><br>
           • 📅 앱 상단에 오늘 날짜, 요일, 공공데이터 연동 공휴일 명칭 실시간 표기<br>
           • 🏛️ 공공데이터포럼 특일 정보 API 연동 (추석/설날/대체공휴일 실시간 자동 감지 및 오피스/학원점수 차단)<br>
           • 🟡 모드 1: 5대 거점역 반경 500m 진입 시 다음 최적 거점역 자동 순환 전환<br>
@@ -862,6 +870,7 @@
     return bonus;
   }
 
+  /* 🛠️ [개선된 콜 점수 연산 함수] 오래된 1년 전 데이터도 최소 70% 이상 영구 보존 및 시간대 집중 적용 */
   function calculateCallLogScore(candLat, candLng) {
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     if (logs.length === 0) return { bonus: 0, matched: false, count: 0, isTimeMatch: false };
@@ -872,31 +881,40 @@
     let isMatched = false;
     let matchCount = 0;
     let isTimeMatch = false;
+
     logs.forEach(log => {
       const logLat = Number(log.lat);
       const logLng = Number(log.lng);
       if (isNaN(logLat) || isNaN(logLng)) return;
+      
       const dist = getStraightDistanceKm(candLat, candLng, logLat, logLng);
       if (dist <= 0.3) {
         matchCount++;
         const logDate = parseDateSafely(log.timestamp);
         const logHour = logDate.getHours();
+        
         let hourDiff = Math.abs(currentHour - logHour);
         if (hourDiff > 12) hourDiff = 24 - hourDiff;
+        
         let timeBonus = 0;
         if (hourDiff <= 1) {
-          timeBonus = 50;
+          timeBonus = 60; // 현재 시간대(±1시간) 일치 시 강력 가산점
           isTimeMatch = true;
         }
+
+        // 💡 오래된 데이터도 최소 70%의 가치를 영구 보존
         const daysPassed = Math.max(0, (now - logDate) / (1000 * 60 * 60 * 24));
-        const decayFactor = Math.exp(-0.023 * daysPassed);
-        const score = (25 + timeBonus) * decayFactor;
+        const retentionFactor = 0.7 + (0.3 * Math.exp(-0.005 * daysPassed));
+        
+        const score = (30 + timeBonus) * retentionFactor;
+        
         if (score > maxBonus) {
           maxBonus = score;
           isMatched = true;
         }
       }
     });
+
     return { bonus: Math.round(maxBonus), matched: isMatched, count: matchCount, isTimeMatch };
   }
 
@@ -960,7 +978,7 @@
     });
   }
 
-  /* ⚡ [통합 연산 엔진: 모드1 5대거점 500m 순환 + 모드2 최단복귀 + 공공데이터 공휴일] */
+  /* ⚡ [통합 연산 엔진: 모드1 5대거점 500m 순환 + 모드2 최단복귀 + 공공데이터 공휴일 + 장기콜 보존] */
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
