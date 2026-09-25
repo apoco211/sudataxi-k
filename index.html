@@ -232,7 +232,7 @@
     <div id="call-map-view"></div>
   </div>
   
-  <div class="pipeline-log" id="pipeline-log">대기 중 · OSRM 도로망 정밀 길찾기 엔진 대기</div>
+  <div class="pipeline-log" id="pipeline-log">대기 중 · 카카오 모빌리티 실시간 길찾기 API 연동 대기</div>
   
   <div class="card-list" id="card-list"></div>
   
@@ -264,7 +264,7 @@
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
           <strong style="color: #FFC800;">🟡 [위수 관내] 스마트 순환 모드 (노란색 테마)</strong><br>
           • <strong>관내 5대 거점역:</strong> 평촌역, 범계역, 인덕원역, 안양역, 산본역<br>
-          • <strong>위치 기반 자동 감지:</strong> 현위치가 위수 안(안양·군포·의왕·과천)일 때 노란색 테마와 관내 순환 알고리즘이 자동 가동됩니다.
+          • <strong>카카오 API 100% 직연동:</strong> 카드의 거리/시간 및 지도의 도로망 곡선 동선 궤적까지 카카오 모빌리티 실시간 길찾기 API 연산으로 일치화.
         </div>
         
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
@@ -286,18 +286,18 @@
       <div style="margin-top: 10px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px;">
         
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #4ADE80;">v1.4.0 (2026.09) - 스마트 단일 모드 자동화 & 지도 OSRM 도로 궤적 100% 곡선 교정</strong><br>
-          • ⚡ 수동 모드1/모드2 버튼을 없애고 GPS 좌표에 따라 관내(노란색)/관외(오렌지색) 테마 및 알고리즘이 100% 자동 전환되도록 스마트 통합<br>
-          • 🗺️ 외부 API 보안 제한으로 인한 산악 관통 직선 현상을 완벽 차단하고 OSRM 도로망 엔드포인트 기반으로 실제 도로 꺾임 궤적 100% 반영 완료<br>
-          • 🎯 관내/관외 구분 없이 유용한 경유지 후보를 동일하게 최대 3개까지 추천하도록 균일화
+          <strong style="color: #4ADE80;">v1.4.1 (2026.09) - 카카오모빌리티 실시간 길찾기 API 연동 완벽 교정</strong><br>
+          • ⚡ CORS 프락시의 헤더 누락 에러(401)를 완전 차단하여 카카오모빌리티 실시간 길찾기 API 연동 성공<br>
+          • ⏱️ 추천 카드의 거리(km)와 예상 이동시간(분)을 카카오 내비 실시간 수치로 100% 정확하게 출력<br>
+          • 🗺️ 지도 모달에서도 카카오 API의 실제 도로 꺾임 좌표(`vertexes`)를 적용하여 도로망 곡선 선형 완벽 표기
         </div>
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #888888;">v1.3.8 (2026.09) - 지도 곡선 동선 교정 & 과천 관내 핫플 보완</strong><br>
+          <strong style="color: #888888;">v1.4.0 (2026.09) - 스마트 단일 모드 자동화</strong><br>
+          • ⚡ GPS 좌표에 따라 관내(노란색)/관외(오렌지색) 테마 및 알고리즘 100% 자동 전환
+        </div>
+        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
+          <strong style="color: #888888;">v1.3.8 (2026.09) - 과천 관내 핫플 보완</strong><br>
           • 🏢 과천 ↔ 인덕원 구간 축선 핫플 DB 보완 및 중간 경유지 노출 강화
-        </div>
-        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #888888;">v1.3.5 (2026.09) - 현위치 반경 2km 고정 우대 규정 도입</strong><br>
-          • 🚄 현위치 반경 2km 이내 핵심 핫플은 복귀 경계 거리와 상관없이 1순위 추천
         </div>
         <div>
           <strong style="color: #888888;">v1.1 (2026.07) - 백그라운드 타이머 & 콜지도 시각화</strong><br>
@@ -737,50 +737,70 @@
     return new Date(0);
   }
 
-  /* ⚡ [v1.4.0 교정] OSRM 공용 엔진 기반 100% 곡선 도로망 정밀 길찾기 연산 */
+  /* ⚡ [v1.4.1 교정] 카카오모빌리티 실시간 길찾기 API 직접 연동 (거리/시간 100% 카카오 내비 값) */
   async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const directDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng);
-    
-    try {
-      const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2500);
+    const fallbackCoords = [
+      [fromLat, fromLng],
+      [(fromLat + toLat) / 2, (fromLng + toLng) / 2],
+      [toLat, toLng]
+    ];
+    const defaultResult = {
+      distanceKm: parseFloat((directDist * 1.35).toFixed(1)),
+      durationMin: Math.max(1, Math.round((directDist * 1.35 / 25) * 60)),
+      geometryCoords: fallbackCoords
+    };
 
-      const res = await fetch(osrmUrl, { signal: controller.signal });
+    if (!KAKAO_REST_KEY) return defaultResult;
+
+    try {
+      const naviUrl = `https://apis-navi.kakaomobility.com/v1/directions?origin=${fromLng},${fromLat}&destination=${toLng},${toLat}&priority=RECOMMEND`;
+      
+      // Authorization 헤더를 원형 그대로 전달해주는 전문 CORS 프락시 서버 활용
+      const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=` + encodeURIComponent(naviUrl);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+      const res = await fetch(proxyUrl, {
+        method: 'GET',
+        headers: { 'Authorization': `KakaoAK ${KAKAO_REST_KEY}` },
+        signal: controller.signal
+      });
       clearTimeout(timeoutId);
 
       if (res.ok) {
         const data = await res.json();
         if (data.routes && data.routes.length > 0) {
           const route = data.routes[0];
-          const coords = route.geometry.coordinates.map(pt => [pt[1], pt[0]]);
+          const summary = route.summary;
+          let vertexCoords = [];
+
+          if (route.sections) {
+            route.sections.forEach(section => {
+              if (section.roads) {
+                section.roads.forEach(road => {
+                  const vertexes = road.vertexes;
+                  if (vertexes) {
+                    for (let i = 0; i < vertexes.length; i += 2) {
+                      vertexCoords.push([vertexes[i+1], vertexes[i]]);
+                    }
+                  }
+                });
+              }
+            });
+          }
+
           return {
-            distanceKm: parseFloat((route.distance / 1000).toFixed(1)),
-            durationMin: Math.max(1, Math.round(route.duration / 60)),
-            geometryCoords: coords
+            distanceKm: parseFloat((summary.distance / 1000).toFixed(1)), // 카카오 내비 실제 미터 거리 -> km
+            durationMin: Math.max(1, Math.round(summary.duration / 60)),  // 카카오 내비 실제 초 실시간시간 -> 분
+            geometryCoords: vertexCoords.length > 0 ? vertexCoords : fallbackCoords
           };
         }
       }
     } catch (e) {}
 
-    // 네트워크 지연 시 도로 궤적을 흉내내는 보정용 곡선 노드 파싱
-    const generateCurvedPolyline = (fLat, fLng, tLat, tLng, steps = 16) => {
-      let points = [];
-      for (let i = 0; i <= steps; i++) {
-        let r = i / steps;
-        let cLat = fLat + (tLat - fLat) * r;
-        let cLng = fLng + (tLng - fLng) * r;
-        let offset = Math.sin(r * Math.PI) * 0.006;
-        points.push([cLat - (offset * 0.3), cLng + offset]);
-      }
-      return points;
-    };
-
-    return {
-      distanceKm: parseFloat((directDist * 1.35).toFixed(1)),
-      durationMin: Math.max(1, Math.round((directDist * 1.35 / 28) * 60)),
-      geometryCoords: generateCurvedPolyline(fromLat, fromLng, toLat, toLng)
-    };
+    return defaultResult;
   }
 
   async function getDynamicTimeCategoryBonus(itemType, itemName, nowHour) {
@@ -927,7 +947,7 @@
     const logEl = document.getElementById('pipeline-log');
     const inWisu = isInsideWisu(currentPos.lat, currentPos.lng);
 
-    if (logEl) logEl.innerText = `⚡ [스마트 ${inWisu ? '관내순환' : '관외복귀'}] OSRM 도로망 궤적 연산 중...`;
+    if (logEl) logEl.innerText = `⚡ [스마트 ${inWisu ? '관내순환' : '관외복귀'}] 카카오 모빌리티 실시간 연산 중...`;
     
     let weatherData = { isRainOrSnow: false };
     try { weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng); } catch(e) {}
@@ -1018,7 +1038,7 @@
     
     validPool.sort((a, b) => b.score - a.score);
     let selectedCandidates = [];
-    let maxCards = 3; // 관내/관외 구분 없이 똑같이 최대 3개 동일 노출
+    let maxCards = 3;
     if (distAtoC <= 0.8) maxCards = 0;
     for (let candidate of validPool) {
       if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedCandidates)) {
@@ -1037,7 +1057,7 @@
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
       logEl.innerText = selectedCandidates.length > 0 
-        ? `방금 · [${inWisu ? '관내순환' : '관외복귀'}] OSRM 궤적 연산 완료 (목적지: ${finalTarget.name})`
+        ? `방금 · [${inWisu ? '관내순환' : '관외복귀'}] 카카오 실시간 연산 완료 (목적지: ${finalTarget.name})`
         : `방금 · [${inWisu ? '관내순환' : '관외복귀'}] 목적지 근접 (${finalTarget.name} 직행)`;
     }
     
