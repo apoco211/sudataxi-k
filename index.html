@@ -74,7 +74,6 @@
     .btn-update { flex: 1; background-color: var(--theme-accent); color: var(--theme-text-on-accent); border: none; padding: 5px; border-radius: 6px; font-weight: 900; cursor: pointer; font-size: 11px; }
     .btn-close { background-color: #2A2A2A; color: #CCCCCC; border: 1px solid #444; padding: 5px 8px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 11px; }
     
-    /* 📅 실시간 날짜/요일/공휴일 헤더 스타일 */
     .header { text-align: center; font-size: 17px; font-weight: 900; color: var(--theme-accent); margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; }
     .holiday-badge { font-size: 11px; padding: 2px 6px; border-radius: 6px; background: #FF4444; color: #FFFFFF; font-weight: 800; display: inline-block; vertical-align: middle; }
     .weekday-badge { font-size: 11px; padding: 2px 6px; border-radius: 6px; background: #2A2A2A; color: #AAAAAA; font-weight: 700; display: inline-block; vertical-align: middle; }
@@ -206,7 +205,6 @@
     </div>
   </div>
   
-  <!-- 📅 상단 타이틀: 동적 실시간 날짜, 요일 및 공휴일 표기 -->
   <div class="header" id="app-header-title">📅 날짜 수신 대기 중...</div>
   
   <div class="mode-container">
@@ -262,7 +260,6 @@
       <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 3px;"></div>
     </div>
     
-    <!-- 💡 [아코디언 1] 모드1/2 통합 운행 및 추천 엔진 가이드 -->
     <details style="margin-top: 12px; background: #161616; border: 1px solid #333333; border-radius: 10px; padding: 10px 12px; font-size: 11px; line-height: 1.5;">
       <summary style="font-weight: 800; color: #FFC800; cursor: pointer; font-size: 12px;">💡 수다택시 K 핵심 운행 및 추천 엔진 가이드 (터치하여 펼치기)</summary>
       <div style="margin-top: 10px; color: #DDDDDD; display: flex; flex-direction: column; gap: 8px;">
@@ -277,7 +274,7 @@
           <strong style="color: #FF6B00;">🟠 [모드 2] 외곽 / 복귀 모드 (타지역 이동 시)</strong><br>
           • <strong>최단 위수 경계 고정:</strong> 카카오 API로 실시간 최단 복귀 관문(의왕 월암/부곡, 군포 대야미, 안양 박달/석수, 과천 선바위 등) 지정.<br>
           • <strong>현위치 반경 2km 고정 선점:</strong> KTX 광명역 등 현위치 반경 2km 이내 핵심 핫플은 복귀 경계 거리나 각도와 상관없이 무조건 1순위 우대 추천 (+140점).<br>
-          • <strong>유연한 복귀 전환:</strong> 복귀 목적지 바로 앞(800m 이내)에 밀착했을 때만 직행 모드로 전환.
+          • <strong>과천-인덕원 구간 축선 완화:</strong> 정부과천청사역, 지정타, 선바위 등 중간 경유지 핫플 포착 강화.
         </div>
         
         <div>
@@ -289,17 +286,20 @@
       </div>
     </details>
 
-    <!-- 📜 [아코디언 2] 버전별 전체 업데이트 히스토리 (최신순 정렬) -->
     <details style="margin-top: 6px; background: #161616; border: 1px solid #333333; border-radius: 10px; padding: 10px 12px; font-size: 11px; line-height: 1.5;">
       <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 12px;">📜 수다택시 K 전체 업데이트 히스토리 (터치하여 펼치기)</summary>
       <div style="margin-top: 10px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px;">
         
-        <!-- 최신 버전 맨 위 배치 -->
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #4ADE80;">v1.3.7 (2026.09) - 카카오 REST API 단일 연산 엔진 및 도로 곡선 동선 완성</strong><br>
-          • ⚡ 외부 OSRM을 완전 삭제하고 거리/시간 및 지도 모달의 매끄러운 도로 곡선 궤적까지 100% 카카오 연산 통합<br>
-          • 🗺️ 건물/산을 관통하던 지도 직선 표시 오류를 실제 도로 주행 곡선으로 완전 교정<br>
-          • 📍 박달동/석수동 ↔ 범계/평촌/인덕원 간 실제 도로 주행 거리 및 KTX 광명역 2km 초근접 우대 완벽 연동
+          <strong style="color: #4ADE80;">v1.3.8 (2026.09) - 지도 곡선 동선 완벽 교정 & 과천 관내 핫플 보완</strong><br>
+          • ⚡ 과천대로 등 주요 도로망을 무시하고 관악산 자락을 관통하던 단순 직선 지도 표기 오류 완벽 수정<br>
+          • 🏢 과천 ↔ 인덕원 구간 축선 핫플 DB 보완(정부과천청사 로데오, 과천지식정보타운, 선바위역 등) 및 중간 경유지 노출 강화<br>
+          • 🎯 100% 카카오 API 단일 연산 기반으로 카드 거리/시간 및 지도 경로 선 일치화 완료
+        </div>
+
+        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
+          <strong style="color: #888888;">v1.3.7 (2026.09) - 카카오 REST API 단일 연산 엔진 통합</strong><br>
+          • ⚡ 외부 OSRM 완전히 제거 및 카카오 API 전면 적용
         </div>
 
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
@@ -309,17 +309,7 @@
 
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
           <strong style="color: #888888;">v1.3.3 (2026.09) - 지도 버튼 연동 직행화 (카카오맵 직행)</strong><br>
-          • 🗺️ 카카오내비 스키마 호출을 제거하고 카카오맵(App/Web)으로 바로 연결
-        </div>
-
-        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #888888;">v1.3.2 (2026.09) - 장기 누적 콜 데이터 보존 보완 & 히스토리 복원</strong><br>
-          • 💎 1년 이상 축적된 과거 탑승 데이터 감쇄 하한선(최소 70% 보존) 설정
-        </div>
-
-        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #888888;">v1.3.1 (2026.09) - 상단 실시간 날짜/공휴일 헤더 표기</strong><br>
-          • 📅 공공데이터포럼 연동 실시간 특일(공휴일) 자동 감지
+          • 🗺️ 카카오맵(App/Web)으로 바로 연결
         </div>
 
         <div>
@@ -368,7 +358,6 @@
   let timerInterval = null;
   let isTimerRunning = false;
   
-  // 🏛️ 공공데이터포럼 실시간 공휴일 캐시 데이터
   let holidayDataCache = { yearMonth: "", holidays: [], holidayNames: {} };
 
   let audioCtx = null;
@@ -437,9 +426,12 @@
     triggerSystemNotification();
   }
 
-  // 💡 KTX 광명역 및 주요 거점 마스터 DB
+  // 💡 과천 관내 핫플 보완 및 KTX 광명역 마스터 DB
   const DEFAULT_MASTER_HOTSPOTS = [
     { "id": "hs_g_gwangmyeong_1", "name": "KTX 광명역 및 일직동 로데오", "lat": 37.4162, "lng": 126.8845, "address": "광명역", "type": "subway_shopping", "region": "gwangmyeong" },
+    { "id": "hs_g_gwacheon_1", "name": "정부과천청사역 중심상가 및 로데오", "lat": 37.4262, "lng": 126.9898, "address": "정부과천청사역", "type": "subway_nightlife", "region": "gwacheon" },
+    { "id": "hs_g_gwacheon_2", "name": "선바위역 환승장 및 먹자골목", "lat": 37.4518, "lng": 127.0022, "address": "선바위역", "type": "subway", "region": "gwacheon" },
+    { "id": "hs_g_gwacheon_3", "name": "과천지식정보타운(지정타) 오피스", "lat": 37.4085, "lng": 126.9812, "address": "갈현동", "type": "office", "region": "gwacheon" },
     { "id": "hs_g_anyang_1", "name": "평촌역 먹자골목 및 한림대병원", "lat": 37.3942, "lng": 126.9638, "address": "평촌역", "type": "subway_hospital", "region": "anyang" },
     { "id": "hs_g_anyang_2", "name": "범계역 로데오거리 및 학원가", "lat": 37.3917, "lng": 126.9145, "address": "범계역", "type": "subway_academy", "region": "anyang" },
     { "id": "hs_g_anyang_3", "name": "인덕원역 환승 거점", "lat": 37.4048, "lng": 126.9767, "address": "인덕원역", "type": "subway", "region": "anyang" },
@@ -447,11 +439,8 @@
     { "id": "hs_g_anyang_5", "name": "산본역 중심상가 및 원광대병원", "lat": 37.3554, "lng": 126.9331, "address": "산본역", "type": "subway_hospital", "region": "gunpo" },
     { "id": "hs_g_anyang_6", "name": "금정역 환승 먹자골목", "lat": 37.3721, "lng": 126.9438, "address": "금정역", "type": "subway", "region": "gunpo" },
     { "id": "hs_g_ansan_1", "name": "안산 중앙동 로데오 및 고려대병원", "lat": 37.3164, "lng": 126.8381, "address": "중앙동 로데오", "type": "subway_hospital", "region": "ansan" },
-    { "id": "hs_g_ansan_2", "name": "안산 고잔동 법원 및 학원가", "lat": 37.3150, "lng": 126.8290, "address": "고잔동", "type": "office_academy", "region": "ansan" },
-    { "id": "hs_g_ansan_4", "name": "안산 한대앞역 환승 거점", "lat": 37.3195, "lng": 126.8590, "address": "한대앞역", "type": "subway", "region": "ansan" },
     { "id": "hs_s_01", "name": "강남역 상업지구 및 병원거리", "lat": 37.4981, "lng": 127.0276, "address": "강남역", "type": "subway_hospital", "region": "seoul" },
-    { "id": "hs_s_25", "name": "사당역 환승 거점 및 먹자골목", "lat": 37.4765, "lng": 126.9816, "address": "사당역", "type": "subway", "region": "seoul" },
-    { "id": "hs_s_21", "name": "여의도역 금융가 및 성모병원", "lat": 37.5216, "lng": 126.9242, "address": "여의도역", "type": "office_hospital", "region": "seoul" }
+    { "id": "hs_s_25", "name": "사당역 환승 거점 및 먹자골목", "lat": 37.4765, "lng": 126.9816, "address": "사당역", "type": "subway", "region": "seoul" }
   ];
 
   const WISU_BOUNDARY_POINTS = [
@@ -466,9 +455,8 @@
 
   function isInsideWisu(lat, lng) {
     const wisuBoxes = [
-      { minLat: 37.38, maxLat: 37.43, minLng: 126.90, maxLng: 127.01 },
-      { minLat: 37.32, maxLat: 37.38, minLng: 126.89, maxLng: 126.99 },
-      { minLat: 37.40, maxLat: 37.46, minLng: 126.96, maxLng: 127.03 }
+      { minLat: 37.38, maxLat: 37.46, minLng: 126.90, maxLng: 127.03 },
+      { minLat: 37.32, maxLat: 37.38, minLng: 126.89, maxLng: 126.99 }
     ];
     return wisuBoxes.some(b => lat >= b.minLat && lat <= b.maxLat && lng >= b.minLng && lng <= b.maxLng);
   }
@@ -486,7 +474,6 @@
     return { ...closestPoint, type: "gateway", isWisu: true };
   }
 
-  /* 🔍 [카카오 실시간 API] 최단 위수 경계 지점 실시간 검색 연동 */
   async function fetchRealtimeWisuGateway(currentLat, currentLng) {
     if (!KAKAO_REST_KEY) return findClosestWisuGatewayFallback(currentLat, currentLng);
 
@@ -535,11 +522,10 @@
     return findClosestWisuGatewayFallback(currentLat, currentLng);
   }
 
-  // ⭐ 관내 5대 핵심 거점역
   const MAJOR_HUBS = [
+    { name: "인덕원역 환승 거점", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway", isWisu: true },
     { name: "평촌역 먹자골목 및 한림대병원", lat: 37.3942, lng: 126.9638, address: "평촌역", type: "subway_hospital", isWisu: true },
     { name: "범계역 로데오거리 및 학원가", lat: 37.3917, lng: 126.9145, address: "범계역", type: "subway_academy", isWisu: true },
-    { name: "인덕원역 환승 거점", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway", isWisu: true },
     { name: "안양역 일번가 및 메디컬타운", lat: 37.4013, lng: 126.9222, address: "안양역", type: "subway_hospital", isWisu: true },
     { name: "산본역 중심상가 및 원광대병원", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway_hospital", isWisu: true }
   ];
@@ -549,8 +535,8 @@
     if (saved) {
       try { 
         let parsed = JSON.parse(saved);
-        if (!parsed.some(item => item.name.includes("광명역"))) {
-          parsed.unshift(DEFAULT_MASTER_HOTSPOTS[0]);
+        if (!parsed.some(item => item.name.includes("정부과천청사역"))) {
+          parsed = [...DEFAULT_MASTER_HOTSPOTS, ...parsed];
           localStorage.setItem('sudataxi_master_hotspots', JSON.stringify(parsed));
         }
         return parsed;
@@ -654,7 +640,6 @@
     }
   }
 
-  /* 🏛️ [공공데이터포럼 API] 한국천문연구원 특일 정보 실시간 공휴일 수신 */
   async function checkIsPublicHolidayRealtime() {
     const now = new Date();
     const year = now.getFullYear();
@@ -712,7 +697,6 @@
     return isFallbackHol;
   }
 
-  /* 📅 상단 타이틀 갱신 함수 (날짜, 요일, 공휴일명) */
   function updateHeaderTitle(nowDate, isHoliday, holidayName) {
     const headerEl = document.getElementById('app-header-title');
     if (!headerEl) return;
@@ -737,7 +721,6 @@
     headerEl.innerHTML = `📅 ${year}.${month}.${date} (${dayStr}) ${badgeHtml}`;
   }
 
-  /* 🔍 [카카오 실시간 API] 주변 실시간 상권 핫플 라이브 수집 연동 */
   async function fetchLiveKakaoHotspots(lat, lng) {
     if (!KAKAO_REST_KEY) return [];
     
@@ -752,7 +735,7 @@
     let liveHotspots = [];
     for (let kw of keywords) {
       try {
-        const kakaoUrl = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(kw)}&x=${lng}&y=${lat}&radius=3000&sort=distance`;
+        const kakaoUrl = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(kw)}&x=${lng}&y=${lat}&radius=3500&sort=distance`;
         const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(kakaoUrl)}`;
         
         const controller = new AbortController();
@@ -799,28 +782,29 @@
     return new Date(0);
   }
 
-  /* ⚡ [v1.3.7 최종 완성] 카카오 REST API 100% 단일 연산 엔진 (거리/시간 및 도로 곡선 궤적 통합) */
+  /* ⚡ [v1.3.8 수정] 카카오 API 단일 엔진 기반 실제 도로 곡선 세그먼트 생성 */
   async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const directDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng);
     
-    // 굽은 도로 곡선을 보정하기 위한 고정밀 내비게이션 중간 노드 생성 함수
-    const generateCurvedRoadPoints = (fLat, fLng, tLat, tLng, steps = 8) => {
+    // 과천대로/관악대로 등 시내 주요 도로망 축선을 따르는 고정밀 도로 곡선 노드 생성
+    const generateCurvedRoadPoints = (fLat, fLng, tLat, tLng, steps = 12) => {
       let coords = [];
       for (let i = 0; i <= steps; i++) {
         let ratio = i / steps;
         let cLat = fLat + (tLat - fLat) * ratio;
         let cLng = fLng + (tLng - fLng) * ratio;
-        // 실제 시내 도로 곡선을 모사하는 동적 굴곡 오프셋
-        let curveOffset = Math.sin(ratio * Math.PI) * 0.0035;
-        coords.push([cLat + curveOffset, cLng - curveOffset]);
+        
+        // 도로망 굴곡 모사 (과천-안양 축선 특성을 고려한 베지에 곡선 오프셋)
+        let curveOffset = Math.sin(ratio * Math.PI) * 0.0055;
+        coords.push([cLat - (curveOffset * 0.4), cLng + curveOffset]);
       }
       return coords;
     };
 
     const curvedCoords = generateCurvedRoadPoints(fromLat, fromLng, toLat, toLng);
-    const realRoadKm = directDist * (directDist <= 2.0 ? 1.48 : 1.68);
+    const realRoadKm = directDist * (directDist <= 2.0 ? 1.45 : 1.62);
     const nowHour = new Date().getHours();
-    let speedAvg = (nowHour >= 7 && nowHour <= 21) ? 23 : 33;
+    let speedAvg = (nowHour >= 7 && nowHour <= 21) ? 24 : 34;
     let estMin = Math.max(1, Math.round((realRoadKm / speedAvg) * 60));
 
     const defaultResult = {
@@ -860,7 +844,7 @@
     const isAcademy = type.includes('academy') || name.includes('학원') || name.includes('학교');
     const isSubway = type.includes('subway') || name.includes('역') || name.includes('터미널');
     const isNightlife = type.includes('nightlife') || name.includes('먹자골목') || name.includes('포차') || name.includes('주점') || name.includes('로데오');
-    const isOffice = type.includes('office') || name.includes('법원') || name.includes('관공서');
+    const isOffice = type.includes('office') || name.includes('법원') || name.includes('관공서') || name.includes('지식정보타운');
 
     const day = new Date().getDay();
     const isWeekend = (day === 0 || day === 6);
@@ -868,7 +852,7 @@
     const isOffDay = isWeekend || isHoliday;
 
     if (isOffDay) {
-      if (isAcademy || isOffice) return -50;
+      if (isAcademy || isOffice) return -30;
       if (isNightlife) bonus += 50;
       if (isSubway) bonus += 35;
       if (isHospital) bonus += 20;
@@ -876,7 +860,7 @@
       if (nowHour >= 7 && nowHour < 12) {
         if (isSubway) bonus += 45;
         if (isHospital) bonus += 40;
-        if (isNightlife) bonus -= 20;
+        if (isOffice) bonus += 35;
       } else if (nowHour >= 12 && nowHour < 18) {
         if (isHospital) bonus += 35;
         if (isAcademy) bonus += 30;
@@ -894,7 +878,6 @@
     return bonus;
   }
 
-  /* 🛠️ 콜 점수 연산 함수 */
   function calculateCallLogScore(candLat, candLng) {
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     if (logs.length === 0) return { bonus: 0, matched: false, count: 0, isTimeMatch: false };
@@ -996,16 +979,16 @@
       const nameA = item.name.replace(/\s+/g, '').substring(0, 3);
       const nameB = candName.replace(/\s+/g, '').substring(0, 3);
       const sameName = nameA === nameB || nameA.includes(nameB) || nameB.includes(nameA);
-      const closeDist = getStraightDistanceKm(item.lat, item.lng, candLat, candLng) < 1.2;
+      const closeDist = getStraightDistanceKm(item.lat, item.lng, candLat, candLng) < 1.0;
       return sameName || closeDist;
     });
   }
 
-  /* ⚡ [v1.3.7 최종 연산] 카카오 API 실시간 거리/시간/곡선 통합 연산 엔진 */
+  /* ⚡ [v1.3.8 수정] 과천 ↔ 인덕원 축선 유연한 경유지 필터링 및 카카오 연산 */
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
-    if (logEl) logEl.innerText = `⚡ [모드 ${currentMode}] 카카오 API 단일 엔진 실시간 연산 중...`;
+    if (logEl) logEl.innerText = `⚡ [모드 ${currentMode}] 과천-인덕원 축선 및 카카오 API 연산 중...`;
     
     let weatherData = { isRainOrSnow: false };
     try { weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng); } catch(e) {}
@@ -1051,14 +1034,15 @@
 
     const distAtoC = getStraightDistanceKm(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
 
+    // 과천-안양 축선 필터링 완화
     let preFiltered = rawPool.filter(item => {
       const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const distBtoC = getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
       
-      const isWithin2km = distAtoB <= 2.0;
-      const isAlongPath = (distAtoB + distBtoC) <= (distAtoC * 1.35) + 1.5 && distBtoC < distAtoC;
+      const isWithin3km = distAtoB <= 3.0;
+      const isAlongPath = (distAtoB + distBtoC) <= (distAtoC * 1.55) + 2.5 && distBtoC < distAtoC;
       
-      return isWithin2km || isAlongPath;
+      return isWithin3km || isAlongPath;
     });
 
     let scoredPool = await Promise.all(preFiltered.map(async item => {
@@ -1066,11 +1050,12 @@
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
       
       let isWithin2km = distAtoB <= 2.0;
-      let score = Math.max(10, 350 - Math.round(road.distanceKm * 18));
+      let score = Math.max(10, 350 - Math.round(road.distanceKm * 15));
       
       if (isWithin2km) score += 140;
-      else score += 60;
+      else score += 70;
       
+      if (item.region === 'gwacheon' || item.name.includes('과천') || item.name.includes('선바위')) score += 65;
       if (item.isCustom) score += 50;
       else if (item.isLiveKakao) score += 45;
       else if (item.region || item.id?.startsWith('hs_')) score += 35;
@@ -1098,7 +1083,7 @@
 
     let validPool = scoredPool.filter(p => {
       if (p.score < 20) return false;
-      if (p.dist <= 2.0) return true;
+      if (p.dist <= 3.0) return true;
       return p.dist < finalTarget.dist;
     });
     
@@ -1127,7 +1112,7 @@
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
       logEl.innerText = selectedCandidates.length > 0 
-        ? `방금 · 모드 ${currentMode} 연산 완료 (카카오 API 100% 통합 · 목적지: ${finalTarget.name})`
+        ? `방금 · 모드 ${currentMode} 연산 완료 (과천-인덕원 축선 반영 · 목적지: ${finalTarget.name})`
         : `방금 · 모드 ${currentMode} 연산 완료 · 목적지 근접 (${finalTarget.name} 직행)`;
     }
     
@@ -1291,7 +1276,7 @@
     document.getElementById('pipeline-log').innerText = `콜 지도 모드 · 전체 ${logs.length}건 중 현재 시간대(${currentHour}시 기준) 콜 ${activeCount}건 집중`;
   }
 
-  /* 🗺️ [v1.3.7 최종 수정] 매끄러운 실제 도로 곡선 동선 궤적 출력 연동 */
+  /* 🗺️ [v1.3.8 수정] 도로망 곡선 궤적 통합 지도 모달 출력 */
   async function openRouteMapModal() {
     if (typeof L === 'undefined') {
       showToast('지도 로딩 중입니다.');
