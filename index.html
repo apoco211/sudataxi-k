@@ -245,7 +245,7 @@
     </div>
     
     <div style="margin-top: 8px; border-top: 1px dashed #3A3A3A; padding-top: 6px;">
-      <div style="font-size: 11px; font-weight: 800; color: #8A8A8A; margin-bottom: 4px;">🕒 최근 저장 목록 (최신 5개)</div>
+      <div style="font-size: 11px; font-weight: 800; color: #8A8A8A; margin-bottom: 4px;">🕒 최근 저장 목록 (최신 3개)</div>
       <div id="recent-logs-list" style="display: flex; flex-direction: column; gap: 3px;"></div>
     </div>
     
@@ -254,6 +254,33 @@
       <div style="font-size: 11px; font-weight: 800; color: #C084FC; margin: 6px 0 3px 0;">📍 나만의 콜 장소 목록</div>
       <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 3px;"></div>
     </div>
+    
+    <!-- 💡 [요청 1] 맨 아래에 위치한 모드1/2 통합 운행 및 추천 엔진 아코디언 가이드 박스 -->
+    <details style="margin-top: 12px; background: #161616; border: 1px solid #333333; border-radius: 10px; padding: 10px 12px; font-size: 11px; line-height: 1.5;">
+      <summary style="font-weight: 800; color: #FFC800; cursor: pointer; font-size: 12px;">💡 수다택시 K 핵심 운행 및 추천 엔진 가이드 (터치하여 펼치기)</summary>
+      <div style="margin-top: 10px; color: #DDDDDD; display: flex; flex-direction: column; gap: 8px;">
+        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
+          <strong style="color: #FFC800;">🟡 [모드 1] 위수 내부 순환 모드 (안양 · 군포 · 의왕 · 과천)</strong><br>
+          • <strong>관내 5대 거점역:</strong> 평촌역, 범계역, 인덕원역, 안양역, 산본역<br>
+          • <strong>500m 반경 순환 엔진:</strong> 현재 최단 5대 거점역을 목적지로 잡고, 반경 500m 진입 시 다음 최적 거점역으로 자동 전환.<br>
+          • <strong>길목 핫플 수거:</strong> 목적지까지의 진행 방향 길목 상 핫플을 이동시간 기준 최대 3개 추천.
+        </div>
+        
+        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
+          <strong style="color: #FF6B00;">🟠 [모드 2] 외곽 / 복귀 모드 (타지역 이동 시)</strong><br>
+          • <strong>최단 위수 경계 고정:</strong> 카카오 API로 실시간 최단 복귀 관문(의왕 월암/부곡, 군포 대야미, 안양 박달/석수, 과천 선바위 등) 지정.<br>
+          • <strong>현위치 3km 근접 선점:</strong> 복귀 출발 전 반경 3km 내 핫플 최우선 배정 (+140점).<br>
+          • <strong>동선 꼬임 차단:</strong> 경유지 거리는 복귀 경계 거리보다 무조건 짧게 제한하여 Z자 꼬임 방지.
+        </div>
+        
+        <div>
+          <strong style="color: #4ADE80;">🕒 시간대 및 요일 가산점 기준 (공통)</strong><br>
+          • <strong>출근(07~10시):</strong> 지하철역, 아파트단지, 병원 | <strong>주간(10~17시):</strong> 병원, 마트, 학원가<br>
+          • <strong>퇴근(17~21시):</strong> 역사 Exit, 대형학원가, 오피스 | <strong>심야(21~04시):</strong> 먹자골목, 로데오, 주점<br>
+          • <strong>주말/공휴일:</strong> 오피스/학원 차단(0점), 쇼핑몰/교외/결혼식장/터미널 가산점 상승
+        </div>
+      </div>
+    </details>
   </div>
   
   <div class="bottom-bar">
@@ -406,7 +433,7 @@
     return { ...closestPoint, type: "gateway", isWisu: true };
   }
 
-  /* 🔍 카카오 API 기반 최단 위수 경계 지점 실시간 검색 */
+  /* 🔍 [카카오 실시간 API] 최단 위수 경계 지점 실시간 검색 */
   async function fetchRealtimeWisuGateway(currentLat, currentLng) {
     if (!KAKAO_REST_KEY) return findClosestWisuGatewayFallback(currentLat, currentLng);
 
@@ -455,13 +482,13 @@
     return findClosestWisuGatewayFallback(currentLat, currentLng);
   }
 
+  // ⭐ 관내 5대 핵심 거점역
   const MAJOR_HUBS = [
     { name: "평촌역 먹자골목 및 한림대병원", lat: 37.3942, lng: 126.9638, address: "평촌역", type: "subway_hospital", isWisu: true },
     { name: "범계역 로데오거리 및 학원가", lat: 37.3917, lng: 126.9145, address: "범계역", type: "subway_academy", isWisu: true },
     { name: "인덕원역 환승 거점", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway", isWisu: true },
     { name: "안양역 일번가 및 메디컬타운", lat: 37.4013, lng: 126.9222, address: "안양역", type: "subway_hospital", isWisu: true },
-    { name: "산본역 중심상가 및 원광대병원", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway_hospital", isWisu: true },
-    { name: "금정역 환승 먹자골목", lat: 37.3721, lng: 126.9438, address: "금정역", type: "subway", isWisu: true }
+    { name: "산본역 중심상가 및 원광대병원", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway_hospital", isWisu: true }
   ];
 
   function getMasterHotspotsFromStorage() {
@@ -567,7 +594,7 @@
     }
   }
 
-  /* 🔍 카카오 장소 검색 API 기반 주변 실시간 상권 핫플 라이브 수집 */
+  /* 🔍 [카카오 실시간 API] 주변 실시간 상권 핫플 라이브 수집 연동 */
   async function fetchLiveKakaoHotspots(lat, lng) {
     if (!KAKAO_REST_KEY) return [];
     
@@ -799,11 +826,11 @@
     });
   }
 
-  /* ⚡ [모드 2: 동선 꼬임 방지 완벽 정립 연산 엔진] */
+  /* ⚡ [통합 연산 엔진: 모드1 5대거점 500m 순환 + 모드2 최단복귀] */
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
-    if (logEl) logEl.innerText = `⚡ [모드 ${currentMode}] 순차 동선 연산 중...`;
+    if (logEl) logEl.innerText = `⚡ [모드 ${currentMode}] 실시간 데이터 및 동선 연산 중...`;
     
     let weatherData = { isRainOrSnow: false };
     try { weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng); } catch(e) {}
@@ -816,16 +843,24 @@
     
     let finalTarget = null;
     
-    // 모드 1이거나, 모드 2이더라도 이미 위수 안인 경우: 주요 번화가를 최종 목적지로 설정
+    // ⭐ 모드 1 또는 위수 내부: 5대 거점역 중 500m 반경 판단 및 최적 거점역 지정
     if (currentMode === 1 || (currentMode === 2 && inWisu)) {
       let scoredTargets = await Promise.all(MAJOR_HUBS.map(async h => {
         let road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, h.lat, h.lng);
         return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: 100, geometryCoords: road.geometryCoords };
       }));
+      
+      // 5대 거점역을 거리순 정렬
       scoredTargets.sort((a, b) => a.dist - b.dist);
-      finalTarget = scoredTargets[0];
+      
+      // ⭐ 500m 반경 진입 시 다음 최적 거점역 자동 전환 로직
+      if (scoredTargets[0].dist <= 0.5 && scoredTargets.length > 1) {
+        finalTarget = scoredTargets[1]; // 다음으로 가까운 거점역을 목적지로 지정
+      } else {
+        finalTarget = scoredTargets[0];
+      }
     } else {
-      // 📍 [모드 2 외곽] 실시간 최단 위수 경계 지점 최종 목적지 강제 지정
+      // 📍 모드 2 외곽: 카카오 API 실시간 최단 위수 경계 지점 최종 목적지 강제 지정
       const closestGateway = await fetchRealtimeWisuGateway(currentPos.lat, currentPos.lng);
       let road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, closestGateway.lat, closestGateway.lng);
       finalTarget = {
@@ -888,7 +923,7 @@
       };
     }));
 
-    // ⭐ [핵심 보완] 복귀 목적지(finalTarget.dist)보다 멀리 있는 핫플은 완전 배제 (거리 역전/동선 꼬임 차단)
+    // ⭐ 경유지 거리가 최종 목적지 거리보다 긴 항목 배제 (거리 역전 완벽 방지)
     let validPool = scoredPool.filter(p => p.score >= 20 && p.dist < finalTarget.dist);
     validPool.sort((a, b) => b.score - a.score);
 
@@ -903,7 +938,6 @@
       if (selectedCandidates.length === maxCards) break;
     }
 
-    // ⭐ 거리 순서대로 오름차순 정렬 (현재위치 -> 1번 거점 -> 2번 목적지)
     selectedCandidates.sort((a, b) => a.dist - b.dist);
 
     currentRouteData = [
@@ -916,7 +950,7 @@
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
       logEl.innerText = selectedCandidates.length > 0 
-        ? `방금 · 모드 ${currentMode} 순차 동선 연산 완료 (추천 ${selectedCandidates.length}곳)`
+        ? `방금 · 모드 ${currentMode} 연산 완료 (경유 핫플 ${selectedCandidates.length}곳 ➔ 목적지: ${finalTarget.name})`
         : `방금 · 모드 ${currentMode} 연산 완료 · 목적지 근접 (${finalTarget.name} 직행)`;
     }
     
@@ -968,7 +1002,7 @@
     });
     const finalCard = document.createElement('div');
     finalCard.className = 'card final-card';
-    const targetLabel = (currentMode === 1 || isInsideWisu(currentPos.lat, currentPos.lng)) ? '최종번화가' : '실시간최단위수경계복귀';
+    const targetLabel = (currentMode === 1 || isInsideWisu(currentPos.lat, currentPos.lng)) ? '최종번화가(5대거점역)' : '실시간최단위수경계복귀';
     const finalBadgeNum = routeCards.length + 1;
     finalCard.innerHTML = `
       <div class="card-main-content">
@@ -994,7 +1028,7 @@
       const subSection = document.createElement('div');
       subSection.className = 'sub-final-section';
       subSection.innerHTML = `
-        <div class="sub-final-title">⭐ 다른 최종 목적지 후보 보기 (참고용)</div>
+        <div class="sub-final-title">⭐ 다른 5대 거점역 후보 보기 (참고용)</div>
         <div class="sub-final-list">
           ${subFinalCandidates.map(sub => `
             <div class="sub-final-card">
@@ -1228,6 +1262,7 @@
     if (currentMode === 3) renderCallMapView();
   }
 
+  /* ⭐ [요청 2] 최근 저장 고객 탑승 기록 최신 3개만 표시하도록 수정 */
   function updateCallLogStats() {
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     const countText = document.getElementById('log-count-text');
@@ -1238,7 +1273,7 @@
       list.innerHTML = '<div style="font-size:10px; color:#666; text-align:center;">기록이 없습니다.</div>';
       return;
     }
-    list.innerHTML = logs.slice(-5).reverse().map(item => `
+    list.innerHTML = logs.slice(-3).reverse().map(item => `
       <div class="recent-log-item">
         <span class="recent-log-time">📍 ${new Date(item.timestamp).toLocaleTimeString()} [M${item.mode || 1}]</span>
         <button class="delete-log-item-btn" data-id="${item.id}" data-ts="${item.timestamp}" style="background:#2E1815; color:#FF5555; border:1px solid #4A2020; border-radius:4px; padding:2px 6px; font-size:10px; font-weight:700; cursor:pointer;">삭제</button>
