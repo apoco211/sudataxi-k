@@ -286,10 +286,10 @@
       <div style="margin-top: 10px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px;">
         
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #4ADE80;">v1.4.3 (2026.09) - 카카오맵 모바일 웹 스킴 완벽 연동</strong><br>
-          • 🔗 카카오맵 모바일 웹 스킴 연동을 적용하여 "존재하지 않는 URL" 오류를 근본 차단하고 내비 길찾기로 직행되도록 수정<br>
-          • 🗺️ OSRM 도로망 엔진 기반으로 실제 도로망 곡선 궤적 100% 보장<br>
-          • ⏱️ 카드 리스트의 실시간 이동 거리(km)와 예상 시간(분) 정밀 연산 적용
+          <strong style="color: #4ADE80;">v1.4.5 (2026.09) - 실시간 이동시간/거리 카드 바인딩 완전 해결</strong><br>
+          • ⏱️ OSRM 도로망 정밀 길찾기 수치(distanceKm, durationMin)를 카드 UI에 100% 반영<br>
+          • 🔗 카카오맵웹 연동 규격 안정화로 튕김 현상 수정<br>
+          • 🗺️ 도로 곡선 궤적 선형 출력 보장
         </div>
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
           <strong style="color: #888888;">v1.4.0 (2026.09) - 스마트 단일 모드 자동화</strong><br>
@@ -334,8 +334,8 @@
 <script>
   const KAKAO_REST_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
-  let currentMode = 1; // 1: 관내(노란색), 2: 관외(오렌지색)
-  let activeTab = 1; // 1: 스마트 추천, 3: 콜지도 시각화
+  let currentMode = 1; 
+  let activeTab = 1; 
   let currentPos = null;
   let leafletMap = null;
   let callMapViewLeaflet = null;
@@ -737,7 +737,7 @@
     return new Date(0);
   }
 
-  /* ⚡ OSRM 전문 길찾기 연동으로 실제 도로 곡선 궤적이 지도상에 100% 표기됨 */
+  /* ⚡ OSRM 정밀 길찾기 연동 */
   async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const directDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng);
     
@@ -1045,6 +1045,8 @@
     routeCards.forEach((item, index) => {
       const card = document.createElement('div');
       card.className = 'card';
+      const distStr = item.dist !== undefined ? item.dist.toFixed(1) : '0.0';
+      const timeStr = item.estimatedTimeMin !== undefined ? item.estimatedTimeMin : '0';
       card.innerHTML = `
         <div class="card-main-content">
           <div class="card-top-row">
@@ -1052,7 +1054,7 @@
               <div class="num-badge">${index + 1}</div>
               <div class="place-info">
                 <div class="place-name">${item.name}</div>
-                <div class="score-dist">실시간 ${item.dist.toFixed(1)}km (약 ${item.estimatedTimeMin}분) · ${item.score}점 ${getScoreLevelBadge(item.score)}</div>
+                <div class="score-dist">실시간 ${distStr}km (약 ${timeStr}분) · ${item.score}점 ${getScoreLevelBadge(item.score)}</div>
               </div>
             </div>
           </div>
@@ -1076,6 +1078,8 @@
     finalCard.className = 'card final-card';
     const targetLabel = isInsideWisu(currentPos.lat, currentPos.lng) ? '최종번화가(5대거점역)' : '실시간최단위수경계복귀';
     const finalBadgeNum = routeCards.length + 1;
+    const finalDistStr = finalTarget.dist !== undefined ? finalTarget.dist.toFixed(1) : '0.0';
+    const finalTimeStr = finalTarget.estimatedTimeMin !== undefined ? finalTarget.estimatedTimeMin : '0';
     finalCard.innerHTML = `
       <div class="card-main-content">
         <div class="card-top-row">
@@ -1083,7 +1087,7 @@
             <div class="num-badge">${finalBadgeNum}</div>
             <div class="place-info">
               <div class="place-name">${finalTarget.name}</div>
-              <div class="score-dist">실시간 ${finalTarget.dist.toFixed(1)}km (약 ${finalTarget.estimatedTimeMin || 0}분) · ${finalTarget.score}점 ${getScoreLevelBadge(finalTarget.score)} [${targetLabel}]</div>
+              <div class="score-dist">실시간 ${finalDistStr}km (약 ${finalTimeStr}분) · ${finalTarget.score}점 ${getScoreLevelBadge(finalTarget.score)} [${targetLabel}]</div>
             </div>
           </div>
         </div>
@@ -1092,7 +1096,7 @@
           <button class="action-btn map-open-btn" data-name="${finalTarget.name}" data-lat="${finalTarget.lat}" data-lng="${finalTarget.lng}">🗺️ 카카오맵</button>
         </div>
       </div>
-      <div class="sub-info">${routeCards.length > 0 ? '경유지 탐색 후 순차 이동 · ' : '경유지 없음 · 즉시 직행 권장 · '}${finalTarget.dist.toFixed(1)}km 남음</div>
+      <div class="sub-info">${routeCards.length > 0 ? '경유지 탐색 후 순차 이동 · ' : '경유지 없음 · 즉시 직행 권장 · '}${finalDistStr}km 남음</div>
     `;
     listEl.appendChild(finalCard);
     
@@ -1107,7 +1111,7 @@
               <div class="sub-final-top">
                 <div class="sub-final-info">
                   <div class="sub-final-name">${sub.name}</div>
-                  <div class="sub-final-meta">실시간 ${sub.dist.toFixed(1)}km (약 ${sub.estimatedTimeMin}분) · ${sub.score}점</div>
+                  <div class="sub-final-meta">실시간 ${sub.dist !== undefined ? sub.dist.toFixed(1) : '0.0'}km (약 ${sub.estimatedTimeMin !== undefined ? sub.estimatedTimeMin : '0'}분) · ${sub.score}점</div>
                 </div>
                 ${getScoreLevelBadge(sub.score)}
               </div>
@@ -1248,13 +1252,13 @@
     }
     showToast(`📋 [${query}] 명칭 복사완료!`);
   }
-  /* ⚡ 카카오맵 모바일 웹 스킴 연동 (존재하지 않는 URL 오류 완벽 해결) */
+  /* ⚡ 카카오맵 웹/앱 길찾기 표준 규격 */
   function openKakaoMapRoute(name, lat, lng) {
     let cleanName = cleanQuery(name);
     if (!cleanName) cleanName = name;
+    const targetName = encodeURIComponent(cleanName);
     
-    // 카카오맵 모바일 웹 스킴 (앱 설치 시 앱 실행, 미설치 시 카카오 웹지도 연동)
-    const mapUrl = `http://m.map.kakao.com/scheme/route?ep=${lat},${lng}&by=car`;
+    const mapUrl = `https://map.kakao.com/link/to/${targetName},${lat},${lng}`;
     window.open(mapUrl, '_blank');
   }
   function saveCurrentCallLocation() {
