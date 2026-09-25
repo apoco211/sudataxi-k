@@ -262,7 +262,7 @@
       <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 3px;"></div>
     </div>
     
-    <!-- 💡 [아코디언 1] 모드1/2 통합 운행 및 추천 엔진 가이드 -->
+    <!-- 💡 [아코디언 1] 모드1/2 통합 운행 및 추천 엔진 가이드 (수정 반영) -->
     <details style="margin-top: 12px; background: #161616; border: 1px solid #333333; border-radius: 10px; padding: 10px 12px; font-size: 11px; line-height: 1.5;">
       <summary style="font-weight: 800; color: #FFC800; cursor: pointer; font-size: 12px;">💡 수다택시 K 핵심 운행 및 추천 엔진 가이드 (터치하여 펼치기)</summary>
       <div style="margin-top: 10px; color: #DDDDDD; display: flex; flex-direction: column; gap: 8px;">
@@ -276,8 +276,8 @@
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
           <strong style="color: #FF6B00;">🟠 [모드 2] 외곽 / 복귀 모드 (타지역 이동 시)</strong><br>
           • <strong>최단 위수 경계 고정:</strong> 카카오 API로 실시간 최단 복귀 관문(의왕 월암/부곡, 군포 대야미, 안양 박달/석수, 과천 선바위 등) 지정.<br>
-          • <strong>현위치 3km 근접 선점:</strong> 복귀 출발 전 반경 3km 내 핫플 최우선 배정 (+140점).<br>
-          • <strong>동선 꼬임 차단:</strong> 경유지 거리는 복귀 경계 거리보다 무조건 짧게 제한하여 Z자 꼬임 방지.
+          • <strong>현위치 반경 2km 고정 선점:</strong> KTX 광명역 등 현위치 반경 2km 이내의 대형 핫플은 복귀 경계 거리나 각도와 상관없이 무조건 1순위 우대 추천 (+140점).<br>
+          • <strong>유연한 복귀 전환:</strong> 복귀 목적지 바로 앞(800m 이내)에 밀착했을 때만 직행 모드로 전환하여 주변 핫플 누락을 방지.
         </div>
         
         <div>
@@ -289,14 +289,21 @@
       </div>
     </details>
 
-    <!-- 📜 [아코디언 2] 버전별 전체 업데이트 히스토리 (최신순 정렬) -->
+    <!-- 📜 [아코디언 2] 버전별 전체 업데이트 히스토리 (수정 반영) -->
     <details style="margin-top: 6px; background: #161616; border: 1px solid #333333; border-radius: 10px; padding: 10px 12px; font-size: 11px; line-height: 1.5;">
       <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 12px;">📜 수다택시 K 전체 업데이트 히스토리 (터치하여 펼치기)</summary>
       <div style="margin-top: 10px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px;">
         
         <!-- 최신 버전 맨 위 배치 -->
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #4ADE80;">v1.3.3 (2026.09) - 지도 버튼 연동 직행화 (카카오맵 직행)</strong><br>
+          <strong style="color: #4ADE80;">v1.3.5 (2026.09) - 현위치 반경 2km 고정 우대 & 광명역 코앞 검색 완벽 보완</strong><br>
+          • 🚄 KTX 광명역 등 현위치 반경 2km 이내 핵심 핫플은 복귀 거리/동선 차단 조건과 상관없이 무조건 1순위 추천<br>
+          • 🟠 복귀 경계 직행 카드 생략 기준을 800m 밀착 시로 완화하여 주변 핫플 누락 원인 완벽 해결<br>
+          • 💡 핵심 운행 가이드 및 히스토리 박스 내용 업데이트
+        </div>
+
+        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
+          <strong style="color: #888888;">v1.3.3 (2026.09) - 지도 버튼 연동 직행화 (카카오맵 직행)</strong><br>
           • 🗺️ 카카오내비 스키마 호출을 제거하고 카카오맵(App/Web)으로 바로 연결되도록 직관적 수정<br>
           • ⚡ '없는 URL' 오류 완전 차단 및 원클릭 지점 경로 안내 연결
         </div>
@@ -305,27 +312,24 @@
           <strong style="color: #888888;">v1.3.2 (2026.09) - 장기 누적 콜 데이터 보존 보완 & 히스토리 전체 복원</strong><br>
           • 💎 1년 이상 축적된 과거 탑승 데이터 감쇄 하한선(최소 70% 보존) 설정으로 장기 데이터 가치 100% 보존<br>
           • 🕒 현재 시간대(±1시간) 일치 시 1년 전 데이터라도 +60점 강력 가산점 즉시 반영<br>
-          • 📜 업데이트 히스토리 전체 버전(v1.1~v1.3.3)을 최신순으로 정렬 및 전체 내역 완벽 보존
+          • 📜 업데이트 히스토리 전체 버전(v1.1~v1.3.5)을 최신순으로 정렬 및 전체 내역 완벽 보존
         </div>
 
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
           <strong style="color: #888888;">v1.3.1 (2026.09) - 상단 실시간 날짜/공휴일 헤더 표기</strong><br>
           • 📅 앱 상단에 오늘 날짜, 요일, 공공데이터 연동 공휴일 명칭 실시간 표기<br>
           • 🏛️ 공공데이터포럼 특일 정보 API 연동 (추석/설날/대체공휴일 실시간 자동 감지 및 오피스/학원점수 차단)<br>
-          • 🟡 모드 1: 5대 거점역 반경 500m 진입 시 다음 최적 거점역 자동 순환 전환<br>
-          • 🕒 최근 탑승 기록 표시 개수 3개로 최적화
+          • 🟡 모드 1: 5대 거점역 반경 500m 진입 시 다음 최적 거점역 자동 순환 전환
         </div>
 
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
           <strong style="color: #888888;">v1.2 (2026.08) - 카카오 라이브 API 연동 & 동선 꼬임 차단</strong><br>
-          • ⚡ 카카오 로컬 API 기반 실시간 주변 상권(먹자골목/학원가/지하철/병원) 라이브 수집<br>
-          • 🟠 모드 2: 카카오 Geo API로 최단 위수 경계 실시간 검색 및 거리 역전(`p.dist < finalTarget.dist`) 완벽 차단
+          • ⚡ 카카오 로컬 API 기반 실시간 주변 상권 라이브 수집 및 최단 위수 경계 검색
         </div>
 
         <div>
           <strong style="color: #888888;">v1.1 (2026.07) - 백그라운드 타이머 & 콜지도 시각화</strong><br>
-          • ⏱️ 5분/10분 대기 타이머 및 무음 오디오 Keep-Alive (백그라운드 유지)<br>
-          • 🗺️ [콜 지도] 현재 시간대 집중 콜 핀 시각화 및 JSON 백업/복원
+          • ⏱️ 5분/10분 대기 타이머 및 무음 오디오 Keep-Alive
         </div>
 
       </div>
@@ -438,7 +442,9 @@
     triggerSystemNotification();
   }
 
+  // 💡 [v1.3.5 수정] KTX 광명역 및 일직동 로데오 거점 공식 포함 마스터 DB
   const DEFAULT_MASTER_HOTSPOTS = [
+    { "id": "hs_g_gwangmyeong_1", "name": "KTX 광명역 및 일직동 로데오", "lat": 37.4162, "lng": 126.8845, "address": "광명역", "type": "subway_shopping", "region": "gwangmyeong" },
     { "id": "hs_g_anyang_1", "name": "평촌역 먹자골목 및 한림대병원", "lat": 37.3942, "lng": 126.9638, "address": "평촌역", "type": "subway_hospital", "region": "anyang" },
     { "id": "hs_g_anyang_2", "name": "범계역 로데오거리 및 학원가", "lat": 37.3917, "lng": 126.9145, "address": "범계역", "type": "subway_academy", "region": "anyang" },
     { "id": "hs_g_anyang_3", "name": "인덕원역 환승 거점", "lat": 37.4048, "lng": 126.9767, "address": "인덕원역", "type": "subway", "region": "anyang" },
@@ -504,7 +510,7 @@
         let targetKeyword = "의왕 월암동 경계";
         if (currentRegion.includes("수원")) targetKeyword = "의왕 월암동";
         else if (currentRegion.includes("안산")) targetKeyword = "군포 대야미역";
-        else if (currentRegion.includes("시흥") || currentRegion.includes("인천")) targetKeyword = "안양 박달동";
+        else if (currentRegion.includes("시흥") || currentRegion.includes("인천") || currentRegion.includes("광명")) targetKeyword = "안양 박달동";
         else if (currentRegion.includes("서울") || currentRegion.includes("성남")) targetKeyword = "과천 선바위역";
 
         const searchUrl = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(targetKeyword)}&x=${currentLng}&y=${currentLat}&sort=distance`;
@@ -546,7 +552,14 @@
   function getMasterHotspotsFromStorage() {
     const saved = localStorage.getItem('sudataxi_master_hotspots');
     if (saved) {
-      try { return JSON.parse(saved); } catch(e) {}
+      try { 
+        let parsed = JSON.parse(saved);
+        if (!parsed.some(item => item.name.includes("광명역"))) {
+          parsed.unshift(DEFAULT_MASTER_HOTSPOTS[0]);
+          localStorage.setItem('sudataxi_master_hotspots', JSON.stringify(parsed));
+        }
+        return parsed;
+      } catch(e) {}
     }
     return DEFAULT_MASTER_HOTSPOTS;
   }
@@ -876,7 +889,7 @@
     return bonus;
   }
 
-  /* 🛠️ [개선된 콜 점수 연산 함수] 오래된 1년 전 데이터도 최소 70% 이상 영구 보존 및 시간대 집중 적용 */
+  /* 🛠️ 콜 점수 연산 함수 */
   function calculateCallLogScore(candLat, candLng) {
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     if (logs.length === 0) return { bonus: 0, matched: false, count: 0, isTimeMatch: false };
@@ -904,11 +917,10 @@
         
         let timeBonus = 0;
         if (hourDiff <= 1) {
-          timeBonus = 60; // 현재 시간대(±1시간) 일치 시 강력 가산점
+          timeBonus = 60;
           isTimeMatch = true;
         }
 
-        // 💡 오래된 데이터도 최소 70%의 가치를 영구 보존
         const daysPassed = Math.max(0, (now - logDate) / (1000 * 60 * 60 * 24));
         const retentionFactor = 0.7 + (0.3 * Math.exp(-0.005 * daysPassed));
         
@@ -984,7 +996,7 @@
     });
   }
 
-  /* ⚡ [통합 연산 엔진: 모드1 5대거점 500m 순환 + 모드2 최단복귀 + 공공데이터 공휴일 + 장기콜 보존] */
+  /* ⚡ [v1.3.5 완벽 수정] 현위치 반경 2km 고정 우대 + 광명역 검색 보완 연산 엔진 */
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
@@ -1034,24 +1046,25 @@
 
     const distAtoC = getStraightDistanceKm(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
 
+    // 💡 [v1.3.5 핵심 보완 1] 현위치 반경 2.0km 고정 무조건 추천 허용
     let preFiltered = rawPool.filter(item => {
       const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const distBtoC = getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
       
-      const isNearStep1 = distAtoB <= 3.0;
+      const isWithin2km = distAtoB <= 2.0; // 현위치 반경 2.0km 고정
       const isAlongPath = (distAtoB + distBtoC) <= (distAtoC * 1.35) + 1.5 && distBtoC < distAtoC;
       
-      return isNearStep1 || isAlongPath;
+      return isWithin2km || isAlongPath; // 2km 이내는 복귀거리/방향과 무관하게 통과
     });
 
     let scoredPool = await Promise.all(preFiltered.map(async item => {
       const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       let road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, item.lat, item.lng);
       
-      let isNearStep1 = distAtoB <= 3.0;
+      let isWithin2km = distAtoB <= 2.0;
       let score = Math.max(10, 350 - Math.round(road.distanceKm * 18));
       
-      if (isNearStep1) score += 140;
+      if (isWithin2km) score += 140; // 2km 이내 코앞 핫플 파격적인 우대 점수
       else score += 60;
       
       if (item.isCustom) score += 50;
@@ -1072,19 +1085,25 @@
         estimatedTimeMin: road.durationMin,
         geometryCoords: road.geometryCoords,
         score: Math.max(10, score), 
-        isNearStep1,
+        isNearStep1: isWithin2km,
         logCount: logResult.count,
         isTimeMatch: logResult.isTimeMatch,
         isMasterDb: !item.isCustom && !item.isLiveKakao && (item.region !== undefined || item.id?.startsWith('hs_'))
       };
     }));
 
-    let validPool = scoredPool.filter(p => p.score >= 20 && p.dist < finalTarget.dist);
+    // 💡 [v1.3.5 핵심 보완 2] 반경 2km 이내는 복귀 거리 차단 조건 완벽 무시
+    let validPool = scoredPool.filter(p => {
+      if (p.score < 20) return false;
+      if (p.dist <= 2.0) return true; // 현위치 반경 2.0km 이내는 완벽 통과
+      return p.dist < finalTarget.dist;
+    });
+    
     validPool.sort((a, b) => b.score - a.score);
 
     let selectedCandidates = [];
     let maxCards = currentMode === 1 ? 3 : 2;
-    if (distAtoC <= 2.0) maxCards = 0;
+    if (distAtoC <= 0.8) maxCards = 0; // 800m 이내 초밀착 시에만 경유지 생략하고 직행
 
     for (let candidate of validPool) {
       if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedCandidates)) {
@@ -1145,7 +1164,7 @@
           </div>
         </div>
         <div class="tag-group">
-          ${item.isNearStep1 ? '<span class="tag near">#현위치근접거점</span>' : '<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#이동경로사이</span>'}
+          ${item.isNearStep1 ? '<span class="tag near">#현위치2km초근접</span>' : '<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#이동경로사이</span>'}
           ${item.isLiveKakao ? '<span class="tag livekakaomap">⚡카카오실시간상권</span>' : ''}
           ${item.isTimeMatch ? '<span class="tag timematch">🔥현재시간대콜집중</span>' : ''}
           ${item.isMasterDb ? '<span class="tag masterdb">#수도권마스터DB</span>' : ''}
@@ -1338,13 +1357,10 @@
     showToast(`📋 [${query}] 명칭 복사완료!`);
   }
 
-  /* 🗺️ [수정된 카카오맵 직행 함수] 카카오내비 연결 단계를 제거하고 카카오맵(App/Web)으로 바로 열기 */
   function openKakaoMapRoute(name, lat, lng) {
     let cleanName = cleanQuery(name);
     if (!cleanName) cleanName = name;
     const targetName = encodeURIComponent(cleanName);
-    
-    // 카카오맵 직접 연결 (웹 및 앱 스키마)
     const mapWebUrl = `https://map.kakao.com/link/to/${targetName},${lat},${lng}`;
     window.open(mapWebUrl, '_blank');
   }
@@ -1554,9 +1570,7 @@
   }
 
   window.addEventListener('DOMContentLoaded', () => {
-    // 📅 초기 실행 시 실시간 날짜/요일 및 공휴일 헤더 표기
     checkIsPublicHolidayRealtime();
-    
     updateCallLogStats();
     updateCustomHotspotUI();
     checkHotspotUpdateReminder();
