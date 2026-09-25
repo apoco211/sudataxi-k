@@ -255,7 +255,7 @@
       <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 3px;"></div>
     </div>
     
-    <!-- 💡 [요청 1] 맨 아래에 위치한 모드1/2 통합 운행 및 추천 엔진 아코디언 가이드 박스 -->
+    <!-- 💡 [요청 1] 맨 아래 모드1/2 통합 운행 및 추천 엔진 가이드 아코디언 박스 -->
     <details style="margin-top: 12px; background: #161616; border: 1px solid #333333; border-radius: 10px; padding: 10px 12px; font-size: 11px; line-height: 1.5;">
       <summary style="font-weight: 800; color: #FFC800; cursor: pointer; font-size: 12px;">💡 수다택시 K 핵심 운행 및 추천 엔진 가이드 (터치하여 펼치기)</summary>
       <div style="margin-top: 10px; color: #DDDDDD; display: flex; flex-direction: column; gap: 8px;">
@@ -274,10 +274,10 @@
         </div>
         
         <div>
-          <strong style="color: #4ADE80;">🕒 시간대 및 요일 가산점 기준 (공통)</strong><br>
+          <strong style="color: #4ADE80;">🕒 시간대, 요일 및 공공데이터 공휴일 가산점 (공통)</strong><br>
           • <strong>출근(07~10시):</strong> 지하철역, 아파트단지, 병원 | <strong>주간(10~17시):</strong> 병원, 마트, 학원가<br>
           • <strong>퇴근(17~21시):</strong> 역사 Exit, 대형학원가, 오피스 | <strong>심야(21~04시):</strong> 먹자골목, 로데오, 주점<br>
-          • <strong>주말/공휴일:</strong> 오피스/학원 차단(0점), 쇼핑몰/교외/결혼식장/터미널 가산점 상승
+          • <strong>주말 및 공공데이터 법정 공휴일(추석/설날 등):</strong> 오피스/학원 차단(0점), 쇼핑몰/교외/결혼식장/터미널 가산점 대폭 상승
         </div>
       </div>
     </details>
@@ -320,6 +320,9 @@
   let timerInterval = null;
   let isTimerRunning = false;
   
+  // 🏛️ 공공데이터포럼 실시간 공휴일 캐시 데이터
+  let holidayDataCache = { yearMonth: "", holidays: [] };
+
   let audioCtx = null;
   let silentAudioElement = null;
   const SILENT_WAV_BASE64 = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==';
@@ -433,7 +436,7 @@
     return { ...closestPoint, type: "gateway", isWisu: true };
   }
 
-  /* 🔍 [카카오 실시간 API] 최단 위수 경계 지점 실시간 검색 */
+  /* 🔍 [카카오 실시간 API] 최단 위수 경계 지점 실시간 검색 연동 */
   async function fetchRealtimeWisuGateway(currentLat, currentLng) {
     if (!KAKAO_REST_KEY) return findClosestWisuGatewayFallback(currentLat, currentLng);
 
@@ -594,6 +597,51 @@
     }
   }
 
+  /* 🏛️ [공공데이터포럼 API] 한국천문연구원 특일 정보 실시간 공휴일 자동 수신 */
+  async function checkIsPublicHolidayRealtime() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const todayStr = `${year}${month}${day}`;
+    const ymStr = `${year}${month}`;
+
+    if (holidayDataCache.yearMonth === ymStr) {
+      return holidayDataCache.holidays.includes(todayStr);
+    }
+
+    try {
+      const serviceKey = "9%2Bf22Nf7iE2%2B%2F8S9Z820yG0%2F%2B8XyR5K1n%2Ff9O%2B%2B92"; // 공공데이터포럼 인코딩 키
+      const apiUrl = `https://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo?solYear=${year}&solMonth=${month}&ServiceKey=${serviceKey}&_type=json`;
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 1200);
+      
+      const res = await fetch(proxyUrl, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const data = await res.json();
+        const items = data.response?.body?.items?.item;
+        let holidayList = [];
+        
+        if (Array.isArray(items)) {
+          holidayList = items.map(item => String(item.locdate));
+        } else if (items && items.locdate) {
+          holidayList = [String(items.locdate)];
+        }
+        
+        holidayDataCache = { yearMonth: ymStr, holidays: holidayList };
+        return holidayList.includes(todayStr);
+      }
+    } catch (e) {}
+
+    // 네트워크 예외 시 기본 내장 연휴 Fallback (2026 추석 등)
+    const fallbackHolidays = ["20260924", "20260925", "20260926", "20261003", "20261009", "20261225"];
+    return fallbackHolidays.includes(todayStr);
+  }
+
   /* 🔍 [카카오 실시간 API] 주변 실시간 상권 핫플 라이브 수집 연동 */
   async function fetchLiveKakaoHotspots(lat, lng) {
     if (!KAKAO_REST_KEY) return [];
@@ -698,7 +746,7 @@
     return fallbackResult;
   }
 
-  function getDynamicTimeCategoryBonus(itemType, itemName, nowHour) {
+  async function getDynamicTimeCategoryBonus(itemType, itemName, nowHour) {
     let bonus = 0;
     const type = itemType || '';
     const name = itemName || '';
@@ -707,22 +755,38 @@
     const isAcademy = type.includes('academy') || name.includes('학원') || name.includes('학교');
     const isSubway = type.includes('subway') || name.includes('역') || name.includes('터미널');
     const isNightlife = type.includes('nightlife') || name.includes('먹자골목') || name.includes('포차') || name.includes('주점') || name.includes('로데오');
+    const isOffice = type.includes('office') || name.includes('법원') || name.includes('관공서');
 
-    if (nowHour >= 7 && nowHour < 12) {
-      if (isSubway) bonus += 45;
-      if (isHospital) bonus += 40;
-      if (isNightlife) bonus -= 20;
-    } else if (nowHour >= 12 && nowHour < 18) {
-      if (isHospital) bonus += 35;
-      if (isAcademy) bonus += 30;
-      if (isSubway) bonus += 25;
-    } else if (nowHour >= 18 && nowHour < 21) {
+    // 🏛️ 실시간 주말/공공데이터 공휴일 체크
+    const day = new Date().getDay();
+    const isWeekend = (day === 0 || day === 6);
+    const isHoliday = await checkIsPublicHolidayRealtime();
+    const isOffDay = isWeekend || isHoliday;
+
+    if (isOffDay) {
+      // 주말 및 공휴일: 오피스/학원가 차단(0점), 상권/먹자/터미널/병원 상승
+      if (isAcademy || isOffice) return -50; // 차단
+      if (isNightlife) bonus += 50;
       if (isSubway) bonus += 35;
-      if (isAcademy) bonus += 35;
-      if (isNightlife) bonus += 20;
+      if (isHospital) bonus += 20;
     } else {
-      if (isNightlife) bonus += 45;
-      if (isSubway) bonus += 25;
+      // 주중 정상 운행 패턴
+      if (nowHour >= 7 && nowHour < 12) {
+        if (isSubway) bonus += 45;
+        if (isHospital) bonus += 40;
+        if (isNightlife) bonus -= 20;
+      } else if (nowHour >= 12 && nowHour < 18) {
+        if (isHospital) bonus += 35;
+        if (isAcademy) bonus += 30;
+        if (isSubway) bonus += 25;
+      } else if (nowHour >= 18 && nowHour < 21) {
+        if (isSubway) bonus += 35;
+        if (isAcademy) bonus += 35;
+        if (isNightlife) bonus += 20;
+      } else {
+        if (isNightlife) bonus += 45;
+        if (isSubway) bonus += 25;
+      }
     }
 
     return bonus;
@@ -826,7 +890,7 @@
     });
   }
 
-  /* ⚡ [통합 연산 엔진: 모드1 5대거점 500m 순환 + 모드2 최단복귀] */
+  /* ⚡ [통합 연산 엔진: 모드1 5대거점 500m 순환 + 모드2 최단복귀 + 공공데이터 공휴일] */
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
@@ -850,12 +914,11 @@
         return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: 100, geometryCoords: road.geometryCoords };
       }));
       
-      // 5대 거점역을 거리순 정렬
       scoredTargets.sort((a, b) => a.dist - b.dist);
       
       // ⭐ 500m 반경 진입 시 다음 최적 거점역 자동 전환 로직
       if (scoredTargets[0].dist <= 0.5 && scoredTargets.length > 1) {
-        finalTarget = scoredTargets[1]; // 다음으로 가까운 거점역을 목적지로 지정
+        finalTarget = scoredTargets[1];
       } else {
         finalTarget = scoredTargets[0];
       }
@@ -904,7 +967,9 @@
       else if (item.isLiveKakao) score += 45;
       else if (item.region || item.id?.startsWith('hs_')) score += 35;
       
-      score += getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
+      const timeBonus = await getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
+      score += timeBonus;
+      
       if (weatherData.isRainOrSnow) score += 20;
       
       const logResult = calculateCallLogScore(item.lat, item.lng);
@@ -1262,7 +1327,7 @@
     if (currentMode === 3) renderCallMapView();
   }
 
-  /* ⭐ [요청 2] 최근 저장 고객 탑승 기록 최신 3개만 표시하도록 수정 */
+  /* ⭐ 최근 저장 고객 탑승 기록 최신 3개만 표시 */
   function updateCallLogStats() {
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     const countText = document.getElementById('log-count-text');
