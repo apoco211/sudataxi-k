@@ -296,10 +296,16 @@
         
         <!-- 최신 버전 맨 위 배치 -->
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #4ADE80;">v1.3.2 (2026.09) - 장기 누적 콜 데이터 보존 보완 & 히스토리 전체 복원</strong><br>
+          <strong style="color: #4ADE80;">v1.3.3 (2026.09) - 지도 버튼 연동 직행화 (카카오맵 직행)</strong><br>
+          • 🗺️ 카카오내비 스키마 호출을 제거하고 카카오맵(App/Web)으로 바로 연결되도록 직관적 수정<br>
+          • ⚡ '없는 URL' 오류 완전 차단 및 원클릭 지점 경로 안내 연결
+        </div>
+
+        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
+          <strong style="color: #888888;">v1.3.2 (2026.09) - 장기 누적 콜 데이터 보존 보완 & 히스토리 전체 복원</strong><br>
           • 💎 1년 이상 축적된 과거 탑승 데이터 감쇄 하한선(최소 70% 보존) 설정으로 장기 데이터 가치 100% 보존<br>
           • 🕒 현재 시간대(±1시간) 일치 시 1년 전 데이터라도 +60점 강력 가산점 즉시 반영<br>
-          • 📜 업데이트 히스토리 전체 버전(v1.1~v1.3.2)을 최신순으로 정렬 및 전체 내역 완벽 보존
+          • 📜 업데이트 히스토리 전체 버전(v1.1~v1.3.3)을 최신순으로 정렬 및 전체 내역 완벽 보존
         </div>
 
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
@@ -1332,20 +1338,15 @@
     showToast(`📋 [${query}] 명칭 복사완료!`);
   }
 
+  /* 🗺️ [수정된 카카오맵 직행 함수] 카카오내비 연결 단계를 제거하고 카카오맵(App/Web)으로 바로 열기 */
   function openKakaoMapRoute(name, lat, lng) {
     let cleanName = cleanQuery(name);
     if (!cleanName) cleanName = name;
     const targetName = encodeURIComponent(cleanName);
     
-    const naviAppUrl = `kakaonavi://navigate?name=${targetName}&x=${lng}&y=${lat}`;
+    // 카카오맵 직접 연결 (웹 및 앱 스키마)
     const mapWebUrl = `https://map.kakao.com/link/to/${targetName},${lat},${lng}`;
-    const startTime = Date.now();
-    window.location.href = naviAppUrl;
-    setTimeout(() => {
-      if (Date.now() - startTime < 1800) {
-        window.location.href = mapWebUrl;
-      }
-    }, 1200);
+    window.open(mapWebUrl, '_blank');
   }
 
   function saveCurrentCallLocation() {
