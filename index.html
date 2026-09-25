@@ -73,7 +73,12 @@
     .banner-btns { display: flex; gap: 6px; }
     .btn-update { flex: 1; background-color: var(--theme-accent); color: var(--theme-text-on-accent); border: none; padding: 5px; border-radius: 6px; font-weight: 900; cursor: pointer; font-size: 11px; }
     .btn-close { background-color: #2A2A2A; color: #CCCCCC; border: 1px solid #444; padding: 5px 8px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 11px; }
-    .header { text-align: center; font-size: 20px; font-weight: 900; color: var(--theme-accent); margin-bottom: 10px; }
+    
+    /* 📅 실시간 날짜/요일/공휴일 헤더 스타일 */
+    .header { text-align: center; font-size: 17px; font-weight: 900; color: var(--theme-accent); margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; }
+    .holiday-badge { font-size: 11px; padding: 2px 6px; border-radius: 6px; background: #FF4444; color: #FFFFFF; font-weight: 800; display: inline-block; vertical-align: middle; }
+    .weekday-badge { font-size: 11px; padding: 2px 6px; border-radius: 6px; background: #2A2A2A; color: #AAAAAA; font-weight: 700; display: inline-block; vertical-align: middle; }
+
     .mode-container { display: flex; gap: 6px; margin-bottom: 10px; }
     .mode-pill { flex: 1; height: 34px; border-radius: 10px; background: #2A2A2A; color: #8A8A8A; font-size: 12px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
     .mode-pill.active { background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; }
@@ -200,7 +205,9 @@
       </div>
     </div>
   </div>
-  <div class="header">주변 콜 많은 곳 찾기</div>
+  
+  <!-- 📅 상단 타이틀: 동적 실시간 날짜, 요일 및 공휴일 표기 -->
+  <div class="header" id="app-header-title">📅 날짜 수신 대기 중...</div>
   
   <div class="mode-container">
     <button class="mode-pill active" id="btn-mode1">[모드1] 위수 내부</button>
@@ -255,7 +262,7 @@
       <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 3px;"></div>
     </div>
     
-    <!-- 💡 [요청 1] 맨 아래 모드1/2 통합 운행 및 추천 엔진 가이드 아코디언 박스 -->
+    <!-- 💡 [아코디언 1] 모드1/2 통합 운행 및 추천 엔진 가이드 -->
     <details style="margin-top: 12px; background: #161616; border: 1px solid #333333; border-radius: 10px; padding: 10px 12px; font-size: 11px; line-height: 1.5;">
       <summary style="font-weight: 800; color: #FFC800; cursor: pointer; font-size: 12px;">💡 수다택시 K 핵심 운행 및 추천 엔진 가이드 (터치하여 펼치기)</summary>
       <div style="margin-top: 10px; color: #DDDDDD; display: flex; flex-direction: column; gap: 8px;">
@@ -279,6 +286,34 @@
           • <strong>퇴근(17~21시):</strong> 역사 Exit, 대형학원가, 오피스 | <strong>심야(21~04시):</strong> 먹자골목, 로데오, 주점<br>
           • <strong>주말 및 공공데이터 법정 공휴일(추석/설날 등):</strong> 오피스/학원 차단(0점), 쇼핑몰/교외/결혼식장/터미널 가산점 대폭 상승
         </div>
+      </div>
+    </details>
+
+    <!-- 📜 [아코디언 2] 버전별 업데이트 히스토리 -->
+    <details style="margin-top: 6px; background: #161616; border: 1px solid #333333; border-radius: 10px; padding: 10px 12px; font-size: 11px; line-height: 1.5;">
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 12px;">📜 수다택시 K 업데이트 히스토리 (터치하여 펼치기)</summary>
+      <div style="margin-top: 10px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px;">
+        
+        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
+          <strong style="color: #4ADE80;">v1.3.1 (2026.09) - 상단 실시간 날짜/공휴일 헤더 표기</strong><br>
+          • 📅 앱 상단에 오늘 날짜, 요일, 공공데이터 연동 공휴일 명칭 실시간 표기<br>
+          • 🏛️ 공공데이터포럼 특일 정보 API 연동 (추석/설날/대체공휴일 실시간 자동 감지 및 오피스/학원점수 차단)<br>
+          • 🟡 모드 1: 5대 거점역 반경 500m 진입 시 다음 최적 거점역 자동 순환 전환<br>
+          • 🕒 최근 탑승 기록 표시 개수 3개로 최적화
+        </div>
+
+        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
+          <strong style="color: #888888;">v1.2 (2026.08) - 카카오 라이브 API 연동 & 동선 꼬임 차단</strong><br>
+          • ⚡ 카카오 로컬 API 기반 실시간 주변 상권(먹자골목/학원가/지하철/병원) 라이브 수집<br>
+          • 🟠 모드 2: 카카오 Geo API로 최단 위수 경계 실시간 검색 및 거리 역전(`p.dist < finalTarget.dist`) 완벽 차단
+        </div>
+
+        <div>
+          <strong style="color: #888888;">v1.1 (2026.07) - 백그라운드 타이머 & 콜지도 시각화</strong><br>
+          • ⏱️ 5분/10분 대기 타이머 및 무음 오디오 Keep-Alive (백그라운드 유지)<br>
+          • 🗺️ [콜 지도] 현재 시간대 집중 콜 핀 시각화 및 JSON 백업/복원
+        </div>
+
       </div>
     </details>
   </div>
@@ -321,7 +356,7 @@
   let isTimerRunning = false;
   
   // 🏛️ 공공데이터포럼 실시간 공휴일 캐시 데이터
-  let holidayDataCache = { yearMonth: "", holidays: [] };
+  let holidayDataCache = { yearMonth: "", holidays: [], holidayNames: {} };
 
   let audioCtx = null;
   let silentAudioElement = null;
@@ -597,7 +632,7 @@
     }
   }
 
-  /* 🏛️ [공공데이터포럼 API] 한국천문연구원 특일 정보 실시간 공휴일 자동 수신 */
+  /* 🏛️ [공공데이터포럼 API] 한국천문연구원 특일 정보 실시간 공휴일 수신 및 헤더 업데이트 */
   async function checkIsPublicHolidayRealtime() {
     const now = new Date();
     const year = now.getFullYear();
@@ -607,11 +642,13 @@
     const ymStr = `${year}${month}`;
 
     if (holidayDataCache.yearMonth === ymStr) {
-      return holidayDataCache.holidays.includes(todayStr);
+      const isHol = holidayDataCache.holidays.includes(todayStr);
+      updateHeaderTitle(now, isHol, holidayDataCache.holidayNames[todayStr]);
+      return isHol;
     }
 
     try {
-      const serviceKey = "9%2Bf22Nf7iE2%2B%2F8S9Z820yG0%2F%2B8XyR5K1n%2Ff9O%2B%2B92"; // 공공데이터포럼 인코딩 키
+      const serviceKey = "9%2Bf22Nf7iE2%2B%2F8S9Z820yG0%2F%2B8XyR5K1n%2Ff9O%2B%2B92";
       const apiUrl = `https://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo?solYear=${year}&solMonth=${month}&ServiceKey=${serviceKey}&_type=json`;
       const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
       
@@ -625,21 +662,57 @@
         const data = await res.json();
         const items = data.response?.body?.items?.item;
         let holidayList = [];
+        let nameMap = {};
         
         if (Array.isArray(items)) {
-          holidayList = items.map(item => String(item.locdate));
+          items.forEach(item => {
+            const loc = String(item.locdate);
+            holidayList.push(loc);
+            nameMap[loc] = item.dateName || "공휴일";
+          });
         } else if (items && items.locdate) {
-          holidayList = [String(items.locdate)];
+          const loc = String(items.locdate);
+          holidayList = [loc];
+          nameMap[loc] = items.dateName || "공휴일";
         }
         
-        holidayDataCache = { yearMonth: ymStr, holidays: holidayList };
-        return holidayList.includes(todayStr);
+        holidayDataCache = { yearMonth: ymStr, holidays: holidayList, holidayNames: nameMap };
+        const isHol = holidayList.includes(todayStr);
+        updateHeaderTitle(now, isHol, nameMap[todayStr]);
+        return isHol;
       }
     } catch (e) {}
 
-    // 네트워크 예외 시 기본 내장 연휴 Fallback (2026 추석 등)
     const fallbackHolidays = ["20260924", "20260925", "20260926", "20261003", "20261009", "20261225"];
-    return fallbackHolidays.includes(todayStr);
+    const isFallbackHol = fallbackHolidays.includes(todayStr);
+    let fallbackName = isFallbackHol ? (todayStr.startsWith("202609") ? "추석 연휴" : "공휴일") : null;
+    updateHeaderTitle(now, isFallbackHol, fallbackName);
+    return isFallbackHol;
+  }
+
+  /* 📅 상단 타이틀 갱신 함수 (날짜, 요일, 공휴일명) */
+  function updateHeaderTitle(nowDate, isHoliday, holidayName) {
+    const headerEl = document.getElementById('app-header-title');
+    if (!headerEl) return;
+    
+    const year = nowDate.getFullYear();
+    const month = nowDate.getMonth() + 1;
+    const date = nowDate.getDate();
+    const days = ['일', '월', '화', '수', '목', '금', '토'];
+    const dayStr = days[nowDate.getDay()];
+    
+    const isWeekend = (nowDate.getDay() === 0 || nowDate.getDay() === 6);
+    
+    let badgeHtml = '';
+    if (isHoliday) {
+      badgeHtml = `<span class="holiday-badge">🔴 ${holidayName || '법정 공휴일'}</span>`;
+    } else if (isWeekend) {
+      badgeHtml = `<span class="holiday-badge" style="background:#FF8C00;">🟡 주말 휴일</span>`;
+    } else {
+      badgeHtml = `<span class="weekday-badge">🟢 평일</span>`;
+    }
+    
+    headerEl.innerHTML = `📅 ${year}.${month}.${date} (${dayStr}) ${badgeHtml}`;
   }
 
   /* 🔍 [카카오 실시간 API] 주변 실시간 상권 핫플 라이브 수집 연동 */
@@ -757,20 +830,17 @@
     const isNightlife = type.includes('nightlife') || name.includes('먹자골목') || name.includes('포차') || name.includes('주점') || name.includes('로데오');
     const isOffice = type.includes('office') || name.includes('법원') || name.includes('관공서');
 
-    // 🏛️ 실시간 주말/공공데이터 공휴일 체크
     const day = new Date().getDay();
     const isWeekend = (day === 0 || day === 6);
     const isHoliday = await checkIsPublicHolidayRealtime();
     const isOffDay = isWeekend || isHoliday;
 
     if (isOffDay) {
-      // 주말 및 공휴일: 오피스/학원가 차단(0점), 상권/먹자/터미널/병원 상승
-      if (isAcademy || isOffice) return -50; // 차단
+      if (isAcademy || isOffice) return -50;
       if (isNightlife) bonus += 50;
       if (isSubway) bonus += 35;
       if (isHospital) bonus += 20;
     } else {
-      // 주중 정상 운행 패턴
       if (nowHour >= 7 && nowHour < 12) {
         if (isSubway) bonus += 45;
         if (isHospital) bonus += 40;
@@ -907,7 +977,6 @@
     
     let finalTarget = null;
     
-    // ⭐ 모드 1 또는 위수 내부: 5대 거점역 중 500m 반경 판단 및 최적 거점역 지정
     if (currentMode === 1 || (currentMode === 2 && inWisu)) {
       let scoredTargets = await Promise.all(MAJOR_HUBS.map(async h => {
         let road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, h.lat, h.lng);
@@ -916,14 +985,12 @@
       
       scoredTargets.sort((a, b) => a.dist - b.dist);
       
-      // ⭐ 500m 반경 진입 시 다음 최적 거점역 자동 전환 로직
       if (scoredTargets[0].dist <= 0.5 && scoredTargets.length > 1) {
         finalTarget = scoredTargets[1];
       } else {
         finalTarget = scoredTargets[0];
       }
     } else {
-      // 📍 모드 2 외곽: 카카오 API 실시간 최단 위수 경계 지점 최종 목적지 강제 지정
       const closestGateway = await fetchRealtimeWisuGateway(currentPos.lat, currentPos.lng);
       let road = await fetchRealRoadRouteDetails(currentPos.lat, currentPos.lng, closestGateway.lat, closestGateway.lng);
       finalTarget = {
@@ -988,7 +1055,6 @@
       };
     }));
 
-    // ⭐ 경유지 거리가 최종 목적지 거리보다 긴 항목 배제 (거리 역전 완벽 방지)
     let validPool = scoredPool.filter(p => p.score >= 20 && p.dist < finalTarget.dist);
     validPool.sort((a, b) => b.score - a.score);
 
@@ -1327,7 +1393,6 @@
     if (currentMode === 3) renderCallMapView();
   }
 
-  /* ⭐ 최근 저장 고객 탑승 기록 최신 3개만 표시 */
   function updateCallLogStats() {
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     const countText = document.getElementById('log-count-text');
@@ -1470,6 +1535,9 @@
   }
 
   window.addEventListener('DOMContentLoaded', () => {
+    // 📅 초기 실행 시 실시간 날짜/요일 및 공휴일 헤더 표기
+    checkIsPublicHolidayRealtime();
+    
     updateCallLogStats();
     updateCustomHotspotUI();
     checkHotspotUpdateReminder();
