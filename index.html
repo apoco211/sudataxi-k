@@ -261,24 +261,40 @@
     <details style="margin-top: 12px; background: #161616; border: 1px solid #333333; border-radius: 10px; padding: 10px 12px; font-size: 11px; line-height: 1.5;">
       <summary style="font-weight: 800; color: #FFC800; cursor: pointer; font-size: 12px;">💡 수다택시 K 핵심 운행 및 추천 엔진 가이드 (터치하여 펼치기)</summary>
       <div style="margin-top: 10px; color: #DDDDDD; display: flex; flex-direction: column; gap: 8px;">
+        
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #FFC800;">🟡 [위수 관내] 스마트 순환 모드 (노란색 테마)</strong><br>
-          • <strong>관내 5대 거점역:</strong> 평촌역, 범계역, 인덕원역, 안양역, 산본역<br>
-          • <strong>실제 도로 궤적 보장:</strong> 산악이나 장애물을 우회하는 OSRM 실시간 도로 곡선 궤적 지도 표기
+          <strong style="color: #FFC800;">🟡 [모드 1] 위수 관내 스마트 순환 영업 (노란색 테마)</strong><br>
+          • <strong>영업 목적:</strong> 안양·군포·의왕·과천 지정 위수지역 내부 순환 영업 전용 (반경 5km 탐색)<br>
+          • <strong>4번 목적지 산정:</strong> 5대 관문역(평촌, 범계, 인덕원, 안양, 산본) 중 실시간 이동거리 최단역 1곳 고정<br>
+          • <strong>목적지 자동 교체 (500m 예외):</strong> 가장 가까운 관문역과 500m 이내로 초근접 시, 다음으로 가까운 2순위 관문역으로 4번 목적지가 자동 순환 교체<br>
+          • <strong>1~3번 경유지:</strong> 현재 위치에서 4번 관문역으로 가는 이동 노선(길목) 상에 있는 알짜 핫플 우선 배치<br>
+          • <strong>타지역 철저 배제:</strong> 검색 결과 부족 시에도 서울/사당/판교 등 위수 밖 장소 100% 차단
         </div>
         
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #FF6B00;">🟠 [위수 관외] 스마트 복귀 모드 (오렌지색 테마)</strong><br>
-          • <strong>실시간 행정구역 완전 연동:</strong> 서울/성남/수원 등 타지역 진입 시 오렌지색 복귀 모드로 100% 자동 전환<br>
-          • <strong>동선 역행 완벽 방지:</strong> 복귀 진행 방향과 반대로 올라가는 핫플 감점 배제, 관내 방향 길목 핫플만 정확히 순차 배정
+          <strong style="color: #FF6B00;">🟠 [모드 2] 타지역/관외 복귀 영업 (오렌지색 테마)</strong><br>
+          • <strong>영업 목적:</strong> 서울/수원/판교 등 타지역 하차 후 내 영업구역(위수지역)으로의 귀로 영업<br>
+          • <strong>자동 모드 전환:</strong> 카카오 실시간 행정구역(시/군/구) 수신으로 위수 밖 진입 시 100% 자동 스위칭<br>
+          • <strong>4번 최단 진입 복귀지:</strong> 현위치에서 위수지역으로 들어가는 <strong>가장 가까운 관내 진입 경계점</strong>(과천 주암/선바위, 안양 박달, 군포 대야미, 의왕 월암 등)이 4번 목적지로 고정 (해당 진입점 근처 핫플 포함)<br>
+          • <strong>복귀 길목 전진 배정:</strong> 현위치에서 4번 진입 복귀지로 내려가는 노선 길목 상의 핫플 우대 (+35점 / <code>[#길목우선]</code>)<br>
+          • <strong>역방향 배제 & 예외:</strong> 후방(서울 도심 방향)은 기본 감점(-999점) 배제. 단, 2.0km 이내 초근접 + 콜점수 높음(🔥70점 이상) 시 제한적 허용 (<code>[#근거리고득점후방]</code>)
         </div>
         
+        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
+          <strong style="color: #C084FC;">📊 기사님 데이터 연동 & 우대 가산점 시스템</strong><br>
+          • <strong>고객 탑승 기록(로그) 매칭:</strong> 저장 위치 반경 300m 이내 매칭 시 데이터 지수 감쇄 적용, 현재시간대(±1시간) 및 요일 패턴 일치 시 최대 +60점 집중 가산 (<code>[#현재시간대콜집중]</code>)<br>
+          • <strong>나만의 핫플 우대:</strong> 기사 직접 등록 장소 기본 +25점~+50점 가산 (<code>[#나만의핫플]</code>)<br>
+          • <strong>실시간 기상 연동:</strong> Open-Meteo API 연동 비/눈 검출 시 +20점 보너스 (<code>[#강수보너스]</code>)
+        </div>
+
         <div>
-          <strong style="color: #4ADE80;">🕒 시간대, 요일 및 공공데이터 공휴일 가산점 (공통)</strong><br>
-          • <strong>출근(07~10시):</strong> 지하철역, 아파트단지, 병원 | <strong>주간(10~17시):</strong> 병원, 마트, 학원가<br>
-          • <strong>퇴근(17~21시):</strong> 역사 Exit, 대형학원가, 오피스 | <strong>심야(21~04시):</strong> 먹자골목, 로데오, 주점<br>
-          • <strong>주말 및 공공데이터 법정 공휴일:</strong> 쇼핑몰/교외/결혼식장/터미널 가산점 대폭 상승
+          <strong style="color: #4ADE80;">🕒 시간대별 피크 및 공공데이터 공휴일 가산점</strong><br>
+          • <strong>아침 피크 (07~10시):</strong> 지하철/아파트/병원/오피스 (+35~45점), 유흥상권 감점 (-25점)<br>
+          • <strong>주간 피크 (10~18시):</strong> 병원 (+35~40점), 대형학원가 (+30~35점), 마트/백화점<br>
+          • <strong>야간 피크 (18~04시):</strong> 먹자골목/로데오/주점 (+45점), 역사 Exit (+35점)<br>
+          • <strong>주말 및 법정 공휴일:</strong> 오피스/학원가 차단 (-30점), 쇼핑몰/교외/결혼식/터미널 보너스 대폭 상승
         </div>
+
       </div>
     </details>
     <details style="margin-top: 6px; background: #161616; border: 1px solid #333333; border-radius: 10px; padding: 10px 12px; font-size: 11px; line-height: 1.5;">
@@ -292,6 +308,14 @@
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
           <strong style="color: #888888;">v1.4.3 (2026.09) - 카카오맵 모바일 웹 스킴 완벽 연동</strong><br>
           • 🔗 카카오맵 모바일 웹 스킴 연동 적용
+        </div>
+        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
+          <strong style="color: #888888;">v1.4.0 (2026.09) - 스마트 단일 모드 자동화</strong><br>
+          • ⚡ GPS 좌표에 따라 관내(노란색)/관외(오렌지색) 테마 및 알고리즘 100% 자동 전환
+        </div>
+        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
+          <strong style="color: #888888;">v1.3.8 (2026.09) - 과천 관내 핫플 보완</strong><br>
+          • 🏢 과천 ↔ 인덕원 구간 축선 핫플 DB 보완 및 중간 경유지 노출 강화
         </div>
         <div>
           <strong style="color: #888888;">v1.1 (2026.07) - 백그라운드 타이머 & 콜지도 시각화</strong><br>
@@ -331,7 +355,7 @@
   let currentMode = 1; // 1: 관내(노란색), 2: 관외(오렌지색)
   let activeTab = 1;
   let currentPos = null;
-  let currentRegionName = ""; // 카카오 수신 실제 행정구역
+  let currentRegionName = "";
   let leafletMap = null;
   let callMapViewLeaflet = null;
   let currentRouteData = [];
@@ -433,7 +457,7 @@
     { name: "과천 주암/선바위 경계 (서울/강남 방면)", lat: 37.4520, lng: 127.0050, address: "과천동" }
   ];
 
-  /* ⚡ [수정1] 카카오 실시간 행정구역(시/군/구) 직접 수신 및 정교한 관내 판정 함수 */
+  /* ⚡ 카카오 실시간 행정구역 수신 기반 관내/관외 자동 판정 */
   async function checkIsInsideWisuRealtime(lat, lng) {
     if (!KAKAO_REST_KEY) return false;
     try {
@@ -452,18 +476,16 @@
         const data = await res.json();
         if (data.documents && data.documents.length > 0) {
           const doc = data.documents[0];
-          const region1 = doc.region_1depth_name || ""; // 예: 경기도, 서울특별시
-          const region2 = doc.region_2depth_name || ""; // 예: 안양시 동안구, 서초구
+          const region1 = doc.region_1depth_name || "";
+          const region2 = doc.region_2depth_name || "";
           
           currentRegionName = `${region1} ${region2}`.trim();
           
-          // 위수지역 4개 시(안양, 군포, 의왕, 과천) 명칭 직접 검증
           const isWisuCity = region2.includes("안양") || region2.includes("군포") || region2.includes("의왕") || region2.includes("과천");
           return isWisuCity;
         }
       }
     } catch(e) {}
-    // API 실패 시의 백업 비상 판정
     return (lat >= 37.34 && lat <= 37.445 && lng >= 126.90 && lng <= 127.015);
   }
 
@@ -913,7 +935,6 @@
       async (pos) => {
         currentPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         
-        // ⚡ 실시간 카카오 행정구역 수신으로 위수지역 판정
         const inWisu = await checkIsInsideWisuRealtime(currentPos.lat, currentPos.lng);
         
         currentMode = inWisu ? 1 : 2;
@@ -960,8 +981,10 @@
         return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: 100, geometryCoords: road.geometryCoords };
       }));
       scoredTargets.sort((a, b) => a.dist - b.dist);
+      /* ⚡ 모드 1: 최단 관문역과 500m 이내 초근접 시 2순위 관문역으로 자동 순환 교체 */
       finalTarget = (scoredTargets[0].dist <= 0.5 && scoredTargets.length > 1) ? scoredTargets[1] : scoredTargets[0];
     } else {
+      /* ⚡ 모드 2: 현위치에서 위수지역으로 들어가는 최단거리 진입 경계점 고정 */
       const closestGateway = await fetchRealtimeWisuGateway(currentPos.lat, currentPos.lng);
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, closestGateway.lat, closestGateway.lng);
       finalTarget = {
@@ -981,7 +1004,7 @@
 
     const distAtoC = getStraightDistanceKm(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
 
-    /* ⚡ [수정2] 모드 2(관외 복귀) 동선 역행 방지 및 진행방향 길목 필터 알고리즘 */
+    /* ⚡ 모드별 진행방향 길목 사전 필터링 */
     let preFiltered = rawPool.filter(item => {
       const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const distBtoC = getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
@@ -991,8 +1014,7 @@
         const isAlongPath = (distAtoB + distBtoC) <= (distAtoC * 1.55) + 2.5 && distBtoC < distAtoC;
         return isWithin3km || isAlongPath;
       } else {
-        // 모드 2 (관외 복귀): 목적지(관내 경계) 쪽으로 내려가는 전진 길목만 허용
-        const isHeadingToGoal = distBtoC < distAtoC; // 목적지와 거리가 현위치보다 가까워야 함
+        const isHeadingToGoal = distBtoC < distAtoC;
         const isWithinNear2km = distAtoB <= 2.0;
         return isHeadingToGoal || isWithinNear2km;
       }
@@ -1006,12 +1028,12 @@
       let isWithin2km = distAtoB <= 2.0;
       let score = Math.max(10, 350 - Math.round(road.distanceKm * 15));
       
-      // 모드 2일 때 역방향(서울 도심으로 도로 올라가는) 장소 엄격 감점 배제
+      /* ⚡ 모드 2: 복귀 동선 역행 방지 및 후방 감점/예외 연산 */
       if (!inWisu) {
         if (distBtoC > distAtoC && !isWithin2km) {
-          score -= 999; // 강남역처럼 역행하는 장소 완벽 배제
+          score -= 999;
         } else if (distBtoC < distAtoC) {
-          score += 50; // 복귀 길목 우대 보너스
+          score += 50;
         }
       }
 
