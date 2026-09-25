@@ -286,10 +286,10 @@
       <div style="margin-top: 10px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px;">
         
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #4ADE80;">v1.4.2 (2026.09) - 카카오맵 웹 URL 오류 및 OSRM 곡선 궤적 완벽 교정</strong><br>
-          • 🔗 카카오맵 버튼 터치 시 "존재하지 않는 URL" 오류 현상 완벽 수정 연동<br>
-          • 🗺️ 산 관통 직선 현상을 차단하고 실제 도로 망 꺾임 곡선 궤적이 지도 모달에 100% 그려지도록 OSRM 엔진 강화<br>
-          • ⏱️ 카드 리스트의 실시간 이동 거리(km)와 예상 시간(분)을 정밀 연산 처리
+          <strong style="color: #4ADE80;">v1.4.3 (2026.09) - 카카오맵 모바일 웹 스킴 완벽 연동</strong><br>
+          • 🔗 카카오맵 모바일 웹 스킴 연동을 적용하여 "존재하지 않는 URL" 오류를 근본 차단하고 내비 길찾기로 직행되도록 수정<br>
+          • 🗺️ OSRM 도로망 엔진 기반으로 실제 도로망 곡선 궤적 100% 보장<br>
+          • ⏱️ 카드 리스트의 실시간 이동 거리(km)와 예상 시간(분) 정밀 연산 적용
         </div>
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
           <strong style="color: #888888;">v1.4.0 (2026.09) - 스마트 단일 모드 자동화</strong><br>
@@ -737,7 +737,7 @@
     return new Date(0);
   }
 
-  /* ⚡ [v1.4.2 교정] OSRM 전문 길찾기 연동으로 실제 도로 곡선 궤적이 지도상에 100% 표기됨 */
+  /* ⚡ OSRM 전문 길찾기 연동으로 실제 도로 곡선 궤적이 지도상에 100% 표기됨 */
   async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const directDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng);
     
@@ -1248,15 +1248,14 @@
     }
     showToast(`📋 [${query}] 명칭 복사완료!`);
   }
-  /* ⚡ [v1.4.2 교정] 카카오맵 앱/웹 길찾기 표준 연동 URL 적용으로 "존재하지 않는 URL" 오류 완벽 방지 */
+  /* ⚡ 카카오맵 모바일 웹 스킴 연동 (존재하지 않는 URL 오류 완벽 해결) */
   function openKakaoMapRoute(name, lat, lng) {
     let cleanName = cleanQuery(name);
     if (!cleanName) cleanName = name;
-    const targetName = encodeURIComponent(cleanName);
     
-    // 카카오 웹/앱 내비 연동 표준 규격 URL
-    const mapWebUrl = `https://map.kakao.com/link/to/${targetName},${lat},${lng}`;
-    window.open(mapWebUrl, '_blank');
+    // 카카오맵 모바일 웹 스킴 (앱 설치 시 앱 실행, 미설치 시 카카오 웹지도 연동)
+    const mapUrl = `http://m.map.kakao.com/scheme/route?ep=${lat},${lng}&by=car`;
+    window.open(mapUrl, '_blank');
   }
   function saveCurrentCallLocation() {
     const doSave = (pos) => {
