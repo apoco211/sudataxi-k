@@ -20,6 +20,8 @@
   <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
   
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- 🚘 카카오 공식 JavaScript SDK 로드 (iOS Safari URI 오류 해결 핵심) -->
+  <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" integrity="sha384-TiC3DnhipfM35im1MGUfOC6FBNbl1gko6EOJuLftME4556cE2CDd4m24A53X6R6x" crossorigin="anonymous"></script>
   
   <style>
     :root {
@@ -345,6 +347,11 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   const KAKAO_REST_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
+  
+  // 카카오 공식 JavaScript SDK 초기화 (iOS Safari 차단 해제)
+  if (window.Kakao && !window.Kakao.isInitialized()) {
+    window.Kakao.init(KAKAO_REST_KEY);
+  }
   
   let currentMode = 1; // 1: 관내(노란색), 2: 관외(오렌지색)
   let activeTab = 1;
@@ -1224,27 +1231,24 @@
     });
   }
 
-  /* 🚘 카카오내비 원터치 길안내 실행 (iOS / Android 범용 호환 안전 스킴) */
-  function openKakaoNaviDirect(name, lat, lng, option = 2) {
+  /* 🚘 카카오내비 원터치 길안내 실행 (카카오 공식 SDK 방식 적용 - iOS Safari URI 오류 완전 방지) */
+  function openKakaoNaviDirect(name, lat, lng) {
     let cleanName = cleanQuery(name);
     if (!cleanName) cleanName = name;
     
-    showToast(`🚘 [${cleanName}] 카카오내비 무료도로 안내 시작`);
+    showToast(`🚘 [${cleanName}] 카카오내비 길안내 연동 중`);
     
-    // 카카오내비 앱 실행 다이렉트 딥링크
-    const appUrl = `kakaonavi://navigate?x=${lng}&y=${lat}&name=${encodeURIComponent(cleanName)}&coord_type=wgs84&option=${option}`;
-    // 카카오내비 앱 미설치 또는 Safari 보안 차단 시 보완용 카카오맵 모바일 웹 길안내 링크
-    const webFallbackUrl = `https://m.map.kakao.com/scheme/route?ep=${lat},${lng}&by=car`;
-    
-    let clickedAt = +new Date();
-    window.location.href = appUrl;
-    
-    // 1초 내에 앱 전환이 실패할 경우 카카오 길찾기 모바일 웹으로 안전 전환
-    setTimeout(function() {
-      if (+new Date() - clickedAt < 2000) {
-        window.location.href = webFallbackUrl;
-      }
-    }, 1200);
+    if (window.Kakao && window.Kakao.Navi) {
+      window.Kakao.Navi.start({
+        name: cleanName,
+        x: parseFloat(lng),
+        y: parseFloat(lat),
+        coordType: 'wgs84'
+      });
+    } else {
+      // SDK 수신 불가 시 범용 카카오맵 대체
+      window.location.href = `https://m.map.kakao.com/scheme/route?ep=${lat},${lng}&by=car`;
+    }
   }
 
   function renderCallMapView() {
@@ -1352,7 +1356,7 @@
   function openKakaoMapRoute(name, lat, lng) {
     let cleanName = cleanQuery(name);
     if (!cleanName) cleanName = name;
-    const mapUrl = `http://m.map.kakao.com/scheme/route?ep=${lat},${lng}&by=car`;
+    const mapUrl = `https://m.map.kakao.com/scheme/route?ep=${lat},${lng}&by=car`;
     window.open(mapUrl, '_blank');
   }
   
