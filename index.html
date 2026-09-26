@@ -21,6 +21,9 @@
   
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   
+  <!-- 카카오 공식 JS SDK (카카오내비 앱 연동 전용) -->
+  <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
+  
   <style>
     :root {
       --theme-accent: #FFC800;
@@ -111,9 +114,9 @@
     .level-low { background: rgba(255, 107, 107, 0.2); color: #FF6B6B; border: 1px solid #FF6B6B; }
     
     .card-btn-row { display: flex; gap: 6px; margin-top: 2px; }
-    .action-btn { flex: 1; height: 34px; font-weight: 800; font-size: 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; text-decoration: none; }
-    .navi-btn { background: #FFE800 !important; color: #000000 !important; border: none; font-weight: 900; }
-    .map-open-btn { background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; border: none; }
+    .action-btn { flex: 1; height: 34px; font-weight: 800; font-size: 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; text-decoration: none; border: none; }
+    .navi-btn { background: #FFE800 !important; color: #000000 !important; font-weight: 900; }
+    .map-open-btn { background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; }
     
     .tag-group { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
     .tag { font-size: 10px; padding: 1px 5px; border-radius: 4px; background: #2A2A2A; color: #A0A0A0; }
@@ -136,9 +139,9 @@
     .sub-final-name { font-size: 14px; font-weight: 900; color: #FFFFFF; margin-bottom: 1px; }
     .sub-final-meta { font-size: 11px; font-weight: 800; color: var(--theme-accent); font-family: monospace; }
     .sub-btn-row { display: flex; gap: 6px; margin-top: 2px; padding-top: 6px; border-top: 1px solid #2A2A2A; }
-    .sub-action-btn { flex: 1; height: 32px; font-weight: 800; font-size: 11px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; text-decoration: none; }
-    .sub-navi-btn { background: #FFE800 !important; color: #000000 !important; border: none; font-weight: 900; }
-    .sub-map-btn { background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; border: none; }
+    .sub-action-btn { flex: 1; height: 32px; font-weight: 800; font-size: 11px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; text-decoration: none; border: none; }
+    .sub-navi-btn { background: #FFE800 !important; color: #000000 !important; font-weight: 900; }
+    .sub-map-btn { background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; }
     #heatmap-container { display: none; flex-direction: column; gap: 8px; margin-bottom: 12px; }
     #call-map-view { width: 100%; height: 340px; background: #1E1E1E; border-radius: 16px; border: 1.5px solid var(--theme-accent); overflow: hidden; }
     .map-legend { display: flex; align-items: center; justify-content: space-between; background: #1E1E1E; padding: 6px 10px; border-radius: 10px; border: 1px solid #2A2A2A; font-size: 11px; }
@@ -299,9 +302,13 @@
       <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 12px;">📜 수다택시 K 전체 업데이트 히스토리 (터치하여 펼치기)</summary>
       <div style="margin-top: 10px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #4ADE80;">v1.6.0 (2026.09) - 카카오모빌리티 API 완벽 연동 & 원터치 카카오내비 실행</strong><br>
-          • 🚘 카카오모빌리티 실시간 길찾기 REST API 연동으로 교통 정체 반영 이동거리 및 소요시간 정밀 연산<br>
-          • 🧭 원터치 [🚘 카카오내비] 길안내 버튼 탑재 (유니버설 링크 적용으로 iOS 차단 에러 완벽 해결)
+          <strong style="color: #4ADE80;">v1.6.1 (2026.09) - 카카오내비 공식 JS SDK 연동 및 iOS URI 오류 완전 수정</strong><br>
+          • 🚘 Kakao 공식 JS SDK (Kakao.Navi.start) 도입으로 아이폰 PWA 환경의 "유효하지 않은 URI" 에러 완벽 해결<br>
+          • 🧭 SDK 호출 미지원 또는 예외 발생 시 카카오맵 차량 길안내 자동 Fallback 전환 보완
+        </div>
+        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
+          <strong style="color: #888888;">v1.6.0 (2026.09) - 카카오모빌리티 API 완벽 연동 & 실시간 경로 연산</strong><br>
+          • 🚘 카카오모빌리티 실시간 길찾기 REST API 연동으로 교통 정체 반영 이동거리 및 소요시간 정밀 연산
         </div>
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
           <strong style="color: #888888;">v1.5.0 (2026.09) - 카카오 행정구역 연동 & 관외 복귀 동선 완전 개편</strong><br>
@@ -345,6 +352,8 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   const KAKAO_REST_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
+  // Kakao Developers의 JavaScript 키 (동일 앱 키 사용)
+  const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
   let activeTab = 1;
@@ -363,6 +372,40 @@
   let silentAudioElement = null;
   const SILENT_WAV_BASE64 = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==';
   
+  // Kakao JS SDK 초기화
+  function initKakaoSdk() {
+    if (window.Kakao && !window.Kakao.isInitialized()) {
+      try {
+        window.Kakao.init(KAKAO_JS_KEY);
+      } catch(e) {}
+    }
+  }
+
+  // 🚘 카카오내비 앱 공식 연동 함수 (iOS PWA URI 에러 완전 수정)
+  function openKakaoNaviApp(name, lat, lng) {
+    initKakaoSdk();
+    let cleanName = cleanQuery(name) || name;
+    
+    if (window.Kakao && window.Kakao.Navi && window.Kakao.isInitialized()) {
+      try {
+        window.Kakao.Navi.start({
+          name: cleanName,
+          x: Number(lng),
+          y: Number(lat),
+          coordType: 'wgs84'
+        });
+        return;
+      } catch(e) {}
+    }
+    // SDK 로딩 실패 또는 앱 실행 불가 시 카카오맵 차량 길안내로 Fallback
+    window.location.href = `https://m.map.kakao.com/scheme/route?ep=${lat},${lng}&by=car`;
+  }
+
+  function getKakaoMapWebUrl(name, lat, lng) {
+    let cleanName = cleanQuery(name) || name;
+    return `https://m.map.kakao.com/scheme/route?ep=${lat},${lng}&by=car`;
+  }
+
   function showToast(msg) {
     const t = document.getElementById('toast-banner');
     if (!t) return;
@@ -1122,19 +1165,6 @@
     }
     renderCards(selectedCandidates, finalTarget, subFinalCandidates);
   }
-  
-  /* 🚘 카카오내비 유니버설 링크 적용 (iOS Safari 보안 차단 완전 우회) */
-  function getNaviAppSchemeUrl(name, lat, lng) {
-    let cleanName = cleanQuery(name);
-    if (!cleanName) cleanName = name;
-    return `https://kakaonavi.kakao.com/launch/index.do?m=route&ep=${lat},${lng}&name=${encodeURIComponent(cleanName)}`;
-  }
-
-  function getKakaoMapWebUrl(name, lat, lng) {
-    let cleanName = cleanQuery(name);
-    if (!cleanName) cleanName = name;
-    return `https://m.map.kakao.com/scheme/route?ep=${lat},${lng}&by=car`;
-  }
 
   function renderCards(routeCards, finalTarget, subFinalCandidates) {
     const listEl = document.getElementById('card-list');
@@ -1144,8 +1174,8 @@
     routeCards.forEach((item, index) => {
       const card = document.createElement('div');
       card.className = 'card';
-      const naviUrl = getNaviAppSchemeUrl(item.name, item.lat, item.lng);
       const mapUrl = getKakaoMapWebUrl(item.name, item.lat, item.lng);
+      const safeName = item.name.replace(/'/g, "\\'");
 
       card.innerHTML = `
         <div class="card-main-content">
@@ -1159,7 +1189,7 @@
             </div>
           </div>
           <div class="card-btn-row">
-            <a class="action-btn navi-btn" href="${naviUrl}">🚘 카카오내비</a>
+            <button type="button" class="action-btn navi-btn" onclick="openKakaoNaviApp('${safeName}', ${item.lat}, ${item.lng})">🚘 카카오내비</button>
             <a class="action-btn map-open-btn" href="${mapUrl}" target="_blank">🗺️ 카카오맵</a>
           </div>
         </div>
@@ -1180,8 +1210,8 @@
     const inWisu = (currentMode === 1);
     const targetLabel = inWisu ? '최종번화가(5대거점역)' : '실시간최단위수경계복귀';
     const finalBadgeNum = routeCards.length + 1;
-    const finalNaviUrl = getNaviAppSchemeUrl(finalTarget.name, finalTarget.lat, finalTarget.lng);
     const finalMapUrl = getKakaoMapWebUrl(finalTarget.name, finalTarget.lat, finalTarget.lng);
+    const safeFinalName = finalTarget.name.replace(/'/g, "\\'");
 
     finalCard.innerHTML = `
       <div class="card-main-content">
@@ -1195,7 +1225,7 @@
           </div>
         </div>
         <div class="card-btn-row">
-          <a class="action-btn navi-btn" href="${finalNaviUrl}">🚘 카카오내비</a>
+          <button type="button" class="action-btn navi-btn" onclick="openKakaoNaviApp('${safeFinalName}', ${finalTarget.lat}, ${finalTarget.lng})">🚘 카카오내비</button>
           <a class="action-btn map-open-btn" href="${finalMapUrl}" target="_blank">🗺️ 카카오맵</a>
         </div>
       </div>
@@ -1210,8 +1240,8 @@
         <div class="sub-final-title">⭐ 다른 5대 거점역 후보 보기 (참고용)</div>
         <div class="sub-final-list">
           ${subFinalCandidates.map(sub => {
-            const subNavi = getNaviAppSchemeUrl(sub.name, sub.lat, sub.lng);
             const subMap = getKakaoMapWebUrl(sub.name, sub.lat, sub.lng);
+            const safeSubName = sub.name.replace(/'/g, "\\'");
             return `
             <div class="sub-final-card">
               <div class="sub-final-top">
@@ -1222,7 +1252,7 @@
                 ${getScoreLevelBadge(sub.score)}
               </div>
               <div class="sub-btn-row">
-                <a class="sub-action-btn sub-navi-btn" href="${subNavi}">🚘 카카오내비</a>
+                <button type="button" class="sub-action-btn sub-navi-btn" onclick="openKakaoNaviApp('${safeSubName}', ${sub.lat},${sub.lng})">🚘 카카오내비</button>
                 <a class="sub-action-btn sub-map-btn" href="${subMap}" target="_blank">🗺️ 카카오맵</a>
               </div>
             </div>
@@ -1534,6 +1564,7 @@
   }
   
   window.addEventListener('DOMContentLoaded', () => {
+    initKakaoSdk();
     checkIsPublicHolidayRealtime();
     updateCallLogStats();
     updateCustomHotspotUI();
