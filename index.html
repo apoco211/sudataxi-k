@@ -1224,19 +1224,17 @@
     });
   }
 
-  /* 🚘 카카오내비 원터치 길안내 실행 (오류 방지 표준 웹링크 스킴 적용) */
+  /* 🚘 카카오내비 원터치 길안내 실행 (iOS / Android 공용 다이렉트 앱 스킴) */
   function openKakaoNaviDirect(name, lat, lng, option = 2) {
     let cleanName = cleanQuery(name);
     if (!cleanName) cleanName = name;
     
-    // 카카오내비 공식 웹링크 연동 규격 (x: 경도, y: 위도, option=2: 무료도로 우선)
-    const naviUrl = `https://kakaonavi-wlink.kakao.com/navigate?x=${lng}&y=${lat}&name=${encodeURIComponent(cleanName)}&coord_type=wgs84&by=car&option=${option}`;
+    // 카카오내비 앱 실행 전용 스킴 (x: 경도, y: 위도, option=2: 무료도로 우선)
+    const naviUrl = `kakaonavi://navigate?x=${lng}&y=${lat}&name=${encodeURIComponent(cleanName)}&coord_type=wgs84&option=${option}`;
     
     showToast(`🚘 [${cleanName}] 카카오내비 무료도로 안내 시작`);
     
-    setTimeout(() => {
-      window.location.href = naviUrl;
-    }, 200);
+    window.location.href = naviUrl;
   }
 
   function renderCallMapView() {
