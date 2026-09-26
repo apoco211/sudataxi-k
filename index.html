@@ -20,8 +20,6 @@
   <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
   
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <!-- 🚘 카카오 공식 JavaScript SDK 로드 (iOS Safari URI 오류 해결 핵심) -->
-  <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" integrity="sha384-TiC3DnhipfM35im1MGUfOC6FBNbl1gko6EOJuLftME4556cE2CDd4m24A53X6R6x" crossorigin="anonymous"></script>
   
   <style>
     :root {
@@ -113,7 +111,7 @@
     .level-low { background: rgba(255, 107, 107, 0.2); color: #FF6B6B; border: 1px solid #FF6B6B; }
     
     .card-btn-row { display: flex; gap: 6px; margin-top: 2px; }
-    .action-btn { flex: 1; height: 34px; font-weight: 800; font-size: 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
+    .action-btn { flex: 1; height: 34px; font-weight: 800; font-size: 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; text-decoration: none; }
     .navi-btn { background: #FFE800 !important; color: #000000 !important; border: none; font-weight: 900; }
     .map-open-btn { background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; border: none; }
     
@@ -138,7 +136,7 @@
     .sub-final-name { font-size: 14px; font-weight: 900; color: #FFFFFF; margin-bottom: 1px; }
     .sub-final-meta { font-size: 11px; font-weight: 800; color: var(--theme-accent); font-family: monospace; }
     .sub-btn-row { display: flex; gap: 6px; margin-top: 2px; padding-top: 6px; border-top: 1px solid #2A2A2A; }
-    .sub-action-btn { flex: 1; height: 32px; font-weight: 800; font-size: 11px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
+    .sub-action-btn { flex: 1; height: 32px; font-weight: 800; font-size: 11px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; text-decoration: none; }
     .sub-navi-btn { background: #FFE800 !important; color: #000000 !important; border: none; font-weight: 900; }
     .sub-map-btn { background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; border: none; }
     #heatmap-container { display: none; flex-direction: column; gap: 8px; margin-bottom: 12px; }
@@ -347,11 +345,6 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   const KAKAO_REST_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
-  
-  // 카카오 공식 JavaScript SDK 초기화 (iOS Safari 차단 해제)
-  if (window.Kakao && !window.Kakao.isInitialized()) {
-    window.Kakao.init(KAKAO_REST_KEY);
-  }
   
   let currentMode = 1; // 1: 관내(노란색), 2: 관외(오렌지색)
   let activeTab = 1;
@@ -1132,6 +1125,18 @@
     renderCards(selectedCandidates, finalTarget, subFinalCandidates);
   }
   
+  function getNaviAppSchemeUrl(name, lat, lng) {
+    let cleanName = cleanQuery(name);
+    if (!cleanName) cleanName = name;
+    return `kakaonavi://navigate?x=${lng}&y=${lat}&name=${encodeURIComponent(cleanName)}&coord_type=wgs84&option=2`;
+  }
+
+  function getKakaoMapWebUrl(name, lat, lng) {
+    let cleanName = cleanQuery(name);
+    if (!cleanName) cleanName = name;
+    return `https://m.map.kakao.com/scheme/route?ep=${lat},${lng}&by=car`;
+  }
+
   function renderCards(routeCards, finalTarget, subFinalCandidates) {
     const listEl = document.getElementById('card-list');
     if (!listEl) return;
@@ -1140,6 +1145,9 @@
     routeCards.forEach((item, index) => {
       const card = document.createElement('div');
       card.className = 'card';
+      const naviUrl = getNaviAppSchemeUrl(item.name, item.lat, item.lng);
+      const mapUrl = getKakaoMapWebUrl(item.name, item.lat, item.lng);
+
       card.innerHTML = `
         <div class="card-main-content">
           <div class="card-top-row">
@@ -1152,8 +1160,8 @@
             </div>
           </div>
           <div class="card-btn-row">
-            <button class="action-btn navi-btn" data-name="${item.name}" data-lat="${item.lat}" data-lng="${item.lng}">🚘 카카오내비</button>
-            <button class="action-btn map-open-btn" data-name="${item.name}" data-lat="${item.lat}" data-lng="${item.lng}">🗺️ 카카오맵</button>
+            <a class="action-btn navi-btn" href="${naviUrl}">🚘 카카오내비</a>
+            <a class="action-btn map-open-btn" href="${mapUrl}" target="_blank">🗺️ 카카오맵</a>
           </div>
         </div>
         <div class="tag-group">
@@ -1167,11 +1175,15 @@
       `;
       listEl.appendChild(card);
     });
+
     const finalCard = document.createElement('div');
     finalCard.className = 'card final-card';
     const inWisu = (currentMode === 1);
     const targetLabel = inWisu ? '최종번화가(5대거점역)' : '실시간최단위수경계복귀';
     const finalBadgeNum = routeCards.length + 1;
+    const finalNaviUrl = getNaviAppSchemeUrl(finalTarget.name, finalTarget.lat, finalTarget.lng);
+    const finalMapUrl = getKakaoMapWebUrl(finalTarget.name, finalTarget.lat, finalTarget.lng);
+
     finalCard.innerHTML = `
       <div class="card-main-content">
         <div class="card-top-row">
@@ -1184,8 +1196,8 @@
           </div>
         </div>
         <div class="card-btn-row">
-          <button class="action-btn navi-btn" data-name="${finalTarget.name}" data-lat="${finalTarget.lat}" data-lng="${finalTarget.lng}">🚘 카카오내비</button>
-          <button class="action-btn map-open-btn" data-name="${finalTarget.name}" data-lat="${finalTarget.lat}" data-lng="${finalTarget.lng}">🗺️ 카카오맵</button>
+          <a class="action-btn navi-btn" href="${finalNaviUrl}">🚘 카카오내비</a>
+          <a class="action-btn map-open-btn" href="${finalMapUrl}" target="_blank">🗺️ 카카오맵</a>
         </div>
       </div>
       <div class="sub-info">${routeCards.length > 0 ? '경유지 탐색 후 순차 이동 · ' : '경유지 없음 · 즉시 직행 권장 · '}${finalTarget.dist.toFixed(1)}km 남음</div>
@@ -1198,7 +1210,10 @@
       subSection.innerHTML = `
         <div class="sub-final-title">⭐ 다른 5대 거점역 후보 보기 (참고용)</div>
         <div class="sub-final-list">
-          ${subFinalCandidates.map(sub => `
+          ${subFinalCandidates.map(sub => {
+            const subNavi = getNaviAppSchemeUrl(sub.name, sub.lat, sub.lng);
+            const subMap = getKakaoMapWebUrl(sub.name, sub.lat, sub.lng);
+            return `
             <div class="sub-final-card">
               <div class="sub-final-top">
                 <div class="sub-final-info">
@@ -1208,46 +1223,14 @@
                 ${getScoreLevelBadge(sub.score)}
               </div>
               <div class="sub-btn-row">
-                <button class="sub-action-btn sub-navi-btn" data-name="${sub.name}" data-lat="${sub.lat}" data-lng="${sub.lng}">🚘 카카오내비</button>
-                <button class="sub-action-btn sub-map-btn" data-name="${sub.name}" data-lat="${sub.lat}" data-lng="${sub.lng}">🗺️ 카카오맵</button>
+                <a class="sub-action-btn sub-navi-btn" href="${subNavi}">🚘 카카오내비</a>
+                <a class="sub-action-btn sub-map-btn" href="${subMap}" target="_blank">🗺️ 카카오맵</a>
               </div>
             </div>
-          `).join('')}
+          `}).join('')}
         </div>
       `;
       listEl.appendChild(subSection);
-    }
-    document.querySelectorAll('.navi-btn, .sub-navi-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const ds = e.currentTarget.dataset;
-        openKakaoNaviDirect(ds.name, ds.lat, ds.lng);
-      });
-    });
-    document.querySelectorAll('.map-open-btn, .sub-map-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const ds = e.currentTarget.dataset;
-        openKakaoMapRoute(ds.name, ds.lat, ds.lng);
-      });
-    });
-  }
-
-  /* 🚘 카카오내비 원터치 길안내 실행 (카카오 공식 SDK 방식 적용 - iOS Safari URI 오류 완전 방지) */
-  function openKakaoNaviDirect(name, lat, lng) {
-    let cleanName = cleanQuery(name);
-    if (!cleanName) cleanName = name;
-    
-    showToast(`🚘 [${cleanName}] 카카오내비 길안내 연동 중`);
-    
-    if (window.Kakao && window.Kakao.Navi) {
-      window.Kakao.Navi.start({
-        name: cleanName,
-        x: parseFloat(lng),
-        y: parseFloat(lat),
-        coordType: 'wgs84'
-      });
-    } else {
-      // SDK 수신 불가 시 범용 카카오맵 대체
-      window.location.href = `https://m.map.kakao.com/scheme/route?ep=${lat},${lng}&by=car`;
     }
   }
 
@@ -1351,13 +1334,6 @@
   function cleanQuery(str) {
     if (!str) return '';
     return str.replace(/먹자골목|중심상가|상업지구|환승거점|사거리|로데오거리|로데오|환승센터|포차|맛고을|업무지구|메디컬타운/g, '').trim();
-  }
-  
-  function openKakaoMapRoute(name, lat, lng) {
-    let cleanName = cleanQuery(name);
-    if (!cleanName) cleanName = name;
-    const mapUrl = `https://m.map.kakao.com/scheme/route?ep=${lat},${lng}&by=car`;
-    window.open(mapUrl, '_blank');
   }
   
   function saveCurrentCallLocation() {
