@@ -1224,17 +1224,19 @@
     });
   }
 
-  /* 🚘 카카오내비 원터치 길안내 실행 (무료도로 옵션 option=2 세팅) */
+  /* 🚘 카카오내비 원터치 길안내 실행 (오류 방지 표준 웹링크 스킴 적용) */
   function openKakaoNaviDirect(name, lat, lng, option = 2) {
     let cleanName = cleanQuery(name);
     if (!cleanName) cleanName = name;
     
-    const naviUrl = `kakaonavi-sdk://navigate?ep=${lat},${lng}&name=${encodeURIComponent(cleanName)}&option=${option}`;
-    showToast(`🚘 [${cleanName}] 카카오내비 무료도로 길안내 시작`);
+    // 카카오내비 공식 웹링크 연동 규격 (x: 경도, y: 위도, option=2: 무료도로 우선)
+    const naviUrl = `https://kakaonavi-wlink.kakao.com/navigate?x=${lng}&y=${lat}&name=${encodeURIComponent(cleanName)}&coord_type=wgs84&by=car&option=${option}`;
+    
+    showToast(`🚘 [${cleanName}] 카카오내비 무료도로 안내 시작`);
     
     setTimeout(() => {
       window.location.href = naviUrl;
-    }, 300);
+    }, 200);
   }
 
   function renderCallMapView() {
