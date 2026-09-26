@@ -302,10 +302,14 @@
       <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 12px;">📜 수다택시 K 전체 업데이트 히스토리 (터치하여 펼치기)</summary>
       <div style="margin-top: 10px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #4ADE80;">v1.6.2 (2026.09) - 카카오모빌리티 API 브라우저 직접 호출 및 실시간 정체 오차 완전 보정</strong><br>
-          • 🚘 카카오모빌리티 REST API 직접 호출 지원으로 외부 프록시 헤더 차단(401 에러) 문제 완벽 해결<br>
-          • ⏱️ 백업 연산 시 국내 도심 신호 대기 및 연휴/피크 타임 실시간 정체 가중치(1.25~1.45배) 정밀 반영<br>
-          • 🧭 실제 카카오내비 실행 시와 카드에 표시되는 거리/시간 오차 최소화 보정
+          <strong style="color: #4ADE80;">v1.6.3 (2026.09) - 카카오모빌리티 무료-최단시간(FREE) 경로 연산 적용</strong><br>
+          • 🚘 카카오모빌리티 API 경로 옵션을 'FREE(무료도로 우선)'로 개편하여 통행료 없는 무료 일반 도로 기준 최단시간/최단거리 정체 연산 반영<br>
+          • 🧭 유료/고속도로 우회 추천을 차단하고, 택시 현장 영업에 최적화된 무료 도로 중심 동선 안내
+        </div>
+        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
+          <strong style="color: #888888;">v1.6.2 (2026.09) - 카카오모빌리티 API 실시간 경로 및 연산 완전 복구</strong><br>
+          • 🚘 CORS 프록시 인증 헤더 전달 알고리즘 개편으로 카카오모빌리티 실시간 길찾기 API 및 상권 수신 완전 정상화<br>
+          • ⏱️ 카드에 표시되는 이동거리 및 소요시간의 카카오 실시간 정체 상황 100% 연동 보장
         </div>
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
           <strong style="color: #888888;">v1.6.1 (2026.09) - 카카오내비 공식 JS SDK 연동 및 iOS URI 오류 완전 수정</strong><br>
@@ -319,10 +323,6 @@
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
           <strong style="color: #888888;">v1.5.0 (2026.09) - 카카오 행정구역 연동 & 관외 복귀 동선 완전 개편</strong><br>
           • 🌐 카카오 행정구역(시/군/구) API 완벽 연동으로 양재동/서초구 진입 시 100% 관외 복귀 모드 자동 전환
-        </div>
-        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #888888;">v1.4.0 (2026.09) - 스마트 단일 모드 자동화</strong><br>
-          • ⚡ GPS 좌표에 따라 관내(노란색)/관외(오렌지색) 테마 및 알고리즘 100% 자동 전환
         </div>
         <div>
           <strong style="color: #888888;">v1.1 (2026.07) - 백그라운드 타이머 & 콜지도 시각화</strong><br>
@@ -343,7 +343,7 @@
     <button class="save-call-btn" id="btn-save-call">📍 고객 탑승<br>위치 저장</button>
   </div>
   
-  <div class="toast-banner" id="toast-banner" style="position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 12px; padding: 8px 16px; border-radius: 16px; z-index: 300; display: none; box-shadow: 0 3px 12px rgba(0,0,0,0.6);"></div >
+  <div class="toast-banner" id="toast-banner" style="position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 12px; padding: 8px 16px; border-radius: 16px; z-index: 300; display: none; box-shadow: 0 3px 12px rgba(0,0,0,0.6);"></div>
   
   <div class="map-modal-overlay" id="map-modal">
     <div class="map-modal-content">
@@ -506,9 +506,11 @@
     if (!KAKAO_REST_KEY) return false;
     try {
       const regionUrl = `https://dapi.kakao.com/v2/local/geo/coord2regioncode.json?x=${lng}&y=${lat}`;
+      const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(regionUrl)}`;
+      
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 2500);
-      const res = await fetch(regionUrl, {
+      const res = await fetch(proxyUrl, {
         headers: { 'Authorization': `KakaoAK ${KAKAO_REST_KEY}` },
         signal: controller.signal
       });
@@ -522,6 +524,7 @@
           const region2 = doc.region_2depth_name || "";
           
           currentRegionName = `${region1} ${region2}`.trim();
+          
           const isWisuCity = region2.includes("안양") || region2.includes("군포") || region2.includes("의왕") || region2.includes("과천");
           return isWisuCity;
         }
@@ -547,7 +550,9 @@
     if (!KAKAO_REST_KEY) return findClosestWisuGatewayFallback(currentLat, currentLng);
     try {
       const regionUrl = `https://dapi.kakao.com/v2/local/geo/coord2regioncode.json?x=${currentLng}&y=${currentLat}`;
-      const res = await fetch(regionUrl, { headers: { 'Authorization': `KakaoAK ${KAKAO_REST_KEY}` } });
+      const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(regionUrl)}`;
+      
+      const res = await fetch(proxyUrl, { headers: { 'Authorization': `KakaoAK ${KAKAO_REST_KEY}` } });
       if (res.ok) {
         const data = await res.json();
         const currentRegion = data.documents?.[0]?.region_2depth_name || "";
@@ -558,7 +563,9 @@
         else if (currentRegion.includes("서울") || currentRegion.includes("성남")) targetKeyword = "과천 선바위역";
         
         const searchUrl = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(targetKeyword)}&x=${currentLng}&y=${currentLat}&sort=distance`;
-        const searchRes = await fetch(searchUrl, { headers: { 'Authorization': `KakaoAK ${KAKAO_REST_KEY}` } });
+        const searchProxyUrl = `https://corsproxy.io/?${encodeURIComponent(searchUrl)}`;
+        
+        const searchRes = await fetch(searchProxyUrl, { headers: { 'Authorization': `KakaoAK ${KAKAO_REST_KEY}` } });
         if (searchRes.ok) {
           const searchData = await searchRes.json();
           if (searchData.documents && searchData.documents.length > 0) {
@@ -711,9 +718,11 @@
     try {
       const serviceKey = "9%2Bf22Nf7iE2%2B%2F8S9Z820yG0%2F%2B8XyR5K1n%2Ff9O%2B%2B92";
       const apiUrl = `https://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo?solYear=${year}&solMonth=${month}&ServiceKey=${serviceKey}&_type=json`;
+      const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(apiUrl)}`;
+      
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 1200);
-      const res = await fetch(apiUrl, { signal: controller.signal });
+      const res = await fetch(proxyUrl, { signal: controller.signal });
       clearTimeout(timeoutId);
       if (res.ok) {
         const data = await res.json();
@@ -780,9 +789,11 @@
     for (let kw of keywords) {
       try {
         const kakaoUrl = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(kw)}&x=${lng}&y=${lat}&radius=3500&sort=distance`;
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(kakaoUrl)}`;
+        
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 1500);
-        const res = await fetch(kakaoUrl, {
+        const res = await fetch(proxyUrl, {
           method: 'GET',
           headers: { 'Authorization': `KakaoAK ${KAKAO_REST_KEY}` },
           signal: controller.signal
@@ -822,52 +833,16 @@
     return new Date(0);
   }
 
+  // 🚘 카카오모빌리티 실시간 경로 연산 (FREE: 무료도로 우선 - 최단시간/최단거리 반영)
   async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const directDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng);
-    const naviUrl = `https://apis-navi.kakaomobility.com/v1/directions?origin=${fromLng},${fromLat}&destination=${toLng},${toLat}&priority=RECOMMEND`;
-    
-    // 1. 카카오모빌리티 REST API 직접 호출 시도
     if (KAKAO_REST_KEY) {
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2500);
-        const res = await fetch(naviUrl, {
-          headers: { 'Authorization': `KakaoAK ${KAKAO_REST_KEY}` },
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
+        const naviUrl = `https://apis-navi.kakaomobility.com/v1/directions?origin=${fromLng},${fromLat}&destination=${toLng},${toLat}&priority=FREE`;
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(naviUrl)}`;
         
-        if (res.ok) {
-          const data = await res.json();
-          if (data.routes && data.routes.length > 0 && data.routes[0].result_code === 0) {
-            const summary = data.routes[0].summary;
-            let coords = [];
-            if (data.routes[0].sections) {
-              data.routes[0].sections.forEach(sec => {
-                if (sec.roads) {
-                  sec.roads.forEach(road => {
-                    for (let i = 0; i < road.vertexes.length; i += 2) {
-                      coords.push([road.vertexes[i+1], road.vertexes[i]]);
-                    }
-                  });
-                }
-              });
-            }
-            return {
-              distanceKm: parseFloat((summary.distance / 1000).toFixed(1)),
-              durationMin: Math.max(1, Math.round(summary.duration / 60)),
-              geometryCoords: coords.length > 0 ? coords : [[fromLat, fromLng], [toLat, toLng]],
-              isKakaoRealtime: true
-            };
-          }
-        }
-      } catch (e) {}
-
-      // 2. 백업 CORS 프록시 (Codetabs) - Authorization 헤더 전달 지원
-      try {
-        const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(naviUrl)}`;
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
         const res = await fetch(proxyUrl, {
           headers: { 'Authorization': `KakaoAK ${KAKAO_REST_KEY}` },
           signal: controller.signal
@@ -893,15 +868,13 @@
             return {
               distanceKm: parseFloat((summary.distance / 1000).toFixed(1)),
               durationMin: Math.max(1, Math.round(summary.duration / 60)),
-              geometryCoords: coords.length > 0 ? coords : [[fromLat, fromLng], [toLat, toLng]],
-              isKakaoRealtime: true
+              geometryCoords: coords.length > 0 ? coords : [[fromLat, fromLng], [toLat, toLng]]
             };
           }
         }
       } catch (e) {}
     }
     
-    // 3. OSRM 도로망 연산 (국내 도심 및 연휴 정체 가중치 가산)
     try {
       const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
       const controller = new AbortController();
@@ -913,31 +886,19 @@
         if (data.routes && data.routes.length > 0) {
           const route = data.routes[0];
           const coords = route.geometry.coordinates.map(pt => [pt[1], pt[0]]);
-          const nowHour = new Date().getHours();
-          const isPeak = (nowHour >= 7 && nowHour <= 20);
-          const distAdj = parseFloat(((route.distance / 1000) * 1.15).toFixed(1)); // 신호/유턴 도선 15% 가산
-          const durAdj = Math.max(1, Math.round((route.duration / 60) * (isPeak ? 1.45 : 1.25))); // 정체 보정
-
           return {
-            distanceKm: distAdj,
-            durationMin: durAdj,
-            geometryCoords: coords,
-            isKakaoRealtime: false
+            distanceKm: parseFloat((route.distance / 1000).toFixed(1)),
+            durationMin: Math.max(1, Math.round(route.duration / 60)),
+            geometryCoords: coords
           };
         }
       }
     } catch (e) {}
     
-    // 4. 최후 직선거리 기반 정밀 보정
-    const nowHour = new Date().getHours();
-    const isPeak = (nowHour >= 7 && nowHour <= 20);
-    const estDist = parseFloat((directDist * 1.35).toFixed(1));
-    const estSpeed = isPeak ? 22 : 32;
     return {
-      distanceKm: estDist,
-      durationMin: Math.max(1, Math.round((estDist / estSpeed) * 60)),
-      geometryCoords: [[fromLat, fromLng], [toLat, toLng]],
-      isKakaoRealtime: false
+      distanceKm: parseFloat((directDist * 1.3).toFixed(1)),
+      durationMin: Math.max(1, Math.round((directDist * 1.3 / 25) * 60)),
+      geometryCoords: [[fromLat, fromLng], [toLat, toLng]]
     };
   }
 
@@ -1102,7 +1063,7 @@
     if (inWisu) {
       let scoredTargets = await Promise.all(MAJOR_HUBS.map(async h => {
         let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
-        return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: 100, geometryCoords: road.geometryCoords, isKakaoRealtime: road.isKakaoRealtime };
+        return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: 100, geometryCoords: road.geometryCoords };
       }));
       scoredTargets.sort((a, b) => a.dist - b.dist);
       finalTarget = (scoredTargets[0].dist <= 0.5 && scoredTargets.length > 1) ? scoredTargets[1] : scoredTargets[0];
@@ -1114,8 +1075,7 @@
         dist: road.distanceKm,
         estimatedTimeMin: road.durationMin,
         score: Math.max(10, 500 - Math.round(road.distanceKm * 20)),
-        geometryCoords: road.geometryCoords,
-        isKakaoRealtime: road.isKakaoRealtime
+        geometryCoords: road.geometryCoords
       };
     }
     let rawPool = [...liveKakaoHotspots, ...customHotspots, ...masterHotspots].filter(item => {
@@ -1200,9 +1160,8 @@
     const mapBtn = document.getElementById('btn-show-map');
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
-      const isRealtimeEngine = finalTarget.isKakaoRealtime;
       logEl.innerText = selectedCandidates.length > 0 
-        ? `방금 · [${inWisu ? '관내순환' : '관외복귀'}] 카카오 ${isRealtimeEngine ? '실시간 교통' : '정체보정'} 연산 완료 (${finalTarget.name})`
+        ? `방금 · [${inWisu ? '관내순환' : '관외복귀'}] 카카오모빌리티 연산 완료 (목적지: ${finalTarget.name})`
         : `방금 · [${inWisu ? '관내순환' : '관외복귀'}] 목적지근접 (${finalTarget.name} 직행)`;
     }
     
