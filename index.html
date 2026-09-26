@@ -301,18 +301,17 @@
       <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 12px;">📜 수다택시 K 전체 업데이트 히스토리 (터치하여 펼치기)</summary>
       <div style="margin-top: 10px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #4ADE80;">v1.6.5 (2026.09) - Cloudflare Workers 전용 우회 통로 연동 완료</strong><br>
-          • ⚡ 전용 우회 통로(kakao-proxy.apoco211.workers.dev) 적용으로 카카오 인증 헤더 100% 정상 수신<br>
-          • ⏱️ 무료 일반 도로 기준(FREE) 실시간 거리/시간 카드 완벽 반영 및 연산 속도 초고속 단축
+          <strong style="color: #4ADE80;">v1.6.6 (2026.09) - Kakao Mobility avoid=toll (무료도로) API 규격 정밀 반영</strong><br>
+          • 🚘 priority=RECOMMEND&avoid=toll 파라미터 보정으로 카카오내비 실제 대안경로(무료) 수치와 카드 완벽 일치<br>
+          • ⚡ Cloudflare Workers 전용 프록시 유지로 실시간 정체 수신 보장
         </div>
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #888888;">v1.6.4 (2026.09) - 카카오내비 경로 선택 화면 연동 & 무료도로(FREE) 기준 개편</strong><br>
-          • 🚘 Kakao.Navi.share 연동으로 내비 실행 시 [추천길 / 무료도로 / 최단거리] 경로 요약 화면 우선 표시<br>
-          • 🗺️ 카카오맵 단독 링크 버튼 제거 및 카카오내비 단일 버튼으로 디자인 간소화
+          <strong style="color: #888888;">v1.6.5 (2026.09) - Cloudflare Workers 전용 우회 통로 연동 완료</strong><br>
+          • ⚡ 전용 우회 통로(kakao-proxy.apoco211.workers.dev) 연동
         </div>
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #888888;">v1.6.3 (2026.09) - 카카오모빌리티 무료-최단시간(FREE) 경로 연산 적용</strong><br>
-          • 🚘 카카오모빌리티 API 경로 옵션을 'FREE(무료도로 우선)'로 개편
+          <strong style="color: #888888;">v1.6.4 (2026.09) - 카카오내비 경로 선택 화면 연동</strong><br>
+          • 🚘 Kakao.Navi.share 연동으로 내비 실행 시 경로 선택 화면 우선 표시 및 단일 버튼화
         </div>
         <div>
           <strong style="color: #888888;">v1.1 (2026.07) - 백그라운드 타이머 & 콜지도 시각화</strong><br>
@@ -378,7 +377,7 @@
     }
   }
 
-  // 🚘 카카오내비 실행 (share 연동: 바로 길안내가 아닌 [추천/무료/최단] 경로 선택 요약 화면 표시)
+  // 🚘 카카오내비 실행 (share 연동: 경로 선택 요약 화면 우선 표시)
   function openKakaoNaviApp(name, lat, lng) {
     initKakaoSdk();
     let cleanName = cleanQuery(name) || name;
@@ -427,7 +426,7 @@
   }
 
   function requestNotificationPermission() {
-    if ('Notification' in window && Notification.permission === 'default') Notification.permission;
+    if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
   }
 
   function triggerSystemNotification() {
@@ -822,12 +821,12 @@
     return new Date(0);
   }
 
-  // 🚘 카카오모빌리티 실시간 경로 연산 (Cloudflare Workers 전용 우회 통로 적용 + FREE 무료도로 기준)
+  // 🚘 카카오모빌리티 실시간 경로 연산 (공식 규격: priority=RECOMMEND&avoid=toll 무료도로 우선)
   async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const directDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng);
     if (KAKAO_REST_KEY) {
       try {
-        const naviUrl = `https://apis-navi.kakaomobility.com/v1/directions?origin=${fromLng},${fromLat}&destination=${toLng},${toLat}&priority=FREE`;
+        const naviUrl = `https://apis-navi.kakaomobility.com/v1/directions?origin=${fromLng},${fromLat}&destination=${toLng},${toLat}&priority=RECOMMEND&avoid=toll`;
         const proxyUrl = PROXY_BASE_URL + encodeURIComponent(naviUrl);
         
         const controller = new AbortController();
