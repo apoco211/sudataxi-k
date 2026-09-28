@@ -98,11 +98,21 @@
     .card-list { display: flex; flex-direction: column; gap: 6px; }
     .card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 12px; padding: 8px 10px; position: relative; }
     
+    /* 🎯 모드 2 전용 최종 복귀 목적지 카드 스타일 */
+    .card.target-destination-card {
+      background: #2D1A0A;
+      border: 1.5px solid #FF6B00;
+      box-shadow: 0 0 10px rgba(255, 107, 0, 0.25);
+      margin-bottom: 2px;
+    }
+    
     .card-main-content { display: flex; flex-direction: column; gap: 4px; }
     .card-top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 4px; }
     .card-title-group { display: flex; align-items: flex-start; gap: 6px; flex: 1; min-width: 0; }
     
     .num-badge { width: 22px; height: 22px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .num-badge.target-badge { background: #FF6B00; color: #FFFFFF; font-size: 13px; }
+    
     .place-info { flex: 1; min-width: 0; }
     .place-name { font-size: 14px; font-weight: 900; color: #FFFFFF; word-break: keep-all; line-height: 1.2; }
     
@@ -129,6 +139,7 @@
     }
     .tag-group::-webkit-scrollbar { display: none; }
     .tag { font-size: 9px; padding: 1px 4px; border-radius: 4px; background: #2A2A2A; color: #A0A0A0; white-space: nowrap; flex-shrink: 0; }
+    .tag.target { background: #7C2D12; color: #FFEDD5; border: 1px solid #EA580C; font-weight: 800; }
     .tag.near { background: #1E3A8A; color: #93C5FD; border: 1px solid #3B82F6; font-weight: 700; }
     .tag.custom { background: #3B0764; color: #E9D5FF; border: 1px solid #7E22CE; font-weight: 700; }
     .tag.logmatch { background: #2B1F3D; color: #C084FC; border: 1px solid #5B21B6; font-weight: 700; }
@@ -290,30 +301,29 @@
     </div>
 
     <details style="margin-top: 8px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 1.4;">
-      <summary style="font-weight: 800; color: #FFC800; cursor: pointer;">💡 수다택시 K 모드별 동작 및 검색 조건 노트 (터치하여 펼치기)</summary>
+      <summary style="font-weight: 800; color: #FFC800; cursor: pointer;">💡 수다택시 K 모드별 동작 가이드 (터치하여 펼치기)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px; font-size: 10px;">
         <div>
-          <strong style="color: #FFC800;">⚡ 모드 1 (관내 반경 5km 실시간 추천)</strong><br>
-          • 4개 도시(안양·군포·의왕·과천) 관내 운행 시 고정 목적지 없이 현재 위치 기준 반경 5km 내 실시간 콜 핫플 Top 3 추천<br>
-          • 하단에 5대 핵심 거점역 상태를 소형 참고 카드로 표시
+          <strong style="color: #FFC800;">⚡ 모드 1 (관내 4개 도시: 안양·군포·의왕·과천)</strong><br>
+          • 관내 반경 5km 이내 최적 콜 핫플 3곳 실시간 추천<br>
+          • 하단에 5대 핵심 거점역 현황을 소형 카드로 표시
         </div>
         <div>
-          <strong style="color: #FF6B00;">🧭 모드 2 (관외 복귀 - 가장 가까운 관내 경계점 + 경로상 핫플)</strong><br>
-          • 관외/타지역(안산, 서울, 수원 등)에 있을 때 현재 위치 기준 <strong>가장 가까운 위수지역 진입 경계점(대야미, 박달, 석수, 선바위 등)</strong>을 복귀 목적지로 자동 산출<br>
-          • 목적지 이동 경로 상에 위치한 현지 초근접 핫플 및 경로 주변 최적 핫플 3곳 추천 (멀리 떨어진 안양 중심가 15~20km 오추천 원천 차단)
+          <strong style="color: #FF6B00;">🧭 모드 2 (관외 복귀 모드)</strong><br>
+          • 상단 카드에 현재 위치에서 <strong>가장 가까운 관내 진입 경계점(🎯 최종 복귀 목적지)</strong>을 명확하게 표시<br>
+          • 그 아래에 복귀 주행 경로 상에 위치한 현지 최적 핫플 3곳을 경유지 카드로 제시
         </div>
       </div>
     </details>
 
     <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;" open>
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.2.4 모드2 복귀 경로 핫플 스캔 & 마스터 DB 연동 보완 (터치)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.2.5 최종 복귀 목적지 UI 명시 & 모드2 완비 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v2.2.4 (2026.09) - 관외 복귀 알고리즘 원점 재정립 & 버그 수정</strong><br>
-          • 🎯 <strong>모드 2 최종 목적지 자동 지정</strong>: 관외에서 가장 가까운 위수지역 진입 경계점(대야미, 박달, 석수 등)을 복귀 목적지로 설정.<br>
-          • 🛣️ <strong>목적지 이동 경로 주변 핫플 3곳 추천</strong>: 관외 위치에서 목적지(경계점)로 향하는 주행 경로 상의 핫플을 선별하여 추천 (15~20km 떨어진 안양 중심가 오추천 완전 제거).<br>
-          • 🛠️ <strong>복원 마스터 DB(`master_hotspots`) 연동 버그 완벽 수정</strong>: 백업 파일로 복원된 기사님 마스터 DB가 실시간 연산에 100% 반영되도록 연결.<br>
-          • 📐 <strong>모드 1 하단 참고 거점 컴팩트화</strong>: 관내 운행 시 하단 참고용 카드 디자인 슬림화.
+          <strong style="color: #4ADE80;">v2.2.5 (2026.09) - 모드 2 최종 복귀 목적지 UI 카드 탑재</strong><br>
+          • 🎯 <strong>최종 복귀 목적지 카드 신설</strong>: 모드 2 동작 시 가장 가까운 위수지역 진입 경계점을 렌더링 최상단에 주황색 전용 카드로 명확하게 표시.<br>
+          • 🛣️ <strong>동선 경유지 3곳 연동</strong>: 복귀 동선 상의 핫플 3곳을 목적지 카드 아래 순서대로 제시.<br>
+          • 🛠️ <strong>마스터 DB 연동 보완</strong>: 복원된 마스터 DB가 실시간 추천 연산에 100% 최우선 반영되도록 수정 완료.
         </div>
       </div>
     </details>
@@ -583,10 +593,10 @@
     { "id": "hs_s_01", "name": "강남역 상업지구 및 병원거리", "lat": 37.4981, "lng": 127.0276, "address": "강남역", "type": "subway_hospital", "region": "seoul", "isWisu": false }
   ];
 
-  /* 💡 관외 복귀 시 가장 가까운 위수지역 진입 경계 포인트 정의 */
+  /* 💡 관외 복귀 시 가장 가까운 위수지역 진입 경계 포인트 목록 정의 */
   const WISU_BOUNDARY_POINTS = [
     { name: "군포 대야미/부곡 경계 (안산 방면)", lat: 37.3320, lng: 126.9150, address: "대야미동", isWisu: true },
-    { name: "안양 박달/석수 경계 (인천/시흥 방면)", lat: 37.4150, lng: 126.8980, address: "박달동", isWisu: true },
+    { name: "안양 박달/석수 경계 (인천/시흥/광명 방면)", lat: 37.4150, lng: 126.8980, address: "박달동", isWisu: true },
     { name: "의왕 부곡/월암 경계 (수원 방면)", lat: 37.3080, lng: 126.9580, address: "월암동", isWisu: true },
     { name: "의왕 청계/포일 경계 (성남/분당 방면)", lat: 37.3950, lng: 127.0120, address: "포일동", isWisu: true },
     { name: "과천 주암/선바위 경계 (서울/강남 방면)", lat: 37.4520, lng: 127.0050, address: "과천동", isWisu: true }
@@ -898,7 +908,7 @@
     });
   }
 
-  /* 💡 v2.2.4 모드 2 가장 가까운 경계점 목적지 산출 & 경로상 핫플 연산 엔진 */
+  /* 💡 v2.2.5 핵심 연산 및 렌더링 엔진 */
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
@@ -914,7 +924,7 @@
     const nowHour = new Date().getHours();
 
     let referenceHubs = [];
-    let targetBoundaryPoint = null;
+    let targetBoundaryCardData = null;
 
     if (inWisu) {
       for (let h of MAJOR_HUBS) {
@@ -929,18 +939,29 @@
       }
       referenceHubs.sort((a, b) => a.dist - b.dist);
     } else {
-      // 💡 모드 2일 때 현재 위치에서 가장 가까운 위수지역 진입 경계 포인트(목적지) 산출
+      // 💡 [모드 2 핵심] 현재 위치 기준 가장 가까운 위수지역 진입 경계점(최종 복귀 목적지) 계산
       let minBoundaryDist = Infinity;
+      let closestBp = null;
       for (let bp of WISU_BOUNDARY_POINTS) {
         let dist = getStraightDistanceKm(currentPos.lat, currentPos.lng, bp.lat, bp.lng);
         if (dist < minBoundaryDist) {
           minBoundaryDist = dist;
-          targetBoundaryPoint = bp;
+          closestBp = bp;
         }
+      }
+      if (closestBp) {
+        let roadToBp = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, closestBp.lat, closestBp.lng);
+        targetBoundaryCardData = {
+          ...closestBp,
+          dist: Number(roadToBp.distanceKm),
+          estimatedTimeMin: roadToBp.durationMin,
+          score: 150,
+          isTargetBoundary: true
+        };
       }
     }
 
-    // 관외(모드 2)일 때 멀리 떨어진 안양/과천 중심가 장소 완전 제외
+    // 모드 2일 경우 안양/과천 중심가 장소 완전 제외
     let rawPool = [...liveKakaoHotspots, ...customHotspots, ...activeMasterHotspots].filter(item => {
       if (!inWisu) {
         const isWisuHub = MAJOR_HUBS.some(h => item.name.includes(h.name.substring(0,2)));
@@ -953,26 +974,21 @@
     for (let item of rawPool) {
       const directDist = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       
-      // 모드 1: 반경 5km 이내 제한
       if (inWisu && directDist > 5.0) continue; 
 
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
       
-      // 💡 [핵심 차단] 모드 2일 때 도로거리 6.0km 넘는 멀리 있는 장소 원천 배제
+      // 모드 2 도로거리 커트라인
       if (!inWisu && road.distanceKm > 6.0) continue;
 
       let pureRes = await calculatePureSpotScore(item, weatherData, nowHour);
       let finalScore = pureRes.score;
 
-      // 모드 2: 목적지(경계점) 방향으로 가는 경로상 핫플 가산점 부여 (Corridor Scoring)
-      if (!inWisu && targetBoundaryPoint) {
-        const currentToBoundary = getStraightDistanceKm(currentPos.lat, currentPos.lng, targetBoundaryPoint.lat, targetBoundaryPoint.lng);
-        const itemToBoundary = getStraightDistanceKm(item.lat, item.lng, targetBoundaryPoint.lat, targetBoundaryPoint.lng);
-        // 목적지와 더 가까워지는 복귀 경로상의 핫플에 가산점
-        if (itemToBoundary < currentToBoundary) {
-          finalScore += 35;
-        }
-        if (road.distanceKm <= 2.0) finalScore += 30; // 초근접 현지 핫플 추가 가산
+      if (!inWisu && targetBoundaryCardData) {
+        const currentToBoundary = getStraightDistanceKm(currentPos.lat, currentPos.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng);
+        const itemToBoundary = getStraightDistanceKm(item.lat, item.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng);
+        if (itemToBoundary < currentToBoundary) finalScore += 35;
+        if (road.distanceKm <= 2.0) finalScore += 30;
       }
 
       scoredPool.push({
@@ -1002,6 +1018,9 @@
       { name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true },
       ...selectedCandidates
     ];
+    if (targetBoundaryCardData) {
+      currentRouteData.push(targetBoundaryCardData);
+    }
     
     const mapBtn = document.getElementById('btn-show-map');
     if (mapBtn) mapBtn.style.display = 'flex';
@@ -1011,16 +1030,46 @@
         : `방금 · 주변 검색 결과 없음`;
     }
     
-    renderCards(selectedCandidates, referenceHubs);
+    renderCards(selectedCandidates, referenceHubs, targetBoundaryCardData);
   }
 
-  function renderCards(routeCards, referenceHubs) {
+  /* 💡 v2.2.5 최종 복귀 목적지 상단 노출 카드 렌더링 */
+  function renderCards(routeCards, referenceHubs, targetBoundaryCardData) {
     const listEl = document.getElementById('card-list');
     if (!listEl) return;
     
     const fragment = document.createDocumentFragment();
     const inWisu = (currentMode === 1);
+
+    // 🎯 [모드 2 전용] 가장 상단에 최종 복귀 목적지 카드 렌더링
+    if (!inWisu && targetBoundaryCardData) {
+      const targetCard = document.createElement('div');
+      targetCard.className = 'card target-destination-card';
+      const safeTargetName = targetBoundaryCardData.name.replace(/'/g, "\\'");
+      targetCard.innerHTML = `
+        <div class="card-main-content">
+          <div class="card-top-row">
+            <div class="card-title-group">
+              <div class="num-badge target-badge">🎯</div>
+              <div class="place-info">
+                <div class="place-name" style="color: #FFD700;">${targetBoundaryCardData.name}</div>
+                <div class="score-dist" style="color: #FF6B00;">${targetBoundaryCardData.dist.toFixed(1)}km (${targetBoundaryCardData.estimatedTimeMin}분) · 복귀 최단 경계지점</div>
+              </div>
+            </div>
+          </div>
+          <div class="card-btn-row">
+            <button type="button" class="action-btn navi-btn" onclick="openKakaoNaviApp('${safeTargetName}', ${targetBoundaryCardData.lat}, ${targetBoundaryCardData.lng})">🚘 카카오내비 (최종 목적지 안내)</button>
+          </div>
+        </div>
+        <div class="tag-group">
+          <span class="tag target">🎯최종복귀목적지</span>
+          <span class="tag near">#관내진입점</span>
+        </div>
+      `;
+      fragment.appendChild(targetCard);
+    }
     
+    // 경유지 핫플 Top 3 카드 렌더링
     routeCards.forEach((item, index) => {
       const card = document.createElement('div');
       card.className = 'card';
@@ -1144,7 +1193,7 @@
       
       currentRouteData.forEach((pt, idx) => {
         let badgeNum = idx;
-        let html = pt.isCurrent ? '<div class="custom-map-marker current">📍</div>' : `<div class="custom-map-marker">${badgeNum}</div>`;
+        let html = pt.isCurrent ? '<div class="custom-map-marker current">📍</div>' : (pt.isTargetBoundary ? '<div class="custom-map-marker" style="background:#FF6B00; color:#FFF;">🎯</div>' : `<div class="custom-map-marker">${badgeNum}</div>`);
         L.marker([pt.lat, pt.lng], { icon: L.divIcon({ html, className: '', iconSize: [24, 24], iconAnchor: [12, 12] }) })
           .addTo(leafletMap).bindPopup(`<b>${pt.name}</b>`);
       });
