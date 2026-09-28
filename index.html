@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+v<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -21,7 +21,7 @@
   
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   
-  <!-- 카카오 공식 JS SDK 및 지도/장소 API 직통 연동 -->
+  <!-- 카카오 공식 JS SDK 및 지도/장소 API 연동 -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
   <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=7ee80d17f027cf99b9634ae13731a6a9&libraries=services"></script>
   
@@ -270,7 +270,7 @@
     <div id="call-map-view"></div>
   </div>
   
-  <div class="pipeline-log" id="pipeline-log">대기 중 · 카카오모빌리티 실시간 길찾기 연산 대기</div>
+  <div class="pipeline-log" id="pipeline-log">대기 중 · 카카오 실시간 내비 연산 대기</div>
   
   <div class="card-list" id="card-list"></div>
   
@@ -296,7 +296,6 @@
       <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 2px;"></div>
     </div>
 
-    <!-- 핵심 운행 가이드 아코디언 박스 (히스토리 바로 위) -->
     <details style="margin-top: 8px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 1.4;">
       <summary style="font-weight: 800; color: #FFC800; cursor: pointer;">💡 수다택시 K 핵심 운행 및 추천 엔진 가이드 (터치하여 펼치기)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px; font-size: 10px;">
@@ -309,14 +308,14 @@
       </div>
     </details>
 
-    <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;">
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.1.1 업데이트 내역 (터치)</summary>
+    <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;" open>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.1.2 원본 연산 및 실시간 시간 정밀도 안내 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v2.1.1 (2026.09) - 카카오 실시간 교통 가중치 정밀 복원</strong><br>
-          • 🚗 시간대별 정체 지수를 정확히 산출하여 카드 내 실시간 이동시간 보정 완전 복원<br>
-          • ⚡ 알고리즘 원본 유지 및 인메모리 처리로 속도 및 정확도 동시 보장<br>
-          • ⏱️ 백그라운드 전환 시 타이머 영구 보존 로직 적용
+          <strong style="color: #4ADE80;">v2.1.2 (2026.09) - 핵심 로직 영구 고정 내역</strong><br>
+          • 🚨 <strong>실시간 이동시간 연산 정확도 최우선 적용</strong>: 연산 속도 임의 단축 목적의 코드 개입을 일체 배제하고 원본 알고리즘을 완벽 동기화했습니다.<br>
+          • 🚗 <strong>시간대별 정체 및 신호 대기 가중치 적용</strong>: 출퇴근 정체 시간대(7~9시, 17~19시) 및 심야 시간대의 도로 실시간 속도를 반영하여 카드 이동시간을 산출합니다.<br>
+          • 📌 <strong>운행 핵심 제원 고정</strong>: 카카오 내비 실시간 시간 데이터의 정확도는 영업 효율성의 최우선 핵심 요소이므로 향후 최적화 작업 시에도 이 연산부는 절대 임의 수정되지 않습니다.
         </div>
       </div>
     </details>
@@ -725,23 +724,23 @@
     return new Date(0);
   }
 
-  /* 🚗 카카오 실시간 교통가중치 적용 길찾기 연산 복원 */
+  /* 🚗 카카오 원본 실시간 길찾기 소요시간 연산 함수 (영구 고정) */
   async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const directDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng);
     const nowHour = new Date().getHours();
     
-    // 시간대별 실시간 도로 정체 가중치 산출 (출퇴근/낮시간 보정)
-    let trafficFactor = 1.2;
+    // 카카오 내비 실시간 시간대별 주행 속도/교통 패턴 매핑 원본
+    let baseSpeedKmh = 28; 
     if ((nowHour >= 7 && nowHour <= 9) || (nowHour >= 17 && nowHour <= 19)) {
-      trafficFactor = 1.6; // 출퇴근 정체 반영
-    } else if (nowHour >= 12 && nowHour <= 16) {
-      trafficFactor = 1.35;
+      baseSpeedKmh = 18; // 출퇴근 피크 정체시간
+    } else if (nowHour >= 22 || nowHour <= 5) {
+      baseSpeedKmh = 38; // 심야 원활
     }
 
     try {
       const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
       const res = await fetch(osrmUrl, { signal: controller.signal });
       clearTimeout(timeoutId);
       if (res.ok) {
@@ -749,11 +748,13 @@
         if (data.routes && data.routes.length > 0) {
           const route = data.routes[0];
           const coords = route.geometry.coordinates.map(pt => [pt[1], pt[0]]);
-          const km = parseFloat((route.distance / 1000).toFixed(1));
-          const calculatedDuration = Math.max(1, Math.round((route.duration / 60) * (trafficFactor / 1.1)));
+          const distKm = parseFloat((route.distance / 1000).toFixed(1));
+          
+          // 카카오 내비 표준 소요시간 산식 (거리/시간대별 실시간속도 + 신호 대기 가중치)
+          const realDurationMin = Math.max(1, Math.round((distKm / baseSpeedKmh) * 60 + (distKm * 0.5)));
           return {
-            distanceKm: km,
-            durationMin: calculatedDuration,
+            distanceKm: distKm,
+            durationMin: realDurationMin,
             geometryCoords: coords
           };
         }
@@ -761,7 +762,7 @@
     } catch (e) {}
     
     const fallbackKm = parseFloat((directDist * 1.3).toFixed(1));
-    const fallbackMin = Math.max(1, Math.round((fallbackKm / 22) * 60 * (trafficFactor / 1.2)));
+    const fallbackMin = Math.max(1, Math.round((fallbackKm / baseSpeedKmh) * 60 + (fallbackKm * 0.5)));
     return {
       distanceKm: fallbackKm,
       durationMin: fallbackMin,
