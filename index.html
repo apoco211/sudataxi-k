@@ -96,7 +96,6 @@
     .pipeline-log { font-family: monospace; font-size: 10px; color: #8A8A8A; margin: 0 0 8px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     
     .card-list { display: flex; flex-direction: column; gap: 6px; }
-    /* 카드 여백 축소 */
     .card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 12px; padding: 8px 10px; position: relative; }
     
     .card-main-content { display: flex; flex-direction: column; gap: 4px; }
@@ -105,7 +104,6 @@
     
     .num-badge { width: 22px; height: 22px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .place-info { flex: 1; min-width: 0; }
-    /* 장소명 크기 소폭 축소 */
     .place-name { font-size: 14px; font-weight: 900; color: #FFFFFF; word-break: keep-all; line-height: 1.2; }
     
     .score-dist { font-size: 11px; font-weight: 800; color: var(--theme-accent); font-family: monospace; margin-top: 1px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
@@ -116,11 +114,9 @@
     .level-low { background: rgba(255, 107, 107, 0.2); color: #FF6B6B; border: 1px solid #FF6B6B; }
     
     .card-btn-row { display: flex; gap: 6px; margin-top: 2px; }
-    /* 버튼 얇게 */
     .action-btn { flex: 1; height: 32px; font-weight: 900; font-size: 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; text-decoration: none; border: none; }
     .navi-btn { background: #FFE800 !important; color: #000000 !important; font-weight: 900; width: 100%; }
     
-    /* 태그 무조건 1줄 처리 및 스크롤 숨김 */
     .tag-group { 
       display: flex; 
       gap: 4px; 
@@ -128,8 +124,8 @@
       overflow-x: auto; 
       margin-top: 4px; 
       padding-bottom: 2px;
-      -ms-overflow-style: none;  /* IE and Edge */
-      scrollbar-width: none;  /* Firefox */
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
     .tag-group::-webkit-scrollbar { display: none; }
     .tag { font-size: 9px; padding: 1px 4px; border-radius: 4px; background: #2A2A2A; color: #A0A0A0; white-space: nowrap; flex-shrink: 0; }
@@ -197,6 +193,42 @@
     .map-modal-title { font-size: 14px; font-weight: 800; color: var(--theme-accent); }
     .map-modal-close { background: none; border: none; color: #8A8A8A; font-size: 16px; font-weight: 900; cursor: pointer; }
     #route-map { width: 100%; height: 100%; min-height: 350px; flex: 1; background: #121212; z-index: 1; }
+    
+    /* 지도 마커 CSS 깨짐 방지 완벽 처리 */
+    .custom-map-marker {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--theme-accent);
+      color: #000000;
+      font-weight: 900;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 6px rgba(0,0,0,0.8);
+      border: 2px solid #FFFFFF;
+      line-height: 1;
+      text-align: center;
+    }
+    .custom-map-marker.current {
+      background: #FF4444;
+      color: #FFFFFF;
+      font-size: 13px;
+    }
+    .call-dot-marker {
+      border-radius: 50%;
+      box-shadow: 0 0 4px rgba(0,0,0,0.6);
+    }
+    .call-dot-marker.active-time {
+      background: #22C55E;
+      border: 1.5px solid #FFFFFF;
+    }
+    .call-dot-marker.other-time {
+      background: #64748B;
+      border: 1px solid #FFFFFF;
+      opacity: 0.7;
+    }
   </style>
 </head>
 <body class="mode-1">
@@ -230,6 +262,20 @@
       <span>🗺️ 전체 도로 동선 지도 보기</span>
     </button>
   </div>
+
+  <!-- 복원된 운행 및 추천 엔진 가이드 아코디언 박스 -->
+  <details style="margin-bottom: 8px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 1.4;">
+    <summary style="font-weight: 800; color: #FFC800; cursor: pointer;">💡 수다택시 K 핵심 운행 및 추천 엔진 가이드 (터치하여 펼치기)</summary>
+    <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px; font-size: 10px;">
+      <div>
+        <strong style="color: #FFC800;">⚡ 모드 1 (관내순환)</strong>: 안양권 영역 내 주행 시 가장 효율적인 최단 5대 거점역으로 순환 및 동선 추천
+      </div>
+      <div>
+        <strong style="color: #FF6B00;">🧭 모드 2 (관외복귀)</strong>: 외곽/타지역 수송 후 복귀 시 출발지 2.0km 초근접 1순위 경유지 연산 후 안양권 복귀
+      </div>
+    </div>
+  </details>
+
   <div id="heatmap-container">
     <div class="map-legend">
       <div class="legend-item"><span class="dot-sample" style="background:#22C55E;"></span> 현재시간 집중</div>
@@ -265,14 +311,14 @@
     </div>
     
     <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;">
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.0.5 업데이트 내역 (터치)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.0.6 업데이트 내역 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v2.0.5 (2026.09) - UI 콤팩트 패치</strong><br>
-          • 🎨 태그 2줄 넘어감 방지 (한 줄 좌우 스크롤 적용)<br>
-          • 🎨 태그 글자수 축약 및 카드 여백 축소로 화면 활용도 극대화<br>
-          • 🎯 동기 연산 적용으로 범계역 등 최단 거점역 100% 정상 고정 지정<br>
-          • 🧭 모드 2 출발지 2km 초근접 1순위 / 복귀 경로 5km 완벽 고정
+          <strong style="color: #4ADE80;">v2.0.6 (2026.09) - 지도 마커 & 가이드 복원 패치</strong><br>
+          • 🗺️ 지도 핀 숫자 깨짐 및 찌그러짐 현상 완벽 수정<br>
+          • 🛣️ 실제 주행 도로망 곡선 경로(OSRM) 표시 복원<br>
+          • 💡 상단 핵심 운행 및 추천 엔진 가이드 아코디언 박스 재배치<br>
+          • 🎨 태그 1줄 고정 스크롤 및 카드 컴팩트 레이아웃 유지
         </div>
       </div>
     </details>
@@ -1096,8 +1142,8 @@
       
       currentRouteData.forEach((pt, idx) => {
         let badgeNum = pt.isFinal ? currentRouteData.length - 1 : idx;
-        let html = pt.isCurrent ? '<div class="custom-map-marker current">📍</div>' : `<div class="custom-map-marker" style="background:${themeColor}">${badgeNum}</div>`;
-        L.marker([pt.lat, pt.lng], { icon: L.divIcon({ html, className: '', iconSize: [26, 26], iconAnchor: [13, 13] }) })
+        let html = pt.isCurrent ? '<div class="custom-map-marker current">📍</div>' : `<div class="custom-map-marker">${badgeNum}</div>`;
+        L.marker([pt.lat, pt.lng], { icon: L.divIcon({ html, className: '', iconSize: [24, 24], iconAnchor: [12, 12] }) })
           .addTo(leafletMap).bindPopup(`<b>${pt.name}</b>`);
       });
       
@@ -1105,8 +1151,14 @@
       for (let i = 0; i < currentRouteData.length - 1; i++) {
         const start = currentRouteData[i];
         const end = currentRouteData[i+1];
-        const roadRes = await fetchKakaoRoadRoute(start.lat, start.lng, end.lat, end.lng);
-        if (roadRes && roadRes.geometryCoords) allRoadCoords.push(...roadRes.geometryCoords);
+        
+        // 정밀 도로망 주행 경로(OSRM 곡선 좌표) 선순위 적용
+        if (end.geometryCoords && end.geometryCoords.length > 0) {
+          allRoadCoords.push(...end.geometryCoords);
+        } else {
+          const roadRes = await fetchKakaoRoadRoute(start.lat, start.lng, end.lat, end.lng);
+          if (roadRes && roadRes.geometryCoords) allRoadCoords.push(...roadRes.geometryCoords);
+        }
       }
       if (allRoadCoords.length > 0) {
         L.polyline(allRoadCoords, { color: themeColor, weight: 5, opacity: 0.9, lineJoin: 'round', lineCap: 'round' }).addTo(leafletMap);
