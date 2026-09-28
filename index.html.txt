@@ -60,110 +60,125 @@
     }
     
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background-color: #121212; color: #FFFFFF; max-width: 430px; margin: 0 auto; padding: 12px 12px 130px 12px; min-height: 100vh; transition: all 0.3s ease; }
+    body { background-color: #121212; color: #FFFFFF; max-width: 430px; margin: 0 auto; padding: 10px 10px 120px 10px; min-height: 100vh; transition: all 0.3s ease; }
     
     .update-banner {
       background-color: #3A2E0A;
       border: 1px solid var(--theme-accent);
-      border-radius: 10px;
-      padding: 8px 10px;
+      border-radius: 8px;
+      padding: 6px 8px;
       font-size: 11px;
       color: #FFD700;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       display: none;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
     }
-    .banner-content { display: flex; flex-direction: column; gap: 6px; }
-    .banner-btns { display: flex; gap: 6px; }
-    .btn-update { flex: 1; background-color: var(--theme-accent); color: var(--theme-text-on-accent); border: none; padding: 5px; border-radius: 6px; font-weight: 900; cursor: pointer; font-size: 11px; }
-    .btn-close { background-color: #2A2A2A; color: #CCCCCC; border: 1px solid #444; padding: 5px 8px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 11px; }
+    .banner-content { display: flex; flex-direction: column; gap: 4px; }
+    .banner-btns { display: flex; gap: 4px; }
+    .btn-update { flex: 1; background-color: var(--theme-accent); color: var(--theme-text-on-accent); border: none; padding: 4px; border-radius: 4px; font-weight: 900; cursor: pointer; font-size: 11px; }
+    .btn-close { background-color: #2A2A2A; color: #CCCCCC; border: 1px solid #444; padding: 4px 6px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 11px; }
     
-    .header { text-align: center; font-size: 17px; font-weight: 900; color: var(--theme-accent); margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; }
-    .holiday-badge { font-size: 11px; padding: 2px 6px; border-radius: 6px; background: #FF4444; color: #FFFFFF; font-weight: 800; display: inline-block; vertical-align: middle; }
-    .weekday-badge { font-size: 11px; padding: 2px 6px; border-radius: 6px; background: #2A2A2A; color: #AAAAAA; font-weight: 700; display: inline-block; vertical-align: middle; }
-    .mode-container { display: flex; gap: 6px; margin-bottom: 10px; }
-    .mode-pill { flex: 1; height: 34px; border-radius: 10px; background: #2A2A2A; color: #8A8A8A; font-size: 12px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+    .header { text-align: center; font-size: 16px; font-weight: 900; color: var(--theme-accent); margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; flex-wrap: wrap; }
+    .holiday-badge { font-size: 10px; padding: 2px 4px; border-radius: 4px; background: #FF4444; color: #FFFFFF; font-weight: 800; display: inline-block; vertical-align: middle; }
+    .weekday-badge { font-size: 10px; padding: 2px 4px; border-radius: 4px; background: #2A2A2A; color: #AAAAAA; font-weight: 700; display: inline-block; vertical-align: middle; }
+    .mode-container { display: flex; gap: 4px; margin-bottom: 8px; }
+    .mode-pill { flex: 1; height: 30px; border-radius: 8px; background: #2A2A2A; color: #8A8A8A; font-size: 11px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
     .mode-pill.active { background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; }
     
-    .loc-bar { background: var(--theme-bg-dark); height: 38px; border: 1px solid var(--theme-border); border-radius: 10px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; font-size: 11px; color: var(--theme-accent); margin-bottom: 10px; }
-    .refresh-btn { background: none; border: none; color: var(--theme-accent); font-size: 15px; cursor: pointer; }
+    .loc-bar { background: var(--theme-bg-dark); height: 34px; border: 1px solid var(--theme-border); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 0 8px; font-size: 11px; color: var(--theme-accent); margin-bottom: 8px; }
+    .refresh-btn { background: none; border: none; color: var(--theme-accent); font-size: 14px; cursor: pointer; }
     
-    .btn-group-main { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
-    .big-btn { width: 100%; height: 50px; background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; font-size: 16px; font-weight: 900; border: none; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 3px 10px var(--theme-border); }
+    .btn-group-main { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+    .big-btn { width: 100%; height: 44px; background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; font-size: 15px; font-weight: 900; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 2px 8px var(--theme-border); }
     .big-btn:active { opacity: 0.9; transform: scale(0.99); }
     
-    .map-btn { width: 100%; height: 38px; background: #2A2A2A; color: #FFFFFF; font-size: 13px; font-weight: 800; border: 1px solid var(--theme-border); border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .map-btn { width: 100%; height: 34px; background: #2A2A2A; color: #FFFFFF; font-size: 12px; font-weight: 800; border: 1px solid var(--theme-border); border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
     
-    .pipeline-log { font-family: monospace; font-size: 11px; color: #8A8A8A; margin: 2px 0 10px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pipeline-log { font-family: monospace; font-size: 10px; color: #8A8A8A; margin: 0 0 8px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     
-    .card-list { display: flex; flex-direction: column; gap: 8px; }
-    .card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 14px; padding: 10px 12px; position: relative; }
+    .card-list { display: flex; flex-direction: column; gap: 6px; }
+    /* 카드 여백 축소 */
+    .card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 12px; padding: 8px 10px; position: relative; }
     
-    .card-main-content { display: flex; flex-direction: column; gap: 6px; }
-    .card-top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
-    .card-title-group { display: flex; align-items: flex-start; gap: 8px; flex: 1; min-width: 0; }
+    .card-main-content { display: flex; flex-direction: column; gap: 4px; }
+    .card-top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 4px; }
+    .card-title-group { display: flex; align-items: flex-start; gap: 6px; flex: 1; min-width: 0; }
     
-    .num-badge { width: 24px; height: 24px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .num-badge { width: 22px; height: 22px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .place-info { flex: 1; min-width: 0; }
-    .place-name { font-size: 15px; font-weight: 900; color: #FFFFFF; word-break: keep-all; line-height: 1.25; }
+    /* 장소명 크기 소폭 축소 */
+    .place-name { font-size: 14px; font-weight: 900; color: #FFFFFF; word-break: keep-all; line-height: 1.2; }
     
-    .score-dist { font-size: 12px; font-weight: 800; color: var(--theme-accent); font-family: monospace; margin-top: 2px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .score-dist { font-size: 11px; font-weight: 800; color: var(--theme-accent); font-family: monospace; margin-top: 1px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
     
-    .level-badge { font-weight: 900; padding: 1px 5px; border-radius: 4px; font-size: 10px; display: inline-flex; align-items: center; gap: 2px; }
+    .level-badge { font-weight: 900; padding: 1px 4px; border-radius: 4px; font-size: 9px; display: inline-flex; align-items: center; gap: 2px; }
     .level-high { background: rgba(74, 222, 128, 0.2); color: #4ADE80; border: 1px solid #4ADE80; }
     .level-mid { background: rgba(255, 200, 0, 0.2); color: #FFC800; border: 1px solid #FFC800; }
     .level-low { background: rgba(255, 107, 107, 0.2); color: #FF6B6B; border: 1px solid #FF6B6B; }
     
     .card-btn-row { display: flex; gap: 6px; margin-top: 2px; }
-    .action-btn { flex: 1; height: 36px; font-weight: 900; font-size: 13px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; text-decoration: none; border: none; }
+    /* 버튼 얇게 */
+    .action-btn { flex: 1; height: 32px; font-weight: 900; font-size: 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; text-decoration: none; border: none; }
     .navi-btn { background: #FFE800 !important; color: #000000 !important; font-weight: 900; width: 100%; }
     
-    .tag-group { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
-    .tag { font-size: 10px; padding: 1px 5px; border-radius: 4px; background: #2A2A2A; color: #A0A0A0; }
+    /* 태그 무조건 1줄 처리 및 스크롤 숨김 */
+    .tag-group { 
+      display: flex; 
+      gap: 4px; 
+      flex-wrap: nowrap; 
+      overflow-x: auto; 
+      margin-top: 4px; 
+      padding-bottom: 2px;
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+    .tag-group::-webkit-scrollbar { display: none; }
+    .tag { font-size: 9px; padding: 1px 4px; border-radius: 4px; background: #2A2A2A; color: #A0A0A0; white-space: nowrap; flex-shrink: 0; }
     .tag.near { background: #1E3A8A; color: #93C5FD; border: 1px solid #3B82F6; font-weight: 700; }
     .tag.custom { background: #3B0764; color: #E9D5FF; border: 1px solid #7E22CE; font-weight: 700; }
     .tag.logmatch { background: #2B1F3D; color: #C084FC; border: 1px solid #5B21B6; font-weight: 700; }
     .tag.timematch { background: #065F46; color: #34D399; border: 1px solid #10B981; font-weight: 800; }
     .tag.masterdb { background: #581C87; color: #F3E8FF; border: 1px solid #9333EA; font-weight: 700; }
     .tag.livekakaomap { background: #854D0E; color: #FEF08A; border: 1px solid #EAB308; font-weight: 800; }
-    .sub-info { font-size: 11px; color: #8A8A8A; margin-top: 6px; border-top: 1px solid #2A2A2A; padding-top: 6px; }
     
-    .card.final-card { background: var(--final-card-bg); border: 1.5px solid var(--theme-accent); box-shadow: 0 0 8px var(--final-card-glow); }
+    .sub-info { font-size: 10px; color: #8A8A8A; margin-top: 4px; border-top: 1px solid #2A2A2A; padding-top: 4px; }
     
-    .sub-final-section { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
-    .sub-final-title { font-size: 12px; font-weight: 800; color: var(--theme-accent); margin-bottom: 2px; }
-    .sub-final-list { display: flex; flex-direction: column; gap: 8px; }
-    .sub-final-card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
-    .sub-final-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; }
+    .card.final-card { background: var(--final-card-bg); border: 1.5px solid var(--theme-accent); box-shadow: 0 0 6px var(--final-card-glow); }
+    
+    .sub-final-section { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+    .sub-final-title { font-size: 11px; font-weight: 800; color: var(--theme-accent); margin-bottom: 2px; }
+    .sub-final-list { display: flex; flex-direction: column; gap: 6px; }
+    .sub-final-card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column; gap: 4px; }
+    .sub-final-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 4px; }
     .sub-final-info { flex: 1; min-width: 0; }
-    .sub-final-name { font-size: 14px; font-weight: 900; color: #FFFFFF; margin-bottom: 1px; }
-    .sub-final-meta { font-size: 11px; font-weight: 800; color: var(--theme-accent); font-family: monospace; }
-    .sub-btn-row { display: flex; gap: 6px; margin-top: 2px; padding-top: 6px; border-top: 1px solid #2A2A2A; }
-    .sub-action-btn { flex: 1; height: 34px; font-weight: 900; font-size: 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; text-decoration: none; border: none; }
+    .sub-final-name { font-size: 13px; font-weight: 900; color: #FFFFFF; margin-bottom: 1px; }
+    .sub-final-meta { font-size: 10px; font-weight: 800; color: var(--theme-accent); font-family: monospace; }
+    .sub-btn-row { display: flex; gap: 6px; margin-top: 2px; padding-top: 4px; border-top: 1px solid #2A2A2A; }
+    .sub-action-btn { flex: 1; height: 30px; font-weight: 900; font-size: 11px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; text-decoration: none; border: none; }
     .sub-navi-btn { background: #FFE800 !important; color: #000000 !important; font-weight: 900; width: 100%; }
     
-    #heatmap-container { display: none; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-    #call-map-view { width: 100%; height: 340px; background: #1E1E1E; border-radius: 16px; border: 1.5px solid var(--theme-accent); overflow: hidden; }
-    .map-legend { display: flex; align-items: center; justify-content: space-between; background: #1E1E1E; padding: 6px 10px; border-radius: 10px; border: 1px solid #2A2A2A; font-size: 11px; }
+    #heatmap-container { display: none; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+    #call-map-view { width: 100%; height: 320px; background: #1E1E1E; border-radius: 12px; border: 1.5px solid var(--theme-accent); overflow: hidden; }
+    .map-legend { display: flex; align-items: center; justify-content: space-between; background: #1E1E1E; padding: 4px 8px; border-radius: 8px; border: 1px solid #2A2A2A; font-size: 10px; }
     .legend-item { display: flex; align-items: center; gap: 4px; font-weight: 700; }
-    .dot-sample { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-    .backup-section { margin-top: 14px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 14px; padding: 12px; }
-    .backup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .backup-title { font-size: 13px; font-weight: 800; color: var(--theme-accent); }
-    .backup-count { font-size: 11px; color: #8A8A8A; }
-    .backup-btn-group { display: flex; gap: 6px; }
-    .backup-btn { flex: 1; height: 36px; background: #2A2A2A; color: #FFFFFF; font-weight: 800; border: 1px solid #3A3A3A; border-radius: 8px; cursor: pointer; font-size: 12px; }
+    .dot-sample { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
     
-    .custom-section { margin-top: 10px; border-top: 1px dashed #3A3A3A; padding-top: 8px; }
-    .add-custom-btn { width: 100%; height: 38px; background: #2A1A3A; color: #D8B4FE; border: 1px solid #6B21A8; font-weight: 800; font-size: 12px; border-radius: 8px; cursor: pointer; }
+    .backup-section { margin-top: 12px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 10px; padding: 10px; }
+    .backup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .backup-title { font-size: 12px; font-weight: 800; color: var(--theme-accent); }
+    .backup-count { font-size: 10px; color: #8A8A8A; }
+    .backup-btn-group { display: flex; gap: 4px; }
+    .backup-btn { flex: 1; height: 32px; background: #2A2A2A; color: #FFFFFF; font-weight: 800; border: 1px solid #3A3A3A; border-radius: 6px; cursor: pointer; font-size: 11px; }
     
-    .recent-log-item { display: flex; align-items: center; justify-content: space-between; background: #242424; border: 1px solid #2E2E2E; border-radius: 6px; padding: 5px 8px; }
-    .recent-log-time { font-size: 11px; font-weight: 700; color: #E0E0E0; white-space: nowrap; }
+    .custom-section { margin-top: 8px; border-top: 1px dashed #3A3A3A; padding-top: 6px; }
+    .add-custom-btn { width: 100%; height: 34px; background: #2A1A3A; color: #D8B4FE; border: 1px solid #6B21A8; font-weight: 800; font-size: 11px; border-radius: 6px; cursor: pointer; }
     
-    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 68px; background: rgba(26,26,26,0.95); backdrop-filter: blur(10px); border-top: 2px solid var(--theme-accent); display: flex; align-items: center; gap: 6px; padding: 6px 10px; z-index: 100; max-width: 430px; margin: 0 auto; }
+    .recent-log-item { display: flex; align-items: center; justify-content: space-between; background: #242424; border: 1px solid #2E2E2E; border-radius: 6px; padding: 4px 6px; }
+    .recent-log-time { font-size: 10px; font-weight: 700; color: #E0E0E0; white-space: nowrap; }
+    
+    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 64px; background: rgba(26,26,26,0.95); backdrop-filter: blur(10px); border-top: 2px solid var(--theme-accent); display: flex; align-items: center; gap: 6px; padding: 6px 10px; z-index: 100; max-width: 430px; margin: 0 auto; }
     .timer-container { flex: 1; height: 100%; display: flex; flex-direction: column; gap: 3px; }
-    .timer-mode-selector { display: flex; gap: 3px; height: 18px; }
-    .timer-mode-btn { flex: 1; background: #2A2A2A; color: #8A8A8A; font-size: 10px; font-weight: 800; border: 1px solid #3A3A3A; border-radius: 4px; cursor: pointer; }
+    .timer-mode-selector { display: flex; gap: 3px; height: 16px; }
+    .timer-mode-btn { flex: 1; background: #2A2A2A; color: #8A8A8A; font-size: 9px; font-weight: 800; border: 1px solid #3A3A3A; border-radius: 4px; cursor: pointer; }
     .timer-mode-btn.active { background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; border-color: var(--theme-accent) !important; }
     .timer-display-btn { flex: 1; background: #2A2A2A; border: 1px solid #3A3A3A; color: #FFFFFF; font-size: 12px; font-weight: 900; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .timer-display-btn.running { background: #3A2E0A; color: var(--theme-accent); border-color: var(--theme-accent); }
@@ -173,35 +188,23 @@
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
     }
-    .save-call-btn { flex: 1; height: 100%; background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; font-weight: 900; font-size: 13px; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.15; word-break: keep-all; }
+    .save-call-btn { flex: 1; height: 100%; background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; font-weight: 900; font-size: 12px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.15; word-break: keep-all; }
     
     .map-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
     .map-modal-overlay.active { display: flex; }
-    .map-modal-content { width: 100%; max-width: 430px; height: 75vh; background: #1E1E1E; border-top-left-radius: 20px; border-top-right-radius: 20px; border-top: 2px solid var(--theme-accent); display: flex; flex-direction: column; overflow: hidden; }
-    .map-modal-header { padding: 12px 14px; background: #121212; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2A2A2A; flex-shrink: 0; }
-    .map-modal-title { font-size: 15px; font-weight: 800; color: var(--theme-accent); }
-    .map-modal-close { background: none; border: none; color: #8A8A8A; font-size: 18px; font-weight: 900; cursor: pointer; }
+    .map-modal-content { width: 100%; max-width: 430px; height: 75vh; background: #1E1E1E; border-top-left-radius: 16px; border-top-right-radius: 16px; border-top: 2px solid var(--theme-accent); display: flex; flex-direction: column; overflow: hidden; }
+    .map-modal-header { padding: 10px 12px; background: #121212; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2A2A2A; flex-shrink: 0; }
+    .map-modal-title { font-size: 14px; font-weight: 800; color: var(--theme-accent); }
+    .map-modal-close { background: none; border: none; color: #8A8A8A; font-size: 16px; font-weight: 900; cursor: pointer; }
     #route-map { width: 100%; height: 100%; min-height: 350px; flex: 1; background: #121212; z-index: 1; }
-    .leaflet-tile-pane { filter: brightness(1.1) contrast(1.4); }
-    .custom-map-marker { width: 30px; height: 30px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 15px; display: flex; align-items: center; justify-content: center; border: 2px solid #FFFFFF; box-shadow: 0 2px 6px rgba(0,0,0,0.8); }
-    .custom-map-marker.current { background: #22C55E; color: #000000; font-size: 16px; }
-    .leaflet-popup-content { font-size: 14px; font-weight: 800; color: #111; }
-    .call-dot-marker { border-radius: 50%; border: 2px solid #FFFFFF; box-shadow: 0 0 6px rgba(0,0,0,0.8); }
-    .call-dot-marker.active-time { background: #22C55E; animation: activePulseGreen 1.5s infinite; }
-    .call-dot-marker.other-time { background: #64748B; opacity: 0.75; }
-    @keyframes activePulseGreen {
-      0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-      70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
-      100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
-    }
   </style>
 </head>
 <body class="mode-1">
   <div id="hotspotUpdateBanner" class="update-banner">
     <div class="banner-content">
-      <span>💡 <strong>[수다택시 K]</strong> 핫플 데이터를 검토한 지 2주가 지났어요! 최신 상권을 반영해 볼까요?</span>
+      <span>💡 <strong>[수다택시 K]</strong> 핫플 데이터를 검토한 지 2주가 지났어요!</span>
       <div class="banner-btns">
-        <button onclick="requestHotspotUpdate()" class="btn-update">업데이트 요청하기</button>
+        <button onclick="requestHotspotUpdate()" class="btn-update">업데이트 요청</button>
         <button onclick="dismissBanner()" class="btn-close">닫기</button>
       </div>
     </div>
@@ -229,8 +232,8 @@
   </div>
   <div id="heatmap-container">
     <div class="map-legend">
-      <div class="legend-item"><span class="dot-sample" style="background:#22C55E;"></span> 현재시간대 집중 (+-1시간)</div>
-      <div class="legend-item"><span class="dot-sample" style="background:#64748B;"></span> 기타 시간대 콜</div>
+      <div class="legend-item"><span class="dot-sample" style="background:#22C55E;"></span> 현재시간 집중</div>
+      <div class="legend-item"><span class="dot-sample" style="background:#64748B;"></span> 기타 시간</div>
     </div>
     <div id="call-map-view"></div>
   </div>
@@ -242,66 +245,34 @@
   <div class="backup-section">
     <div class="backup-header">
       <span class="backup-title">📊 데이터 관리 & 백업</span>
-      <span class="backup-count" id="log-count-text">저장된 기록: 0개</span>
+      <span class="backup-count" id="log-count-text">저장 기록: 0개</span>
     </div>
     <div class="backup-btn-group">
-      <button class="backup-btn" id="btn-export">📤 JSON 내보내기</button>
-      <button class="backup-btn" id="btn-import-open">📥 JSON 가져오기</button>
+      <button class="backup-btn" id="btn-export">📤 백업</button>
+      <button class="backup-btn" id="btn-import-open">📥 복원</button>
       <input type="file" id="import-file-input" accept=".json,application/json" style="display: none;">
     </div>
     
-    <div style="margin-top: 8px; border-top: 1px dashed #3A3A3A; padding-top: 6px;">
-      <div style="font-size: 11px; font-weight: 800; color: #8A8A8A; margin-bottom: 4px;">🕒 최근 저장 목록 (최신 3개)</div>
-      <div id="recent-logs-list" style="display: flex; flex-direction: column; gap: 3px;"></div>
+    <div style="margin-top: 6px; border-top: 1px dashed #3A3A3A; padding-top: 4px;">
+      <div style="font-size: 10px; font-weight: 800; color: #8A8A8A; margin-bottom: 2px;">🕒 최근 저장 목록</div>
+      <div id="recent-logs-list" style="display: flex; flex-direction: column; gap: 2px;"></div>
     </div>
     
     <div class="custom-section">
-      <button class="add-custom-btn" id="btn-add-custom">⭐ 현재 위치를 '나만의 콜 장소'로 직접 등록</button>
-      <div style="font-size: 11px; font-weight: 800; color: #C084FC; margin: 6px 0 3px 0;">📍 나만의 콜 장소 목록</div>
-      <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 3px;"></div>
+      <button class="add-custom-btn" id="btn-add-custom">⭐ 현재 위치 '나만의 핫플' 등록</button>
+      <div style="font-size: 10px; font-weight: 800; color: #C084FC; margin: 4px 0 2px 0;">📍 나만의 핫플 목록</div>
+      <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 2px;"></div>
     </div>
     
-    <details style="margin-top: 12px; background: #161616; border: 1px solid #333333; border-radius: 10px; padding: 10px 12px; font-size: 11px; line-height: 1.5;">
-      <summary style="font-weight: 800; color: #FFC800; cursor: pointer; font-size: 12px;">💡 수다택시 K 핵심 운행 및 추천 엔진 가이드 (터치하여 펼치기)</summary>
-      <div style="margin-top: 10px; color: #DDDDDD; display: flex; flex-direction: column; gap: 8px;">
-        
-        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #FFC800;">🟡 [모드 1] 위수 관내 스마트 순환 영업 (노란색 테마)</strong><br>
-          • <strong>영업 목적:</strong> 안양·군포·의왕·과천 지정 위수지역 내부 순환 영업 전용<br>
-          • <strong>최단거리 거점역 100% 지정:</strong> 5대 관문역(평촌, 범계, 인덕원, 안양, 산본) 중 실제 주행 거리가 가장 가까운 역이 무조건 3번 최종 목적지로 고정 지정<br>
-          • <strong>목적지 자동 순환 (500m 초근접 예외):</strong> 최단역과 500m 이내로 들어올 경우 다음 최단 거점역으로 목적지가 자동 변경<br>
-          • <strong>1~2번 길목 경유지:</strong> 현위치에서 3번 거점역으로 가는 길목 상의 알짜 상권 우선 배치
-        </div>
-        
-        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #FF6B00;">🟠 [모드 2] 타지역/관외 복귀 영업 (오렌지색 테마)</strong><br>
-          • <strong>영업 목적:</strong> 서울/수원/판교 등 타지역 하차 후 내 영업구역(위수지역)으로의 귀로 영업<br>
-          • <strong>출발지 반경 2km 초근접 우대:</strong> 검색 위치 반경 2.0km 이내 핫플 존재 시 무조건 1번 카드 최우선 확정 (바로 태우기)<br>
-          • <strong>복귀 경로 좌우 5km 우회 탐색:</strong> 3번 최단 위수 경계로 내려가는 경로 축 기준 우회 이탈거리 5.0km 이내의 순방향 알짜 상권만 2번 카드 배치
-        </div>
-        
-        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #C084FC;">📊 기사님 데이터 연동 & 우대 가산점 시스템</strong><br>
-          • <strong>고객 탑승 기록(로그) 매칭:</strong> 저장 위치 반경 300m 이내 매칭 시 현재시간대(±1시간) 및 요일 패턴 일치 시 최대 +60점 집중 가산 (<code>[#현재시간대콜집중]</code>)<br>
-          • <strong>나만의 핫플 우대:</strong> 기사 직접 등록 장소 기본 +25점~+50점 가산 (<code>[#나만의핫플]</code>)<br>
-          • <strong>실시간 기상 연동:</strong> Open-Meteo API 연동 비/눈 검출 시 +20점 보너스 (<code>[#강수보너스]</code>)
-        </div>
-        <div>
-          <strong style="color: #4ADE80;">🕒 시간대별 피크 및 공공데이터 공휴일 가산점</strong><br>
-          • <strong>아침 피크 (07~10시):</strong> 지하철/아파트/병원/오피스 (+35~45점), 유흥상권 감점 (-25점)<br>
-          • <strong>주간 피크 (10~18시):</strong> 병원 (+35~40점), 대형학원가 (+30~35점), 마트/백화점<br>
-          • <strong>야간 피크 (18~04시):</strong> 먹자골목/로데오/주점 (+45점), 역사 Exit (+35점)<br>
-          • <strong>주말 및 법정 공휴일:</strong> 오피스/학원가 차단 (-30점), 쇼핑몰/교외/결혼식/터미널 보너스 대폭 상승
-        </div>
-      </div>
-    </details>
-    <details style="margin-top: 6px; background: #161616; border: 1px solid #333333; border-radius: 10px; padding: 10px 12px; font-size: 11px; line-height: 1.5;">
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 12px;">📜 수다택시 K 전체 업데이트 히스토리 (터치하여 펼치기)</summary>
-      <div style="margin-top: 10px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px;">
-        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #4ADE80;">v2.0.3 (2026.09) - 모드 2 출발지 2km / 복귀경로 5km 정확 수식 개편</strong><br>
-          • 🎯 모드 2 검색 시 출발지 반경 2.0km 이내 초근접 핫플 무조건 1번 우선 배치 적용<br>
-          • 🧭 복귀 도로 축 기준 좌우 우회 이탈 거리 5.0km 이내 순방향 핫플만 선별하여 일직선 동선 완벽 정렬
+    <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;">
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.0.5 업데이트 내역 (터치)</summary>
+      <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
+        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
+          <strong style="color: #4ADE80;">v2.0.5 (2026.09) - UI 콤팩트 패치</strong><br>
+          • 🎨 태그 2줄 넘어감 방지 (한 줄 좌우 스크롤 적용)<br>
+          • 🎨 태그 글자수 축약 및 카드 여백 축소로 화면 활용도 극대화<br>
+          • 🎯 동기 연산 적용으로 범계역 등 최단 거점역 100% 정상 고정 지정<br>
+          • 🧭 모드 2 출발지 2km 초근접 1순위 / 복귀 경로 5km 완벽 고정
         </div>
       </div>
     </details>
@@ -318,12 +289,12 @@
     <button class="save-call-btn" id="btn-save-call">📍 고객 탑승<br>위치 저장</button>
   </div>
   
-  <div class="toast-banner" id="toast-banner" style="position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 12px; padding: 8px 16px; border-radius: 16px; z-index: 300; display: none; box-shadow: 0 3px 12px rgba(0,0,0,0.6);"></div>
+  <div class="toast-banner" id="toast-banner" style="position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 12px; padding: 6px 12px; border-radius: 12px; z-index: 300; display: none; box-shadow: 0 3px 12px rgba(0,0,0,0.6);"></div>
   
   <div class="map-modal-overlay" id="map-modal">
     <div class="map-modal-content">
       <div class="map-modal-header">
-        <span class="map-modal-title">🗺️ 실제 도로 이동 동선 지도</span>
+        <span class="map-modal-title">🗺️ 도로 동선 지도</span>
         <button class="map-modal-close" id="map-modal-close">✕</button>
       </div>
       <div id="route-map"></div>
@@ -352,24 +323,16 @@
   
   function initKakaoSdk() {
     if (window.Kakao && !window.Kakao.isInitialized()) {
-      try {
-        window.Kakao.init(KAKAO_JS_KEY);
-      } catch(e) {}
+      try { window.Kakao.init(KAKAO_JS_KEY); } catch(e) {}
     }
   }
 
   function openKakaoNaviApp(name, lat, lng) {
     initKakaoSdk();
     let cleanName = cleanQuery(name) || name;
-    
     if (window.Kakao && window.Kakao.Navi && window.Kakao.isInitialized()) {
       try {
-        window.Kakao.Navi.share({
-          name: cleanName,
-          x: Number(lng),
-          y: Number(lat),
-          coordType: 'wgs84'
-        });
+        window.Kakao.Navi.share({ name: cleanName, x: Number(lng), y: Number(lat), coordType: 'wgs84' });
         return;
       } catch(e) {}
     }
@@ -412,10 +375,7 @@
   function triggerSystemNotification() {
     if ('Notification' in window && Notification.permission === 'granted') {
       try {
-        new Notification('⏱️ [수다택시 K] 대기시간 종료!', {
-          body: `${timerPresetMin}분 대기 완료! 다음 핫스팟으로 이동 추천시간입니다.`,
-          requireInteraction: true
-        });
+        new Notification('⏱️ [수다택시 K]', { body: `${timerPresetMin}분 대기 완료! 추천지로 이동하세요.`, requireInteraction: true });
       } catch(e) {}
     }
   }
@@ -504,9 +464,7 @@
 
   function getMasterHotspotsFromStorage() {
     const saved = localStorage.getItem('sudataxi_master_hotspots');
-    if (saved) {
-      try { return JSON.parse(saved); } catch(e) {}
-    }
+    if (saved) { try { return JSON.parse(saved); } catch(e) {} }
     return DEFAULT_MASTER_HOTSPOTS;
   }
 
@@ -632,29 +590,20 @@
     
     let badgeHtml = '';
     if (isHoliday) {
-      badgeHtml = `<span class="holiday-badge">🔴 ${holidayName || '법정 공휴일'}</span>`;
+      badgeHtml = `<span class="holiday-badge">🔴 ${holidayName || '공휴일'}</span>`;
     } else if (isWeekend) {
-      badgeHtml = `<span class="holiday-badge" style="background:#FF8C00;">🟡 주말 휴일</span>`;
+      badgeHtml = `<span class="holiday-badge" style="background:#FF8C00;">🟡 휴일</span>`;
     } else {
       badgeHtml = `<span class="weekday-badge">🟢 평일</span>`;
     }
     headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) ${badgeHtml}`;
   }
 
-  // ⚡ 카카오 장소 SDK 초고속 직통 수신
   async function fetchLiveKakaoHotspots(lat, lng) {
     return new Promise((resolve) => {
-      if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) {
-        resolve([]);
-        return;
-      }
+      if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) { resolve([]); return; }
       const ps = new kakao.maps.services.Places();
-      const options = {
-        location: new kakao.maps.LatLng(lat, lng),
-        radius: 4000,
-        sort: kakao.maps.services.SortBy.DISTANCE
-      };
-
+      const options = { location: new kakao.maps.LatLng(lat, lng), radius: 4000, sort: kakao.maps.services.SortBy.DISTANCE };
       const nowHour = new Date().getHours();
       let category = 'FD6';
       if (nowHour >= 7 && nowHour < 12) category = 'SW8';
@@ -662,18 +611,11 @@
       ps.categorySearch(category, (data, status) => {
         if (status === kakao.maps.services.Status.OK && data && data.length > 0) {
           const liveItems = data.slice(0, 5).map(place => ({
-            id: 'kakao_live_' + place.id,
-            name: place.place_name,
-            lat: parseFloat(place.y),
-            lng: parseFloat(place.x),
-            address: place.address_name || place.road_address_name,
-            type: 'nightlife',
-            isLiveKakao: true
+            id: 'kakao_live_' + place.id, name: place.place_name, lat: parseFloat(place.y), lng: parseFloat(place.x),
+            address: place.address_name || place.road_address_name, type: 'nightlife', isLiveKakao: true
           }));
           resolve(liveItems);
-        } else {
-          resolve([]);
-        }
+        } else resolve([]);
       }, options);
     });
   }
@@ -721,9 +663,7 @@
     let bonus = 0;
     const name = itemName || '';
     const isNightlife = name.includes('먹자골목') || name.includes('포차') || name.includes('주점') || name.includes('로데오');
-    if (nowHour >= 18 || nowHour < 4) {
-      if (isNightlife) bonus += 45;
-    }
+    if (nowHour >= 18 || nowHour < 4) { if (isNightlife) bonus += 45; }
     return bonus;
   }
 
@@ -809,7 +749,7 @@
 
   function executeSearch() {
     const locText = document.getElementById('loc-text');
-    if (locText) locText.innerText = '📍 실시간 GPS 위치 수신 중...';
+    if (locText) locText.innerText = '📍 실시간 GPS 수신 중...';
     if (!navigator.geolocation) {
       if (locText) locText.innerText = `❌ GPS 미지원 기기입니다.`;
       return;
@@ -825,7 +765,7 @@
         if (activeTab !== 3) calculateAndRender();
       },
       (err) => {
-        if (locText) locText.innerText = `❌ GPS 수신 대기 (⟳ 새로고침 터치)`;
+        if (locText) locText.innerText = `❌ GPS 수신 대기 (⟳ 클릭)`;
         showToast("📍 위치 권한을 허용하신 후 ⟳ 새로고침을 누르세요.");
       },
       { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 }
@@ -842,14 +782,11 @@
     });
   }
 
-  // =========================================================================
-  // 💡 [v2.0.3 FINAL BUILD] 모드2 출발지 2km / 복귀경로 5km 연산 완벽 적용
-  // =========================================================================
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
     const inWisu = (currentMode === 1);
-    if (logEl) logEl.innerText = `⚡ [스마트 ${inWisu ? '관내순환' : '관외복귀'}] 카카오모빌리티 실시간 정체/경로 연산 중...`;
+    if (logEl) logEl.innerText = `⚡ [스마트 ${inWisu ? '관내순환' : '관외복귀'}] 길찾기 연산 중...`;
     
     let weatherData = { isRainOrSnow: false };
     try { weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng); } catch(e) {}
@@ -862,33 +799,37 @@
     let finalTarget = null;
     
     if (inWisu) {
-      // 🟡 [모드 1] 관내 순환 : 5대 거점역 중 '실제 주행 거리' 최단역 100% 최우선 지정!
-      let scoredTargets = await Promise.all(MAJOR_HUBS.map(async h => {
+      let scoredTargets = [];
+      for (let h of MAJOR_HUBS) {
         let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
         let pureRes = await calculatePureSpotScore({...h, isWisu: true}, weatherData, nowHour);
-        return { 
-          ...h, 
-          dist: road.distanceKm, 
-          estimatedTimeMin: road.durationMin, 
-          score: pureRes.score, 
-          geometryCoords: road.geometryCoords 
-        };
-      }));
-
+        scoredTargets.push({
+          ...h,
+          dist: Number(road.distanceKm),
+          estimatedTimeMin: road.durationMin,
+          score: pureRes.score,
+          geometryCoords: road.geometryCoords
+        });
+      }
       scoredTargets.sort((a, b) => a.dist - b.dist);
       finalTarget = (scoredTargets[0].dist <= 0.5 && scoredTargets.length > 1) ? scoredTargets[1] : scoredTargets[0];
     } else {
-      // 🟠 [모드 2] 타지역 복귀 : 실시간 최단 위수 경계 목적지 지정
       const allWisuCandidates = [...WISU_BOUNDARY_POINTS, ...masterHotspots, ...MAJOR_HUBS].filter(item => {
         return item.isWisu === true || item.region === 'anyang' || item.region === 'gunpo' || item.region === 'gwacheon' || item.region === 'uiwang';
       });
 
-      let scoredWisuTargets = await Promise.all(allWisuCandidates.map(async item => {
+      let scoredWisuTargets = [];
+      for (let item of allWisuCandidates) {
         let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
         let pureRes = await calculatePureSpotScore({...item, isWisu: true}, weatherData, nowHour);
-        return { ...item, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: pureRes.score, geometryCoords: road.geometryCoords };
-      }));
-      
+        scoredWisuTargets.push({
+          ...item,
+          dist: Number(road.distanceKm),
+          estimatedTimeMin: road.durationMin,
+          score: pureRes.score,
+          geometryCoords: road.geometryCoords
+        });
+      }
       scoredWisuTargets.sort((a, b) => a.dist - b.dist);
       finalTarget = scoredWisuTargets[0]; 
     }
@@ -905,21 +846,21 @@
 
     const distAtoC = getStraightDistanceKm(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
     
-    let scoredPool = await Promise.all(rawPool.map(async item => {
+    let scoredPool = [];
+    for (let item of rawPool) {
       const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const distBtoC = getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
       let pureRes = await calculatePureSpotScore(item, weatherData, nowHour);
       
       let finalScore = pureRes.score;
-      // 출발지 2.0km 이내 보너스 부여
       if (!inWisu && road.distanceKm <= 2.0) {
         finalScore += 50;
       }
 
-      return { 
+      scoredPool.push({
         ...item, 
-        dist: road.distanceKm, 
+        dist: Number(road.distanceKm), 
         distBtoC: distBtoC,
         estimatedTimeMin: road.durationMin,
         geometryCoords: road.geometryCoords,
@@ -928,8 +869,8 @@
         logCount: pureRes.logCount,
         isTimeMatch: pureRes.isTimeMatch,
         isMasterDb: !item.isCustom && !item.isLiveKakao && (item.region !== undefined || item.id?.startsWith('hs_'))
-      };
-    }));
+      });
+    }
 
     let selectedCandidates = [];
 
@@ -944,28 +885,21 @@
       }
       selectedCandidates.sort((a, b) => a.dist - b.dist);
     } else {
-      // 🟠 [모드 2 원칙 완벽 적용] 
-      // 1) 출발지(검색위치) 반경 2.0km 이내 핫플 최우선 1번 카드 선별
       let startAreaPool = scoredPool.filter(p => p.dist <= 2.0);
       startAreaPool.sort((a, b) => b.score - a.score);
 
       if (startAreaPool.length > 0) {
-        selectedCandidates.push(startAreaPool[0]); // 출발지 2km 이내 1순위 확정
+        selectedCandidates.push(startAreaPool[0]);
       } else {
-        // 2km 이내 부재 시 3.5km까지 예외 확장 선별
         let fallbackStartPool = scoredPool.filter(p => p.dist <= 3.5 && p.dist < distAtoC);
         fallbackStartPool.sort((a, b) => b.score - a.score);
         if (fallbackStartPool.length > 0) selectedCandidates.push(fallbackStartPool[0]);
       }
 
-      // 2) 목적지 이동 경로 축 기준 우회 이탈거리 5.0km 이내 순방향 핫플 선별
       let corridorPool = scoredPool.filter(p => {
         if (selectedCandidates.some(s => s.name === p.name)) return false;
-        
-        // 경로상 우회거리 = (A->B + B->C) - A->C (5km 이내 우회 상권만 선별)
         const detourDist = (p.dist + p.distBtoC) - distAtoC;
         const distToFinal = getStraightDistanceKm(p.lat, p.lng, finalTarget.lat, finalTarget.lng);
-        
         return (p.dist > (selectedCandidates[0]?.dist || 0)) && (detourDist <= 5.0) && (distToFinal >= 2.0);
       });
       corridorPool.sort((a, b) => b.score - a.score);
@@ -976,8 +910,6 @@
         }
         if (selectedCandidates.length === 2) break;
       }
-
-      // 현위치 기준 거리 오름차순(dist) 일직선 순방향 배치
       selectedCandidates.sort((a, b) => a.dist - b.dist);
     }
 
@@ -991,17 +923,19 @@
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
       logEl.innerText = selectedCandidates.length > 0 
-        ? `방금 · [${inWisu ? '관내순환' : '관외복귀'}] 연산 완료 (목적지: ${finalTarget.name})`
-        : `방금 · [${inWisu ? '관내순환' : '관외복귀'}] 목적지근접 (${finalTarget.name} 직행)`;
+        ? `방금 · [${inWisu ? '관내순환' : '관외복귀'}] 연산 완료 (${finalTarget.name})`
+        : `방금 · [${inWisu ? '관내순환' : '관외복귀'}] 목적지 직행`;
     }
     
     let subFinalCandidates = [];
     if (inWisu) {
-      subFinalCandidates = await Promise.all(MAJOR_HUBS.filter(h => h.name !== finalTarget.name).map(async h => {
+      for (let h of MAJOR_HUBS.filter(h => h.name !== finalTarget.name)) {
         let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
         let pureRes = await calculatePureSpotScore({...h, isWisu: true}, weatherData, nowHour);
-        return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: pureRes.score };
-      }));
+        subFinalCandidates.push({
+          ...h, dist: Number(road.distanceKm), estimatedTimeMin: road.durationMin, score: pureRes.score
+        });
+      }
       subFinalCandidates.sort((a, b) => a.dist - b.dist);
     }
     renderCards(selectedCandidates, finalTarget, subFinalCandidates);
@@ -1023,7 +957,7 @@
               <div class="num-badge">${index + 1}</div>
               <div class="place-info">
                 <div class="place-name">${item.name}</div>
-                <div class="score-dist">실시간 ${item.dist.toFixed(1)}km (약 ${item.estimatedTimeMin}분) · ${item.score}점 ${getScoreLevelBadge(item.score)}</div>
+                <div class="score-dist">${item.dist.toFixed(1)}km (${item.estimatedTimeMin}분) · ${item.score}점 ${getScoreLevelBadge(item.score)}</div>
               </div>
             </div>
           </div>
@@ -1032,12 +966,12 @@
           </div>
         </div>
         <div class="tag-group">
-          ${item.isNearStep1 ? '<span class="tag near">#현위치2km초근접</span>' : '<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#이동경로사이</span>'}
-          ${item.isLiveKakao ? '<span class="tag livekakaomap">⚡카카오실시간상권</span>' : ''}
-          ${item.isTimeMatch ? '<span class="tag timematch">🔥현재시간대콜집중</span>' : ''}
-          ${item.isMasterDb ? '<span class="tag masterdb">#수도권마스터DB</span>' : ''}
+          ${item.isNearStep1 ? '<span class="tag near">#초근접</span>' : '<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#경로상</span>'}
+          ${item.isLiveKakao ? '<span class="tag livekakaomap">⚡실시간상권</span>' : ''}
+          ${item.isTimeMatch ? '<span class="tag timematch">🔥시간대콜</span>' : ''}
+          ${item.isMasterDb ? '<span class="tag masterdb">#마스터DB</span>' : ''}
           ${item.isCustom ? '<span class="tag custom">#나만의핫플</span>' : ''}
-          ${item.logCount > 0 ? `<span class="tag logmatch">#누적콜 ${item.logCount}건</span>` : ''}
+          ${item.logCount > 0 ? `<span class="tag logmatch">#콜${item.logCount}건</span>` : ''}
         </div>
       `;
       listEl.appendChild(card);
@@ -1046,7 +980,7 @@
     const finalCard = document.createElement('div');
     finalCard.className = 'card final-card';
     const inWisu = (currentMode === 1);
-    const targetLabel = inWisu ? '최종번화가(5대거점역)' : '실시간최단위수경계복귀';
+    const targetLabel = inWisu ? '5대거점역' : '위수복귀';
     const finalBadgeNum = routeCards.length + 1;
     const safeFinalName = finalTarget.name.replace(/'/g, "\\'");
     finalCard.innerHTML = `
@@ -1056,7 +990,7 @@
             <div class="num-badge">${finalBadgeNum}</div>
             <div class="place-info">
               <div class="place-name">${finalTarget.name}</div>
-              <div class="score-dist">실시간 ${finalTarget.dist.toFixed(1)}km (약 ${finalTarget.estimatedTimeMin || 0}분) · ${finalTarget.score}점 ${getScoreLevelBadge(finalTarget.score)} [${targetLabel}]</div>
+              <div class="score-dist">${finalTarget.dist.toFixed(1)}km (${finalTarget.estimatedTimeMin || 0}분) · ${finalTarget.score}점 ${getScoreLevelBadge(finalTarget.score)} [${targetLabel}]</div>
             </div>
           </div>
         </div>
@@ -1064,7 +998,7 @@
           <button type="button" class="action-btn navi-btn" onclick="openKakaoNaviApp('${safeFinalName}', ${finalTarget.lat}, ${finalTarget.lng})">🚘 카카오내비</button>
         </div>
       </div>
-      <div class="sub-info">${routeCards.length > 0 ? '경유지탐색후순차이동 · ' : '경유지없음 · 즉시직행권장 · '}${finalTarget.dist.toFixed(1)}km 남음</div>
+      <div class="sub-info">${routeCards.length > 0 ? '경유지 순차이동 · ' : '직행 권장 · '}${finalTarget.dist.toFixed(1)}km 남음</div>
     `;
     listEl.appendChild(finalCard);
     
@@ -1072,7 +1006,7 @@
       const subSection = document.createElement('div');
       subSection.className = 'sub-final-section';
       subSection.innerHTML = `
-        <div class="sub-final-title">⭐ 다른 5대 거점역 후보 보기 (참고용)</div>
+        <div class="sub-final-title">⭐ 다른 거점역 후보 (참고용)</div>
         <div class="sub-final-list">
           ${subFinalCandidates.map(sub => {
             const safeSubName = sub.name.replace(/'/g, "\\'");
@@ -1081,7 +1015,7 @@
               <div class="sub-final-top">
                 <div class="sub-final-info">
                   <div class="sub-final-name">${sub.name}</div>
-                  <div class="sub-final-meta">실시간 ${sub.dist.toFixed(1)}km (약 ${sub.estimatedTimeMin}분) · ${sub.score}점</div>
+                  <div class="sub-final-meta">${sub.dist.toFixed(1)}km (${sub.estimatedTimeMin}분) · ${sub.score}점</div>
                 </div>
                 ${getScoreLevelBadge(sub.score)}
               </div>
@@ -1109,12 +1043,12 @@
     }
     callMapViewLeaflet.eachLayer(l => { if (l instanceof L.Marker) callMapViewLeaflet.removeLayer(l); });
     L.marker([centerPos.lat, centerPos.lng], {
-      icon: L.divIcon({ html: '<div class="custom-map-marker current">📍</div>', className: '', iconSize: [30, 30], iconAnchor: [15, 15] })
+      icon: L.divIcon({ html: '<div class="custom-map-marker current">📍</div>', className: '', iconSize: [24, 24], iconAnchor: [12, 12] })
     }).addTo(callMapViewLeaflet).bindPopup('<b>현재 위치</b>');
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     const currentHour = new Date().getHours();
     if (logs.length === 0) {
-      document.getElementById('pipeline-log').innerText = '저장된 고객 탑승 콜 기록이 없습니다.';
+      document.getElementById('pipeline-log').innerText = '저장된 콜 기록이 없습니다.';
       return;
     }
     let activeCount = 0;
@@ -1133,25 +1067,20 @@
       L.marker([logLat, logLng], {
         icon: L.divIcon({
           html: `<div class="${markerClass}" style="width:${markerSize}px; height:${markerSize}px;"></div>`,
-          className: '',
-          iconSize: [markerSize, markerSize],
-          iconAnchor: [markerSize/2, markerSize/2]
+          className: '', iconSize: [markerSize, markerSize], iconAnchor: [markerSize/2, markerSize/2]
         })
       }).addTo(callMapViewLeaflet).bindPopup(`
         <b>📍 탑승 기록</b><br>
         시간: ${logDate.toLocaleTimeString()}<br>
         날짜: ${logDate.toLocaleDateString()}<br>
-        ${isActiveTime ? '<span style="color:#22C55E; font-weight:900;">🔥 현재시간 집중지점</span>' : ''}
+        ${isActiveTime ? '<span style="color:#22C55E; font-weight:900;">🔥 집중지점</span>' : ''}
       `);
     });
-    document.getElementById('pipeline-log').innerText = `콜 지도 모드 · 전체 ${logs.length}건 중 현재시간대(${currentHour}시 기준) 콜 ${activeCount}건 집중`;
+    document.getElementById('pipeline-log').innerText = `총 ${logs.length}건 중 현재시간(${currentHour}시) 콜 ${activeCount}건 집중`;
   }
 
   async function openRouteMapModal() {
-    if (typeof L === 'undefined') {
-      showToast('지도 로딩 중입니다.');
-      return;
-    }
+    if (typeof L === 'undefined') { showToast('지도 로딩 중입니다.'); return; }
     const modal = document.getElementById('map-modal');
     if (modal) modal.classList.add('active');
     setTimeout(async () => {
@@ -1168,7 +1097,7 @@
       currentRouteData.forEach((pt, idx) => {
         let badgeNum = pt.isFinal ? currentRouteData.length - 1 : idx;
         let html = pt.isCurrent ? '<div class="custom-map-marker current">📍</div>' : `<div class="custom-map-marker" style="background:${themeColor}">${badgeNum}</div>`;
-        L.marker([pt.lat, pt.lng], { icon: L.divIcon({ html, className: '', iconSize: [30, 30], iconAnchor: [15, 15] }) })
+        L.marker([pt.lat, pt.lng], { icon: L.divIcon({ html, className: '', iconSize: [26, 26], iconAnchor: [13, 13] }) })
           .addTo(leafletMap).bindPopup(`<b>${pt.name}</b>`);
       });
       
@@ -1177,14 +1106,12 @@
         const start = currentRouteData[i];
         const end = currentRouteData[i+1];
         const roadRes = await fetchKakaoRoadRoute(start.lat, start.lng, end.lat, end.lng);
-        if (roadRes && roadRes.geometryCoords) {
-          allRoadCoords.push(...roadRes.geometryCoords);
-        }
+        if (roadRes && roadRes.geometryCoords) allRoadCoords.push(...roadRes.geometryCoords);
       }
       if (allRoadCoords.length > 0) {
-        L.polyline(allRoadCoords, { color: themeColor, weight: 6, opacity: 0.9, lineJoin: 'round', lineCap: 'round' }).addTo(leafletMap);
+        L.polyline(allRoadCoords, { color: themeColor, weight: 5, opacity: 0.9, lineJoin: 'round', lineCap: 'round' }).addTo(leafletMap);
       }
-      leafletMap.fitBounds(L.latLngBounds(markerCoords), { padding: [40, 40] });
+      leafletMap.fitBounds(L.latLngBounds(markerCoords), { padding: [30, 30] });
     }, 200);
   }
 
@@ -1204,7 +1131,7 @@
       logs.push({ id: 'log_' + Date.now(), timestamp: new Date().toISOString(), lat: pos.lat, lng: pos.lng, mode: currentMode });
       localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
       updateCallLogStats();
-      showToast('🎉 고객 탑승 위치 저장 완료!');
+      showToast('🎉 위치 저장 완료!');
       if (activeTab === 3) renderCallMapView();
     };
     if (currentPos) doSave(currentPos);
@@ -1212,10 +1139,7 @@
   }
 
   function addCustomHotspotPrompt() {
-    if (!currentPos) {
-      showToast('먼저 위치 검색을 진행해 주세요.');
-      return;
-    }
+    if (!currentPos) { showToast('먼저 위치 검색을 진행해 주세요.'); return; }
     const name = prompt('⭐ 나만의 콜 장소 이름:');
     if (!name || !name.trim()) return;
     let custom = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
@@ -1238,19 +1162,17 @@
     if (!list) return;
     const custom = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
     if (custom.length === 0) {
-      list.innerHTML = '<div style="font-size:10px; color:#666; text-align:center;">등록된 장소가 없습니다.</div>';
+      list.innerHTML = '<div style="font-size:9px; color:#666; text-align:center;">등록된 장소가 없습니다.</div>';
       return;
     }
     list.innerHTML = custom.map(item => `
       <div class="recent-log-item">
         <span class="recent-log-time">⭐ ${item.name}</span>
-        <button class="delete-custom-btn" data-id="${item.id}" style="background:#2E1815; color:#FF5555; border:1px solid #4A2020; border-radius:4px; padding:2px 6px; font-size:10px; font-weight:700; cursor:pointer;">삭제</button>
+        <button class="delete-custom-btn" data-id="${item.id}" style="background:#2E1815; color:#FF5555; border:1px solid #4A2020; border-radius:4px; padding:2px 6px; font-size:9px; font-weight:700; cursor:pointer;">삭제</button>
       </div>
     `).join('');
     document.querySelectorAll('.delete-custom-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        deleteCustomHotspot(e.currentTarget.dataset.id);
-      });
+      btn.addEventListener('click', (e) => { deleteCustomHotspot(e.currentTarget.dataset.id); });
     });
   }
 
@@ -1264,23 +1186,21 @@
   function updateCallLogStats() {
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     const countText = document.getElementById('log-count-text');
-    if (countText) countText.innerText = `저장된 기록: ${logs.length}개`;
+    if (countText) countText.innerText = `저장 기록: ${logs.length}개`;
     const list = document.getElementById('recent-logs-list');
     if (!list) return;
     if (logs.length === 0) {
-      list.innerHTML = '<div style="font-size:10px; color:#666; text-align:center;">기록이 없습니다.</div>';
+      list.innerHTML = '<div style="font-size:9px; color:#666; text-align:center;">기록이 없습니다.</div>';
       return;
     }
     list.innerHTML = logs.slice(-3).reverse().map(item => `
       <div class="recent-log-item">
         <span class="recent-log-time">📍 ${new Date(item.timestamp).toLocaleTimeString()} [M${item.mode || 1}]</span>
-        <button class="delete-log-item-btn" data-id="${item.id}" data-ts="${item.timestamp}" style="background:#2E1815; color:#FF5555; border:1px solid #4A2020; border-radius:4px; padding:2px 6px; font-size:10px; font-weight:700; cursor:pointer;">삭제</button>
+        <button class="delete-log-item-btn" data-id="${item.id}" data-ts="${item.timestamp}" style="background:#2E1815; color:#FF5555; border:1px solid #4A2020; border-radius:4px; padding:2px 6px; font-size:9px; font-weight:700; cursor:pointer;">삭제</button>
       </div>
     `).join('');
     document.querySelectorAll('.delete-log-item-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        deleteCallLog(e.currentTarget.dataset.id, e.currentTarget.dataset.ts);
-      });
+      btn.addEventListener('click', (e) => { deleteCallLog(e.currentTarget.dataset.id, e.currentTarget.dataset.ts); });
     });
   }
 
@@ -1292,10 +1212,7 @@
     };
     const jsonStr = JSON.stringify(data, null, 2);
     const today = new Date();
-    const dateStr = today.getFullYear() +
-      String(today.getMonth() + 1).padStart(2, '0') +
-      String(today.getDate()).padStart(2, '0');
-    
+    const dateStr = today.getFullYear() + String(today.getMonth() + 1).padStart(2, '0') + String(today.getDate()).padStart(2, '0');
     const defaultFileName = `sudataxi_backup_${dateStr}`;
     let userFileName = prompt('💾 저장할 백업 파일 이름을 입력하세요:', defaultFileName);
     
@@ -1307,20 +1224,13 @@
       const blob = new Blob([jsonStr], { type: 'application/json' });
       const blobUrl = URL.createObjectURL(blob); 
       const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = userFileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      a.href = blobUrl; a.download = userFileName;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
       showToast(`📥 [${userFileName}] 다운로드 시작!`);
     } catch(e) {
-      try {
-        navigator.clipboard.writeText(jsonStr);
-        showToast('📋 파일 생성 대신 텍스트 복사 완료!');
-      } catch(err) {
-        showToast('❌ 내보내기에 실패했습니다.');
-      }
+      try { navigator.clipboard.writeText(jsonStr); showToast('📋 파일 생성 대신 텍스트 복사 완료!'); } 
+      catch(err) { showToast('❌ 내보내기에 실패했습니다.'); }
     }
   }
 
@@ -1344,30 +1254,21 @@
         let logMap = new Map();
         existingLogs.forEach(item => { logMap.set(item.id || `${item.timestamp}_${item.lat}_${item.lng}`, item); });
         importedLogs.forEach(item => { logMap.set(item.id || `${item.timestamp}_${item.lat}_${item.lng}`, item); });
-        let mergedLogs = Array.from(logMap.values());
         
         let hotspotMap = new Map();
         existingHotspots.forEach(item => { hotspotMap.set(item.id || `${item.name}_${item.lat}_${item.lng}`, item); });
         importedHotspots.forEach(item => { hotspotMap.set(item.id || `${item.name}_${item.lat}_${item.lng}`, item); });
-        let mergedHotspots = Array.from(hotspotMap.values());
         
-        localStorage.setItem('sudataxi_call_logs', JSON.stringify(mergedLogs));
-        localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(mergedHotspots));
+        localStorage.setItem('sudataxi_call_logs', JSON.stringify(Array.from(logMap.values())));
+        localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(Array.from(hotspotMap.values())));
         updateCallLogStats();
         updateCustomHotspotUI();
-        showToast(`🎉 마스터 DB 및 백업 병합 완료!`);
-        if (activeTab === 3) renderCallMapView();
-        else calculateAndRender();
-      } catch(err) {
-        showToast('❌ 올바르지 않은 백업/마스터 JSON 파일입니다.');
-      } finally {
-        e.target.value = '';
-      }
+        showToast(`🎉 병합 완료!`);
+        if (activeTab === 3) renderCallMapView(); else calculateAndRender();
+      } catch(err) { showToast('❌ 오류: 올바르지 않은 JSON 파일입니다.'); } 
+      finally { e.target.value = ''; }
     };
-    reader.onerror = function() {
-      showToast('❌ 파일 읽기 오류가 발생했습니다.');
-      e.target.value = '';
-    };
+    reader.onerror = function() { showToast('❌ 파일 읽기 오류가 발생했습니다.'); e.target.value = ''; };
     reader.readAsText(file);
   }
 
@@ -1376,25 +1277,20 @@
     const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
     const lastUpdate = localStorage.getItem(LAST_UPDATE_KEY);
     const now = new Date().getTime();
-    if (!lastUpdate) {
-      localStorage.setItem(LAST_UPDATE_KEY, now);
-    } else if (now - parseInt(lastUpdate, 10) > TWO_WEEKS_MS) {
+    if (!lastUpdate) { localStorage.setItem(LAST_UPDATE_KEY, now); } 
+    else if (now - parseInt(lastUpdate, 10) > TWO_WEEKS_MS) {
       const banner = document.getElementById('hotspotUpdateBanner');
       if (banner) banner.style.display = 'block';
     }
   }
 
   function requestHotspotUpdate() {
-    alert("최신 핫플 검색 후 저에게 말씀해 주시면 새로운 마스터 파일을 만들어 드리겠습니다!");
+    alert("최신 핫플 검색 후 말씀해 주시면 새 마스터 파일을 만들어 드립니다!");
     localStorage.setItem('suhda_last_hotspot_update', new Date().getTime());
-    const banner = document.getElementById('hotspotUpdateBanner');
-    if (banner) banner.style.display = 'none';
+    document.getElementById('hotspotUpdateBanner').style.display = 'none';
   }
 
-  function dismissBanner() {
-    const banner = document.getElementById('hotspotUpdateBanner');
-    if (banner) banner.style.display = 'none';
-  }
+  function dismissBanner() { document.getElementById('hotspotUpdateBanner').style.display = 'none'; }
 
   window.addEventListener('DOMContentLoaded', () => {
     initKakaoSdk();
