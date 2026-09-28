@@ -136,19 +136,15 @@
     .tag.masterdb { background: #581C87; color: #F3E8FF; border: 1px solid #9333EA; font-weight: 700; }
     .tag.livekakaomap { background: #854D0E; color: #FEF08A; border: 1px solid #EAB308; font-weight: 800; }
     
-    .sub-info { font-size: 10px; color: #8A8A8A; margin-top: 4px; border-top: 1px solid #2A2A2A; padding-top: 4px; }
-    
-    .sub-final-section { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
-    .sub-final-title { font-size: 11px; font-weight: 800; color: var(--theme-accent); margin-bottom: 2px; }
-    .sub-final-list { display: flex; flex-direction: column; gap: 6px; }
-    .sub-final-card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column; gap: 4px; }
-    .sub-final-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 4px; }
-    .sub-final-info { flex: 1; min-width: 0; }
-    .sub-final-name { font-size: 13px; font-weight: 900; color: #FFFFFF; margin-bottom: 1px; }
-    .sub-final-meta { font-size: 10px; font-weight: 800; color: var(--theme-accent); font-family: monospace; }
-    .sub-btn-row { display: flex; gap: 6px; margin-top: 2px; padding-top: 4px; border-top: 1px solid #2A2A2A; }
-    .sub-action-btn { flex: 1; height: 30px; font-weight: 900; font-size: 11px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; text-decoration: none; border: none; }
-    .sub-navi-btn { background: #FFE800 !important; color: #000000 !important; font-weight: 900; width: 100%; }
+    /* 💡 컴팩트하게 축소된 하단 참고용 거점역 스타일 (v2.2.3) */
+    .sub-final-section { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+    .sub-final-title { font-size: 10px; font-weight: 800; color: var(--theme-accent); margin-bottom: 1px; }
+    .sub-final-list { display: flex; flex-direction: column; gap: 4px; }
+    .sub-final-card { background: #181818; border: 1px solid #282828; border-radius: 8px; padding: 5px 8px; display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+    .sub-final-info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+    .sub-final-name { font-size: 11px; font-weight: 800; color: #DDDDDD; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sub-final-meta { font-size: 9px; font-weight: 700; color: #AAAAAA; font-family: monospace; }
+    .sub-navi-btn { background: #FFE800 !important; color: #000000 !important; font-weight: 900; height: 24px; padding: 0 8px; font-size: 10px; border-radius: 5px; cursor: pointer; border: none; white-space: nowrap; flex-shrink: 0; }
     
     #heatmap-container { display: none; flex-direction: column; gap: 6px; margin-bottom: 8px; }
     #call-map-view { width: 100%; height: 320px; background: #1E1E1E; border-radius: 12px; border: 1.5px solid var(--theme-accent); overflow: hidden; }
@@ -298,21 +294,21 @@
       <summary style="font-weight: 800; color: #FFC800; cursor: pointer;">💡 수다택시 K 핵심 운행 및 추천 엔진 가이드 (터치하여 펼치기)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px; font-size: 10px;">
         <div>
-          <strong style="color: #FFC800;">⚡ 모드 1 (관내 반경 5km 실시간)</strong>: 현재 위치 반경 5km 이내의 최적 콜 핫플 3곳을 실시간 추천하며, 5대 거점역 현황은 하단에 참고용으로 표시
+          <strong style="color: #FFC800;">⚡ 모드 1 (관내 반경 5km 실시간)</strong>: 현재 위치 반경 5km 이내의 최적 콜 핫플 3곳을 실시간 추천하며, 관내 거점역 현황은 하단 소형 카드로 표시
         </div>
         <div>
-          <strong style="color: #FF6B00;">🧭 모드 2 (관외복귀)</strong>: 외곽/타지역 수송 후 복귀 시 출발지 2.0km 초근접 1순위 경유지 연산 후 안양권 복귀
+          <strong style="color: #FF6B00;">🧭 모드 2 (관외복귀)</strong>: 외곽/타지역 수송 후 복귀 시 출발지 2.0km 초근접 1순위 경유지 연산 후 관내 복귀
         </div>
       </div>
     </details>
 
     <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;" open>
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.2.1 반경 5km 추천 + 5대 거점역 참고 복원 (터치)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.2.3 모드2 참고 카드 분기 및 컴팩트 디자인 적용 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v2.2.1 (2026.09) - 5대 거점역 하단 참고 영역 완벽 복원</strong><br>
-          • 🎯 <strong>상단 실시간 반경 5km Top 3 추천</strong>: 현재 위치 기준 5km 이내의 실시간 핫플/아파트단지/기사님콜을 실시간 추천합니다.<br>
-          • ⭐ <strong>하단 5대 거점역 복원</strong>: 기존 5대 거점역(인덕원, 평촌, 범계, 안양, 산본) 현황을 카드 리스트 아래 참고 영역으로 완벽 복원했습니다.
+          <strong style="color: #4ADE80;">v2.2.3 (2026.09) - 디자인 및 모드 분기 최적화</strong><br>
+          • 🚫 <strong>모드 2 하단 거점역 완벽 제외</strong>: 관외(타지역)에 있을 때 관내 거점역 카드가 출력되는 현상을 완전히 제어했습니다.<br>
+          • 📏 <strong>하단 참고 거점역 소형화</strong>: 모드 1 하단 참고 영역의 카드를 슬림형(Compact)으로 재설계하여 한눈에 들어오도록 개선했습니다.
         </div>
       </div>
     </details>
@@ -901,19 +897,21 @@
     const masterHotspots = getMasterHotspotsFromStorage();
     const nowHour = new Date().getHours();
 
-    // 5대 거점역 실시간 상태 연산 (하단 참고용)
+    // 💡 모드 1일 때만 5대 거점역 실시간 상태 연산
     let referenceHubs = [];
-    for (let h of MAJOR_HUBS) {
-      let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
-      let pureRes = await calculatePureSpotScore({...h, isWisu: true}, weatherData, nowHour);
-      referenceHubs.push({
-        ...h,
-        dist: Number(road.distanceKm),
-        estimatedTimeMin: road.durationMin,
-        score: pureRes.score
-      });
+    if (inWisu) {
+      for (let h of MAJOR_HUBS) {
+        let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
+        let pureRes = await calculatePureSpotScore({...h, isWisu: true}, weatherData, nowHour);
+        referenceHubs.push({
+          ...h,
+          dist: Number(road.distanceKm),
+          estimatedTimeMin: road.durationMin,
+          score: pureRes.score
+        });
+      }
+      referenceHubs.sort((a, b) => a.dist - b.dist);
     }
-    referenceHubs.sort((a, b) => a.dist - b.dist);
 
     let rawPool = [...liveKakaoHotspots, ...customHotspots, ...masterHotspots];
 
@@ -1002,8 +1000,8 @@
       fragment.appendChild(card);
     });
 
-    // ⭐ 하단 참고용 5대 거점역 완벽 복원
-    if (referenceHubs && referenceHubs.length > 0) {
+    // 💡 모드 1일 때만 슬림형 하단 참고 거점역 렌더링 (v2.2.3 컴팩트 디자인)
+    if (currentMode === 1 && referenceHubs && referenceHubs.length > 0) {
       const subSection = document.createElement('div');
       subSection.className = 'sub-final-section';
       subSection.innerHTML = `
@@ -1013,16 +1011,11 @@
             const safeSubName = sub.name.replace(/'/g, "\\'");
             return `
             <div class="sub-final-card">
-              <div class="sub-final-top">
-                <div class="sub-final-info">
-                  <div class="sub-final-name">${sub.name}</div>
-                  <div class="sub-final-meta">${sub.dist.toFixed(1)}km (${sub.estimatedTimeMin}분) · ${sub.score}점</div>
-                </div>
-                ${getScoreLevelBadge(sub.score)}
+              <div class="sub-final-info">
+                <div class="sub-final-name">${sub.name}</div>
+                <div class="sub-final-meta">${sub.dist.toFixed(1)}km (${sub.estimatedTimeMin}분) · ${sub.score}점</div>
               </div>
-              <div class="sub-btn-row">
-                <button type="button" class="sub-action-btn sub-navi-btn" onclick="openKakaoNaviApp('${safeSubName}', ${sub.lat},${sub.lng})">🚘 카카오내비</button>
-              </div>
+              <button type="button" class="sub-navi-btn" onclick="openKakaoNaviApp('${safeSubName}', ${sub.lat},${sub.lng})">🚘 안내</button>
             </div>
           `}).join('')}
         </div>
