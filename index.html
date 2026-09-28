@@ -301,17 +301,16 @@
       <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 12px;">📜 수다택시 K 전체 업데이트 히스토리 (터치하여 펼치기)</summary>
       <div style="margin-top: 10px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #4ADE80;">v1.7.1 (2026.09) - 동선 연산 완벽 반영 & 순차 전진 카드 배정</strong><br>
-          • 📊 모든 카드 점수 정상 계산 (하드코딩 50점 완전 삭제)<br>
-          • 🧭 고득점 알짜 상권 추출 후 현위치 기준 가까운 순서(1→2→3→4)로 순차 배정하여 지그재그 완벽 방지
+          <strong style="color: #4ADE80;">v1.7.2 (2026.09) - 상/하단 거점역 점수 연산 완벽 동기화</strong><br>
+          • 🎯 참고용 5대 거점역 점수에 마스터 DB 보너스(+35점) 항목을 상단 카드와 완벽히 통합하여 점수 불일치 오류 수정
         </div>
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #888888;">v1.6.8 (2026.09) - 금정역 5번 출구 먹자골목 좌표 정밀 보정</strong><br>
-          • 📍 금정역 환승 먹자골목 좌표 보정 완료
+          <strong style="color: #888888;">v1.7.1 (2026.09) - 동선 연산 완벽 반영 & 순차 전진 카드 배정</strong><br>
+          • 📊 모든 카드 점수 정상 계산 및 현위치 기준 가까운 순서(1→2→3→4)로 순차 배정
         </div>
         <div>
-          <strong style="color: #888888;">v1.6.7 (2026.09) - 범계역 로데오거리 마스터 좌표 정밀 보정</strong><br>
-          • 📍 범계역 로데오거리 좌표 오타 수정 완료
+          <strong style="color: #888888;">v1.6.8 (2026.09) - 금정역 5번 출구 먹자골목 좌표 정밀 보정</strong><br>
+          • 📍 금정역 환승 먹자골목 좌표 보정 완료
         </div>
       </div>
     </details>
@@ -1137,7 +1136,6 @@
       };
     }));
 
-    // 1. 점수가 높은 상권 순으로 우선 정렬하여 추출
     let validPool = scoredPool.filter(p => p.score >= 30);
     validPool.sort((a, b) => b.score - a.score);
     
@@ -1152,7 +1150,6 @@
       if (selectedCandidates.length === maxCards) break;
     }
 
-    // 2. [기사님 요구사항 완벽반영] 추출된 알짜 카드들을 현위치에서 가까운 순서(1→2→3→4)로 순차 배정
     selectedCandidates.sort((a, b) => a.dist - b.dist);
 
     currentRouteData = [
@@ -1169,7 +1166,7 @@
         : `방금 · [${inWisu ? '관내순환' : '관외복귀'}] 목적지근접 (${finalTarget.name} 직행)`;
     }
     
-    // 참고용 5대 거점역 점수도 거리/시간대/콜로그 동적 연산 적용 (하드코딩 제거)
+    // 🎯 [v1.7.2 보정] 참고용 5대 거점역 목록도 마스터 DB 보너스(+35점) 항목을 상단과 완벽히 동일하게 합산
     let subFinalCandidates = [];
     if (inWisu) {
       subFinalCandidates = await Promise.all(MAJOR_HUBS.filter(h => h.name !== finalTarget.name).map(async h => {
@@ -1178,6 +1175,10 @@
         let isWithin2km = distAtoB <= 2.0;
         let score = Math.max(10, 350 - Math.round(road.distanceKm * 15));
         if (isWithin2km) score += 140; else score += 70;
+        
+        // 💡 상단 마스터 DB 항목 가산점(+35점)과 완벽 동기화
+        score += 35;
+
         const timeBonus = await getDynamicTimeCategoryBonus(h.type, h.name, nowHour);
         score += timeBonus;
         if (weatherData.isRainOrSnow) score += 20;
