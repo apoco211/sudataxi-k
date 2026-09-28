@@ -277,9 +277,9 @@
           <strong style="color: #FF6B00;">🟠 [모드 2] 타지역/관외 복귀 영업 (오렌지색 테마)</strong><br>
           • <strong>영업 목적:</strong> 서울/수원/판교 등 타지역 하차 후 내 영업구역(위수지역)으로의 귀로 영업<br>
           • <strong>자동 모드 전환:</strong> 카카오 실시간 행정구역(시/군/구) 수신으로 위수 밖 진입 시 100% 자동 스위칭<br>
-          • <strong>4번 최단 진입 복귀지:</strong> 현위치에서 위수지역으로 들어가는 <strong>가장 가까운 관내 진입 경계점</strong>(과천 주암/선바위, 안양 박달, 군포 대야미, 의왕 월암 등)이 4번 목적지로 고정 (해당 진입점 근처 핫플 포함)<br>
-          • <strong>복귀 길목 전진 배정:</strong> 현위치에서 4번 진입 복귀지로 내려가는 노선 길목 상의 핫플 우대 (+35점 / <code>[#길목우선]</code>)<br>
-          • <strong>역방향 배제 & 예외:</strong> 후방(서울 도심 방향)은 100% 차단 (근거리 근접 시에도 U턴 및 역방향 픽업 전면 금지)
+          • <strong>4번 최단 진입 복귀지:</strong> 현위치에서 위수지역으로 들어가는 <strong>가장 가까운 관내 진입 경계점</strong>(과천 주암/선바위, 안양 박달, 군포 대야미, 의왕 월암 등)이 4번 목적지로 고정<br>
+          • <strong>복귀 길목 순차 배정:</strong> 현위치에서 4번 진입 복귀지로 내려가는 노선 길목 상의 핫플을 **남은 거리 순서대로 1➔2➔3번 순차 배치** (U턴/역주행 꽈배기 완벽 차단)<br>
+          • <strong>측면 우회 차단:</strong> 여의도 등에서 복귀 시 동쪽 강남 등 크게 돌아서 가는 경로 100% 배제
         </div>
         
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
@@ -301,16 +301,17 @@
       <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 12px;">📜 수다택시 K 전체 업데이트 히스토리 (터치하여 펼치기)</summary>
       <div style="margin-top: 10px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #4ADE80;">v1.7.5 (2026.09) - 모드 2 관외복귀 후방(서울방향) U턴 픽업 완벽 차단</strong><br>
-          • 🎯 Mode 2 복귀 길목 조건(isHeadingToGoal) 엄격 강제: distBtoC < distAtoC 조건 필수화로 남태령 등에서 사당역 등 후방/역방향 장소 배출 100% 차단
+          <strong style="color: #4ADE80;">v1.7.6 (2026.09) - 모드 2 U턴/꽈배기 동선 및 측면 우회 완벽 수정</strong><br>
+          • 🎯 경유지 정렬을 목적지 잔여거리(distBtoC) 내림차순으로 변경하여 1➔2➔3➔4번 순차적 직진 배정 보장<br>
+          • 🧭 구간 사이 존재 조건(isBetween) 및 우회율(1.10배) 적용으로 여의도➔강남 우회 전면 차단
         </div>
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #888888;">v1.7.4 (2026.09) - 1~3번 경유지 5대 거점역 중복 완전 차단</strong><br>
-          • 🎯 1~3번 경유지 후보군에서 5대 거점역(인덕원, 평촌, 범계, 안양, 산본) 전면 제외
+          <strong style="color: #888888;">v1.7.5 (2026.09) - 모드 2 관외복귀 후방(서울방향) U턴 픽업 차단</strong><br>
+          • 🎯 Mode 2 복귀 길목 조건 엄격 강제
         </div>
         <div>
-          <strong style="color: #888888;">v1.7.3 (2026.09) - 거리 변수 점수 개입 완전 차단</strong><br>
-          • 🎯 초근접 보너스(+140점) 및 거리 감점 항목을 점수 공식에서 전면 제거
+          <strong style="color: #888888;">v1.7.4 (2026.09) - 1~3번 경유지 5대 거점역 중복 완전 차단</strong><br>
+          • 🎯 1~3번 경유지 후보군에서 5대 거점역 전면 제외
         </div>
       </div>
     </details>
@@ -1113,12 +1114,14 @@
         const isVeryCloseFront = (distAtoB <= 1.0) && (distBtoC <= distAtoC + 0.2);
         return isCorridor || isVeryCloseFront;
       } else {
-        // 모드 2 (관외 복귀 전방 길목 엄격 강제)
-        const isHeadingToGoal = distBtoC < distAtoC;
+        // 💡 [v1.7.6 핵심 보정] 모드 2 전방 엄격 정렬
+        // 1) 후보지(B)가 현위치(A)와 목적지(C) 사이 구간 내에 완벽하게 존재 (isBetween)
+        const isBetween = (distBtoC < distAtoC) && (distAtoB < distAtoC);
+        // 2) 측면 우회 허용치 1.10배로 제한 (여의도➔강남 등 대형 측면 우회 100% 차단)
         const detourDist = distAtoB + distBtoC;
-        const isCorridor = detourDist <= (distAtoC * 1.15) + 0.3;
+        const isStrictCorridor = detourDist <= (distAtoC * 1.10) + 0.2;
         
-        return isHeadingToGoal && isCorridor;
+        return isBetween && isStrictCorridor;
       }
     });
 
@@ -1156,7 +1159,9 @@
       if (selectedCandidates.length === maxCards) break;
     }
 
-    selectedCandidates.sort((a, b) => a.dist - b.dist);
+    // 💡 [v1.7.6 핵심 보정] 목적지 잔여 거리(distBtoC) 내림차순 정렬
+    // 목적지에서 멀리 떨어진 곳이 1번, 점점 목적지와 가까운 곳이 2➔3번 배정되어 U턴/꽈배기 동선 완벽 해결
+    selectedCandidates.sort((a, b) => b.distBtoC - a.distBtoC);
 
     currentRouteData = [
       { name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true },
