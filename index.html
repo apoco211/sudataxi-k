@@ -194,7 +194,6 @@
     .map-modal-close { background: none; border: none; color: #8A8A8A; font-size: 16px; font-weight: 900; cursor: pointer; }
     #route-map { width: 100%; height: 100%; min-height: 350px; flex: 1; background: #121212; z-index: 1; }
     
-    /* 지도 마커 CSS 깨짐 방지 완벽 처리 */
     .custom-map-marker {
       width: 24px;
       height: 24px;
@@ -263,7 +262,6 @@
     </button>
   </div>
 
-  <!-- 복원된 운행 및 추천 엔진 가이드 아코디언 박스 -->
   <details style="margin-bottom: 8px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 1.4;">
     <summary style="font-weight: 800; color: #FFC800; cursor: pointer;">💡 수다택시 K 핵심 운행 및 추천 엔진 가이드 (터치하여 펼치기)</summary>
     <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px; font-size: 10px;">
@@ -311,14 +309,13 @@
     </div>
     
     <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;">
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.0.6 업데이트 내역 (터치)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.0.7 업데이트 내역 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v2.0.6 (2026.09) - 지도 마커 & 가이드 복원 패치</strong><br>
-          • 🗺️ 지도 핀 숫자 깨짐 및 찌그러짐 현상 완벽 수정<br>
-          • 🛣️ 실제 주행 도로망 곡선 경로(OSRM) 표시 복원<br>
-          • 💡 상단 핵심 운행 및 추천 엔진 가이드 아코디언 박스 재배치<br>
-          • 🎨 태그 1줄 고정 스크롤 및 카드 컴팩트 레이아웃 유지
+          <strong style="color: #4ADE80;">v2.0.7 (2026.09) - 타이머 영구 상태 저장 패치</strong><br>
+          • ⏱️ 새로고침/앱재시작 발생 시에도 타이머가 끊기지 않고 남은 시간 보존<br>
+          • 📍 GPS 리로드 과부하 방지 및 위치 수신 안전장치 강화<br>
+          • 🗺️ 지도 마커 숫자 깨짐 완벽 방지 및 도로망 곡선 표기 보장
         </div>
       </div>
     </details>
@@ -450,6 +447,119 @@
     triggerSystemNotification();
   }
 
+  /* ---------------- TIMER PERSISTENCE FIX (새로고침 방지 시스템) ---------------- */
+  function saveTimerState() {
+    const state = {
+      presetMin: timerPresetMin,
+      remainingSec: timerRemainingSec,
+      isRunning: isTimerRunning,
+      targetEndTime: isTimerRunning ? (Date.now() + timerRemainingSec * 1000) : null
+    };
+    localStorage.setItem('sudataxi_timer_state', JSON.stringify(state));
+  }
+
+  function restoreTimerState() {
+    const saved = localStorage.getItem('sudataxi_timer_state');
+    if (!saved) return;
+    try {
+      const state = JSON.parse(saved);
+      timerPresetMin = state.presetMin || 5;
+      document.getElementById('timer-btn-5m').classList.toggle('active', timerPresetMin === 5);
+      document.getElementById('timer-btn-10m').classList.toggle('active', timerPresetMin === 10);
+
+      if (state.isRunning && state.targetEndTime) {
+        const now = Date.now();
+        const leftSec = Math.round((state.targetEndTime - now) / 1000);
+        if (leftSec > 0) {
+          timerRemainingSec = leftSec;
+          startTimerInternal();
+        } else {
+          timerRemainingSec = 0;
+          const btn = document.getElementById('timer-display-btn');
+          btn.className = 'timer-display-btn finished';
+          btn.innerText = `⏱️ 00:00 이동 추천!`;
+          localStorage.removeItem('sudataxi_timer_state');
+        }
+      } else if (state.remainingSec && state.remainingSec > 0) {
+        timerRemainingSec = state.remainingSec;
+        const btn = document.getElementById('timer-display-btn');
+        btn.className = 'timer-display-btn';
+        btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 재개`;
+      }
+    } catch(e) {}
+  }
+
+  function setTimerPreset(min) {
+    initOrResumeAudioContext();
+    requestNotificationPermission();
+    if (isTimerRunning) {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+      stopBackgroundAudioKeepAlive();
+    }
+    timerPresetMin = min;
+    timerRemainingSec = min * 60;
+    document.getElementById('timer-btn-5m').classList.toggle('active', min === 5);
+    document.getElementById('timer-btn-10m').classList.toggle('active', min === 10);
+    const btn = document.getElementById('timer-display-btn');
+    btn.className = 'timer-display-btn';
+    btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 시작`;
+    saveTimerState();
+  }
+
+  function toggleTimer() {
+    initOrResumeAudioContext();
+    requestNotificationPermission();
+    const btn = document.getElementById('timer-display-btn');
+    if (timerRemainingSec <= 0) {
+      timerRemainingSec = timerPresetMin * 60;
+      btn.className = 'timer-display-btn';
+    }
+    if (isTimerRunning) {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+      stopBackgroundAudioKeepAlive();
+      btn.classList.remove('running');
+      btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 재개`;
+      saveTimerState();
+    } else {
+      startTimerInternal();
+    }
+  }
+
+  function startTimerInternal() {
+    isTimerRunning = true;
+    startBackgroundAudioKeepAlive();
+    const btn = document.getElementById('timer-display-btn');
+    btn.classList.add('running');
+    btn.classList.remove('finished');
+    saveTimerState();
+    
+    if (timerInterval) clearInterval(timerInterval);
+    let lastTime = Date.now();
+    timerInterval = setInterval(() => {
+      const now = Date.now();
+      const elapsedSec = Math.round((now - lastTime) / 1000);
+      if (elapsedSec >= 1) {
+        timerRemainingSec -= elapsedSec;
+        lastTime = now;
+        saveTimerState();
+      }
+      if (timerRemainingSec <= 0) {
+        clearInterval(timerInterval);
+        isTimerRunning = false;
+        stopBackgroundAudioKeepAlive();
+        timerRemainingSec = 0;
+        btn.className = 'timer-display-btn finished';
+        btn.innerText = `⏱️ 00:00 이동 추천!`;
+        localStorage.removeItem('sudataxi_timer_state');
+        playTimerAlarm();
+      } else {
+        btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)}`;
+      }
+    }, 1000);
+  }
+
   const DEFAULT_MASTER_HOTSPOTS = [
     { "id": "hs_s_sadang_1", "name": "사당역 환승 거점 및 먹자골목", "lat": 37.4765, "lng": 126.9816, "address": "사당역", "type": "subway_nightlife", "region": "seoul", "isWisu": false },
     { "id": "hs_s_yeouido_1", "name": "여의도역 및 증권가 상권", "lat": 37.5216, "lng": 126.9242, "address": "여의도동", "type": "office_nightlife", "region": "seoul", "isWisu": false },
@@ -534,66 +644,6 @@
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${String(m).padStart(2,'0')}:${String(s).padStart(2, '0')}`;
-  }
-
-  function setTimerPreset(min) {
-    initOrResumeAudioContext();
-    requestNotificationPermission();
-    if (isTimerRunning) {
-      clearInterval(timerInterval);
-      isTimerRunning = false;
-      stopBackgroundAudioKeepAlive();
-    }
-    timerPresetMin = min;
-    timerRemainingSec = min * 60;
-    document.getElementById('timer-btn-5m').classList.toggle('active', min === 5);
-    document.getElementById('timer-btn-10m').classList.toggle('active', min === 10);
-    const btn = document.getElementById('timer-display-btn');
-    btn.className = 'timer-display-btn';
-    btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 시작`;
-  }
-
-  function toggleTimer() {
-    initOrResumeAudioContext();
-    requestNotificationPermission();
-    const btn = document.getElementById('timer-display-btn');
-    if (timerRemainingSec <= 0) {
-      timerRemainingSec = timerPresetMin * 60;
-      btn.className = 'timer-display-btn';
-    }
-    if (isTimerRunning) {
-      clearInterval(timerInterval);
-      isTimerRunning = false;
-      stopBackgroundAudioKeepAlive();
-      btn.classList.remove('running');
-      btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 재개`;
-    } else {
-      isTimerRunning = true;
-      startBackgroundAudioKeepAlive();
-      btn.classList.add('running');
-      btn.classList.remove('finished');
-      
-      let lastTime = Date.now();
-      timerInterval = setInterval(() => {
-        const now = Date.now();
-        const elapsedSec = Math.round((now - lastTime) / 1000);
-        if (elapsedSec >= 1) {
-          timerRemainingSec -= elapsedSec;
-          lastTime = now;
-        }
-        if (timerRemainingSec <= 0) {
-          clearInterval(timerInterval);
-          isTimerRunning = false;
-          stopBackgroundAudioKeepAlive();
-          timerRemainingSec = 0;
-          btn.className = 'timer-display-btn finished';
-          btn.innerText = `⏱️ 00:00 이동 추천!`;
-          playTimerAlarm();
-        } else {
-          btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)}`;
-        }
-      }, 1000);
-    }
   }
 
   async function fetchRealtimeWeather(lat, lng) {
@@ -814,7 +864,7 @@
         if (locText) locText.innerText = `❌ GPS 수신 대기 (⟳ 클릭)`;
         showToast("📍 위치 권한을 허용하신 후 ⟳ 새로고침을 누르세요.");
       },
-      { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 3000 }
     );
   }
 
@@ -1152,7 +1202,6 @@
         const start = currentRouteData[i];
         const end = currentRouteData[i+1];
         
-        // 정밀 도로망 주행 경로(OSRM 곡선 좌표) 선순위 적용
         if (end.geometryCoords && end.geometryCoords.length > 0) {
           allRoadCoords.push(...end.geometryCoords);
         } else {
@@ -1350,6 +1399,7 @@
     updateCallLogStats();
     updateCustomHotspotUI();
     checkHotspotUpdateReminder();
+    restoreTimerState(); // 타이머 영구 상태 복원
     
     document.getElementById('btn-mode1').addEventListener('click', () => setTab(1));
     document.getElementById('btn-mode3').addEventListener('click', () => setTab(3));
