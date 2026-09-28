@@ -278,8 +278,8 @@
           • <strong>영업 목적:</strong> 서울/수원/판교 등 타지역 하차 후 내 영업구역(위수지역)으로의 귀로 영업<br>
           • <strong>자동 모드 전환:</strong> 카카오 실시간 행정구역(시/군/구) 수신으로 위수 밖 진입 시 100% 자동 스위칭<br>
           • <strong>4번 최단 진입 복귀지:</strong> 현위치에서 위수지역으로 들어가는 <strong>가장 가까운 관내 진입 경계점</strong>(과천 주암/선바위, 안양 박달, 군포 대야미, 의왕 월암 등)이 4번 목적지로 고정<br>
-          • <strong>복귀 길목 순차 배정:</strong> 현위치에서 4번 진입 복귀지로 내려가는 노선 길목 상의 핫플을 **남은 거리 순서대로 1➔2➔3번 순차 배치** (U턴/역주행 꽈배기 완벽 차단)<br>
-          • <strong>측면 우회 차단:</strong> 여의도 등에서 복귀 시 동쪽 강남 등 크게 돌아서 가는 경로 100% 배제
+          • <strong>실시간 API 병렬연산 (v1.7.8):</strong> 타임아웃 방지 병렬 조회로 현위치 주변 실시간 카카오 상권 100% 즉시 수신<br>
+          • <strong>서울 서북/서부 DB 보강:</strong> 상암DMC, 홍대, 신촌, 연신내, 합정 등 복귀 길목 마스터 DB 대폭 강화 및 15km 거리 제한 차단
         </div>
         
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
@@ -301,17 +301,17 @@
       <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 12px;">📜 수다택시 K 전체 업데이트 히스토리 (터치하여 펼치기)</summary>
       <div style="margin-top: 10px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #4ADE80;">v1.7.6 (2026.09) - 모드 2 U턴/꽈배기 동선 및 측면 우회 완벽 수정</strong><br>
-          • 🎯 경유지 정렬을 목적지 잔여거리(distBtoC) 내림차순으로 변경하여 1➔2➔3➔4번 순차적 직진 배정 보장<br>
-          • 🧭 구간 사이 존재 조건(isBetween) 및 우회율(1.10배) 적용으로 여의도➔강남 우회 전면 차단
+          <strong style="color: #4ADE80;">v1.7.8 (2026.09) - 카카오 실시간 API 병렬수신 & 서울 서북권 마스터 DB 보강</strong><br>
+          • 🎯 실시간 검색 타임아웃 해결을 위해 Promise.all 병렬 수신 적용<br>
+          • 🧭 상암 DMC, 홍대입구, 신촌, 합정, 연신내 등 서울 서북/서부권 주요 복귀 길목 마스터 DB 추가
         </div>
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #888888;">v1.7.5 (2026.09) - 모드 2 관외복귀 후방(서울방향) U턴 픽업 차단</strong><br>
-          • 🎯 Mode 2 복귀 길목 조건 엄격 강제
+          <strong style="color: #888888;">v1.7.7 (2026.09) - 모드 2 벡터 각도 및 수직 이탈거리 정밀 엔진 도입</strong><br>
+          • 🎯 진행 방향 각도(22도) 및 수직 거리(1.5km) 제한 적용
         </div>
         <div>
-          <strong style="color: #888888;">v1.7.4 (2026.09) - 1~3번 경유지 5대 거점역 중복 완전 차단</strong><br>
-          • 🎯 1~3번 경유지 후보군에서 5대 거점역 전면 제외
+          <strong style="color: #888888;">v1.7.6 (2026.09) - 경유지 잔여거리 순차 정렬</strong><br>
+          • 🎯 목적지 잔여거리(distBtoC) 내림차순 적용
         </div>
       </div>
     </details>
@@ -460,7 +460,14 @@
     triggerSystemNotification();
   }
   
+  // 💡 [v1.7.8] 서울 서북/서부권 주요 복귀 길목 마스터 DB 대폭 추가
   const DEFAULT_MASTER_HOTSPOTS = [
+    { "id": "hs_s_sangam_1", "name": "상암 DMC 오피스 및 방송타운", "lat": 37.5780, "lng": 126.8900, "address": "상암동", "type": "office", "region": "seoul" },
+    { "id": "hs_s_hongdae_1", "name": "홍대입구역 및 연남동 로데오", "lat": 37.5575, "lng": 126.9244, "address": "홍대입구역", "type": "subway_nightlife", "region": "seoul" },
+    { "id": "hs_s_hapjeong_1", "name": "합정역 환승 거점 및 메세나폴리스", "lat": 37.5495, "lng": 126.9138, "address": "합정역", "type": "subway", "region": "seoul" },
+    { "id": "hs_s_sinchon_1", "name": "신촌역 로데오 및 메디컬타운", "lat": 37.5552, "lng": 126.9368, "address": "신촌역", "type": "subway_hospital", "region": "seoul" },
+    { "id": "hs_s_yeonsinnae_1", "name": "연신내역 로데오거리 및 먹자골목", "lat": 37.6190, "lng": 126.9210, "address": "연신내역", "type": "subway_nightlife", "region": "seoul" },
+    { "id": "hs_s_yeongdeungpo_1", "name": "영등포역 환승 거점 및 타임스퀘어", "lat": 37.5158, "lng": 126.9075, "address": "영등포역", "type": "subway_shopping", "region": "seoul" },
     { "id": "hs_g_gwangmyeong_1", "name": "KTX 광명역 및 일직동 로데오", "lat": 37.4162, "lng": 126.8845, "address": "광명역", "type": "subway_shopping", "region": "gwangmyeong" },
     { "id": "hs_g_gwacheon_1", "name": "정부과천청사역 중심상가 및 로데오", "lat": 37.4262, "lng": 126.9898, "address": "정부과천청사역", "type": "subway_nightlife", "region": "gwacheon" },
     { "id": "hs_g_gwacheon_2", "name": "선바위역 환승장 및 먹자골목", "lat": 37.4518, "lng": 127.0022, "address": "선바위역", "type": "subway", "region": "gwacheon" },
@@ -760,6 +767,7 @@
     headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) ${badgeHtml}`;
   }
   
+  // 💡 [v1.7.8] 카카오 실시간 API 타임아웃 3.5초 연장 및 Promise.all 병렬 호출
   async function fetchLiveKakaoHotspots(lat, lng) {
     if (!KAKAO_REST_KEY) return [];
     const nowHour = new Date().getHours();
@@ -769,14 +777,15 @@
     } else if (nowHour >= 12 && nowHour < 18) {
       keywords = ['학원가', '병원', '지하철역'];
     }
+    
     let liveHotspots = [];
-    for (let kw of keywords) {
+    const searchPromises = keywords.map(async (kw) => {
       try {
-        const kakaoUrl = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(kw)}&x=${lng}&y=${lat}&radius=3500&sort=distance`;
+        const kakaoUrl = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(kw)}&x=${lng}&y=${lat}&radius=4000&sort=distance`;
         const proxyUrl = PROXY_BASE_URL + encodeURIComponent(kakaoUrl);
         
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 1500);
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
         const res = await fetch(proxyUrl, {
           method: 'GET',
           headers: { 'Authorization': `KakaoAK ${KAKAO_REST_KEY}` },
@@ -786,8 +795,9 @@
         if (res.ok) {
           const data = await res.json();
           if (data.documents && data.documents.length > 0) {
+            let items = [];
             data.documents.slice(0, 3).forEach(place => {
-              liveHotspots.push({
+              items.push({
                 id: 'kakao_live_' + place.id,
                 name: place.place_name,
                 lat: parseFloat(place.y),
@@ -797,10 +807,15 @@
                 isLiveKakao: true
               });
             });
+            return items;
           }
         }
       } catch(e) {}
-    }
+      return [];
+    });
+    
+    const results = await Promise.all(searchPromises);
+    results.forEach(arr => { liveHotspots.push(...arr); });
     return liveHotspots;
   }
   
@@ -1107,6 +1122,7 @@
     let preFiltered = rawPool.filter(item => {
       const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const distBtoC = getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
+      
       if (inWisu) {
         const detourDist = distAtoB + distBtoC;
         const isGettingCloser = distBtoC < distAtoC;
@@ -1114,14 +1130,39 @@
         const isVeryCloseFront = (distAtoB <= 1.0) && (distBtoC <= distAtoC + 0.2);
         return isCorridor || isVeryCloseFront;
       } else {
-        // 💡 [v1.7.6 핵심 보정] 모드 2 전방 엄격 정렬
-        // 1) 후보지(B)가 현위치(A)와 목적지(C) 사이 구간 내에 완벽하게 존재 (isBetween)
-        const isBetween = (distBtoC < distAtoC) && (distAtoB < distAtoC);
-        // 2) 측면 우회 허용치 1.10배로 제한 (여의도➔강남 등 대형 측면 우회 100% 차단)
-        const detourDist = distAtoB + distBtoC;
-        const isStrictCorridor = detourDist <= (distAtoC * 1.10) + 0.2;
+        // 💡 [v1.7.8] 모드 2 경유지 최대 거리 제한 (현위치에서 15km 초과 원거리 장소 강제 차단)
+        if (distAtoB > 15.0 && !item.isWisu) return false;
+
+        const dyAC = finalTarget.lat - currentPos.lat;
+        const dxAC = (finalTarget.lng - currentPos.lng) * Math.cos(currentPos.lat * Math.PI / 180);
         
-        return isBetween && isStrictCorridor;
+        const dyAB = item.lat - currentPos.lat;
+        const dxAB = (item.lng - currentPos.lng) * Math.cos(currentPos.lat * Math.PI / 180);
+        
+        const lenAC = Math.sqrt(dxAC * dxAC + dyAC * dyAC);
+        const lenAB = Math.sqrt(dxAB * dxAB + dyAB * dyAB);
+        
+        if (lenAC === 0 || lenAB === 0) return false;
+        
+        const dot = (dxAC * dxAB + dyAC * dyAB) / (lenAC * lenAB);
+        const clampedDot = Math.max(-1, Math.min(1, dot));
+        const angleRad = Math.acos(clampedDot);
+        const angleDeg = angleRad * (180 / Math.PI);
+        
+        // 실시간 상권(isLiveKakao)은 현위치 근처(3.5km 이내)라면 진행 각도 조건을 대폭 완화
+        if (item.isLiveKakao && distAtoB <= 3.5) {
+          return true;
+        }
+
+        if (angleDeg > 28) return false;
+        
+        const crossTrackDistKm = distAtoB * Math.sin(angleRad);
+        if (crossTrackDistKm > 2.5) return false;
+        
+        const progressKm = distAtoB * Math.cos(angleRad);
+        const isProgressValid = (progressKm >= 0.2) && (progressKm <= distAtoC - 0.2);
+        
+        return isProgressValid;
       }
     });
 
@@ -1159,8 +1200,6 @@
       if (selectedCandidates.length === maxCards) break;
     }
 
-    // 💡 [v1.7.6 핵심 보정] 목적지 잔여 거리(distBtoC) 내림차순 정렬
-    // 목적지에서 멀리 떨어진 곳이 1번, 점점 목적지와 가까운 곳이 2➔3번 배정되어 U턴/꽈배기 동선 완벽 해결
     selectedCandidates.sort((a, b) => b.distBtoC - a.distBtoC);
 
     currentRouteData = [
