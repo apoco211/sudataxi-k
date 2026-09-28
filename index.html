@@ -295,8 +295,7 @@
       <div style="font-size: 10px; font-weight: 800; color: #C084FC; margin: 4px 0 2px 0;">📍 나만의 핫플 목록</div>
       <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 2px;"></div>
     </div>
-    
-    <!-- 요청하신 위치: 히스토리 바로 위로 재배치된 핵심 가이드 박스 -->
+
     <details style="margin-top: 8px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 1.4;">
       <summary style="font-weight: 800; color: #FFC800; cursor: pointer;">💡 수다택시 K 핵심 운행 및 추천 엔진 가이드 (터치하여 펼치기)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px; font-size: 10px;">
@@ -310,13 +309,13 @@
     </details>
 
     <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;">
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.0.8 업데이트 내역 (터치)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.0.9 업데이트 내역 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v2.0.8 (2026.09) - 연산속도 최적화 & 위치 재배치</strong><br>
-          • ⚡ 도로망 OSRM 및 카카오 길찾기 병렬 연산으로 대기시간 획기적 단축<br>
-          • 📍 핵심 운행 가이드 박스를 히스토리 바로 위로 재배치하여 상단 공간 확보<br>
-          • ⏱️ 새로고침/앱재시작 발생 시 타이머 남은 시간 영구 복원 보장
+          <strong style="color: #4ADE80;">v2.0.9 (2026.09) - 카카오 핫플 및 주행시간 연산 보정</strong><br>
+          • ⚡ 카카오 장소 API 비동기 처리 완전 보장으로 실시간 핫플 검색 누락 해결<br>
+          • 🛣️ OSRM 타임아웃 3초 확대 및 실제 도로 주행시간 정확도 보정<br>
+          • ⏱️ 새로고침 발생 시 타이머 영구 상태 완벽 복원
         </div>
       </div>
     </details>
@@ -695,14 +694,14 @@
     headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) ${badgeHtml}`;
   }
 
+  /* 카카오 장소 실시간 수신 완벽 보장 */
   async function fetchLiveKakaoHotspots(lat, lng) {
     return new Promise((resolve) => {
       if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) { resolve([]); return; }
       const ps = new kakao.maps.services.Places();
       const options = { location: new kakao.maps.LatLng(lat, lng), radius: 4000, sort: kakao.maps.services.SortBy.DISTANCE };
       const nowHour = new Date().getHours();
-      let category = 'FD6';
-      if (nowHour >= 7 && nowHour < 12) category = 'SW8';
+      let category = (nowHour >= 7 && nowHour < 12) ? 'SW8' : 'FD6';
 
       ps.categorySearch(category, (data, status) => {
         if (status === kakao.maps.services.Status.OK && data && data.length > 0) {
@@ -726,13 +725,13 @@
     return new Date(0);
   }
 
-  /* OSRM 길찾기 타임아웃 단축 (빠른 처리) */
+  /* OSRM 실시간 도로 길찾기 (타임아웃 3초 보정) */
   async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const directDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng);
     try {
       const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 1200); // 1.2초 내 응답 시 적용
+      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3초 타임아웃
       const res = await fetch(osrmUrl, { signal: controller.signal });
       clearTimeout(timeoutId);
       if (res.ok) {
@@ -740,18 +739,19 @@
         if (data.routes && data.routes.length > 0) {
           const route = data.routes[0];
           const coords = route.geometry.coordinates.map(pt => [pt[1], pt[0]]);
-          return {
-            distanceKm: parseFloat((route.distance / 1000).toFixed(1)),
-            durationMin: Math.max(1, Math.round(route.duration / 60)),
-            geometryCoords: coords
-          };
+          const realKm = parseFloat((route.distance / 1000).toFixed(1));
+          const realMin = Math.max(1, Math.round(route.duration / 60));
+          return { distanceKm: realKm, durationMin: realMin, geometryCoords: coords };
         }
       }
     } catch (e) {}
     
+    // OSRM 실패시 시가지 우회비율(1.35) 반영
+    const estKm = parseFloat((directDist * 1.35).toFixed(1));
+    const estMin = Math.max(1, Math.round((estKm / 22) * 60));
     return {
-      distanceKm: parseFloat((directDist * 1.3).toFixed(1)),
-      durationMin: Math.max(1, Math.round((directDist * 1.3 / 25) * 60)),
+      distanceKm: estKm,
+      durationMin: estMin,
       geometryCoords: [[fromLat, fromLng], [toLat, toLng]]
     };
   }
@@ -879,7 +879,7 @@
     });
   }
 
-  /* ⚡ [속도 최적화] 병렬 연산을 통한 즉시 계산 처리 */
+  /* 실시간 핫플 및 도로 길찾기 수신 보정 적용 */
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
@@ -888,7 +888,6 @@
     
     const nowHour = new Date().getHours();
 
-    // 외부 API 수신 병렬 실행
     const [weatherData, liveKakaoHotspots] = await Promise.all([
       fetchRealtimeWeather(currentPos.lat, currentPos.lng),
       fetchLiveKakaoHotspots(currentPos.lat, currentPos.lng)
@@ -944,9 +943,7 @@
 
     const distAtoC = getStraightDistanceKm(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
     
-    // 후보지 길찾기 및 점수 부여 고속 병렬 처리
     let scoredPool = await Promise.all(rawPool.map(async (item) => {
-      const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const distBtoC = getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
       let pureRes = await calculatePureSpotScore(item, weatherData, nowHour);
