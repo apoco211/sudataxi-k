@@ -269,7 +269,7 @@
           • <strong>영업 목적:</strong> 안양·군포·의왕·과천 지정 위수지역 내부 순환 영업 전용 (반경 5km 탐색)<br>
           • <strong>4번 목적지 산정:</strong> 5대 관문역(평촌, 범계, 인덕원, 안양, 산본) 중 실시간 이동거리 최단역 1곳 고정<br>
           • <strong>목적지 자동 교체 (500m 예외):</strong> 가장 가까운 관문역과 500m 이내로 초근접 시, 다음으로 가까운 2순위 관문역으로 4번 목적지가 자동 순환 교체<br>
-          • <strong>1~3번 경유지:</strong> 현재 위치에서 4번 관문역으로 가는 이동 노선(길목) 상에 있는 알짜 핫플 우선 배치<br>
+          • <strong>1~3번 경유지:</strong> 현재 위치에서 4번 관문역으로 가는 이동 노선(길목) 상에 있는 알짜 핫플 우선 배치 (5대 거점역 제외)<br>
           • <strong>타지역 철저 배제:</strong> 검색 결과 부족 시에도 서울/사당/판교 등 위수 밖 장소 100% 차단
         </div>
         
@@ -301,13 +301,13 @@
       <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 12px;">📜 수다택시 K 전체 업데이트 히스토리 (터치하여 펼치기)</summary>
       <div style="margin-top: 10px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #4ADE80;">v1.7.3 (2026.09) - 거리 변수 점수 개입 완전 차단 & 순수 상권 가치 개편</strong><br>
-          • 🎯 초근접 보너스(+140점) 및 거리 감점 항목을 점수 공식에서 전면 제거<br>
-          • 📊 점수는 오직 상권 가치(시간대+공휴일+콜로그+기상+DB)만으로 100% 평가하고, 거리는 동선 순서(1→2→3→4)에만 사용
+          <strong style="color: #4ADE80;">v1.7.4 (2026.09) - 1~3번 경유지 5대 거점역 중복 완전 차단</strong><br>
+          • 🎯 1~3번 경유지 후보군에서 5대 거점역(인덕원, 평촌, 범계, 안양, 산본)을 전면 제외하여 세부 알짜 상권만 추천되도록 보정<br>
+          • 🧭 직진 길목 조건(Detour Ratio)을 강화하여 지그재그 우회 완벽 차단
         </div>
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #888888;">v1.7.2 (2026.09) - 상/하단 거점역 점수 연산 완벽 동기화</strong><br>
-          • 🎯 참고용 5대 거점역 점수 마스터 DB 보너스 동기화
+          <strong style="color: #888888;">v1.7.3 (2026.09) - 거리 변수 점수 개입 완전 차단</strong><br>
+          • 🎯 초근접 보너스(+140점) 및 거리 감점 항목을 점수 공식에서 전면 제거
         </div>
         <div>
           <strong style="color: #888888;">v1.6.8 (2026.09) - 금정역 5번 출구 먹자골목 좌표 정밀 보정</strong><br>
@@ -602,7 +602,6 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
   
-  // 🎯 [v1.7.3 보정] 순수 상권 가치 전용 뱃지 등급
   function getScoreLevelBadge(score) {
     if (score >= 100) return '<span class="level-badge level-high">🔥 높음</span>';
     if (score >= 60) return '<span class="level-badge level-mid">⚡ 보통</span>';
@@ -818,7 +817,7 @@
     return new Date(0);
   }
 
-  // 🚘 카카오모빌리티 실시간 경로 연산 (공식 규격: priority=RECOMMEND&avoid=toll 무료도로 우선)
+  // 🚘 카카오모빌리티 실시간 경로 연산
   async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const directDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng);
     if (KAKAO_REST_KEY) {
@@ -968,26 +967,21 @@
     return { bonus: Math.round(maxBonus), matched: isMatched, count: matchCount, isTimeMatch };
   }
   
-  // 💡 [v1.7.3 핵심] 거리 변수를 완전히 배제한 순수 상권 가치 점수 연산 함수
+  // 거리 변수를 배제한 순수 상권 가치 점수 연산
   async function calculatePureSpotScore(item, weatherData, nowHour) {
-    let score = 50; // 기본 점수
+    let score = 50;
     
-    // 1. 마스터 DB / 나만의 핫플 우대
     if (item.isCustom) score += 50;
     else if (item.isLiveKakao) score += 45;
     else if (item.region || item.id?.startsWith('hs_') || item.isWisu) score += 35;
     
-    // 과천 지역 특별 보너스
     if (item.region === 'gwacheon' || item.name.includes('과천') || item.name.includes('선바위')) score += 30;
     
-    // 2. 시간대/공휴일/요일 피크 보너스
     const timeBonus = await getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
     score += timeBonus;
     
-    // 3. 기상 보너스 (비/눈)
     if (weatherData.isRainOrSnow) score += 20;
     
-    // 4. 누적 콜 로그 매칭 보너스
     const logResult = calculateCallLogScore(item.lat, item.lng);
     score += logResult.bonus;
     
@@ -1095,11 +1089,23 @@
         geometryCoords: road.geometryCoords
       };
     }
+
+    // 💡 [v1.7.4 핵심 보정] 5대 거점역 명단 (1~3번 경유지 후보에서 전면 제외하기 위한 키워드)
+    const majorHubKeywords = ["인덕원", "평촌역", "범계역", "안양역", "산본역"];
+
     let rawPool = [...liveKakaoHotspots, ...customHotspots, ...masterHotspots].filter(item => {
-      const nameA = item.name.replace(/\s+/g, '').substring(0, 3);
+      const itemName = item.name.replace(/\s+/g, '');
+      
+      // 1. 5대 거점역은 1~3번 경유지 후보에서 전면 차단 (4번 카드 및 하단 참고용에만 표시)
+      const isMajorHub = majorHubKeywords.some(kw => itemName.includes(kw));
+      if (isMajorHub) return false;
+
+      // 2. 최종 목적지와 중복 명칭 제외
+      const nameA = itemName.substring(0, 3);
       const nameB = finalTarget.name.replace(/\s+/g, '').substring(0, 3);
       return nameA !== nameB;
     });
+
     const distAtoC = getStraightDistanceKm(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
     
     let preFiltered = rawPool.filter(item => {
@@ -1108,8 +1114,9 @@
       if (inWisu) {
         const detourDist = distAtoB + distBtoC;
         const isGettingCloser = distBtoC < distAtoC;
-        const isCorridor = (detourDist <= (distAtoC * 1.35) + 1.0) && isGettingCloser;
-        const isVeryCloseFront = (distAtoB <= 1.2) && (distBtoC <= distAtoC + 0.3);
+        // 💡 [v1.7.4 보정] 직진 길목 조건 강화 (우회거리 1.20배 이내로 제한하여 서쪽 안양역 방향 우회 완전 차단)
+        const isCorridor = (detourDist <= (distAtoC * 1.20) + 0.5) && isGettingCloser;
+        const isVeryCloseFront = (distAtoB <= 1.0) && (distBtoC <= distAtoC + 0.2);
         return isCorridor || isVeryCloseFront;
       } else {
         const isHeadingToGoal = distBtoC < distAtoC;
@@ -1138,7 +1145,7 @@
       };
     }));
 
-    // 1. 순수 상권 가치 점수가 높은 순으로 추출
+    // 1. 순수 상권 가치 점수가 높은 순으로 선별
     let validPool = scoredPool.filter(p => p.score >= 30);
     validPool.sort((a, b) => b.score - a.score);
     
@@ -1153,7 +1160,7 @@
       if (selectedCandidates.length === maxCards) break;
     }
 
-    // 2. 추출된 고득점 상권 카드를 현위치 기준 가까운 순서(1→2→3→4)로 순차 배정
+    // 2. 추출된 경유지 알짜 상권을 현위치에서 가까운 순서(1→2→3→4)로 순차 배정
     selectedCandidates.sort((a, b) => a.dist - b.dist);
 
     currentRouteData = [
@@ -1170,7 +1177,7 @@
         : `방금 · [${inWisu ? '관내순환' : '관외복귀'}] 목적지근접 (${finalTarget.name} 직행)`;
     }
     
-    // 참고용 5대 거점역 목록도 순수 상권 가치 점수로 동일 연산
+    // 참고용 5대 거점역 후보 연산
     let subFinalCandidates = [];
     if (inWisu) {
       subFinalCandidates = await Promise.all(MAJOR_HUBS.filter(h => h.name !== finalTarget.name).map(async h => {
@@ -1371,7 +1378,6 @@
     if (modal) modal.classList.remove('active');
   }
   
-  // 🧹 명칭 자동 정제 함수
   function cleanQuery(str) {
     if (!str) return '';
     return str.replace(/먹자골목|중심상가|상업지구|환승거점|사거리|로데오거리|로데오|환승센터|포차|맛고을|업무지구|메디컬타운/g, '').trim();
