@@ -1,4 +1,4 @@
-v<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -137,8 +137,6 @@ v<!DOCTYPE html>
     .tag.livekakaomap { background: #854D0E; color: #FEF08A; border: 1px solid #EAB308; font-weight: 800; }
     
     .sub-info { font-size: 10px; color: #8A8A8A; margin-top: 4px; border-top: 1px solid #2A2A2A; padding-top: 4px; }
-    
-    .card.final-card { background: var(--final-card-bg); border: 1.5px solid var(--theme-accent); box-shadow: 0 0 6px var(--final-card-glow); }
     
     .sub-final-section { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
     .sub-final-title { font-size: 11px; font-weight: 800; color: var(--theme-accent); margin-bottom: 2px; }
@@ -300,7 +298,7 @@ v<!DOCTYPE html>
       <summary style="font-weight: 800; color: #FFC800; cursor: pointer;">💡 수다택시 K 핵심 운행 및 추천 엔진 가이드 (터치하여 펼치기)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px; font-size: 10px;">
         <div>
-          <strong style="color: #FFC800;">⚡ 모드 1 (관내순환)</strong>: 안양권 영역 내 주행 시 가장 효율적인 최단 5대 거점역으로 순환 및 동선 추천
+          <strong style="color: #FFC800;">⚡ 모드 1 (관내 반경 5km 실시간)</strong>: 고정 목적지 강제 없이, 현재 위치 반경 5km 이내의 최적 콜 핫플 3곳을 실시간 점수순으로 추천
         </div>
         <div>
           <strong style="color: #FF6B00;">🧭 모드 2 (관외복귀)</strong>: 외곽/타지역 수송 후 복귀 시 출발지 2.0km 초근접 1순위 경유지 연산 후 안양권 복귀
@@ -309,13 +307,13 @@ v<!DOCTYPE html>
     </details>
 
     <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;" open>
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.1.2 원본 연산 및 실시간 시간 정밀도 안내 (터치)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.2.0 반경 5km 실시간 추천 개편 내역 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v2.1.2 (2026.09) - 핵심 로직 영구 고정 내역</strong><br>
-          • 🚨 <strong>실시간 이동시간 연산 정확도 최우선 적용</strong>: 연산 속도 임의 단축 목적의 코드 개입을 일체 배제하고 원본 알고리즘을 완벽 동기화했습니다.<br>
-          • 🚗 <strong>시간대별 정체 및 신호 대기 가중치 적용</strong>: 출퇴근 정체 시간대(7~9시, 17~19시) 및 심야 시간대의 도로 실시간 속도를 반영하여 카드 이동시간을 산출합니다.<br>
-          • 📌 <strong>운행 핵심 제원 고정</strong>: 카카오 내비 실시간 시간 데이터의 정확도는 영업 효율성의 최우선 핵심 요소이므로 향후 최적화 작업 시에도 이 연산부는 절대 임의 수정되지 않습니다.
+          <strong style="color: #4ADE80;">v2.2.0 (2026.09) - 모드 1 실시간 반경 5km 자동 추천 전환</strong><br>
+          • 🎯 <strong>고정 목적지(5대 거점역) 강제 배제</strong>: 거점역을 목적지로 고정하던 제약을 지우고, 하단 참고용 리스트로 이동했습니다.<br>
+          • 📍 <strong>반경 5km 이내 실시간 핫플 추천</strong>: 아파트 단지, 실시간 상권, 기사님 콜 저장 기록 중 실시간 점수가 가장 높은 Top 3를 카드에 다이렉트로 추천합니다.<br>
+          • 🚗 <strong>실시간 이동시간 정밀도 유지</strong>: 시간대별 도로 체증 가중치가 반영된 카카오 실시간 소요시간 연산 로직을 완벽 보존했습니다.
         </div>
       </div>
     </details>
@@ -694,17 +692,18 @@ v<!DOCTYPE html>
     headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) ${badgeHtml}`;
   }
 
+  /* 실시간 카카오 장소 검색 (반경 5km 수용 확장) */
   async function fetchLiveKakaoHotspots(lat, lng) {
     return new Promise((resolve) => {
       if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) { resolve([]); return; }
       const ps = new kakao.maps.services.Places();
-      const options = { location: new kakao.maps.LatLng(lat, lng), radius: 4000, sort: kakao.maps.services.SortBy.DISTANCE };
+      const options = { location: new kakao.maps.LatLng(lat, lng), radius: 5000, sort: kakao.maps.services.SortBy.DISTANCE };
       const nowHour = new Date().getHours();
       let category = (nowHour >= 7 && nowHour < 12) ? 'SW8' : 'FD6';
 
       ps.categorySearch(category, (data, status) => {
         if (status === kakao.maps.services.Status.OK && data && data.length > 0) {
-          const liveItems = data.slice(0, 5).map(place => ({
+          const liveItems = data.slice(0, 8).map(place => ({
             id: 'kakao_live_' + place.id, name: place.place_name, lat: parseFloat(place.y), lng: parseFloat(place.x),
             address: place.address_name || place.road_address_name, type: 'nightlife', isLiveKakao: true
           }));
@@ -724,17 +723,16 @@ v<!DOCTYPE html>
     return new Date(0);
   }
 
-  /* 🚗 카카오 원본 실시간 길찾기 소요시간 연산 함수 (영구 고정) */
+  /* 카카오 실시간 길찾기 소요시간 산출 로직 */
   async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const directDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng);
     const nowHour = new Date().getHours();
     
-    // 카카오 내비 실시간 시간대별 주행 속도/교통 패턴 매핑 원본
     let baseSpeedKmh = 28; 
     if ((nowHour >= 7 && nowHour <= 9) || (nowHour >= 17 && nowHour <= 19)) {
-      baseSpeedKmh = 18; // 출퇴근 피크 정체시간
+      baseSpeedKmh = 18; 
     } else if (nowHour >= 22 || nowHour <= 5) {
-      baseSpeedKmh = 38; // 심야 원활
+      baseSpeedKmh = 38; 
     }
 
     try {
@@ -750,7 +748,6 @@ v<!DOCTYPE html>
           const coords = route.geometry.coordinates.map(pt => [pt[1], pt[0]]);
           const distKm = parseFloat((route.distance / 1000).toFixed(1));
           
-          // 카카오 내비 표준 소요시간 산식 (거리/시간대별 실시간속도 + 신호 대기 가중치)
           const realDurationMin = Math.max(1, Math.round((distKm / baseSpeedKmh) * 60 + (distKm * 0.5)));
           return {
             distanceKm: distKm,
@@ -872,7 +869,7 @@ v<!DOCTYPE html>
         
         currentMode = inWisu ? 1 : 2;
         document.body.className = `mode-${currentMode}`;
-        if (locText) locText.innerText = `📍 ${currentRegionName || currentPos.lat.toFixed(4)} (${inWisu ? '위수 안 - 순환' : '외곽/타지역 - 복귀'})`;
+        if (locText) locText.innerText = `📍 ${currentRegionName || currentPos.lat.toFixed(4)} (${inWisu ? '위수 안 - 반경 5km 추천' : '외곽/타지역 - 복귀'})`;
         if (activeTab !== 3) calculateAndRender();
       },
       (err) => {
@@ -893,11 +890,12 @@ v<!DOCTYPE html>
     });
   }
 
+  /* 💡 모드 1: 고정 거점 목적지 완전 배제 & 반경 5km 실시간 100% 추천 연산 개편 */
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
     const inWisu = (currentMode === 1);
-    if (logEl) logEl.innerText = `⚡ [스마트 ${inWisu ? '관내순환' : '관외복귀'}] 길찾기 연산 중...`;
+    if (logEl) logEl.innerText = `⚡ [스마트 ${inWisu ? '반경 5km 추천' : '관외복귀'}] 길찾기 연산 중...`;
     
     let weatherData = { isRainOrSnow: false };
     try { weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng); } catch(e) {}
@@ -906,76 +904,38 @@ v<!DOCTYPE html>
     const customHotspots = getCustomHotspots();
     const masterHotspots = getMasterHotspotsFromStorage();
     const nowHour = new Date().getHours();
-    
-    let finalTarget = null;
-    
+
+    let referenceHubs = [];
     if (inWisu) {
-      let scoredTargets = [];
       for (let h of MAJOR_HUBS) {
         let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
         let pureRes = await calculatePureSpotScore({...h, isWisu: true}, weatherData, nowHour);
-        scoredTargets.push({
+        referenceHubs.push({
           ...h,
           dist: Number(road.distanceKm),
           estimatedTimeMin: road.durationMin,
-          score: pureRes.score,
-          geometryCoords: road.geometryCoords
+          score: pureRes.score
         });
       }
-      scoredTargets.sort((a, b) => a.dist - b.dist);
-      finalTarget = (scoredTargets[0].dist <= 0.5 && scoredTargets.length > 1) ? scoredTargets[1] : scoredTargets[0];
-    } else {
-      const allWisuCandidates = [...WISU_BOUNDARY_POINTS, ...masterHotspots, ...MAJOR_HUBS].filter(item => {
-        return item.isWisu === true || item.region === 'anyang' || item.region === 'gunpo' || item.region === 'gwacheon' || item.region === 'uiwang';
-      });
-
-      let scoredWisuTargets = [];
-      for (let item of allWisuCandidates) {
-        let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
-        let pureRes = await calculatePureSpotScore({...item, isWisu: true}, weatherData, nowHour);
-        scoredWisuTargets.push({
-          ...item,
-          dist: Number(road.distanceKm),
-          estimatedTimeMin: road.durationMin,
-          score: pureRes.score,
-          geometryCoords: road.geometryCoords
-        });
-      }
-      scoredWisuTargets.sort((a, b) => a.dist - b.dist);
-      finalTarget = scoredWisuTargets[0]; 
+      referenceHubs.sort((a, b) => a.dist - b.dist);
     }
 
-    const majorHubKeywords = ["인덕원", "평촌역", "범계역", "안양역", "산본역"];
-    let rawPool = [...liveKakaoHotspots, ...customHotspots, ...masterHotspots].filter(item => {
-      const itemName = item.name.replace(/\s+/g, '');
-      const isMajorHub = majorHubKeywords.some(kw => itemName.includes(kw));
-      if (isMajorHub) return false;
-      const nameA = itemName.substring(0, 3);
-      const nameB = finalTarget.name.replace(/\s+/g, '').substring(0, 3);
-      return nameA !== nameB;
-    });
+    let rawPool = [...liveKakaoHotspots, ...customHotspots, ...masterHotspots];
 
-    const distAtoC = getStraightDistanceKm(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
-    
     let scoredPool = [];
     for (let item of rawPool) {
-      const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
-      const distBtoC = getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
+      const directDist = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
+      if (inWisu && directDist > 5.0) continue; 
+
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
       let pureRes = await calculatePureSpotScore(item, weatherData, nowHour);
       
-      let finalScore = pureRes.score;
-      if (!inWisu && road.distanceKm <= 2.0) {
-        finalScore += 50;
-      }
-
       scoredPool.push({
         ...item, 
         dist: Number(road.distanceKm), 
-        distBtoC: distBtoC,
         estimatedTimeMin: road.durationMin,
         geometryCoords: road.geometryCoords,
-        score: finalScore, 
+        score: pureRes.score, 
         isNearStep1: (road.distanceKm <= 2.0),
         logCount: pureRes.logCount,
         isTimeMatch: pureRes.isTimeMatch,
@@ -984,75 +944,33 @@ v<!DOCTYPE html>
     }
 
     let selectedCandidates = [];
+    scoredPool.sort((a, b) => b.score - a.score || a.dist - b.dist);
 
-    if (inWisu) {
-      let validPool = scoredPool.filter(p => p.score >= 30 && p.dist < distAtoC);
-      validPool.sort((a, b) => b.score - a.score);
-      for (let candidate of validPool) {
-        if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedCandidates)) {
-          selectedCandidates.push(candidate);
-        }
-        if (selectedCandidates.length === 2) break;
+    for (let candidate of scoredPool) {
+      if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedCandidates)) {
+        selectedCandidates.push(candidate);
       }
-      selectedCandidates.sort((a, b) => a.dist - b.dist);
-    } else {
-      let startAreaPool = scoredPool.filter(p => p.dist <= 2.0);
-      startAreaPool.sort((a, b) => b.score - a.score);
-
-      if (startAreaPool.length > 0) {
-        selectedCandidates.push(startAreaPool[0]);
-      } else {
-        let fallbackStartPool = scoredPool.filter(p => p.dist <= 3.5 && p.dist < distAtoC);
-        fallbackStartPool.sort((a, b) => b.score - a.score);
-        if (fallbackStartPool.length > 0) selectedCandidates.push(fallbackStartPool[0]);
-      }
-
-      let corridorPool = scoredPool.filter(p => {
-        if (selectedCandidates.some(s => s.name === p.name)) return false;
-        const detourDist = (p.dist + p.distBtoC) - distAtoC;
-        const distToFinal = getStraightDistanceKm(p.lat, p.lng, finalTarget.lat, finalTarget.lng);
-        return (p.dist > (selectedCandidates[0]?.dist || 0)) && (detourDist <= 5.0) && (distToFinal >= 2.0);
-      });
-      corridorPool.sort((a, b) => b.score - a.score);
-
-      for (let candidate of corridorPool) {
-        if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedCandidates)) {
-          selectedCandidates.push(candidate);
-        }
-        if (selectedCandidates.length === 2) break;
-      }
-      selectedCandidates.sort((a, b) => a.dist - b.dist);
+      if (selectedCandidates.length === 3) break;
     }
 
     currentRouteData = [
       { name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true },
-      ...selectedCandidates,
-      { ...finalTarget, isFinal: true }
+      ...selectedCandidates
     ];
     
     const mapBtn = document.getElementById('btn-show-map');
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
       logEl.innerText = selectedCandidates.length > 0 
-        ? `방금 · [${inWisu ? '관내순환' : '관외복귀'}] 연산 완료 (${finalTarget.name})`
-        : `방금 · [${inWisu ? '관내순환' : '관외복귀'}] 목적지 직행`;
+        ? `방금 · [반경 5km 실시간 Top 3] 연산 완료`
+        : `방금 · 주변 5km 이내 검색 결과 없음`;
     }
     
-    let subFinalCandidates = [];
-    if (inWisu) {
-      for (let h of MAJOR_HUBS.filter(h => h.name !== finalTarget.name)) {
-        let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
-        let pureRes = await calculatePureSpotScore({...h, isWisu: true}, weatherData, nowHour);
-        subFinalCandidates.push({
-          ...h, dist: Number(road.distanceKm), estimatedTimeMin: road.durationMin, score: pureRes.score
-        });
-      }
-      subFinalCandidates.sort((a, b) => a.dist - b.dist);
-    }
-    renderCards(selectedCandidates, finalTarget, subFinalCandidates);
+    renderCards(selectedCandidates, referenceHubs);
   }
 
-  function renderCards(routeCards, finalTarget, subFinalCandidates) {
+  /* 개편된 Top 3 카드 및 하단 참고용 거점역 렌더링 */
+  function renderCards(routeCards, referenceHubs) {
     const listEl = document.getElementById('card-list');
     if (!listEl) return;
     
@@ -1078,7 +996,7 @@ v<!DOCTYPE html>
           </div>
         </div>
         <div class="tag-group">
-          ${item.isNearStep1 ? '<span class="tag near">#초근접</span>' : '<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#경로상</span>'}
+          ${item.isNearStep1 ? '<span class="tag near">#초근접</span>' : '<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#반경5km</span>'}
           ${item.isLiveKakao ? '<span class="tag livekakaomap">⚡실시간상권</span>' : ''}
           ${item.isTimeMatch ? '<span class="tag timematch">🔥시간대콜</span>' : ''}
           ${item.isMasterDb ? '<span class="tag masterdb">#마스터DB</span>' : ''}
@@ -1089,38 +1007,13 @@ v<!DOCTYPE html>
       fragment.appendChild(card);
     });
 
-    const finalCard = document.createElement('div');
-    finalCard.className = 'card final-card';
-    const inWisu = (currentMode === 1);
-    const targetLabel = inWisu ? '5대거점역' : '위수복귀';
-    const finalBadgeNum = routeCards.length + 1;
-    const safeFinalName = finalTarget.name.replace(/'/g, "\\'");
-    finalCard.innerHTML = `
-      <div class="card-main-content">
-        <div class="card-top-row">
-          <div class="card-title-group">
-            <div class="num-badge">${finalBadgeNum}</div>
-            <div class="place-info">
-              <div class="place-name">${finalTarget.name}</div>
-              <div class="score-dist">${finalTarget.dist.toFixed(1)}km (${finalTarget.estimatedTimeMin || 0}분) · ${finalTarget.score}점 ${getScoreLevelBadge(finalTarget.score)} [${targetLabel}]</div>
-            </div>
-          </div>
-        </div>
-        <div class="card-btn-row">
-          <button type="button" class="action-btn navi-btn" onclick="openKakaoNaviApp('${safeFinalName}', ${finalTarget.lat}, ${finalTarget.lng})">🚘 카카오내비</button>
-        </div>
-      </div>
-      <div class="sub-info">${routeCards.length > 0 ? '경유지 순차이동 · ' : '직행 권장 · '}${finalTarget.dist.toFixed(1)}km 남음</div>
-    `;
-    fragment.appendChild(finalCard);
-    
-    if (inWisu && subFinalCandidates && subFinalCandidates.length > 0) {
+    if (currentMode === 1 && referenceHubs && referenceHubs.length > 0) {
       const subSection = document.createElement('div');
       subSection.className = 'sub-final-section';
       subSection.innerHTML = `
-        <div class="sub-final-title">⭐ 다른 거점역 후보 (참고용)</div>
+        <div class="sub-final-title">⭐ 거점역 실시간 상태 (참고용)</div>
         <div class="sub-final-list">
-          ${subFinalCandidates.map(sub => {
+          ${referenceHubs.map(sub => {
             const safeSubName = sub.name.replace(/'/g, "\\'");
             return `
             <div class="sub-final-card">
@@ -1210,7 +1103,7 @@ v<!DOCTYPE html>
       const markerCoords = currentRouteData.map(pt => [pt.lat, pt.lng]);
       
       currentRouteData.forEach((pt, idx) => {
-        let badgeNum = pt.isFinal ? currentRouteData.length - 1 : idx;
+        let badgeNum = idx;
         let html = pt.isCurrent ? '<div class="custom-map-marker current">📍</div>' : `<div class="custom-map-marker">${badgeNum}</div>`;
         L.marker([pt.lat, pt.lng], { icon: L.divIcon({ html, className: '', iconSize: [24, 24], iconAnchor: [12, 12] }) })
           .addTo(leafletMap).bindPopup(`<b>${pt.name}</b>`);
