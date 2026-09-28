@@ -138,7 +138,7 @@
     
     .sub-info { font-size: 10px; color: #8A8A8A; margin-top: 4px; border-top: 1px solid #2A2A2A; padding-top: 4px; }
     
-    .sub-final-section { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+    .sub-final-section { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
     .sub-final-title { font-size: 11px; font-weight: 800; color: var(--theme-accent); margin-bottom: 2px; }
     .sub-final-list { display: flex; flex-direction: column; gap: 6px; }
     .sub-final-card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column; gap: 4px; }
@@ -298,7 +298,7 @@
       <summary style="font-weight: 800; color: #FFC800; cursor: pointer;">💡 수다택시 K 핵심 운행 및 추천 엔진 가이드 (터치하여 펼치기)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px; font-size: 10px;">
         <div>
-          <strong style="color: #FFC800;">⚡ 모드 1 (관내 반경 5km 실시간)</strong>: 고정 목적지 강제 없이, 현재 위치 반경 5km 이내의 최적 콜 핫플 3곳을 실시간 점수순으로 추천
+          <strong style="color: #FFC800;">⚡ 모드 1 (관내 반경 5km 실시간)</strong>: 현재 위치 반경 5km 이내의 최적 콜 핫플 3곳을 실시간 추천하며, 5대 거점역 현황은 하단에 참고용으로 표시
         </div>
         <div>
           <strong style="color: #FF6B00;">🧭 모드 2 (관외복귀)</strong>: 외곽/타지역 수송 후 복귀 시 출발지 2.0km 초근접 1순위 경유지 연산 후 안양권 복귀
@@ -307,13 +307,12 @@
     </details>
 
     <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;" open>
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.2.0 반경 5km 실시간 추천 개편 내역 (터치)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.2.1 반경 5km 추천 + 5대 거점역 참고 복원 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v2.2.0 (2026.09) - 모드 1 실시간 반경 5km 자동 추천 전환</strong><br>
-          • 🎯 <strong>고정 목적지(5대 거점역) 강제 배제</strong>: 거점역을 목적지로 고정하던 제약을 지우고, 하단 참고용 리스트로 이동했습니다.<br>
-          • 📍 <strong>반경 5km 이내 실시간 핫플 추천</strong>: 아파트 단지, 실시간 상권, 기사님 콜 저장 기록 중 실시간 점수가 가장 높은 Top 3를 카드에 다이렉트로 추천합니다.<br>
-          • 🚗 <strong>실시간 이동시간 정밀도 유지</strong>: 시간대별 도로 체증 가중치가 반영된 카카오 실시간 소요시간 연산 로직을 완벽 보존했습니다.
+          <strong style="color: #4ADE80;">v2.2.1 (2026.09) - 5대 거점역 하단 참고 영역 완벽 복원</strong><br>
+          • 🎯 <strong>상단 실시간 반경 5km Top 3 추천</strong>: 현재 위치 기준 5km 이내의 실시간 핫플/아파트단지/기사님콜을 실시간 추천합니다.<br>
+          • ⭐ <strong>하단 5대 거점역 복원</strong>: 기존 5대 거점역(인덕원, 평촌, 범계, 안양, 산본) 현황을 카드 리스트 아래 참고 영역으로 완벽 복원했습니다.
         </div>
       </div>
     </details>
@@ -692,7 +691,6 @@
     headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) ${badgeHtml}`;
   }
 
-  /* 실시간 카카오 장소 검색 (반경 5km 수용 확장) */
   async function fetchLiveKakaoHotspots(lat, lng) {
     return new Promise((resolve) => {
       if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) { resolve([]); return; }
@@ -723,7 +721,6 @@
     return new Date(0);
   }
 
-  /* 카카오 실시간 길찾기 소요시간 산출 로직 */
   async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const directDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng);
     const nowHour = new Date().getHours();
@@ -890,7 +887,6 @@
     });
   }
 
-  /* 💡 모드 1: 고정 거점 목적지 완전 배제 & 반경 5km 실시간 100% 추천 연산 개편 */
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
@@ -905,20 +901,19 @@
     const masterHotspots = getMasterHotspotsFromStorage();
     const nowHour = new Date().getHours();
 
+    // 5대 거점역 실시간 상태 연산 (하단 참고용)
     let referenceHubs = [];
-    if (inWisu) {
-      for (let h of MAJOR_HUBS) {
-        let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
-        let pureRes = await calculatePureSpotScore({...h, isWisu: true}, weatherData, nowHour);
-        referenceHubs.push({
-          ...h,
-          dist: Number(road.distanceKm),
-          estimatedTimeMin: road.durationMin,
-          score: pureRes.score
-        });
-      }
-      referenceHubs.sort((a, b) => a.dist - b.dist);
+    for (let h of MAJOR_HUBS) {
+      let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
+      let pureRes = await calculatePureSpotScore({...h, isWisu: true}, weatherData, nowHour);
+      referenceHubs.push({
+        ...h,
+        dist: Number(road.distanceKm),
+        estimatedTimeMin: road.durationMin,
+        score: pureRes.score
+      });
     }
+    referenceHubs.sort((a, b) => a.dist - b.dist);
 
     let rawPool = [...liveKakaoHotspots, ...customHotspots, ...masterHotspots];
 
@@ -969,13 +964,13 @@
     renderCards(selectedCandidates, referenceHubs);
   }
 
-  /* 개편된 Top 3 카드 및 하단 참고용 거점역 렌더링 */
   function renderCards(routeCards, referenceHubs) {
     const listEl = document.getElementById('card-list');
     if (!listEl) return;
     
     const fragment = document.createDocumentFragment();
     
+    // Top 3 추천 카드
     routeCards.forEach((item, index) => {
       const card = document.createElement('div');
       card.className = 'card';
@@ -1007,7 +1002,8 @@
       fragment.appendChild(card);
     });
 
-    if (currentMode === 1 && referenceHubs && referenceHubs.length > 0) {
+    // ⭐ 하단 참고용 5대 거점역 완벽 복원
+    if (referenceHubs && referenceHubs.length > 0) {
       const subSection = document.createElement('div');
       subSection.className = 'sub-final-section';
       subSection.innerHTML = `
