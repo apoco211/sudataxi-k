@@ -301,12 +301,13 @@
       <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 12px;">📜 수다택시 K 전체 업데이트 히스토리 (터치하여 펼치기)</summary>
       <div style="margin-top: 10px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #4ADE80;">v1.7.2 (2026.09) - 상/하단 거점역 점수 연산 완벽 동기화</strong><br>
-          • 🎯 참고용 5대 거점역 점수에 마스터 DB 보너스(+35점) 항목을 상단 카드와 완벽히 통합하여 점수 불일치 오류 수정
+          <strong style="color: #4ADE80;">v1.7.3 (2026.09) - 거리 변수 점수 개입 완전 차단 & 순수 상권 가치 개편</strong><br>
+          • 🎯 초근접 보너스(+140점) 및 거리 감점 항목을 점수 공식에서 전면 제거<br>
+          • 📊 점수는 오직 상권 가치(시간대+공휴일+콜로그+기상+DB)만으로 100% 평가하고, 거리는 동선 순서(1→2→3→4)에만 사용
         </div>
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #888888;">v1.7.1 (2026.09) - 동선 연산 완벽 반영 & 순차 전진 카드 배정</strong><br>
-          • 📊 모든 카드 점수 정상 계산 및 현위치 기준 가까운 순서(1→2→3→4)로 순차 배정
+          <strong style="color: #888888;">v1.7.2 (2026.09) - 상/하단 거점역 점수 연산 완벽 동기화</strong><br>
+          • 🎯 참고용 5대 거점역 점수 마스터 DB 보너스 동기화
         </div>
         <div>
           <strong style="color: #888888;">v1.6.8 (2026.09) - 금정역 5번 출구 먹자골목 좌표 정밀 보정</strong><br>
@@ -601,9 +602,10 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
   
+  // 🎯 [v1.7.3 보정] 순수 상권 가치 전용 뱃지 등급
   function getScoreLevelBadge(score) {
-    if (score >= 120) return '<span class="level-badge level-high">🔥 높음</span>';
-    if (score >= 70) return '<span class="level-badge level-mid">⚡ 보통</span>';
+    if (score >= 100) return '<span class="level-badge level-high">🔥 높음</span>';
+    if (score >= 60) return '<span class="level-badge level-mid">⚡ 보통</span>';
     return '<span class="level-badge level-low">💧 낮음</span>';
   }
   
@@ -966,6 +968,36 @@
     return { bonus: Math.round(maxBonus), matched: isMatched, count: matchCount, isTimeMatch };
   }
   
+  // 💡 [v1.7.3 핵심] 거리 변수를 완전히 배제한 순수 상권 가치 점수 연산 함수
+  async function calculatePureSpotScore(item, weatherData, nowHour) {
+    let score = 50; // 기본 점수
+    
+    // 1. 마스터 DB / 나만의 핫플 우대
+    if (item.isCustom) score += 50;
+    else if (item.isLiveKakao) score += 45;
+    else if (item.region || item.id?.startsWith('hs_') || item.isWisu) score += 35;
+    
+    // 과천 지역 특별 보너스
+    if (item.region === 'gwacheon' || item.name.includes('과천') || item.name.includes('선바위')) score += 30;
+    
+    // 2. 시간대/공휴일/요일 피크 보너스
+    const timeBonus = await getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
+    score += timeBonus;
+    
+    // 3. 기상 보너스 (비/눈)
+    if (weatherData.isRainOrSnow) score += 20;
+    
+    // 4. 누적 콜 로그 매칭 보너스
+    const logResult = calculateCallLogScore(item.lat, item.lng);
+    score += logResult.bonus;
+    
+    return {
+      score: Math.max(10, score),
+      logCount: logResult.count,
+      isTimeMatch: logResult.isTimeMatch
+    };
+  }
+
   function getCustomHotspots() {
     return JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
   }
@@ -1046,27 +1078,20 @@
     if (inWisu) {
       let scoredTargets = await Promise.all(MAJOR_HUBS.map(async h => {
         let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
-        let distAtoB = road.distanceKm;
-        let isWithin2km = distAtoB <= 2.0;
-        let score = Math.max(10, 350 - Math.round(road.distanceKm * 15));
-        if (isWithin2km) score += 140; else score += 70;
-        const timeBonus = await getDynamicTimeCategoryBonus(h.type, h.name, nowHour);
-        score += timeBonus;
-        if (weatherData.isRainOrSnow) score += 20;
-        const logResult = calculateCallLogScore(h.lat, h.lng);
-        score += logResult.bonus;
-        return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: Math.max(10, score), geometryCoords: road.geometryCoords };
+        let pureRes = await calculatePureSpotScore({...h, isWisu: true}, weatherData, nowHour);
+        return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: pureRes.score, geometryCoords: road.geometryCoords };
       }));
       scoredTargets.sort((a, b) => b.score - a.score);
       finalTarget = (scoredTargets[0].dist <= 0.5 && scoredTargets.length > 1) ? scoredTargets[1] : scoredTargets[0];
     } else {
       const closestGateway = await fetchRealtimeWisuGateway(currentPos.lat, currentPos.lng);
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, closestGateway.lat, closestGateway.lng);
+      let pureRes = await calculatePureSpotScore({...closestGateway, isWisu: true}, weatherData, nowHour);
       finalTarget = {
         ...closestGateway,
         dist: road.distanceKm,
         estimatedTimeMin: road.durationMin,
-        score: Math.max(10, 500 - Math.round(road.distanceKm * 20)),
+        score: pureRes.score,
         geometryCoords: road.geometryCoords
       };
     }
@@ -1097,45 +1122,23 @@
       const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const distBtoC = getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
+      let pureRes = await calculatePureSpotScore(item, weatherData, nowHour);
       
-      let isWithin2km = distAtoB <= 2.0;
-      let score = Math.max(10, 350 - Math.round(road.distanceKm * 15));
-      
-      if (!inWisu) {
-        if (distBtoC > distAtoC && !isWithin2km) {
-          score -= 999;
-        } else if (distBtoC < distAtoC) {
-          score += 50;
-        }
-      }
-      if (isWithin2km) score += 140;
-      else score += 70;
-      
-      if (item.region === 'gwacheon' || item.name.includes('과천') || item.name.includes('선바위')) score += 65;
-      if (item.isCustom) score += 50;
-      else if (item.isLiveKakao) score += 45;
-      else if (item.region || item.id?.startsWith('hs_')) score += 35;
-      
-      const timeBonus = await getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
-      score += timeBonus;
-      if (weatherData.isRainOrSnow) score += 20;
-      
-      const logResult = calculateCallLogScore(item.lat, item.lng);
-      score += logResult.bonus;
       return { 
         ...item, 
         dist: road.distanceKm, 
         distBtoC: distBtoC,
         estimatedTimeMin: road.durationMin,
         geometryCoords: road.geometryCoords,
-        score: Math.max(10, score), 
-        isNearStep1: isWithin2km,
-        logCount: logResult.count,
-        isTimeMatch: logResult.isTimeMatch,
+        score: pureRes.score, 
+        isNearStep1: (road.distanceKm <= 2.0),
+        logCount: pureRes.logCount,
+        isTimeMatch: pureRes.isTimeMatch,
         isMasterDb: !item.isCustom && !item.isLiveKakao && (item.region !== undefined || item.id?.startsWith('hs_'))
       };
     }));
 
+    // 1. 순수 상권 가치 점수가 높은 순으로 추출
     let validPool = scoredPool.filter(p => p.score >= 30);
     validPool.sort((a, b) => b.score - a.score);
     
@@ -1150,6 +1153,7 @@
       if (selectedCandidates.length === maxCards) break;
     }
 
+    // 2. 추출된 고득점 상권 카드를 현위치 기준 가까운 순서(1→2→3→4)로 순차 배정
     selectedCandidates.sort((a, b) => a.dist - b.dist);
 
     currentRouteData = [
@@ -1166,25 +1170,13 @@
         : `방금 · [${inWisu ? '관내순환' : '관외복귀'}] 목적지근접 (${finalTarget.name} 직행)`;
     }
     
-    // 🎯 [v1.7.2 보정] 참고용 5대 거점역 목록도 마스터 DB 보너스(+35점) 항목을 상단과 완벽히 동일하게 합산
+    // 참고용 5대 거점역 목록도 순수 상권 가치 점수로 동일 연산
     let subFinalCandidates = [];
     if (inWisu) {
       subFinalCandidates = await Promise.all(MAJOR_HUBS.filter(h => h.name !== finalTarget.name).map(async h => {
         let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
-        let distAtoB = road.distanceKm;
-        let isWithin2km = distAtoB <= 2.0;
-        let score = Math.max(10, 350 - Math.round(road.distanceKm * 15));
-        if (isWithin2km) score += 140; else score += 70;
-        
-        // 💡 상단 마스터 DB 항목 가산점(+35점)과 완벽 동기화
-        score += 35;
-
-        const timeBonus = await getDynamicTimeCategoryBonus(h.type, h.name, nowHour);
-        score += timeBonus;
-        if (weatherData.isRainOrSnow) score += 20;
-        const logResult = calculateCallLogScore(h.lat, h.lng);
-        score += logResult.bonus;
-        return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: Math.max(10, score) };
+        let pureRes = await calculatePureSpotScore({...h, isWisu: true}, weatherData, nowHour);
+        return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: pureRes.score };
       }));
       subFinalCandidates.sort((a, b) => b.score - a.score);
     }
