@@ -301,17 +301,17 @@
       <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 12px;">📜 수다택시 K 전체 업데이트 히스토리 (터치하여 펼치기)</summary>
       <div style="margin-top: 10px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #4ADE80;">v1.6.6 (2026.09) - Kakao Mobility avoid=toll (무료도로) API 규격 정밀 반영</strong><br>
-          • 🚘 priority=RECOMMEND&avoid=toll 파라미터 보정으로 카카오내비 실제 대안경로(무료) 수치와 카드 완벽 일치<br>
-          • ⚡ Cloudflare Workers 전용 프록시 유지로 실시간 정체 수신 보장
+          <strong style="color: #4ADE80;">v1.6.8 (2026.09) - 금정역 5번 출구 먹자골목 좌표 정밀 보정</strong><br>
+          • 📍 금정역 환승 먹자골목 좌표 보정 (126.9438 -> 126.9415) 완료<br>
+          • 🚘 금정역 5번 출구 앞 메인 먹자골목/로데오 상권으로 정확히 안내
         </div>
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #888888;">v1.6.5 (2026.09) - Cloudflare Workers 전용 우회 통로 연동 완료</strong><br>
-          • ⚡ 전용 우회 통로(kakao-proxy.apoco211.workers.dev) 연동
+          <strong style="color: #888888;">v1.6.7 (2026.09) - 범계역 로데오거리 마스터 좌표 정밀 보정</strong><br>
+          • 📍 범계역 로데오거리 좌표 오타 수정 완료
         </div>
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #888888;">v1.6.4 (2026.09) - 카카오내비 경로 선택 화면 연동</strong><br>
-          • 🚘 Kakao.Navi.share 연동으로 내비 실행 시 경로 선택 화면 우선 표시 및 단일 버튼화
+          <strong style="color: #888888;">v1.6.6 (2026.09) - Kakao Mobility avoid=toll (무료도로) API 규격 정밀 반영</strong><br>
+          • 🚘 priority=RECOMMEND&avoid=toll 파라미터 보정으로 카카오내비 실제 대안경로(무료) 수치와 카드 완벽 일치
         </div>
         <div>
           <strong style="color: #888888;">v1.1 (2026.07) - 백그라운드 타이머 & 콜지도 시각화</strong><br>
@@ -470,11 +470,11 @@
     { "id": "hs_g_gwacheon_2", "name": "선바위역 환승장 및 먹자골목", "lat": 37.4518, "lng": 127.0022, "address": "선바위역", "type": "subway", "region": "gwacheon" },
     { "id": "hs_g_gwacheon_3", "name": "과천지식정보타운(지정타) 오피스", "lat": 37.4085, "lng": 126.9812, "address": "갈현동", "type": "office", "region": "gwacheon" },
     { "id": "hs_g_anyang_1", "name": "평촌역 먹자골목 및 한림대병원", "lat": 37.3942, "lng": 126.9638, "address": "평촌역", "type": "subway_hospital", "region": "anyang" },
-    { "id": "hs_g_anyang_2", "name": "범계역 로데오거리 및 학원가", "lat": 37.3917, "lng": 126.9145, "address": "범계역", "type": "subway_academy", "region": "anyang" },
+    { "id": "hs_g_anyang_2", "name": "범계역 로데오거리 및 학원가", "lat": 37.3898, "lng": 126.9508, "address": "범계역", "type": "subway_academy", "region": "anyang" },
     { "id": "hs_g_anyang_3", "name": "인덕원역 환승 거점", "lat": 37.4048, "lng": 126.9767, "address": "인덕원역", "type": "subway", "region": "anyang" },
     { "id": "hs_g_anyang_4", "name": "안양역 일번가 및 메디컬타운", "lat": 37.4013, "lng": 126.9222, "address": "안양역", "type": "subway_hospital", "region": "anyang" },
     { "id": "hs_g_anyang_5", "name": "산본역 중심상가 및 원광대병원", "lat": 37.3554, "lng": 126.9331, "address": "산본역", "type": "subway_hospital", "region": "gunpo" },
-    { "id": "hs_g_anyang_6", "name": "금정역 환승 먹자골목", "lat": 37.3721, "lng": 126.9438, "address": "금정역", "type": "subway", "region": "gunpo" },
+    { "id": "hs_g_anyang_6", "name": "금정역 환승 먹자골목", "lat": 37.3718, "lng": 126.9415, "address": "금정역", "type": "subway", "region": "gunpo" },
     { "id": "hs_g_ansan_1", "name": "안산 중앙동 로데오 및 고려대병원", "lat": 37.3164, "lng": 126.8381, "address": "중앙동 로데오", "type": "subway_hospital", "region": "ansan" },
     { "id": "hs_s_01", "name": "강남역 상업지구 및 병원거리", "lat": 37.4981, "lng": 127.0276, "address": "강남역", "type": "subway_hospital", "region": "seoul" },
     { "id": "hs_s_25", "name": "사당역 환승 거점 및 먹자골목", "lat": 37.4765, "lng": 126.9816, "address": "사당역", "type": "subway", "region": "seoul" }
@@ -576,7 +576,7 @@
   const MAJOR_HUBS = [
     { name: "인덕원역 환승 거점", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway", isWisu: true },
     { name: "평촌역 먹자골목 및 한림대병원", lat: 37.3942, lng: 126.9638, address: "평촌역", type: "subway_hospital", isWisu: true },
-    { name: "범계역 로데오거리 및 학원가", lat: 37.3917, lng: 126.9145, address: "범계역", type: "subway_academy", isWisu: true },
+    { name: "범계역 로데오거리 및 학원가", lat: 37.3898, lng: 126.9508, address: "범계역", type: "subway_academy", isWisu: true },
     { name: "안양역 일번가 및 메디컬타운", lat: 37.4013, lng: 126.9222, address: "안양역", type: "subway_hospital", isWisu: true },
     { name: "산본역 중심상가 및 원광대병원", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway_hospital", isWisu: true }
   ];
