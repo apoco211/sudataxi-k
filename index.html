@@ -98,12 +98,12 @@
     .card-list { display: flex; flex-direction: column; gap: 6px; }
     .card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 12px; padding: 8px 10px; position: relative; }
     
-    /* 🎯 모드 2 전용 최종 복귀 목적지 카드 스타일 */
+    /* 🎯 최종 복귀 목적지 카드 맨 아래 스타일 */
     .card.target-destination-card {
       background: #2D1A0A;
       border: 1.5px solid #FF6B00;
       box-shadow: 0 0 10px rgba(255, 107, 0, 0.25);
-      margin-bottom: 2px;
+      margin-top: 4px;
     }
     
     .card-main-content { display: flex; flex-direction: column; gap: 4px; }
@@ -310,20 +310,19 @@
         </div>
         <div>
           <strong style="color: #FF6B00;">🧭 모드 2 (관외 복귀 모드)</strong><br>
-          • 상단 카드에 현재 위치에서 <strong>가장 가까운 관내 진입 경계점(🎯 최종 복귀 목적지)</strong>을 명확하게 표시<br>
-          • 그 아래에 복귀 주행 경로 상에 위치한 현지 최적 핫플 3곳을 경유지 카드로 제시
+          • 상단에 복귀 경로 상의 현지 최적 핫플 3곳 제시 (경유지 1, 2, 3번)<br>
+          • <strong>맨 하단 카드에 가장 가까운 관내 진입 경계점(🎯 최종 복귀 목적지)</strong>을 순서대로 명확히 표시
         </div>
       </div>
     </details>
 
     <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;" open>
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.2.5 최종 복귀 목적지 UI 명시 & 모드2 완비 (터치)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.2.6 UI 카드 순서 정립 (경유지 핫플 ➔ 맨 아래 최종 목적지)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v2.2.5 (2026.09) - 모드 2 최종 복귀 목적지 UI 카드 탑재</strong><br>
-          • 🎯 <strong>최종 복귀 목적지 카드 신설</strong>: 모드 2 동작 시 가장 가까운 위수지역 진입 경계점을 렌더링 최상단에 주황색 전용 카드로 명확하게 표시.<br>
-          • 🛣️ <strong>동선 경유지 3곳 연동</strong>: 복귀 동선 상의 핫플 3곳을 목적지 카드 아래 순서대로 제시.<br>
-          • 🛠️ <strong>마스터 DB 연동 보완</strong>: 복원된 마스터 DB가 실시간 추천 연산에 100% 최우선 반영되도록 수정 완료.
+          <strong style="color: #4ADE80;">v2.2.6 (2026.09) - 카드 렌더링 순서 완전 수정</strong><br>
+          • 📍 <strong>순서 올바르게 정립</strong>: 복귀 동선 상의 추천 핫플 1, 2, 3번 카드를 상단에 배치하고, <strong>🎯 최종 복귀 목적지 카드는 맨 아래에 배치</strong>합니다.<br>
+          • 🛠️ <strong>복원 마스터 DB(`master_hotspots`) 연동 보완</strong>: 백업 파일로 복원된 기사님 마스터 DB가 실시간 연산에 100% 최우선 반영되도록 유지.
         </div>
       </div>
     </details>
@@ -593,7 +592,6 @@
     { "id": "hs_s_01", "name": "강남역 상업지구 및 병원거리", "lat": 37.4981, "lng": 127.0276, "address": "강남역", "type": "subway_hospital", "region": "seoul", "isWisu": false }
   ];
 
-  /* 💡 관외 복귀 시 가장 가까운 위수지역 진입 경계 포인트 목록 정의 */
   const WISU_BOUNDARY_POINTS = [
     { name: "군포 대야미/부곡 경계 (안산 방면)", lat: 37.3320, lng: 126.9150, address: "대야미동", isWisu: true },
     { name: "안양 박달/석수 경계 (인천/시흥/광명 방면)", lat: 37.4150, lng: 126.8980, address: "박달동", isWisu: true },
@@ -908,7 +906,6 @@
     });
   }
 
-  /* 💡 v2.2.5 핵심 연산 및 렌더링 엔진 */
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
@@ -939,7 +936,6 @@
       }
       referenceHubs.sort((a, b) => a.dist - b.dist);
     } else {
-      // 💡 [모드 2 핵심] 현재 위치 기준 가장 가까운 위수지역 진입 경계점(최종 복귀 목적지) 계산
       let minBoundaryDist = Infinity;
       let closestBp = null;
       for (let bp of WISU_BOUNDARY_POINTS) {
@@ -961,7 +957,6 @@
       }
     }
 
-    // 모드 2일 경우 안양/과천 중심가 장소 완전 제외
     let rawPool = [...liveKakaoHotspots, ...customHotspots, ...activeMasterHotspots].filter(item => {
       if (!inWisu) {
         const isWisuHub = MAJOR_HUBS.some(h => item.name.includes(h.name.substring(0,2)));
@@ -978,7 +973,6 @@
 
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
       
-      // 모드 2 도로거리 커트라인
       if (!inWisu && road.distanceKm > 6.0) continue;
 
       let pureRes = await calculatePureSpotScore(item, weatherData, nowHour);
@@ -1033,7 +1027,7 @@
     renderCards(selectedCandidates, referenceHubs, targetBoundaryCardData);
   }
 
-  /* 💡 v2.2.5 최종 복귀 목적지 상단 노출 카드 렌더링 */
+  /* 💡 v2.2.6 순서 완벽 교정: 경유지 핫플 1,2,3번 ➔ 맨 아래 🎯 최종 복귀 목적지 */
   function renderCards(routeCards, referenceHubs, targetBoundaryCardData) {
     const listEl = document.getElementById('card-list');
     if (!listEl) return;
@@ -1041,35 +1035,7 @@
     const fragment = document.createDocumentFragment();
     const inWisu = (currentMode === 1);
 
-    // 🎯 [모드 2 전용] 가장 상단에 최종 복귀 목적지 카드 렌더링
-    if (!inWisu && targetBoundaryCardData) {
-      const targetCard = document.createElement('div');
-      targetCard.className = 'card target-destination-card';
-      const safeTargetName = targetBoundaryCardData.name.replace(/'/g, "\\'");
-      targetCard.innerHTML = `
-        <div class="card-main-content">
-          <div class="card-top-row">
-            <div class="card-title-group">
-              <div class="num-badge target-badge">🎯</div>
-              <div class="place-info">
-                <div class="place-name" style="color: #FFD700;">${targetBoundaryCardData.name}</div>
-                <div class="score-dist" style="color: #FF6B00;">${targetBoundaryCardData.dist.toFixed(1)}km (${targetBoundaryCardData.estimatedTimeMin}분) · 복귀 최단 경계지점</div>
-              </div>
-            </div>
-          </div>
-          <div class="card-btn-row">
-            <button type="button" class="action-btn navi-btn" onclick="openKakaoNaviApp('${safeTargetName}', ${targetBoundaryCardData.lat}, ${targetBoundaryCardData.lng})">🚘 카카오내비 (최종 목적지 안내)</button>
-          </div>
-        </div>
-        <div class="tag-group">
-          <span class="tag target">🎯최종복귀목적지</span>
-          <span class="tag near">#관내진입점</span>
-        </div>
-      `;
-      fragment.appendChild(targetCard);
-    }
-    
-    // 경유지 핫플 Top 3 카드 렌더링
+    // 1. 추천 핫플 1, 2, 3번 경유지 카드를 먼저 상단에 렌더링
     routeCards.forEach((item, index) => {
       const card = document.createElement('div');
       card.className = 'card';
@@ -1100,6 +1066,34 @@
       `;
       fragment.appendChild(card);
     });
+
+    // 2. 🎯 [모드 2 전용] 경유지 핫플 아래 맨 마지막에 최종 복귀 목적지 카드 렌더링
+    if (!inWisu && targetBoundaryCardData) {
+      const targetCard = document.createElement('div');
+      targetCard.className = 'card target-destination-card';
+      const safeTargetName = targetBoundaryCardData.name.replace(/'/g, "\\'");
+      targetCard.innerHTML = `
+        <div class="card-main-content">
+          <div class="card-top-row">
+            <div class="card-title-group">
+              <div class="num-badge target-badge">🎯</div>
+              <div class="place-info">
+                <div class="place-name" style="color: #FFD700;">${targetBoundaryCardData.name}</div>
+                <div class="score-dist" style="color: #FF6B00;">${targetBoundaryCardData.dist.toFixed(1)}km (${targetBoundaryCardData.estimatedTimeMin}분) · 복귀 최단 경계지점</div>
+              </div>
+            </div>
+          </div>
+          <div class="card-btn-row">
+            <button type="button" class="action-btn navi-btn" onclick="openKakaoNaviApp('${safeTargetName}', ${targetBoundaryCardData.lat}, ${targetBoundaryCardData.lng})">🚘 카카오내비 (최종 목적지 안내)</button>
+          </div>
+        </div>
+        <div class="tag-group">
+          <span class="tag target">🎯최종복귀목적지</span>
+          <span class="tag near">#관내진입점</span>
+        </div>
+      `;
+      fragment.appendChild(targetCard);
+    }
 
     if (inWisu && referenceHubs && referenceHubs.length > 0) {
       const subSection = document.createElement('div');
