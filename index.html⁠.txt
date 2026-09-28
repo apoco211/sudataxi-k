@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>수다택시 K</title>
+  
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#FFC800">
+  
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="수다택시K">
+  <link rel="apple-touch-icon" href="./icon-180.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png">
+  <link rel="apple-touch-icon" sizes="1024x1024" href="./icon-1024.png">
+  
+  <link rel="shortcut icon" href="./icon-192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <!-- 카카오 공식 JS SDK 및 지도/장소 API 직통 연동 -->
+  <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
+  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=7ee80d17f027cf99b9634ae13731a6a9&libraries=services"></script>
+  
+  <style>
+    :root {
+      --theme-accent: #FFC800;
+      --theme-bg-dark: #2A2210;
+      --theme-border: #3A2E0A;
+      --theme-text-on-accent: #000000;
+      --final-card-bg: #2B2505;
+      --final-card-glow: rgba(255, 200, 0, 0.2);
+    }
+    body.mode-1 {
+      --theme-accent: #FFC800;
+      --theme-bg-dark: #2A2210;
+      --theme-border: #3A2E0A;
+      --theme-text-on-accent: #000000;
+      --final-card-bg: #2B2505;
+      --final-card-glow: rgba(255, 200, 0, 0.2);
+    }
+    body.mode-2 {
+      --theme-accent: #FF6B00;
+      --theme-bg-dark: #2A1A0A;
+      --theme-border: #3A1F0A;
+      --theme-text-on-accent: #FFFFFF;
+      --final-card-bg: #2A1A0A;
+      --final-card-glow: rgba(255, 107, 0, 0.2);
+    }
+    body.mode-3 {
+      --theme-accent: #22C55E;
+      --theme-bg-dark: #0D2418;
+      --theme-border: #164E2B;
+      --theme-text-on-accent: #000000;
+      --final-card-bg: #0B1F14;
+      --final-card-glow: rgba(34, 197, 94, 0.25);
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: #121212; color: #FFFFFF; max-width: 430px; margin: 0 auto; padding: 12px 12px 130px 12px; min-height: 100vh; transition: all 0.3s ease; }
+    
+    .update-banner {
+      background-color: #3A2E0A;
+      border: 1px solid var(--theme-accent);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 11px;
+      color: #FFD700;
+      margin-bottom: 10px;
+      display: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
+    .banner-content { display: flex; flex-direction: column; gap: 6px; }
+    .banner-btns { display: flex; gap: 6px; }
+    .btn-update { flex: 1; background-color: var(--theme-accent); color: var(--theme-text-on-accent); border: none; padding: 5px; border-radius: 6px; font-weight: 900; cursor: pointer; font-size: 11px; }
+    .btn-close { background-color: #2A2A2A; color: #CCCCCC; border: 1px solid #444; padding: 5px 8px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 11px; }
+    
+    .header { text-align: center; font-size: 17px; font-weight: 900; color: var(--theme-accent); margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; }
+    .holiday-badge { font-size: 11px; padding: 2px 6px; border-radius: 6px; background: #FF4444; color: #FFFFFF; font-weight: 800; display: inline-block; vertical-align: middle; }
+    .weekday-badge { font-size: 11px; padding: 2px 6px; border-radius: 6px; background: #2A2A2A; color: #AAAAAA; font-weight: 700; display: inline-block; vertical-align: middle; }
+    .mode-container { display: flex; gap: 6px; margin-bottom: 10px; }
+    .mode-pill { flex: 1; height: 34px; border-radius: 10px; background: #2A2A2A; color: #8A8A8A; font-size: 12px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+    .mode-pill.active { background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; }
+    
+    .loc-bar { background: var(--theme-bg-dark); height: 38px; border: 1px solid var(--theme-border); border-radius: 10px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; font-size: 11px; color: var(--theme-accent); margin-bottom: 10px; }
+    .refresh-btn { background: none; border: none; color: var(--theme-accent); font-size: 15px; cursor: pointer; }
+    
+    .btn-group-main { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+    .big-btn { width: 100%; height: 50px; background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; font-size: 16px; font-weight: 900; border: none; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 3px 10px var(--theme-border); }
+    .big-btn:active { opacity: 0.9; transform: scale(0.99); }
+    
+    .map-btn { width: 100%; height: 38px; background: #2A2A2A; color: #FFFFFF; font-size: 13px; font-weight: 800; border: 1px solid var(--theme-border); border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    
+    .pipeline-log { font-family: monospace; font-size: 11px; color: #8A8A8A; margin: 2px 0 10px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
+    .card-list { display: flex; flex-direction: column; gap: 8px; }
+    .card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 14px; padding: 10px 12px; position: relative; }
+    
+    .card-main-content { display: flex; flex-direction: column; gap: 6px; }
+    .card-top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
+    .card-title-group { display: flex; align-items: flex-start; gap: 8px; flex: 1; min-width: 0; }
+    
+    .num-badge { width: 24px; height: 24px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .place-info { flex: 1; min-width: 0; }
+    .place-name { font-size: 15px; font-weight: 900; color: #FFFFFF; word-break: keep-all; line-height: 1.25; }
+    
+    .score-dist { font-size: 12px; font-weight: 800; color: var(--theme-accent); font-family: monospace; margin-top: 2px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    
+    .level-badge { font-weight: 900; padding: 1px 5px; border-radius: 4px; font-size: 10px; display: inline-flex; align-items: center; gap: 2px; }
+    .level-high { background: rgba(74, 222, 128, 0.2); color: #4ADE80; border: 1px solid #4ADE80; }
+    .level-mid { background: rgba(255, 200, 0, 0.2); color: #FFC800; border: 1px solid #FFC800; }
+    .level-low { background: rgba(255, 107, 107, 0.2); color: #FF6B6B; border: 1px solid #FF6B6B; }
+    
+    .card-btn-row { display: flex; gap: 6px; margin-top: 2px; }
+    .action-btn { flex: 1; height: 36px; font-weight: 900; font-size: 13px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; text-decoration: none; border: none; }
+    .navi-btn { background: #FFE800 !important; color: #000000 !important; font-weight: 900; width: 100%; }
+    
+    .tag-group { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+    .tag { font-size: 10px; padding: 1px 5px; border-radius: 4px; background: #2A2A2A; color: #A0A0A0; }
+    .tag.near { background: #1E3A8A; color: #93C5FD; border: 1px solid #3B82F6; font-weight: 700; }
+    .tag.custom { background: #3B0764; color: #E9D5FF; border: 1px solid #7E22CE; font-weight: 700; }
+    .tag.logmatch { background: #2B1F3D; color: #C084FC; border: 1px solid #5B21B6; font-weight: 700; }
+    .tag.timematch { background: #065F46; color: #34D399; border: 1px solid #10B981; font-weight: 800; }
+    .tag.masterdb { background: #581C87; color: #F3E8FF; border: 1px solid #9333EA; font-weight: 700; }
+    .tag.livekakaomap { background: #854D0E; color: #FEF08A; border: 1px solid #EAB308; font-weight: 800; }
+    .sub-info { font-size: 11px; color: #8A8A8A; margin-top: 6px; border-top: 1px solid #2A2A2A; padding-top: 6px; }
+    
+    .card.final-card { background: var(--final-card-bg); border: 1.5px solid var(--theme-accent); box-shadow: 0 0 8px var(--final-card-glow); }
+    
+    .sub-final-section { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .sub-final-title { font-size: 12px; font-weight: 800; color: var(--theme-accent); margin-bottom: 2px; }
+    .sub-final-list { display: flex; flex-direction: column; gap: 8px; }
+    .sub-final-card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+    .sub-final-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; }
+    .sub-final-info { flex: 1; min-width: 0; }
+    .sub-final-name { font-size: 14px; font-weight: 900; color: #FFFFFF; margin-bottom: 1px; }
+    .sub-final-meta { font-size: 11px; font-weight: 800; color: var(--theme-accent); font-family: monospace; }
+    .sub-btn-row { display: flex; gap: 6px; margin-top: 2px; padding-top: 6px; border-top: 1px solid #2A2A2A; }
+    .sub-action-btn { flex: 1; height: 34px; font-weight: 900; font-size: 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; text-decoration: none; border: none; }
+    .sub-navi-btn { background: #FFE800 !important; color: #000000 !important; font-weight: 900; width: 100%; }
+    
+    #heatmap-container { display: none; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    #call-map-view { width: 100%; height: 340px; background: #1E1E1E; border-radius: 16px; border: 1.5px solid var(--theme-accent); overflow: hidden; }
+    .map-legend { display: flex; align-items: center; justify-content: space-between; background: #1E1E1E; padding: 6px 10px; border-radius: 10px; border: 1px solid #2A2A2A; font-size: 11px; }
+    .legend-item { display: flex; align-items: center; gap: 4px; font-weight: 700; }
+    .dot-sample { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .backup-section { margin-top: 14px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 14px; padding: 12px; }
+    .backup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .backup-title { font-size: 13px; font-weight: 800; color: var(--theme-accent); }
+    .backup-count { font-size: 11px; color: #8A8A8A; }
+    .backup-btn-group { display: flex; gap: 6px; }
+    .backup-btn { flex: 1; height: 36px; background: #2A2A2A; color: #FFFFFF; font-weight: 800; border: 1px solid #3A3A3A; border-radius: 8px; cursor: pointer; font-size: 12px; }
+    
+    .custom-section { margin-top: 10px; border-top: 1px dashed #3A3A3A; padding-top: 8px; }
+    .add-custom-btn { width: 100%; height: 38px; background: #2A1A3A; color: #D8B4FE; border: 1px solid #6B21A8; font-weight: 800; font-size: 12px; border-radius: 8px; cursor: pointer; }
+    
+    .recent-log-item { display: flex; align-items: center; justify-content: space-between; background: #242424; border: 1px solid #2E2E2E; border-radius: 6px; padding: 5px 8px; }
+    .recent-log-time { font-size: 11px; font-weight: 700; color: #E0E0E0; white-space: nowrap; }
+    
+    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 68px; background: rgba(26,26,26,0.95); backdrop-filter: blur(10px); border-top: 2px solid var(--theme-accent); display: flex; align-items: center; gap: 6px; padding: 6px 10px; z-index: 100; max-width: 430px; margin: 0 auto; }
+    .timer-container { flex: 1; height: 100%; display: flex; flex-direction: column; gap: 3px; }
+    .timer-mode-selector { display: flex; gap: 3px; height: 18px; }
+    .timer-mode-btn { flex: 1; background: #2A2A2A; color: #8A8A8A; font-size: 10px; font-weight: 800; border: 1px solid #3A3A3A; border-radius: 4px; cursor: pointer; }
+    .timer-mode-btn.active { background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; border-color: var(--theme-accent) !important; }
+    .timer-display-btn { flex: 1; background: #2A2A2A; border: 1px solid #3A3A3A; color: #FFFFFF; font-size: 12px; font-weight: 900; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .timer-display-btn.running { background: #3A2E0A; color: var(--theme-accent); border-color: var(--theme-accent); }
+    .timer-display-btn.finished { background: #4A1A1A; color: #FF5555; border-color: #FF5555; animation: alertBlink 1s infinite; }
+    
+    @keyframes alertBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .save-call-btn { flex: 1; height: 100%; background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; font-weight: 900; font-size: 13px; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.15; word-break: keep-all; }
+    
+    .map-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
+    .map-modal-overlay.active { display: flex; }
+    .map-modal-content { width: 100%; max-width: 430px; height: 75vh; background: #1E1E1E; border-top-left-radius: 20px; border-top-right-radius: 20px; border-top: 2px solid var(--theme-accent); display: flex; flex-direction: column; overflow: hidden; }
+    .map-modal-header { padding: 12px 14px; background: #121212; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2A2A2A; flex-shrink: 0; }
+    .map-modal-title { font-size: 15px; font-weight: 800; color: var(--theme-accent); }
+    .map-modal-close { background: none; border: none; color: #8A8A8A; font-size: 18px; font-weight: 900; cursor: pointer; }
+    #route-map { width: 100%; height: 100%; min-height: 350px; flex: 1; background: #121212; z-index: 1; }
+    .leaflet-tile-pane { filter: brightness(1.1) contrast(1.4); }
+    .custom-map-marker { width: 30px; height: 30px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 15px; display: flex; align-items: center; justify-content: center; border: 2px solid #FFFFFF; box-shadow: 0 2px 6px rgba(0,0,0,0.8); }
+    .custom-map-marker.current { background: #22C55E; color: #000000; font-size: 16px; }
+    .leaflet-popup-content { font-size: 14px; font-weight: 800; color: #111; }
+    .call-dot-marker { border-radius: 50%; border: 2px solid #FFFFFF; box-shadow: 0 0 6px rgba(0,0,0,0.8); }
+    .call-dot-marker.active-time { background: #22C55E; animation: activePulseGreen 1.5s infinite; }
+    .call-dot-marker.other-time { background: #64748B; opacity: 0.75; }
+    @keyframes activePulseGreen {
+      0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+      70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+      100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+    }
+  </style>
+</head>
+<body class="mode-1">
+  <div id="hotspotUpdateBanner" class="update-banner">
+    <div class="banner-content">
+      <span>💡 <strong>[수다택시 K]</strong> 핫플 데이터를 검토한 지 2주가 지났어요! 최신 상권을 반영해 볼까요?</span>
+      <div class="banner-btns">
+        <button onclick="requestHotspotUpdate()" class="btn-update">업데이트 요청하기</button>
+        <button onclick="dismissBanner()" class="btn-close">닫기</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="header" id="app-header-title">📅 날짜 수신 대기 중...</div>
+  
+  <div class="mode-container">
+    <button class="mode-pill active" id="btn-mode1">⚡ 스마트 자동 추천 모드</button>
+    <button class="mode-pill" id="btn-mode3">📊 콜 지도 시각화</button>
+  </div>
+  
+  <div class="loc-bar">
+    <span id="loc-text">📍 실시간 GPS 위치 수신 대기 중...</span>
+    <button class="refresh-btn" id="btn-refresh">⟳</button>
+  </div>
+  
+  <div class="btn-group-main" id="main-btn-group">
+    <button class="big-btn" id="btn-search">
+      <span>📍 주변 콜 많은 곳 찾기</span>
+    </button>
+    <button class="map-btn" id="btn-show-map" style="display: none;">
+      <span>🗺️ 전체 도로 동선 지도 보기</span>
+    </button>
+  </div>
+  <div id="heatmap-container">
+    <div class="map-legend">
+      <div class="legend-item"><span class="dot-sample" style="background:#22C55E;"></span> 현재시간대 집중 (+-1시간)</div>
+      <div class="legend-item"><span class="dot-sample" style="background:#64748B;"></span> 기타 시간대 콜</div>
+    </div>
+    <div id="call-map-view"></div>
+  </div>
+  
+  <div class="pipeline-log" id="pipeline-log">대기 중 · 카카오모빌리티 실시간 길찾기 연산 대기</div>
+  
+  <div class="card-list" id="card-list"></div>
+  
+  <div class="backup-section">
+    <div class="backup-header">
+      <span class="backup-title">📊 데이터 관리 & 백업</span>
+      <span class="backup-count" id="log-count-text">저장된 기록: 0개</span>
+    </div>
+    <div class="backup-btn-group">
+      <button class="backup-btn" id="btn-export">📤 JSON 내보내기</button>
+      <button class="backup-btn" id="btn-import-open">📥 JSON 가져오기</button>
+      <input type="file" id="import-file-input" accept=".json,application/json" style="display: none;">
+    </div>
+    
+    <div style="margin-top: 8px; border-top: 1px dashed #3A3A3A; padding-top: 6px;">
+      <div style="font-size: 11px; font-weight: 800; color: #8A8A8A; margin-bottom: 4px;">🕒 최근 저장 목록 (최신 3개)</div>
+      <div id="recent-logs-list" style="display: flex; flex-direction: column; gap: 3px;"></div>
+    </div>
+    
+    <div class="custom-section">
+      <button class="add-custom-btn" id="btn-add-custom">⭐ 현재 위치를 '나만의 콜 장소'로 직접 등록</button>
+      <div style="font-size: 11px; font-weight: 800; color: #C084FC; margin: 6px 0 3px 0;">📍 나만의 콜 장소 목록</div>
+      <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 3px;"></div>
+    </div>
+    
+    <details style="margin-top: 12px; background: #161616; border: 1px solid #333333; border-radius: 10px; padding: 10px 12px; font-size: 11px; line-height: 1.5;">
+      <summary style="font-weight: 800; color: #FFC800; cursor: pointer; font-size: 12px;">💡 수다택시 K 핵심 운행 및 추천 엔진 가이드 (터치하여 펼치기)</summary>
+      <div style="margin-top: 10px; color: #DDDDDD; display: flex; flex-direction: column; gap: 8px;">
+        
+        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
+          <strong style="color: #FFC800;">🟡 [모드 1] 위수 관내 스마트 순환 영업 (노란색 테마)</strong><br>
+          • <strong>영업 목적:</strong> 안양·군포·의왕·과천 지정 위수지역 내부 순환 영업 전용<br>
+          • <strong>최단거리 거점역 100% 지정:</strong> 5대 관문역(평촌, 범계, 인덕원, 안양, 산본) 중 실제 주행 거리가 가장 가까운 역이 무조건 3번 최종 목적지로 고정 지정<br>
+          • <strong>목적지 자동 순환 (500m 초근접 예외):</strong> 최단역과 500m 이내로 들어올 경우 다음 최단 거점역으로 목적지가 자동 변경<br>
+          • <strong>1~2번 길목 경유지:</strong> 현위치에서 3번 거점역으로 가는 길목 상의 알짜 상권 우선 배치
+        </div>
+        
+        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
+          <strong style="color: #FF6B00;">🟠 [모드 2] 타지역/관외 복귀 영업 (오렌지색 테마)</strong><br>
+          • <strong>영업 목적:</strong> 서울/수원/판교 등 타지역 하차 후 내 영업구역(위수지역)으로의 귀로 영업<br>
+          • <strong>출발지 반경 2km 초근접 우대:</strong> 검색 위치 반경 2.0km 이내 핫플 존재 시 무조건 1번 카드 최우선 확정 (바로 태우기)<br>
+          • <strong>복귀 경로 좌우 5km 우회 탐색:</strong> 3번 최단 위수 경계로 내려가는 경로 축 기준 우회 이탈거리 5.0km 이내의 순방향 알짜 상권만 2번 카드 배치
+        </div>
+        
+        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
+          <strong style="color: #C084FC;">📊 기사님 데이터 연동 & 우대 가산점 시스템</strong><br>
+          • <strong>고객 탑승 기록(로그) 매칭:</strong> 저장 위치 반경 300m 이내 매칭 시 현재시간대(±1시간) 및 요일 패턴 일치 시 최대 +60점 집중 가산 (<code>[#현재시간대콜집중]</code>)<br>
+          • <strong>나만의 핫플 우대:</strong> 기사 직접 등록 장소 기본 +25점~+50점 가산 (<code>[#나만의핫플]</code>)<br>
+          • <strong>실시간 기상 연동:</strong> Open-Meteo API 연동 비/눈 검출 시 +20점 보너스 (<code>[#강수보너스]</code>)
+        </div>
+        <div>
+          <strong style="color: #4ADE80;">🕒 시간대별 피크 및 공공데이터 공휴일 가산점</strong><br>
+          • <strong>아침 피크 (07~10시):</strong> 지하철/아파트/병원/오피스 (+35~45점), 유흥상권 감점 (-25점)<br>
+          • <strong>주간 피크 (10~18시):</strong> 병원 (+35~40점), 대형학원가 (+30~35점), 마트/백화점<br>
+          • <strong>야간 피크 (18~04시):</strong> 먹자골목/로데오/주점 (+45점), 역사 Exit (+35점)<br>
+          • <strong>주말 및 법정 공휴일:</strong> 오피스/학원가 차단 (-30점), 쇼핑몰/교외/결혼식/터미널 보너스 대폭 상승
+        </div>
+      </div>
+    </details>
+    <details style="margin-top: 6px; background: #161616; border: 1px solid #333333; border-radius: 10px; padding: 10px 12px; font-size: 11px; line-height: 1.5;">
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 12px;">📜 수다택시 K 전체 업데이트 히스토리 (터치하여 펼치기)</summary>
+      <div style="margin-top: 10px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px;">
+        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
+          <strong style="color: #4ADE80;">v2.0.4 (2026.09) - 거점역 비동기 정렬 타이밍 완벽 해결</strong><br>
+          • 🎯 거점역 산정 시 비동기 병렬 연산(Promise.all) 대신 순차 동기 연산 적용 및 Number 형변환으로 범계역 등 최단 거점역 100% 정상 고정 지정<br>
+          • 🧭 모드 2 출발지 2.0km / 복귀 경로 5.0km 완벽 동선 고정
+        </div>
+      </div>
+    </details>
+  </div>
+  
+  <div class="bottom-bar">
+    <div class="timer-container">
+      <div class="timer-mode-selector">
+        <button class="timer-mode-btn active" id="timer-btn-5m">5분 대기</button>
+        <button class="timer-mode-btn" id="timer-btn-10m">10분 대기</button>
+      </div>
+      <button class="timer-display-btn" id="timer-display-btn">⏱️ 05:00 시작</button>
+    </div>
+    <button class="save-call-btn" id="btn-save-call">📍 고객 탑승<br>위치 저장</button>
+  </div>
+  
+  <div class="toast-banner" id="toast-banner" style="position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 12px; padding: 8px 16px; border-radius: 16px; z-index: 300; display: none; box-shadow: 0 3px 12px rgba(0,0,0,0.6);"></div>
+  
+  <div class="map-modal-overlay" id="map-modal">
+    <div class="map-modal-content">
+      <div class="map-modal-header">
+        <span class="map-modal-title">🗺️ 실제 도로 이동 동선 지도</span>
+        <button class="map-modal-close" id="map-modal-close">✕</button>
+      </div>
+      <div id="route-map"></div>
+    </div>
+  </div>
+  
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
+  
+  let currentMode = 1;
+  let activeTab = 1;
+  let currentPos = null;
+  let currentRegionName = "";
+  let leafletMap = null;
+  let callMapViewLeaflet = null;
+  let currentRouteData = [];
+  let timerPresetMin = 5;
+  let timerRemainingSec = 300;
+  let timerInterval = null;
+  let isTimerRunning = false;
+  
+  let audioCtx = null;
+  let silentAudioElement = null;
+  const SILENT_WAV_BASE64 = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==';
+  
+  function initKakaoSdk() {
+    if (window.Kakao && !window.Kakao.isInitialized()) {
+      try {
+        window.Kakao.init(KAKAO_JS_KEY);
+      } catch(e) {}
+    }
+  }
+
+  function openKakaoNaviApp(name, lat, lng) {
+    initKakaoSdk();
+    let cleanName = cleanQuery(name) || name;
+    
+    if (window.Kakao && window.Kakao.Navi && window.Kakao.isInitialized()) {
+      try {
+        window.Kakao.Navi.share({
+          name: cleanName,
+          x: Number(lng),
+          y: Number(lat),
+          coordType: 'wgs84'
+        });
+        return;
+      } catch(e) {}
+    }
+    window.location.href = `https://m.map.kakao.com/scheme/route?ep=${lat},${lng}&by=car`;
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast-banner');
+    if (!t) return;
+    t.innerText = msg;
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 2200);
+  }
+
+  function initOrResumeAudioContext() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    } catch(e) {}
+  }
+
+  function startBackgroundAudioKeepAlive() {
+    try {
+      if (!silentAudioElement) {
+        silentAudioElement = new Audio(SILENT_WAV_BASE64);
+        silentAudioElement.loop = true;
+      }
+      silentAudioElement.play().catch(e => {});
+    } catch(e) {}
+  }
+
+  function stopBackgroundAudioKeepAlive() {
+    try { if (silentAudioElement) silentAudioElement.pause(); } catch(e) {}
+  }
+
+  function requestNotificationPermission() {
+    if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+  }
+
+  function triggerSystemNotification() {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      try {
+        new Notification('⏱️ [수다택시 K] 대기시간 종료!', {
+          body: `${timerPresetMin}분 대기 완료! 다음 핫스팟으로 이동 추천시간입니다.`,
+          requireInteraction: true
+        });
+      } catch(e) {}
+    }
+  }
+
+  function playTimerAlarm() {
+    try {
+      initOrResumeAudioContext();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      const beepFreqs = [880, 1050, 1250];
+      beepFreqs.forEach((freq, idx) => {
+        const startTime = now + (idx * 0.25);
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, startTime);
+        gain.gain.setValueAtTime(0.8, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.2);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(startTime);
+        osc.stop(startTime + 0.2);
+      });
+    } catch(e) {}
+    if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 300]);
+    triggerSystemNotification();
+  }
+
+  const DEFAULT_MASTER_HOTSPOTS = [
+    { "id": "hs_s_sadang_1", "name": "사당역 환승 거점 및 먹자골목", "lat": 37.4765, "lng": 126.9816, "address": "사당역", "type": "subway_nightlife", "region": "seoul", "isWisu": false },
+    { "id": "hs_s_yeouido_1", "name": "여의도역 및 증권가 상권", "lat": 37.5216, "lng": 126.9242, "address": "여의도동", "type": "office_nightlife", "region": "seoul", "isWisu": false },
+    { "id": "hs_s_yeongdeungpo_1", "name": "영등포역 환승 거점 및 타임스퀘어", "lat": 37.5158, "lng": 126.9075, "address": "영등포동", "type": "subway_shopping", "region": "seoul", "isWisu": false },
+    { "id": "hs_s_guro_1", "name": "구로디지털단지역 로데오", "lat": 37.4852, "lng": 126.9015, "address": "구로동", "type": "office_nightlife", "region": "seoul", "isWisu": false },
+    { "id": "hs_s_sangam_1", "name": "상암 DMC 오피스 및 방송타운", "lat": 37.5780, "lng": 126.8900, "address": "상암동", "type": "office", "region": "seoul", "isWisu": false },
+    { "id": "hs_s_hongdae_1", "name": "홍대입구역 및 연남동 로데오", "lat": 37.5575, "lng": 126.9244, "address": "홍대입구역", "type": "subway_nightlife", "region": "seoul", "isWisu": false },
+    { "id": "hs_s_hapjeong_1", "name": "합정역 환승 거점 및 메세나폴리스", "lat": 37.5495, "lng": 126.9138, "address": "합정역", "type": "subway", "region": "seoul", "isWisu": false },
+    { "id": "hs_s_sinchon_1", "name": "신촌역 로데오 및 메디컬타운", "lat": 37.5552, "lng": 126.9368, "address": "신촌역", "type": "subway_hospital", "region": "seoul", "isWisu": false },
+    { "id": "hs_g_gwangmyeong_1", "name": "KTX 광명역 및 일직동 로데오", "lat": 37.4162, "lng": 126.8845, "address": "광명역", "type": "subway_shopping", "region": "gwangmyeong", "isWisu": false },
+    { "id": "hs_g_gwacheon_1", "name": "정부과천청사역 중심상가 및 로데오", "lat": 37.4262, "lng": 126.9898, "address": "정부과천청사역", "type": "subway_nightlife", "region": "gwacheon", "isWisu": true },
+    { "id": "hs_g_gwacheon_2", "name": "선바위역 환승장 및 먹자골목", "lat": 37.4518, "lng": 127.0022, "address": "선바위역", "type": "subway", "region": "gwacheon", "isWisu": true },
+    { "id": "hs_g_anyang_1", "name": "평촌역 먹자골목 및 한림대병원", "lat": 37.3942, "lng": 126.9638, "address": "평촌역", "type": "subway_hospital", "region": "anyang", "isWisu": true },
+    { "id": "hs_g_anyang_2", "name": "범계역 로데오거리 및 학원가", "lat": 37.3898, "lng": 126.9508, "address": "범계역", "type": "subway_academy", "region": "anyang", "isWisu": true },
+    { "id": "hs_g_anyang_3", "name": "인덕원역 환승 거점", "lat": 37.4048, "lng": 126.9767, "address": "인덕원역", "type": "subway", "region": "anyang", "isWisu": true },
+    { "id": "hs_g_anyang_4", "name": "안양역 일번가 및 메디컬타운", "lat": 37.4013, "lng": 126.9222, "address": "안양역", "type": "subway_hospital", "region": "anyang", "isWisu": true },
+    { "id": "hs_g_anyang_5", "name": "산본역 중심상가 및 원광대병원", "lat": 37.3554, "lng": 126.9331, "address": "산본역", "type": "subway_hospital", "region": "gunpo", "isWisu": true },
+    { "id": "hs_s_01", "name": "강남역 상업지구 및 병원거리", "lat": 37.4981, "lng": 127.0276, "address": "강남역", "type": "subway_hospital", "region": "seoul", "isWisu": false }
+  ];
+
+  const WISU_BOUNDARY_POINTS = [
+    { name: "안양 석수동 경계 (인천/부천/서울 방면)", lat: 37.4265, lng: 126.9050, address: "석수동", isWisu: true },
+    { name: "안양 박달동 경계 (시흥/인천 방면)", lat: 37.4080, lng: 126.8920, address: "박달동", isWisu: true },
+    { name: "안양 만안구 경계", lat: 37.3850, lng: 126.9100, address: "안양동", isWisu: true },
+    { name: "군포 대야미/부곡 경계 (안산 방면)", lat: 37.3320, lng: 126.9150, address: "대야미동", isWisu: true },
+    { name: "의왕 부곡/월암 경계 (수원 방면)", lat: 37.3080, lng: 126.9580, address: "월암동", isWisu: true },
+    { name: "의왕 청계/포일 경계 (성남/분당 방면)", lat: 37.3950, lng: 127.0120, address: "포일동", isWisu: true },
+    { name: "과천 주암/선바위 경계 (서울/강남 방면)", lat: 37.4520, lng: 127.0050, address: "과천동", isWisu: true }
+  ];
+
+  async function checkIsInsideWisuRealtime(lat, lng) {
+    return new Promise((resolve) => {
+      if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
+        const geocoder = new kakao.maps.services.Geocoder();
+        geocoder.coord2RegionCode(lng, lat, (result, status) => {
+          if (status === kakao.maps.services.Status.OK && result.length > 0) {
+            const region2 = result[0].region_2depth_name || "";
+            currentRegionName = `${result[0].region_1depth_name} ${region2}`.trim();
+            const isWisu = region2.includes("안양") || region2.includes("군포") || region2.includes("의왕") || region2.includes("과천");
+            resolve(isWisu);
+            return;
+          }
+          resolve(lat >= 37.34 && lat <= 37.445 && lng >= 126.90 && lng <= 127.015);
+        });
+      } else {
+        resolve(lat >= 37.34 && lat <= 37.445 && lng >= 126.90 && lng <= 127.015);
+      }
+    });
+  }
+
+  const MAJOR_HUBS = [
+    { name: "인덕원역 환승 거점", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway", isWisu: true },
+    { name: "평촌역 먹자골목 및 한림대병원", lat: 37.3942, lng: 126.9638, address: "평촌역", type: "subway_hospital", isWisu: true },
+    { name: "범계역 로데오거리 및 학원가", lat: 37.3898, lng: 126.9508, address: "범계역", type: "subway_academy", isWisu: true },
+    { name: "안양역 일번가 및 메디컬타운", lat: 37.4013, lng: 126.9222, address: "안양역", type: "subway_hospital", isWisu: true },
+    { name: "산본역 중심상가 및 원광대병원", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway_hospital", isWisu: true }
+  ];
+
+  function getMasterHotspotsFromStorage() {
+    const saved = localStorage.getItem('sudataxi_master_hotspots');
+    if (saved) {
+      try { return JSON.parse(saved); } catch(e) {}
+    }
+    return DEFAULT_MASTER_HOTSPOTS;
+  }
+
+  function getStraightDistanceKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  function getScoreLevelBadge(score) {
+    if (score >= 100) return '<span class="level-badge level-high">🔥 높음</span>';
+    if (score >= 60) return '<span class="level-badge level-mid">⚡ 보통</span>';
+    return '<span class="level-badge level-low">💧 낮음</span>';
+  }
+
+  function formatMMSS(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${String(m).padStart(2,'0')}:${String(s).padStart(2, '0')}`;
+  }
+
+  function setTimerPreset(min) {
+    initOrResumeAudioContext();
+    requestNotificationPermission();
+    if (isTimerRunning) {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+      stopBackgroundAudioKeepAlive();
+    }
+    timerPresetMin = min;
+    timerRemainingSec = min * 60;
+    document.getElementById('timer-btn-5m').classList.toggle('active', min === 5);
+    document.getElementById('timer-btn-10m').classList.toggle('active', min === 10);
+    const btn = document.getElementById('timer-display-btn');
+    btn.className = 'timer-display-btn';
+    btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 시작`;
+  }
+
+  function toggleTimer() {
+    initOrResumeAudioContext();
+    requestNotificationPermission();
+    const btn = document.getElementById('timer-display-btn');
+    if (timerRemainingSec <= 0) {
+      timerRemainingSec = timerPresetMin * 60;
+      btn.className = 'timer-display-btn';
+    }
+    if (isTimerRunning) {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+      stopBackgroundAudioKeepAlive();
+      btn.classList.remove('running');
+      btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 재개`;
+    } else {
+      isTimerRunning = true;
+      startBackgroundAudioKeepAlive();
+      btn.classList.add('running');
+      btn.classList.remove('finished');
+      
+      let lastTime = Date.now();
+      timerInterval = setInterval(() => {
+        const now = Date.now();
+        const elapsedSec = Math.round((now - lastTime) / 1000);
+        if (elapsedSec >= 1) {
+          timerRemainingSec -= elapsedSec;
+          lastTime = now;
+        }
+        if (timerRemainingSec <= 0) {
+          clearInterval(timerInterval);
+          isTimerRunning = false;
+          stopBackgroundAudioKeepAlive();
+          timerRemainingSec = 0;
+          btn.className = 'timer-display-btn finished';
+          btn.innerText = `⏱️ 00:00 이동 추천!`;
+          playTimerAlarm();
+        } else {
+          btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)}`;
+        }
+      }, 1000);
+    }
+  }
+
+  async function fetchRealtimeWeather(lat, lng) {
+    try {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=precipitation,rain,showers,snowfall&timezone=Asia%2FTokyo`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const current = data.current || {};
+      const isRainOrSnow = (current.precipitation > 0 || current.rain > 0 || current.showers > 0 || current.snowfall > 0);
+      return { isRainOrSnow, precip: current.precipitation || 0 };
+    } catch (e) {
+      return { isRainOrSnow: false, precip: 0 };
+    }
+  }
+
+  async function checkIsPublicHolidayRealtime() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const todayStr = `${year}${month}${day}`;
+    
+    const fallbackHolidays = ["20260924", "20260925", "20260926", "20261003", "20261009", "20261225"];
+    const isFallbackHol = fallbackHolidays.includes(todayStr);
+    let fallbackName = isFallbackHol ? "공휴일" : null;
+    updateHeaderTitle(now, isFallbackHol, fallbackName);
+    return isFallbackHol;
+  }
+
+  function updateHeaderTitle(nowDate, isHoliday, holidayName) {
+    const headerEl = document.getElementById('app-header-title');
+    if (!headerEl) return;
+    
+    const year = nowDate.getFullYear();
+    const month = nowDate.getMonth() + 1;
+    const date = nowDate.getDate();
+    const days = ['일', '월', '화', '수', '목', '금', '토'];
+    const dayStr = days[nowDate.getDay()];
+    const isWeekend = (nowDate.getDay() === 0 || nowDate.getDay() === 6);
+    
+    let badgeHtml = '';
+    if (isHoliday) {
+      badgeHtml = `<span class="holiday-badge">🔴 ${holidayName || '법정 공휴일'}</span>`;
+    } else if (isWeekend) {
+      badgeHtml = `<span class="holiday-badge" style="background:#FF8C00;">🟡 주말 휴일</span>`;
+    } else {
+      badgeHtml = `<span class="weekday-badge">🟢 평일</span>`;
+    }
+    headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) ${badgeHtml}`;
+  }
+
+  // ⚡ 카카오 장소 SDK 초고속 직통 수신
+  async function fetchLiveKakaoHotspots(lat, lng) {
+    return new Promise((resolve) => {
+      if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) {
+        resolve([]);
+        return;
+      }
+      const ps = new kakao.maps.services.Places();
+      const options = {
+        location: new kakao.maps.LatLng(lat, lng),
+        radius: 4000,
+        sort: kakao.maps.services.SortBy.DISTANCE
+      };
+
+      const nowHour = new Date().getHours();
+      let category = 'FD6';
+      if (nowHour >= 7 && nowHour < 12) category = 'SW8';
+
+      ps.categorySearch(category, (data, status) => {
+        if (status === kakao.maps.services.Status.OK && data && data.length > 0) {
+          const liveItems = data.slice(0, 5).map(place => ({
+            id: 'kakao_live_' + place.id,
+            name: place.place_name,
+            lat: parseFloat(place.y),
+            lng: parseFloat(place.x),
+            address: place.address_name || place.road_address_name,
+            type: 'nightlife',
+            isLiveKakao: true
+          }));
+          resolve(liveItems);
+        } else {
+          resolve([]);
+        }
+      }, options);
+    });
+  }
+
+  function parseDateSafely(dateStr) {
+    if (!dateStr) return new Date(0);
+    if (dateStr instanceof Date) return dateStr;
+    if (typeof dateStr === 'number') return new Date(dateStr);
+    let s = String(dateStr).trim();
+    let d = new Date(s);
+    if (!isNaN(d.getTime())) return d;
+    return new Date(0);
+  }
+
+  async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
+    const directDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng);
+    try {
+      const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      const res = await fetch(osrmUrl, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.routes && data.routes.length > 0) {
+          const route = data.routes[0];
+          const coords = route.geometry.coordinates.map(pt => [pt[1], pt[0]]);
+          return {
+            distanceKm: parseFloat((route.distance / 1000).toFixed(1)),
+            durationMin: Math.max(1, Math.round(route.duration / 60)),
+            geometryCoords: coords
+          };
+        }
+      }
+    } catch (e) {}
+    
+    return {
+      distanceKm: parseFloat((directDist * 1.3).toFixed(1)),
+      durationMin: Math.max(1, Math.round((directDist * 1.3 / 25) * 60)),
+      geometryCoords: [[fromLat, fromLng], [toLat, toLng]]
+    };
+  }
+
+  async function getDynamicTimeCategoryBonus(itemType, itemName, nowHour) {
+    let bonus = 0;
+    const name = itemName || '';
+    const isNightlife = name.includes('먹자골목') || name.includes('포차') || name.includes('주점') || name.includes('로데오');
+    if (nowHour >= 18 || nowHour < 4) {
+      if (isNightlife) bonus += 45;
+    }
+    return bonus;
+  }
+
+  function calculateCallLogScore(candLat, candLng) {
+    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+    if (logs.length === 0) return { bonus: 0, matched: false, count: 0, isTimeMatch: false };
+    
+    const now = new Date();
+    const currentHour = now.getHours();
+    let maxBonus = 0;
+    let matchCount = 0;
+    let isTimeMatch = false;
+
+    logs.forEach(log => {
+      const logLat = Number(log.lat);
+      const logLng = Number(log.lng);
+      if (isNaN(logLat) || isNaN(logLng)) return;
+      
+      const dist = getStraightDistanceKm(candLat, candLng, logLat, logLng);
+      if (dist <= 0.3) {
+        matchCount++;
+        const logDate = parseDateSafely(log.timestamp);
+        const logHour = logDate.getHours();
+        let hourDiff = Math.abs(currentHour - logHour);
+        if (hourDiff > 12) hourDiff = 24 - hourDiff;
+        
+        if (hourDiff <= 1) {
+          maxBonus = 60;
+          isTimeMatch = true;
+        } else if (maxBonus < 30) {
+          maxBonus = 30;
+        }
+      }
+    });
+    return { bonus: maxBonus, matched: matchCount > 0, count: matchCount, isTimeMatch };
+  }
+
+  async function calculatePureSpotScore(item, weatherData, nowHour) {
+    let score = 50;
+    if (item.isCustom) score += 50;
+    else if (item.isLiveKakao) score += 45;
+    else if (item.region || item.isWisu) score += 35;
+    
+    const timeBonus = await getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
+    score += timeBonus;
+    
+    if (weatherData.isRainOrSnow) score += 20;
+    const logResult = calculateCallLogScore(item.lat, item.lng);
+    score += logResult.bonus;
+    
+    return {
+      score: Math.max(10, score),
+      logCount: logResult.count,
+      isTimeMatch: logResult.isTimeMatch
+    };
+  }
+
+  function getCustomHotspots() {
+    return JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
+  }
+
+  function setTab(tab) {
+    activeTab = tab;
+    document.getElementById('btn-mode1').classList.toggle('active', tab === 1);
+    document.getElementById('btn-mode3').classList.toggle('active', tab === 3);
+    
+    const mainBtnGroup = document.getElementById('main-btn-group');
+    const heatmapBox = document.getElementById('heatmap-container');
+    const cardListEl = document.getElementById('card-list');
+    
+    if (tab === 3) {
+      if (mainBtnGroup) mainBtnGroup.style.display = 'none';
+      if (heatmapBox) heatmapBox.style.display = 'flex';
+      if (cardListEl) cardListEl.style.display = 'none';
+      renderCallMapView();
+    } else {
+      if (mainBtnGroup) mainBtnGroup.style.display = 'flex';
+      if (heatmapBox) heatmapBox.style.display = 'none';
+      if (cardListEl) cardListEl.style.display = 'flex';
+      executeSearch();
+    }
+  }
+
+  function executeSearch() {
+    const locText = document.getElementById('loc-text');
+    if (locText) locText.innerText = '📍 실시간 GPS 위치 수신 중...';
+    if (!navigator.geolocation) {
+      if (locText) locText.innerText = `❌ GPS 미지원 기기입니다.`;
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        currentPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        const inWisu = await checkIsInsideWisuRealtime(currentPos.lat, currentPos.lng);
+        
+        currentMode = inWisu ? 1 : 2;
+        document.body.className = `mode-${currentMode}`;
+        if (locText) locText.innerText = `📍 ${currentRegionName || currentPos.lat.toFixed(4)} (${inWisu ? '위수 안 - 순환' : '외곽/타지역 - 복귀'})`;
+        if (activeTab !== 3) calculateAndRender();
+      },
+      (err) => {
+        if (locText) locText.innerText = `❌ GPS 수신 대기 (⟳ 새로고침 터치)`;
+        showToast("📍 위치 권한을 허용하신 후 ⟳ 새로고침을 누르세요.");
+      },
+      { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 }
+    );
+  }
+
+  function isDuplicatePlace(candName, candLat, candLng, existingList) {
+    return existingList.some(item => {
+      const nameA = item.name.replace(/\s+/g, '').substring(0, 3);
+      const nameB = candName.replace(/\s+/g, '').substring(0, 3);
+      const sameName = nameA === nameB || nameA.includes(nameB) || nameB.includes(nameA);
+      const closeDist = getStraightDistanceKm(item.lat, item.lng, candLat, candLng) < 1.0;
+      return sameName || closeDist;
+    });
+  }
+
+  // =========================================================================
+  // 💡 [v2.0.4 FINAL BUILD] 순차 동기 정렬로 최단 거점역 100% 고정 지정
+  // =========================================================================
+  async function calculateAndRender() {
+    if (!currentPos) return;
+    const logEl = document.getElementById('pipeline-log');
+    const inWisu = (currentMode === 1);
+    if (logEl) logEl.innerText = `⚡ [스마트 ${inWisu ? '관내순환' : '관외복귀'}] 카카오모빌리티 실시간 정체/경로 연산 중...`;
+    
+    let weatherData = { isRainOrSnow: false };
+    try { weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng); } catch(e) {}
+    
+    const liveKakaoHotspots = await fetchLiveKakaoHotspots(currentPos.lat, currentPos.lng);
+    const customHotspots = getCustomHotspots();
+    const masterHotspots = getMasterHotspotsFromStorage();
+    const nowHour = new Date().getHours();
+    
+    let finalTarget = null;
+    
+    if (inWisu) {
+      // 🟡 [모드 1] 순차 동기 연산으로 '실제 주행 거리(dist)' 최단 거점역 100% 고정
+      let scoredTargets = [];
+      for (let h of MAJOR_HUBS) {
+        let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
+        let pureRes = await calculatePureSpotScore({...h, isWisu: true}, weatherData, nowHour);
+        scoredTargets.push({
+          ...h,
+          dist: Number(road.distanceKm),
+          estimatedTimeMin: road.durationMin,
+          score: pureRes.score,
+          geometryCoords: road.geometryCoords
+        });
+      }
+
+      // 💡 실제 도로 주행 거리(dist) 숫자로 완전 오름차순 정렬!
+      scoredTargets.sort((a, b) => a.dist - b.dist);
+
+      // 현재 위치 500m 이내 예외 제외 무조건 최단역 고정
+      finalTarget = (scoredTargets[0].dist <= 0.5 && scoredTargets.length > 1) ? scoredTargets[1] : scoredTargets[0];
+    } else {
+      // 🟠 [모드 2] 타지역 복귀 : 실시간 최단 위수 경계 목적지 지정
+      const allWisuCandidates = [...WISU_BOUNDARY_POINTS, ...masterHotspots, ...MAJOR_HUBS].filter(item => {
+        return item.isWisu === true || item.region === 'anyang' || item.region === 'gunpo' || item.region === 'gwacheon' || item.region === 'uiwang';
+      });
+
+      let scoredWisuTargets = [];
+      for (let item of allWisuCandidates) {
+        let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
+        let pureRes = await calculatePureSpotScore({...item, isWisu: true}, weatherData, nowHour);
+        scoredWisuTargets.push({
+          ...item,
+          dist: Number(road.distanceKm),
+          estimatedTimeMin: road.durationMin,
+          score: pureRes.score,
+          geometryCoords: road.geometryCoords
+        });
+      }
+      
+      scoredWisuTargets.sort((a, b) => a.dist - b.dist);
+      finalTarget = scoredWisuTargets[0]; 
+    }
+
+    const majorHubKeywords = ["인덕원", "평촌역", "범계역", "안양역", "산본역"];
+    let rawPool = [...liveKakaoHotspots, ...customHotspots, ...masterHotspots].filter(item => {
+      const itemName = item.name.replace(/\s+/g, '');
+      const isMajorHub = majorHubKeywords.some(kw => itemName.includes(kw));
+      if (isMajorHub) return false;
+      const nameA = itemName.substring(0, 3);
+      const nameB = finalTarget.name.replace(/\s+/g, '').substring(0, 3);
+      return nameA !== nameB;
+    });
+
+    const distAtoC = getStraightDistanceKm(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
+    
+    let scoredPool = [];
+    for (let item of rawPool) {
+      const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
+      const distBtoC = getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
+      let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
+      let pureRes = await calculatePureSpotScore(item, weatherData, nowHour);
+      
+      let finalScore = pureRes.score;
+      if (!inWisu && road.distanceKm <= 2.0) {
+        finalScore += 50;
+      }
+
+      scoredPool.push({
+        ...item, 
+        dist: Number(road.distanceKm), 
+        distBtoC: distBtoC,
+        estimatedTimeMin: road.durationMin,
+        geometryCoords: road.geometryCoords,
+        score: finalScore, 
+        isNearStep1: (road.distanceKm <= 2.0),
+        logCount: pureRes.logCount,
+        isTimeMatch: pureRes.isTimeMatch,
+        isMasterDb: !item.isCustom && !item.isLiveKakao && (item.region !== undefined || item.id?.startsWith('hs_'))
+      });
+    }
+
+    let selectedCandidates = [];
+
+    if (inWisu) {
+      let validPool = scoredPool.filter(p => p.score >= 30 && p.dist < distAtoC);
+      validPool.sort((a, b) => b.score - a.score);
+      for (let candidate of validPool) {
+        if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedCandidates)) {
+          selectedCandidates.push(candidate);
+        }
+        if (selectedCandidates.length === 2) break;
+      }
+      selectedCandidates.sort((a, b) => a.dist - b.dist);
+    } else {
+      // 🟠 [모드 2 원칙] 출발지 2.0km 초근접 1번 우선 배정
+      let startAreaPool = scoredPool.filter(p => p.dist <= 2.0);
+      startAreaPool.sort((a, b) => b.score - a.score);
+
+      if (startAreaPool.length > 0) {
+        selectedCandidates.push(startAreaPool[0]);
+      } else {
+        let fallbackStartPool = scoredPool.filter(p => p.dist <= 3.5 && p.dist < distAtoC);
+        fallbackStartPool.sort((a, b) => b.score - a.score);
+        if (fallbackStartPool.length > 0) selectedCandidates.push(fallbackStartPool[0]);
+      }
+
+      // 복귀 경로 우회 5.0km 이내 순방향 핫플 선별
+      let corridorPool = scoredPool.filter(p => {
+        if (selectedCandidates.some(s => s.name === p.name)) return false;
+        const detourDist = (p.dist + p.distBtoC) - distAtoC;
+        const distToFinal = getStraightDistanceKm(p.lat, p.lng, finalTarget.lat, finalTarget.lng);
+        return (p.dist > (selectedCandidates[0]?.dist || 0)) && (detourDist <= 5.0) && (distToFinal >= 2.0);
+      });
+      corridorPool.sort((a, b) => b.score - a.score);
+
+      for (let candidate of corridorPool) {
+        if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedCandidates)) {
+          selectedCandidates.push(candidate);
+        }
+        if (selectedCandidates.length === 2) break;
+      }
+
+      selectedCandidates.sort((a, b) => a.dist - b.dist);
+    }
+
+    currentRouteData = [
+      { name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true },
+      ...selectedCandidates,
+      { ...finalTarget, isFinal: true }
+    ];
+    
+    const mapBtn = document.getElementById('btn-show-map');
+    if (mapBtn) mapBtn.style.display = 'flex';
+    if (logEl) {
+      logEl.innerText = selectedCandidates.length > 0 
+        ? `방금 · [${inWisu ? '관내순환' : '관외복귀'}] 연산 완료 (목적지: ${finalTarget.name})`
+        : `방금 · [${inWisu ? '관내순환' : '관외복귀'}] 목적지근접 (${finalTarget.name} 직행)`;
+    }
+    
+    let subFinalCandidates = [];
+    if (inWisu) {
+      for (let h of MAJOR_HUBS.filter(h => h.name !== finalTarget.name)) {
+        let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
+        let pureRes = await calculatePureSpotScore({...h, isWisu: true}, weatherData, nowHour);
+        subFinalCandidates.push({
+          ...h,
+          dist: Number(road.distanceKm),
+          estimatedTimeMin: road.durationMin,
+          score: pureRes.score
+        });
+      }
+      subFinalCandidates.sort((a, b) => a.dist - b.dist);
+    }
+    renderCards(selectedCandidates, finalTarget, subFinalCandidates);
+  }
+
+  function renderCards(routeCards, finalTarget, subFinalCandidates) {
+    const listEl = document.getElementById('card-list');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    
+    routeCards.forEach((item, index) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const safeName = item.name.replace(/'/g, "\\'");
+      card.innerHTML = `
+        <div class="card-main-content">
+          <div class="card-top-row">
+            <div class="card-title-group">
+              <div class="num-badge">${index + 1}</div>
+              <div class="place-info">
+                <div class="place-name">${item.name}</div>
+                <div class="score-dist">실시간 ${item.dist.toFixed(1)}km (약 ${item.estimatedTimeMin}분) · ${item.score}점 ${getScoreLevelBadge(item.score)}</div>
+              </div>
+            </div>
+          </div>
+          <div class="card-btn-row">
+            <button type="button" class="action-btn navi-btn" onclick="openKakaoNaviApp('${safeName}', ${item.lat}, ${item.lng})">🚘 카카오내비</button>
+          </div>
+        </div>
+        <div class="tag-group">
+          ${item.isNearStep1 ? '<span class="tag near">#현위치2km초근접</span>' : '<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#이동경로사이</span>'}
+          ${item.isLiveKakao ? '<span class="tag livekakaomap">⚡카카오실시간상권</span>' : ''}
+          ${item.isTimeMatch ? '<span class="tag timematch">🔥현재시간대콜집중</span>' : ''}
+          ${item.isMasterDb ? '<span class="tag masterdb">#수도권마스터DB</span>' : ''}
+          ${item.isCustom ? '<span class="tag custom">#나만의핫플</span>' : ''}
+          ${item.logCount > 0 ? `<span class="tag logmatch">#누적콜 ${item.logCount}건</span>` : ''}
+        </div>
+      `;
+      listEl.appendChild(card);
+    });
+
+    const finalCard = document.createElement('div');
+    finalCard.className = 'card final-card';
+    const inWisu = (currentMode === 1);
+    const targetLabel = inWisu ? '최종번화가(5대거점역)' : '실시간최단위수경계복귀';
+    const finalBadgeNum = routeCards.length + 1;
+    const safeFinalName = finalTarget.name.replace(/'/g, "\\'");
+    finalCard.innerHTML = `
+      <div class="card-main-content">
+        <div class="card-top-row">
+          <div class="card-title-group">
+            <div class="num-badge">${finalBadgeNum}</div>
+            <div class="place-info">
+              <div class="place-name">${finalTarget.name}</div>
+              <div class="score-dist">실시간 ${finalTarget.dist.toFixed(1)}km (약 ${finalTarget.estimatedTimeMin || 0}분) · ${finalTarget.score}점 ${getScoreLevelBadge(finalTarget.score)} [${targetLabel}]</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-btn-row">
+          <button type="button" class="action-btn navi-btn" onclick="openKakaoNaviApp('${safeFinalName}', ${finalTarget.lat}, ${finalTarget.lng})">🚘 카카오내비</button>
+        </div>
+      </div>
+      <div class="sub-info">${routeCards.length > 0 ? '경유지탐색후순차이동 · ' : '경유지없음 · 즉시직행권장 · '}${finalTarget.dist.toFixed(1)}km 남음</div>
+    `;
+    listEl.appendChild(finalCard);
+    
+    if (inWisu && subFinalCandidates && subFinalCandidates.length > 0) {
+      const subSection = document.createElement('div');
+      subSection.className = 'sub-final-section';
+      subSection.innerHTML = `
+        <div class="sub-final-title">⭐ 다른 5대 거점역 후보 보기 (참고용)</div>
+        <div class="sub-final-list">
+          ${subFinalCandidates.map(sub => {
+            const safeSubName = sub.name.replace(/'/g, "\\'");
+            return `
+            <div class="sub-final-card">
+              <div class="sub-final-top">
+                <div class="sub-final-info">
+                  <div class="sub-final-name">${sub.name}</div>
+                  <div class="sub-final-meta">실시간 ${sub.dist.toFixed(1)}km (약 ${sub.estimatedTimeMin}분) · ${sub.score}점</div>
+                </div>
+                ${getScoreLevelBadge(sub.score)}
+              </div>
+              <div class="sub-btn-row">
+                <button type="button" class="sub-action-btn sub-navi-btn" onclick="openKakaoNaviApp('${safeSubName}', ${sub.lat},${sub.lng})">🚘 카카오내비</button>
+              </div>
+            </div>
+          `}).join('')}
+        </div>
+      `;
+      listEl.appendChild(subSection);
+    }
+  }
+
+  function renderCallMapView() {
+    if (typeof L === 'undefined') return;
+    const centerPos = currentPos || { lat: 37.4048, lng: 126.9767 };
+    
+    if (!callMapViewLeaflet) {
+      callMapViewLeaflet = L.map('call-map-view', { zoomControl: false }).setView([centerPos.lat, centerPos.lng], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '' }).addTo(callMapViewLeaflet);
+    } else {
+      callMapViewLeaflet.setView([centerPos.lat, centerPos.lng], 13);
+      callMapViewLeaflet.invalidateSize();
+    }
+    callMapViewLeaflet.eachLayer(l => { if (l instanceof L.Marker) callMapViewLeaflet.removeLayer(l); });
+    L.marker([centerPos.lat, centerPos.lng], {
+      icon: L.divIcon({ html: '<div class="custom-map-marker current">📍</div>', className: '', iconSize: [30, 30], iconAnchor: [15, 15] })
+    }).addTo(callMapViewLeaflet).bindPopup('<b>현재 위치</b>');
+    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+    const currentHour = new Date().getHours();
+    if (logs.length === 0) {
+      document.getElementById('pipeline-log').innerText = '저장된 고객 탑승 콜 기록이 없습니다.';
+      return;
+    }
+    let activeCount = 0;
+    logs.forEach(log => {
+      const logLat = Number(log.lat);
+      const logLng = Number(log.lng);
+      if (isNaN(logLat) || isNaN(logLng)) return;
+      const logDate = parseDateSafely(log.timestamp);
+      const logHour = logDate.getHours();
+      let hourDiff = Math.abs(currentHour - logHour);
+      if (hourDiff > 12) hourDiff = 24 - hourDiff;
+      const isActiveTime = hourDiff <= 1;
+      if (isActiveTime) activeCount++;
+      const markerClass = isActiveTime ? 'call-dot-marker active-time' : 'call-dot-marker other-time';
+      const markerSize = isActiveTime ? 16 : 10;
+      L.marker([logLat, logLng], {
+        icon: L.divIcon({
+          html: `<div class="${markerClass}" style="width:${markerSize}px; height:${markerSize}px;"></div>`,
+          className: '',
+          iconSize: [markerSize, markerSize],
+          iconAnchor: [markerSize/2, markerSize/2]
+        })
+      }).addTo(callMapViewLeaflet).bindPopup(`
+        <b>📍 탑승 기록</b><br>
+        시간: ${logDate.toLocaleTimeString()}<br>
+        날짜: ${logDate.toLocaleDateString()}<br>
+        ${isActiveTime ? '<span style="color:#22C55E; font-weight:900;">🔥 현재시간 집중지점</span>' : ''}
+      `);
+    });
+    document.getElementById('pipeline-log').innerText = `콜 지도 모드 · 전체 ${logs.length}건 중 현재시간대(${currentHour}시 기준) 콜 ${activeCount}건 집중`;
+  }
+
+  async function openRouteMapModal() {
+    if (typeof L === 'undefined') {
+      showToast('지도 로딩 중입니다.');
+      return;
+    }
+    const modal = document.getElementById('map-modal');
+    if (modal) modal.classList.add('active');
+    setTimeout(async () => {
+      if (!leafletMap) {
+        leafletMap = L.map('route-map', { zoomControl: false });
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '' }).addTo(leafletMap);
+      }
+      leafletMap.invalidateSize();
+      leafletMap.eachLayer(l => { if (l instanceof L.Marker || l instanceof L.Polyline) leafletMap.removeLayer(l); });
+      
+      const themeColor = currentMode === 1 ? '#FFC800' : '#FF6B00';
+      const markerCoords = currentRouteData.map(pt => [pt.lat, pt.lng]);
+      
+      currentRouteData.forEach((pt, idx) => {
+        let badgeNum = pt.isFinal ? currentRouteData.length - 1 : idx;
+        let html = pt.isCurrent ? '<div class="custom-map-marker current">📍</div>' : `<div class="custom-map-marker" style="background:${themeColor}">${badgeNum}</div>`;
+        L.marker([pt.lat, pt.lng], { icon: L.divIcon({ html, className: '', iconSize: [30, 30], iconAnchor: [15, 15] }) })
+          .addTo(leafletMap).bindPopup(`<b>${pt.name}</b>`);
+      });
+      
+      let allRoadCoords = [];
+      for (let i = 0; i < currentRouteData.length - 1; i++) {
+        const start = currentRouteData[i];
+        const end = currentRouteData[i+1];
+        const roadRes = await fetchKakaoRoadRoute(start.lat, start.lng, end.lat, end.lng);
+        if (roadRes && roadRes.geometryCoords) {
+          allRoadCoords.push(...roadRes.geometryCoords);
+        }
+      }
+      if (allRoadCoords.length > 0) {
+        L.polyline(allRoadCoords, { color: themeColor, weight: 6, opacity: 0.9, lineJoin: 'round', lineCap: 'round' }).addTo(leafletMap);
+      }
+      leafletMap.fitBounds(L.latLngBounds(markerCoords), { padding: [40, 40] });
+    }, 200);
+  }
+
+  function closeRouteMapModal() {
+    const modal = document.getElementById('map-modal');
+    if (modal) modal.classList.remove('active');
+  }
+
+  function cleanQuery(str) {
+    if (!str) return '';
+    return str.replace(/먹자골목|중심상가|상업지구|환승거점|사거리|로데오거리|로데오|환승센터|포차|맛고을|업무지구|메디컬타운/g, '').trim();
+  }
+
+  function saveCurrentCallLocation() {
+    const doSave = (pos) => {
+      let logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+      logs.push({ id: 'log_' + Date.now(), timestamp: new Date().toISOString(), lat: pos.lat, lng: pos.lng, mode: currentMode });
+      localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
+      updateCallLogStats();
+      showToast('🎉 고객 탑승 위치 저장 완료!');
+      if (activeTab === 3) renderCallMapView();
+    };
+    if (currentPos) doSave(currentPos);
+    else showToast("위치 확인 후 저장 가능합니다.");
+  }
+
+  function addCustomHotspotPrompt() {
+    if (!currentPos) {
+      showToast('먼저 위치 검색을 진행해 주세요.');
+      return;
+    }
+    const name = prompt('⭐ 나만의 콜 장소 이름:');
+    if (!name || !name.trim()) return;
+    let custom = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
+    custom.push({ id: 'custom_' + Date.now(), name: name.trim(), lat: currentPos.lat, lng: currentPos.lng, type: 'subway', isCustom: true, address: name.trim() });
+    localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(custom));
+    updateCustomHotspotUI();
+    if (activeTab !== 3) calculateAndRender();
+    showToast('등록 완료!');
+  }
+
+  function deleteCustomHotspot(id) {
+    let custom = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]').filter(i => i.id !== id);
+    localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(custom));
+    updateCustomHotspotUI();
+    if (activeTab !== 3) calculateAndRender();
+  }
+
+  function updateCustomHotspotUI() {
+    const list = document.getElementById('custom-hotspots-list');
+    if (!list) return;
+    const custom = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
+    if (custom.length === 0) {
+      list.innerHTML = '<div style="font-size:10px; color:#666; text-align:center;">등록된 장소가 없습니다.</div>';
+      return;
+    }
+    list.innerHTML = custom.map(item => `
+      <div class="recent-log-item">
+        <span class="recent-log-time">⭐ ${item.name}</span>
+        <button class="delete-custom-btn" data-id="${item.id}" style="background:#2E1815; color:#FF5555; border:1px solid #4A2020; border-radius:4px; padding:2px 6px; font-size:10px; font-weight:700; cursor:pointer;">삭제</button>
+      </div>
+    `).join('');
+    document.querySelectorAll('.delete-custom-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        deleteCustomHotspot(e.currentTarget.dataset.id);
+      });
+    });
+  }
+
+  function deleteCallLog(id, ts) {
+    let logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]').filter(i => i.id !== id && i.timestamp !== ts);
+    localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
+    updateCallLogStats();
+    if (activeTab === 3) renderCallMapView();
+  }
+
+  function updateCallLogStats() {
+    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+    const countText = document.getElementById('log-count-text');
+    if (countText) countText.innerText = `저장된 기록: ${logs.length}개`;
+    const list = document.getElementById('recent-logs-list');
+    if (!list) return;
+    if (logs.length === 0) {
+      list.innerHTML = '<div style="font-size:10px; color:#666; text-align:center;">기록이 없습니다.</div>';
+      return;
+    }
+    list.innerHTML = logs.slice(-3).reverse().map(item => `
+      <div class="recent-log-item">
+        <span class="recent-log-time">📍 ${new Date(item.timestamp).toLocaleTimeString()} [M${item.mode || 1}]</span>
+        <button class="delete-log-item-btn" data-id="${item.id}" data-ts="${item.timestamp}" style="background:#2E1815; color:#FF5555; border:1px solid #4A2020; border-radius:4px; padding:2px 6px; font-size:10px; font-weight:700; cursor:pointer;">삭제</button>
+      </div>
+    `).join('');
+    document.querySelectorAll('.delete-log-item-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        deleteCallLog(e.currentTarget.dataset.id, e.currentTarget.dataset.ts);
+      });
+    });
+  }
+
+  function exportCallLogs() {
+    const data = { 
+      call_logs: JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]'), 
+      custom_hotspots: JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]'),
+      master_hotspots: getMasterHotspotsFromStorage()
+    };
+    const jsonStr = JSON.stringify(data, null, 2);
+    const today = new Date();
+    const dateStr = today.getFullYear() +
+      String(today.getMonth() + 1).padStart(2, '0') +
+      String(today.getDate()).padStart(2, '0');
+    
+    const defaultFileName = `sudataxi_backup_${dateStr}`;
+    let userFileName = prompt('💾 저장할 백업 파일 이름을 입력하세요:', defaultFileName);
+    
+    if (userFileName === null) return;
+    userFileName = userFileName.trim();
+    if (!userFileName) userFileName = defaultFileName;
+    if (!userFileName.endsWith('.json')) userFileName += '.json';
+    try {
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const blobUrl = URL.createObjectURL(blob); 
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = userFileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+      showToast(`📥 [${userFileName}] 다운로드 시작!`);
+    } catch(e) {
+      try {
+        navigator.clipboard.writeText(jsonStr);
+        showToast('📋 파일 생성 대신 텍스트 복사 완료!');
+      } catch(err) {
+        showToast('❌ 내보내기에 실패했습니다.');
+      }
+    }
+  }
+
+  function importCallLogs(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      try {
+        const json = JSON.parse(evt.target.result);
+        let existingLogs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+        let existingHotspots = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
+        
+        let importedLogs = json.call_logs || (Array.isArray(json) ? json : []);
+        let importedHotspots = json.custom_hotspots || [];
+        let importedMaster = json.master_hotspots || json.hotspots || null;
+        
+        if (importedMaster && Array.isArray(importedMaster)) {
+          localStorage.setItem('sudataxi_master_hotspots', JSON.stringify(importedMaster));
+        }
+        let logMap = new Map();
+        existingLogs.forEach(item => { logMap.set(item.id || `${item.timestamp}_${item.lat}_${item.lng}`, item); });
+        importedLogs.forEach(item => { logMap.set(item.id || `${item.timestamp}_${item.lat}_${item.lng}`, item); });
+        let mergedLogs = Array.from(logMap.values());
+        
+        let hotspotMap = new Map();
+        existingHotspots.forEach(item => { hotspotMap.set(item.id || `${item.name}_${item.lat}_${item.lng}`, item); });
+        importedHotspots.forEach(item => { hotspotMap.set(item.id || `${item.name}_${item.lat}_${item.lng}`, item); });
+        let mergedHotspots = Array.from(hotspotMap.values());
+        
+        localStorage.setItem('sudataxi_call_logs', JSON.stringify(mergedLogs));
+        localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(mergedHotspots));
+        updateCallLogStats();
+        updateCustomHotspotUI();
+        showToast(`🎉 마스터 DB 및 백업 병합 완료!`);
+        if (activeTab === 3) renderCallMapView();
+        else calculateAndRender();
+      } catch(err) {
+        showToast('❌ 올바르지 않은 백업/마스터 JSON 파일입니다.');
+      } finally {
+        e.target.value = '';
+      }
+    };
+    reader.onerror = function() {
+      showToast('❌ 파일 읽기 오류가 발생했습니다.');
+      e.target.value = '';
+    };
+    reader.readAsText(file);
+  }
+
+  function checkHotspotUpdateReminder() {
+    const LAST_UPDATE_KEY = 'suhda_last_hotspot_update';
+    const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
+    const lastUpdate = localStorage.getItem(LAST_UPDATE_KEY);
+    const now = new Date().getTime();
+    if (!lastUpdate) {
+      localStorage.setItem(LAST_UPDATE_KEY, now);
+    } else if (now - parseInt(lastUpdate, 10) > TWO_WEEKS_MS) {
+      const banner = document.getElementById('hotspotUpdateBanner');
+      if (banner) banner.style.display = 'block';
+    }
+  }
+
+  function requestHotspotUpdate() {
+    alert("최신 핫플 검색 후 저에게 말씀해 주시면 새로운 마스터 파일을 만들어 드리겠습니다!");
+    localStorage.setItem('suhda_last_hotspot_update', new Date().getTime());
+    const banner = document.getElementById('hotspotUpdateBanner');
+    if (banner) banner.style.display = 'none';
+  }
+
+  function dismissBanner() {
+    const banner = document.getElementById('hotspotUpdateBanner');
+    if (banner) banner.style.display = 'none';
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    initKakaoSdk();
+    checkIsPublicHolidayRealtime();
+    updateCallLogStats();
+    updateCustomHotspotUI();
+    checkHotspotUpdateReminder();
+    
+    document.getElementById('btn-mode1').addEventListener('click', () => setTab(1));
+    document.getElementById('btn-mode3').addEventListener('click', () => setTab(3));
+    
+    document.getElementById('btn-refresh').addEventListener('click', () => executeSearch());
+    document.getElementById('btn-search').addEventListener('click', () => executeSearch());
+    document.getElementById('btn-show-map').addEventListener('click', () => openRouteMapModal());
+    document.getElementById('map-modal-close').addEventListener('click', () => closeRouteMapModal());
+    document.getElementById('map-modal').addEventListener('click', (e) => { if(e.target === e.currentTarget) closeRouteMapModal(); });
+    
+    document.getElementById('btn-export').addEventListener('click', () => exportCallLogs());
+    document.getElementById('btn-import-open').addEventListener('click', () => document.getElementById('import-file-input').click());
+    document.getElementById('import-file-input').addEventListener('change', (e) => importCallLogs(e));
+    
+    document.getElementById('btn-add-custom').addEventListener('click', () => addCustomHotspotPrompt());
+    document.getElementById('btn-save-call').addEventListener('click', () => saveCurrentCallLocation());
+    
+    document.getElementById('timer-btn-5m').addEventListener('click', () => setTimerPreset(5));
+    document.getElementById('timer-btn-10m').addEventListener('click', () => setTimerPreset(10));
+    document.getElementById('timer-display-btn').addEventListener('click', () => toggleTimer());
+    
+    setTimeout(() => { executeSearch(); }, 200);
+  });
+</script>
+</body>
+</html>
