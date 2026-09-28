@@ -267,24 +267,22 @@
         
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
           <strong style="color: #FFC800;">🟡 [모드 1] 위수 관내 스마트 순환 영업 (노란색 테마)</strong><br>
-          • <strong>영업 목적:</strong> 안양·군포·의왕·과천 지정 위수지역 내부 순환 영업 전용 (반경 5km 탐색)<br>
-          • <strong>4번 목적지 산정:</strong> 5대 관문역(평촌, 범계, 인덕원, 안양, 산본) 중 실시간 이동거리 최단역 1곳 고정<br>
-          • <strong>목적지 자동 교체 (500m 예외):</strong> 가장 가까운 관문역과 500m 이내로 초근접 시, 다음으로 가까운 2순위 관문역으로 4번 목적지가 자동 순환 교체<br>
-          • <strong>1~3번 경유지:</strong> 현재 위치에서 4번 관문역으로 가는 이동 노선(길목) 상에 있는 알짜 핫플 우선 배치 (5대 거점역 제외)<br>
-          • <strong>타지역 철저 배제:</strong> 검색 결과 부족 시에도 서울/사당/판교 등 위수 밖 장소 100% 차단
+          • <strong>영업 목적:</strong> 안양·군포·의왕·과천 지정 위수지역 내부 순환 영업 전용<br>
+          • <strong>최단거리 거점역 100% 지정:</strong> 5대 관문역(평촌, 범계, 인덕원, 안양, 산본) 중 실제 주행 거리가 가장 가까운 역이 무조건 3번 최종 목적지로 고정 지정<br>
+          • <strong>목적지 자동 순환 (500m 초근접 예외):</strong> 최단역과 500m 이내로 들어올 경우 다음 최단 거점역으로 목적지가 자동 변경<br>
+          • <strong>1~2번 길목 경유지:</strong> 현위치에서 3번 거점역으로 가는 길목 상의 알짜 상권 우선 배치
         </div>
         
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
           <strong style="color: #FF6B00;">🟠 [모드 2] 타지역/관외 복귀 영업 (오렌지색 테마)</strong><br>
           • <strong>영업 목적:</strong> 서울/수원/판교 등 타지역 하차 후 내 영업구역(위수지역)으로의 귀로 영업<br>
-          • <strong>자동 모드 전환:</strong> 카카오 실시간 행정구역 수신으로 위수 밖 진입 시 100% 자동 스위칭<br>
-          • <strong>순방향 동선 고정:</strong> 출발지 주변 핫플(1번) ➔ 복귀 길목 상권(2~3번) ➔ 최단 위수 경계(4번) 순으로 깔끔한 오름차순 배치<br>
-          • <strong>초고속 카카오 Direct 엔진:</strong> 프록시 병목 제거로 출발지 주변 실시간 핫플 1초 내 즉시 1번 카드 확정
+          • <strong>출발지 반경 2km 초근접 우대:</strong> 검색 위치 반경 2.0km 이내 핫플 존재 시 무조건 1번 카드 최우선 확정 (바로 태우기)<br>
+          • <strong>복귀 경로 좌우 5km 우회 탐색:</strong> 3번 최단 위수 경계로 내려가는 경로 축 기준 우회 이탈거리 5.0km 이내의 순방향 알짜 상권만 2번 카드 배치
         </div>
         
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
           <strong style="color: #C084FC;">📊 기사님 데이터 연동 & 우대 가산점 시스템</strong><br>
-          • <strong>고객 탑승 기록(로그) 매칭:</strong> 저장 위치 반경 300m 이내 매칭 시 데이터 지수 감쇄 적용, 현재시간대(±1시간) 및 요일 패턴 일치 시 최대 +60점 집중 가산 (<code>[#현재시간대콜집중]</code>)<br>
+          • <strong>고객 탑승 기록(로그) 매칭:</strong> 저장 위치 반경 300m 이내 매칭 시 현재시간대(±1시간) 및 요일 패턴 일치 시 최대 +60점 집중 가산 (<code>[#현재시간대콜집중]</code>)<br>
           • <strong>나만의 핫플 우대:</strong> 기사 직접 등록 장소 기본 +25점~+50점 가산 (<code>[#나만의핫플]</code>)<br>
           • <strong>실시간 기상 연동:</strong> Open-Meteo API 연동 비/눈 검출 시 +20점 보너스 (<code>[#강수보너스]</code>)
         </div>
@@ -301,9 +299,9 @@
       <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 12px;">📜 수다택시 K 전체 업데이트 히스토리 (터치하여 펼치기)</summary>
       <div style="margin-top: 10px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #4ADE80;">v2.0.1 (2026.09) - 경로 정렬 교정 및 순방향 100% 보장</strong><br>
-          • 🎯 모드 2 추천 핫플에 대해 현재 위치 기준 거리 오름차순(dist) 재정렬을 강제하여 지도 경로 꼬임(왕복 현상) 완전 해결<br>
-          • 🧭 카카오 Direct 실시간 상권과 최단거리 위수 목적지 간 일직선 복귀 동선 확립
+          <strong style="color: #4ADE80;">v2.0.3 (2026.09) - 모드 2 출발지 2km / 복귀경로 5km 정확 수식 개편</strong><br>
+          • 🎯 모드 2 검색 시 출발지 반경 2.0km 이내 초근접 핫플 무조건 1번 우선 배치 적용<br>
+          • 🧭 복귀 도로 축 기준 좌우 우회 이탈 거리 5.0km 이내 순방향 핫플만 선별하여 일직선 동선 완벽 정렬
         </div>
       </div>
     </details>
@@ -348,7 +346,6 @@
   let timerInterval = null;
   let isTimerRunning = false;
   
-  let holidayDataCache = { yearMonth: "", holidays: [], holidayNames: {} };
   let audioCtx = null;
   let silentAudioElement = null;
   const SILENT_WAV_BASE64 = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==';
@@ -644,7 +641,7 @@
     headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) ${badgeHtml}`;
   }
 
-  // ⚡ 카카오 장소 SDK 직통 수신
+  // ⚡ 카카오 장소 SDK 초고속 직통 수신
   async function fetchLiveKakaoHotspots(lat, lng) {
     return new Promise((resolve) => {
       if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) {
@@ -846,7 +843,7 @@
   }
 
   // =========================================================================
-  // 💡 [v2.0.1 BUILD] 순방향 거리 정렬 100% 보장 및 경로 꼬임 방지 연산 엔진
+  // 💡 [v2.0.3 FINAL BUILD] 모드2 출발지 2km / 복귀경로 5km 연산 완벽 적용
   // =========================================================================
   async function calculateAndRender() {
     if (!currentPos) return;
@@ -865,14 +862,23 @@
     let finalTarget = null;
     
     if (inWisu) {
+      // 🟡 [모드 1] 관내 순환 : 5대 거점역 중 '실제 주행 거리' 최단역 100% 최우선 지정!
       let scoredTargets = await Promise.all(MAJOR_HUBS.map(async h => {
         let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
         let pureRes = await calculatePureSpotScore({...h, isWisu: true}, weatherData, nowHour);
-        return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: pureRes.score, geometryCoords: road.geometryCoords };
+        return { 
+          ...h, 
+          dist: road.distanceKm, 
+          estimatedTimeMin: road.durationMin, 
+          score: pureRes.score, 
+          geometryCoords: road.geometryCoords 
+        };
       }));
+
       scoredTargets.sort((a, b) => a.dist - b.dist);
       finalTarget = (scoredTargets[0].dist <= 0.5 && scoredTargets.length > 1) ? scoredTargets[1] : scoredTargets[0];
     } else {
+      // 🟠 [모드 2] 타지역 복귀 : 실시간 최단 위수 경계 목적지 지정
       const allWisuCandidates = [...WISU_BOUNDARY_POINTS, ...masterHotspots, ...MAJOR_HUBS].filter(item => {
         return item.isWisu === true || item.region === 'anyang' || item.region === 'gunpo' || item.region === 'gwacheon' || item.region === 'uiwang';
       });
@@ -884,7 +890,7 @@
       }));
       
       scoredWisuTargets.sort((a, b) => a.dist - b.dist);
-      finalTarget = scoredWisuTargets[0]; // 실시간 최단거리 위수 목적지 (예: 석수동)
+      finalTarget = scoredWisuTargets[0]; 
     }
 
     const majorHubKeywords = ["인덕원", "평촌역", "범계역", "안양역", "산본역"];
@@ -906,7 +912,8 @@
       let pureRes = await calculatePureSpotScore(item, weatherData, nowHour);
       
       let finalScore = pureRes.score;
-      if (!inWisu && road.distanceKm <= 5.0) {
+      // 출발지 2.0km 이내 보너스 부여
+      if (!inWisu && road.distanceKm <= 2.0) {
         finalScore += 50;
       }
 
@@ -933,24 +940,33 @@
         if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedCandidates)) {
           selectedCandidates.push(candidate);
         }
-        if (selectedCandidates.length === 3) break;
+        if (selectedCandidates.length === 2) break;
       }
       selectedCandidates.sort((a, b) => a.dist - b.dist);
     } else {
-      // 🟠 [모드 2 복귀 알고리즘 & 순방향 정렬 핵심]
-      // 1) 현위치(사당/여의도 등) 6km 이내 출발지 최고 핫플 1개 선별
-      let startAreaPool = scoredPool.filter(p => p.dist <= 6.0 && p.dist < distAtoC);
+      // 🟠 [모드 2 원칙 완벽 적용] 
+      // 1) 출발지(검색위치) 반경 2.0km 이내 핫플 최우선 1번 카드 선별
+      let startAreaPool = scoredPool.filter(p => p.dist <= 2.0);
       startAreaPool.sort((a, b) => b.score - a.score);
 
       if (startAreaPool.length > 0) {
-        selectedCandidates.push(startAreaPool[0]); 
+        selectedCandidates.push(startAreaPool[0]); // 출발지 2km 이내 1순위 확정
+      } else {
+        // 2km 이내 부재 시 3.5km까지 예외 확장 선별
+        let fallbackStartPool = scoredPool.filter(p => p.dist <= 3.5 && p.dist < distAtoC);
+        fallbackStartPool.sort((a, b) => b.score - a.score);
+        if (fallbackStartPool.length > 0) selectedCandidates.push(fallbackStartPool[0]);
       }
 
-      // 2) 복귀 길목 중간 핫플 추가 선별
+      // 2) 목적지 이동 경로 축 기준 우회 이탈거리 5.0km 이내 순방향 핫플 선별
       let corridorPool = scoredPool.filter(p => {
         if (selectedCandidates.some(s => s.name === p.name)) return false;
-        const detourDist = p.dist + p.distBtoC;
-        return (p.dist < distAtoC) && (detourDist <= distAtoC * 1.3);
+        
+        // 경로상 우회거리 = (A->B + B->C) - A->C (5km 이내 우회 상권만 선별)
+        const detourDist = (p.dist + p.distBtoC) - distAtoC;
+        const distToFinal = getStraightDistanceKm(p.lat, p.lng, finalTarget.lat, finalTarget.lng);
+        
+        return (p.dist > (selectedCandidates[0]?.dist || 0)) && (detourDist <= 5.0) && (distToFinal >= 2.0);
       });
       corridorPool.sort((a, b) => b.score - a.score);
 
@@ -958,10 +974,10 @@
         if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedCandidates)) {
           selectedCandidates.push(candidate);
         }
-        if (selectedCandidates.length === 3) break;
+        if (selectedCandidates.length === 2) break;
       }
 
-      // 💡 [핵심 교정] 1번, 2번, 3번을 무조건 현위치에서 가까운 순(dist 오름차순)으로 완벽 배치하여 지그재그 교차 방지!
+      // 현위치 기준 거리 오름차순(dist) 일직선 순방향 배치
       selectedCandidates.sort((a, b) => a.dist - b.dist);
     }
 
@@ -986,7 +1002,7 @@
         let pureRes = await calculatePureSpotScore({...h, isWisu: true}, weatherData, nowHour);
         return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: pureRes.score };
       }));
-      subFinalCandidates.sort((a, b) => b.score - a.score);
+      subFinalCandidates.sort((a, b) => a.dist - b.dist);
     }
     renderCards(selectedCandidates, finalTarget, subFinalCandidates);
   }
