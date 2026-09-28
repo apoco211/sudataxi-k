@@ -301,21 +301,21 @@
       <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 12px;">📜 수다택시 K 전체 업데이트 히스토리 (터치하여 펼치기)</summary>
       <div style="margin-top: 10px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #4ADE80;">v1.6.8 (2026.09) - 금정역 5번 출구 먹자골목 좌표 정밀 보정</strong><br>
-          • 📍 금정역 환승 먹자골목 좌표 보정 (126.9438 -> 126.9415) 완료<br>
-          • 🚘 금정역 5번 출구 앞 메인 먹자골목/로데오 상권으로 정확히 안내
+          <strong style="color: #4ADE80;">v1.6.9 (2026.09) - 관내 순환 모드 길목 순차 전진 알고리즘 강화</strong><br>
+          • 🛣️ 4번 목적지로 향하는 길목(Corridor) 산정 로직 엄격화 (우회율 1.35x 제한)<br>
+          • 🧭 경유지 순서를 목적지 잔여 거리 기준 내림차순 정렬하여 지그재그 U턴 동선 100% 방지
+        </div>
+        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
+          <strong style="color: #888888;">v1.6.8 (2026.09) - 금정역 5번 출구 먹자골목 좌표 정밀 보정</strong><br>
+          • 📍 금정역 환승 먹자골목 좌표 보정 (126.9438 -> 126.9415) 완료
         </div>
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
           <strong style="color: #888888;">v1.6.7 (2026.09) - 범계역 로데오거리 마스터 좌표 정밀 보정</strong><br>
           • 📍 범계역 로데오거리 좌표 오타 수정 완료
         </div>
-        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #888888;">v1.6.6 (2026.09) - Kakao Mobility avoid=toll (무료도로) API 규격 정밀 반영</strong><br>
-          • 🚘 priority=RECOMMEND&avoid=toll 파라미터 보정으로 카카오내비 실제 대안경로(무료) 수치와 카드 완벽 일치
-        </div>
         <div>
-          <strong style="color: #888888;">v1.1 (2026.07) - 백그라운드 타이머 & 콜지도 시각화</strong><br>
-          • ⏱️ 5분/10분 대기 타이머 및 무음 오디오 Keep-Alive
+          <strong style="color: #888888;">v1.6.6 (2026.09) - Kakao Mobility avoid=toll (무료도로) API 규격 정밀 반영</strong><br>
+          • 🚘 priority=RECOMMEND&avoid=toll 파라미터 보정 완료
         </div>
       </div>
     </details>
@@ -1072,19 +1072,24 @@
       return nameA !== nameB;
     });
     const distAtoC = getStraightDistanceKm(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
+    
     let preFiltered = rawPool.filter(item => {
       const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const distBtoC = getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
       if (inWisu) {
-        const isWithin3km = distAtoB <= 3.0;
-        const isAlongPath = (distAtoB + distBtoC) <= (distAtoC * 1.55) + 2.5 && distBtoC < distAtoC;
-        return isWithin3km || isAlongPath;
+        // [v1.6.9 보정] 관내 순환 모드: 4번 목적지 길목(Corridor) 정밀 필터링
+        const detourDist = distAtoB + distBtoC;
+        const isGettingCloser = distBtoC < distAtoC;
+        const isCorridor = (detourDist <= (distAtoC * 1.35) + 1.0) && isGettingCloser;
+        const isVeryCloseFront = (distAtoB <= 1.2) && (distBtoC <= distAtoC + 0.3);
+        return isCorridor || isVeryCloseFront;
       } else {
         const isHeadingToGoal = distBtoC < distAtoC;
         const isWithinNear2km = distAtoB <= 2.0;
         return isHeadingToGoal || isWithinNear2km;
       }
     });
+
     let scoredPool = await Promise.all(preFiltered.map(async item => {
       const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const distBtoC = getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
@@ -1117,6 +1122,7 @@
       return { 
         ...item, 
         dist: road.distanceKm, 
+        distBtoC: distBtoC,
         estimatedTimeMin: road.durationMin,
         geometryCoords: road.geometryCoords,
         score: Math.max(10, score), 
@@ -1126,6 +1132,7 @@
         isMasterDb: !item.isCustom && !item.isLiveKakao && (item.region !== undefined || item.id?.startsWith('hs_'))
       };
     }));
+
     let validPool = scoredPool.filter(p => p.score >= 30);
     validPool.sort((a, b) => b.score - a.score);
     let selectedCandidates = [];
@@ -1138,7 +1145,14 @@
       }
       if (selectedCandidates.length === maxCards) break;
     }
-    selectedCandidates.sort((a, b) => a.dist - b.dist);
+
+    // [v1.6.9 보정] 관내 순환 모드에서는 4번 목적지까지 남은 거리 기준 내림차순 정렬 (지그재그 방지 및 순차 전진 동선 보장)
+    if (inWisu) {
+      selectedCandidates.sort((a, b) => b.distBtoC - a.distBtoC);
+    } else {
+      selectedCandidates.sort((a, b) => a.dist - b.dist);
+    }
+
     currentRouteData = [
       { name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true },
       ...selectedCandidates,
