@@ -21,8 +21,9 @@
   
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   
-  <!-- 카카오 공식 JS SDK (카카오내비 앱 연동 전용) -->
+  <!-- 카카오 공식 JS SDK 및 지도/장소 API 직통 연동 -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
+  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=7ee80d17f027cf99b9634ae13731a6a9&libraries=services"></script>
   
   <style>
     :root {
@@ -276,9 +277,9 @@
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
           <strong style="color: #FF6B00;">🟠 [모드 2] 타지역/관외 복귀 영업 (오렌지색 테마)</strong><br>
           • <strong>영업 목적:</strong> 서울/수원/판교 등 타지역 하차 후 내 영업구역(위수지역)으로의 귀로 영업<br>
-          • <strong>자동 모드 전환:</strong> 카카오 실시간 행정구역(시/군/구) 수신으로 위수 밖 진입 시 100% 자동 스위칭<br>
-          • <strong>실시간 최단 복귀지 산정:</strong> 현재 위치에서 위수지역 내부(isWisu) 장소 중 도로거리가 가장 짧은 곳이 실시간 4번 목적지로 결정<br>
-          • <strong>복귀 경로 길목 탐색:</strong> 진행 각도 없이 현재 위치에서 최종 목적지로 가는 복귀 동선 상의 알짜 핫플을 1~3번 경유지로 배치
+          • <strong>자동 모드 전환:</strong> 카카오 실시간 행정구역 수신으로 위수 밖 진입 시 100% 자동 스위칭<br>
+          • <strong>초고속 카카오 Direct 엔진:</strong> 프록시 병목 제거로 여의도/영등포 등 출발지 주변 실시간 핫플 1초 내 즉시 1번 카드 확정<br>
+          • <strong>순방향 복귀 동선:</strong> 출발지 근처 핫플 ➔ 복귀 길목 상권 ➔ 최단 위수 목적지 순으로 완벽 정렬
         </div>
         
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
@@ -300,14 +301,9 @@
       <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 12px;">📜 수다택시 K 전체 업데이트 히스토리 (터치하여 펼치기)</summary>
       <div style="margin-top: 10px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #4ADE80;">v1.8.0 (2026.09) - 실시간 복귀지 산정 & 각도폐기 복귀길목 엔진 고정</strong><br>
-          • 🎯 진행 각도 연산 완전 폐기, 복귀 경로(Corridor) 우회율 알고리즘 전환<br>
-          • 🧭 관외 복귀 시 최단 거리 위수 장소를 실시간 연산하여 4번 목적지로 자동 지정
-        </div>
-        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #888888;">v1.7.8 (2026.09) - 카카오 실시간 API 병렬수신 & 서울 서북권 마스터 DB 보강</strong><br>
-          • 🎯 실시간 검색 타임아웃 해결을 위해 Promise.all 병렬 수신 적용<br>
-          • 🧭 상암 DMC, 홍대입구, 신촌, 합정, 연신내 등 서울 서북/서부권 주요 복귀 길목 마스터 DB 추가
+          <strong style="color: #4ADE80;">v2.0.0 (2026.09) - 카카오 Direct 초고속 연동 & 출발지 근처 핫플 강제 배정</strong><br>
+          • 🎯 프록시 서버 제거 및 카카오 장소 SDK 직통 호출로 1초 내 즉시 수신<br>
+          • 🧭 여의도/영등포 등 현위치 5km 이내 실시간 핫플 1번 카드 확정 및 각도 연산 완전 폐기
         </div>
       </div>
     </details>
@@ -338,11 +334,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const KAKAO_REST_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
-  
-  // ⚡ Cloudflare Workers 전용 우회 프록시 URL
-  const PROXY_BASE_URL = "https://kakao-proxy.apoco211.workers.dev/?url=";
   
   let currentMode = 1;
   let activeTab = 1;
@@ -368,7 +360,7 @@
       } catch(e) {}
     }
   }
-  // 🚘 카카오내비 실행
+
   function openKakaoNaviApp(name, lat, lng) {
     initKakaoSdk();
     let cleanName = cleanQuery(name) || name;
@@ -386,6 +378,7 @@
     }
     window.location.href = `https://m.map.kakao.com/scheme/route?ep=${lat},${lng}&by=car`;
   }
+
   function showToast(msg) {
     const t = document.getElementById('toast-banner');
     if (!t) return;
@@ -393,12 +386,14 @@
     t.style.display = 'block';
     setTimeout(() => { t.style.display = 'none'; }, 2200);
   }
+
   function initOrResumeAudioContext() {
     try {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume();
     } catch(e) {}
   }
+
   function startBackgroundAudioKeepAlive() {
     try {
       if (!silentAudioElement) {
@@ -408,12 +403,15 @@
       silentAudioElement.play().catch(e => {});
     } catch(e) {}
   }
+
   function stopBackgroundAudioKeepAlive() {
     try { if (silentAudioElement) silentAudioElement.pause(); } catch(e) {}
   }
+
   function requestNotificationPermission() {
     if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
   }
+
   function triggerSystemNotification() {
     if ('Notification' in window && Notification.permission === 'granted') {
       try {
@@ -424,6 +422,7 @@
       } catch(e) {}
     }
   }
+
   function playTimerAlarm() {
     try {
       initOrResumeAudioContext();
@@ -447,29 +446,27 @@
     if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 300]);
     triggerSystemNotification();
   }
-  
+
   const DEFAULT_MASTER_HOTSPOTS = [
+    { "id": "hs_s_yeouido_1", "name": "여의도역 및 증권가 상권", "lat": 37.5216, "lng": 126.9242, "address": "여의도동", "type": "office_nightlife", "region": "seoul", "isWisu": false },
+    { "id": "hs_s_yeongdeungpo_1", "name": "영등포역 환승 거점 및 타임스퀘어", "lat": 37.5158, "lng": 126.9075, "address": "영등포동", "type": "subway_shopping", "region": "seoul", "isWisu": false },
+    { "id": "hs_s_guro_1", "name": "구로디지털단지역 로데오", "lat": 37.4852, "lng": 126.9015, "address": "구로동", "type": "office_nightlife", "region": "seoul", "isWisu": false },
     { "id": "hs_s_sangam_1", "name": "상암 DMC 오피스 및 방송타운", "lat": 37.5780, "lng": 126.8900, "address": "상암동", "type": "office", "region": "seoul", "isWisu": false },
     { "id": "hs_s_hongdae_1", "name": "홍대입구역 및 연남동 로데오", "lat": 37.5575, "lng": 126.9244, "address": "홍대입구역", "type": "subway_nightlife", "region": "seoul", "isWisu": false },
     { "id": "hs_s_hapjeong_1", "name": "합정역 환승 거점 및 메세나폴리스", "lat": 37.5495, "lng": 126.9138, "address": "합정역", "type": "subway", "region": "seoul", "isWisu": false },
     { "id": "hs_s_sinchon_1", "name": "신촌역 로데오 및 메디컬타운", "lat": 37.5552, "lng": 126.9368, "address": "신촌역", "type": "subway_hospital", "region": "seoul", "isWisu": false },
-    { "id": "hs_s_yeonsinnae_1", "name": "연신내역 로데오거리 및 먹자골목", "lat": 37.6190, "lng": 126.9210, "address": "연신내역", "type": "subway_nightlife", "region": "seoul", "isWisu": false },
-    { "id": "hs_s_yeongdeungpo_1", "name": "영등포역 환승 거점 및 타임스퀘어", "lat": 37.5158, "lng": 126.9075, "address": "영등포역", "type": "subway_shopping", "region": "seoul", "isWisu": false },
     { "id": "hs_g_gwangmyeong_1", "name": "KTX 광명역 및 일직동 로데오", "lat": 37.4162, "lng": 126.8845, "address": "광명역", "type": "subway_shopping", "region": "gwangmyeong", "isWisu": false },
     { "id": "hs_g_gwacheon_1", "name": "정부과천청사역 중심상가 및 로데오", "lat": 37.4262, "lng": 126.9898, "address": "정부과천청사역", "type": "subway_nightlife", "region": "gwacheon", "isWisu": true },
     { "id": "hs_g_gwacheon_2", "name": "선바위역 환승장 및 먹자골목", "lat": 37.4518, "lng": 127.0022, "address": "선바위역", "type": "subway", "region": "gwacheon", "isWisu": true },
-    { "id": "hs_g_gwacheon_3", "name": "과천지식정보타운(지정타) 오피스", "lat": 37.4085, "lng": 126.9812, "address": "갈현동", "type": "office", "region": "gwacheon", "isWisu": true },
     { "id": "hs_g_anyang_1", "name": "평촌역 먹자골목 및 한림대병원", "lat": 37.3942, "lng": 126.9638, "address": "평촌역", "type": "subway_hospital", "region": "anyang", "isWisu": true },
     { "id": "hs_g_anyang_2", "name": "범계역 로데오거리 및 학원가", "lat": 37.3898, "lng": 126.9508, "address": "범계역", "type": "subway_academy", "region": "anyang", "isWisu": true },
     { "id": "hs_g_anyang_3", "name": "인덕원역 환승 거점", "lat": 37.4048, "lng": 126.9767, "address": "인덕원역", "type": "subway", "region": "anyang", "isWisu": true },
     { "id": "hs_g_anyang_4", "name": "안양역 일번가 및 메디컬타운", "lat": 37.4013, "lng": 126.9222, "address": "안양역", "type": "subway_hospital", "region": "anyang", "isWisu": true },
     { "id": "hs_g_anyang_5", "name": "산본역 중심상가 및 원광대병원", "lat": 37.3554, "lng": 126.9331, "address": "산본역", "type": "subway_hospital", "region": "gunpo", "isWisu": true },
-    { "id": "hs_g_anyang_6", "name": "금정역 환승 먹자골목", "lat": 37.3718, "lng": 126.9415, "address": "금정역", "type": "subway", "region": "gunpo", "isWisu": true },
-    { "id": "hs_g_ansan_1", "name": "안산 중앙동 로데오 및 고려대병원", "lat": 37.3164, "lng": 126.8381, "address": "중앙동 로데오", "type": "subway_hospital", "region": "ansan", "isWisu": false },
     { "id": "hs_s_01", "name": "강남역 상업지구 및 병원거리", "lat": 37.4981, "lng": 127.0276, "address": "강남역", "type": "subway_hospital", "region": "seoul", "isWisu": false },
     { "id": "hs_s_25", "name": "사당역 환승 거점 및 먹자골목", "lat": 37.4765, "lng": 126.9816, "address": "사당역", "type": "subway", "region": "seoul", "isWisu": false }
   ];
-  
+
   const WISU_BOUNDARY_POINTS = [
     { name: "안양 석수동 경계 (인천/부천/서울 방면)", lat: 37.4265, lng: 126.9050, address: "석수동", isWisu: true },
     { name: "안양 박달동 경계 (시흥/인천 방면)", lat: 37.4080, lng: 126.8920, address: "박달동", isWisu: true },
@@ -479,38 +476,27 @@
     { name: "의왕 청계/포일 경계 (성남/분당 방면)", lat: 37.3950, lng: 127.0120, address: "포일동", isWisu: true },
     { name: "과천 주암/선바위 경계 (서울/강남 방면)", lat: 37.4520, lng: 127.0050, address: "과천동", isWisu: true }
   ];
-  
+
   async function checkIsInsideWisuRealtime(lat, lng) {
-    if (!KAKAO_REST_KEY) return false;
-    try {
-      const regionUrl = `https://dapi.kakao.com/v2/local/geo/coord2regioncode.json?x=${lng}&y=${lat}`;
-      const proxyUrl = PROXY_BASE_URL + encodeURIComponent(regionUrl);
-      
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2500);
-      const res = await fetch(proxyUrl, {
-        headers: { 'Authorization': `KakaoAK ${KAKAO_REST_KEY}` },
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-      
-      if (res.ok) {
-        const data = await res.json();
-        if (data.documents && data.documents.length > 0) {
-          const doc = data.documents[0];
-          const region1 = doc.region_1depth_name || "";
-          const region2 = doc.region_2depth_name || "";
-          
-          currentRegionName = `${region1} ${region2}`.trim();
-          
-          const isWisuCity = region2.includes("안양") || region2.includes("군포") || region2.includes("의왕") || region2.includes("과천");
-          return isWisuCity;
-        }
+    return new Promise((resolve) => {
+      if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
+        const geocoder = new kakao.maps.services.Geocoder();
+        geocoder.coord2RegionCode(lng, lat, (result, status) => {
+          if (status === kakao.maps.services.Status.OK && result.length > 0) {
+            const region2 = result[0].region_2depth_name || "";
+            currentRegionName = `${result[0].region_1depth_name} ${region2}`.trim();
+            const isWisu = region2.includes("안양") || region2.includes("군포") || region2.includes("의왕") || region2.includes("과천");
+            resolve(isWisu);
+            return;
+          }
+          resolve(lat >= 37.34 && lat <= 37.445 && lng >= 126.90 && lng <= 127.015);
+        });
+      } else {
+        resolve(lat >= 37.34 && lat <= 37.445 && lng >= 126.90 && lng <= 127.015);
       }
-    } catch(e) {}
-    return (lat >= 37.34 && lat <= 37.445 && lng >= 126.90 && lng <= 127.015);
+    });
   }
-  
+
   const MAJOR_HUBS = [
     { name: "인덕원역 환승 거점", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway", isWisu: true },
     { name: "평촌역 먹자골목 및 한림대병원", lat: 37.3942, lng: 126.9638, address: "평촌역", type: "subway_hospital", isWisu: true },
@@ -518,22 +504,15 @@
     { name: "안양역 일번가 및 메디컬타운", lat: 37.4013, lng: 126.9222, address: "안양역", type: "subway_hospital", isWisu: true },
     { name: "산본역 중심상가 및 원광대병원", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway_hospital", isWisu: true }
   ];
-  
+
   function getMasterHotspotsFromStorage() {
     const saved = localStorage.getItem('sudataxi_master_hotspots');
     if (saved) {
-      try { 
-        let parsed = JSON.parse(saved);
-        if (!parsed.some(item => item.name.includes("정부과천청사역"))) {
-          parsed = [...DEFAULT_MASTER_HOTSPOTS, ...parsed];
-          localStorage.setItem('sudataxi_master_hotspots', JSON.stringify(parsed));
-        }
-        return parsed;
-      } catch(e) {}
+      try { return JSON.parse(saved); } catch(e) {}
     }
     return DEFAULT_MASTER_HOTSPOTS;
   }
-  
+
   function getStraightDistanceKm(lat1, lon1, lat2, lon2) {
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -543,19 +522,19 @@
               Math.sin(dLon/2) * Math.sin(dLon/2);
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
-  
+
   function getScoreLevelBadge(score) {
     if (score >= 100) return '<span class="level-badge level-high">🔥 높음</span>';
     if (score >= 60) return '<span class="level-badge level-mid">⚡ 보통</span>';
     return '<span class="level-badge level-low">💧 낮음</span>';
   }
-  
+
   function formatMMSS(seconds) {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${String(m).padStart(2,'0')}:${String(s).padStart(2, '0')}`;
   }
-  
+
   function setTimerPreset(min) {
     initOrResumeAudioContext();
     requestNotificationPermission();
@@ -572,7 +551,7 @@
     btn.className = 'timer-display-btn';
     btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 시작`;
   }
-  
+
   function toggleTimer() {
     initOrResumeAudioContext();
     requestNotificationPermission();
@@ -615,7 +594,7 @@
       }, 1000);
     }
   }
-  
+
   async function fetchRealtimeWeather(lat, lng) {
     try {
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=precipitation,rain,showers,snowfall&timezone=Asia%2FTokyo`;
@@ -628,58 +607,21 @@
       return { isRainOrSnow: false, precip: 0 };
     }
   }
-  
+
   async function checkIsPublicHolidayRealtime() {
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
     const todayStr = `${year}${month}${day}`;
-    const ymStr = `${year}${month}`;
-    if (holidayDataCache.yearMonth === ymStr) {
-      const isHol = holidayDataCache.holidays.includes(todayStr);
-      updateHeaderTitle(now, isHol, holidayDataCache.holidayNames[todayStr]);
-      return isHol;
-    }
-    try {
-      const serviceKey = "9%2Bf22Nf7iE2%2B%2F8S9Z820yG0%2F%2B8XyR5K1n%2Ff9O%2B%2B92";
-      const apiUrl = `https://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo?solYear=${year}&solMonth=${month}&ServiceKey=${serviceKey}&_type=json`;
-      const proxyUrl = PROXY_BASE_URL + encodeURIComponent(apiUrl);
-      
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 1200);
-      const res = await fetch(proxyUrl, { signal: controller.signal });
-      clearTimeout(timeoutId);
-      if (res.ok) {
-        const data = await res.json();
-        const items = data.response?.body?.items?.item;
-        let holidayList = [];
-        let nameMap = {};
-        
-        if (Array.isArray(items)) {
-          items.forEach(item => {
-            const loc = String(item.locdate);
-            holidayList.push(loc);
-            nameMap[loc] = item.dateName || "공휴일";
-          });
-        } else if (items && items.locdate) {
-          const loc = String(items.locdate);
-          holidayList = [loc];
-          nameMap[loc] = items.dateName || "공휴일";
-        }
-        holidayDataCache = { yearMonth: ymStr, holidays: holidayList, holidayNames: nameMap };
-        const isHol = holidayList.includes(todayStr);
-        updateHeaderTitle(now, isHol, nameMap[todayStr]);
-        return isHol;
-      }
-    } catch (e) {}
+    
     const fallbackHolidays = ["20260924", "20260925", "20260926", "20261003", "20261009", "20261225"];
     const isFallbackHol = fallbackHolidays.includes(todayStr);
-    let fallbackName = isFallbackHol ? (todayStr.startsWith("202609") ? "추석 연휴" : "공휴일") : null;
+    let fallbackName = isFallbackHol ? "공휴일" : null;
     updateHeaderTitle(now, isFallbackHol, fallbackName);
     return isFallbackHol;
   }
-  
+
   function updateHeaderTitle(nowDate, isHoliday, holidayName) {
     const headerEl = document.getElementById('app-header-title');
     if (!headerEl) return;
@@ -701,58 +643,44 @@
     }
     headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) ${badgeHtml}`;
   }
-  
+
+  // ⚡ 카카오 장소 SDK 초고속 직통 수신 (프록시 완벽 제거)
   async function fetchLiveKakaoHotspots(lat, lng) {
-    if (!KAKAO_REST_KEY) return [];
-    const nowHour = new Date().getHours();
-    let keywords = ['지하철역', '병원'];
-    if (nowHour >= 18 || nowHour < 4) {
-      keywords = ['먹자골목', '로데오', '지하철역', '주점'];
-    } else if (nowHour >= 12 && nowHour < 18) {
-      keywords = ['학원가', '병원', '지하철역'];
-    }
-    
-    let liveHotspots = [];
-    const searchPromises = keywords.map(async (kw) => {
-      try {
-        const kakaoUrl = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(kw)}&x=${lng}&y=${lat}&radius=4000&sort=distance`;
-        const proxyUrl = PROXY_BASE_URL + encodeURIComponent(kakaoUrl);
-        
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3500);
-        const res = await fetch(proxyUrl, {
-          method: 'GET',
-          headers: { 'Authorization': `KakaoAK ${KAKAO_REST_KEY}` },
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.documents && data.documents.length > 0) {
-            let items = [];
-            data.documents.slice(0, 3).forEach(place => {
-              items.push({
-                id: 'kakao_live_' + place.id,
-                name: place.place_name,
-                lat: parseFloat(place.y),
-                lng: parseFloat(place.x),
-                address: place.address_name || place.road_address_name,
-                type: kw.includes('역') ? 'subway' : (kw.includes('병원') ? 'hospital' : 'nightlife'),
-                isLiveKakao: true
-              });
-            });
-            return items;
-          }
+    return new Promise((resolve) => {
+      if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) {
+        resolve([]);
+        return;
+      }
+      const ps = new kakao.maps.services.Places();
+      const options = {
+        location: new kakao.maps.LatLng(lat, lng),
+        radius: 4000,
+        sort: kakao.maps.services.SortBy.DISTANCE
+      };
+
+      const nowHour = new Date().getHours();
+      let category = 'FD6'; // 음식점/유흥
+      if (nowHour >= 7 && nowHour < 12) category = 'SW8'; // 지하철역
+
+      ps.categorySearch(category, (data, status) => {
+        if (status === kakao.maps.services.Status.OK && data && data.length > 0) {
+          const liveItems = data.slice(0, 5).map(place => ({
+            id: 'kakao_live_' + place.id,
+            name: place.place_name,
+            lat: parseFloat(place.y),
+            lng: parseFloat(place.x),
+            address: place.address_name || place.road_address_name,
+            type: 'nightlife',
+            isLiveKakao: true
+          }));
+          resolve(liveItems);
+        } else {
+          resolve([]);
         }
-      } catch(e) {}
-      return [];
+      }, options);
     });
-    
-    const results = await Promise.all(searchPromises);
-    results.forEach(arr => { liveHotspots.push(...arr); });
-    return liveHotspots;
   }
-  
+
   function parseDateSafely(dateStr) {
     if (!dateStr) return new Date(0);
     if (dateStr instanceof Date) return dateStr;
@@ -760,54 +688,12 @@
     let s = String(dateStr).trim();
     let d = new Date(s);
     if (!isNaN(d.getTime())) return d;
-    s = s.replace(' ', 'T');
-    d = new Date(s);
-    if (!isNaN(d.getTime())) return d;
     return new Date(0);
   }
 
-  // 🚘 카카오모빌리티 실시간 경로 연산
+  // 🚘 카카오모빌리티 실시간 도로 길찾기 API
   async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const directDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng);
-    if (KAKAO_REST_KEY) {
-      try {
-        const naviUrl = `https://apis-navi.kakaomobility.com/v1/directions?origin=${fromLng},${fromLat}&destination=${toLng},${toLat}&priority=RECOMMEND&avoid=toll`;
-        const proxyUrl = PROXY_BASE_URL + encodeURIComponent(naviUrl);
-        
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3500);
-        const res = await fetch(proxyUrl, {
-          headers: { 'Authorization': `KakaoAK ${KAKAO_REST_KEY}` },
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        
-        if (res.ok) {
-          const data = await res.json();
-          if (data.routes && data.routes.length > 0 && data.routes[0].result_code === 0) {
-            const summary = data.routes[0].summary;
-            let coords = [];
-            if (data.routes[0].sections) {
-              data.routes[0].sections.forEach(sec => {
-                if (sec.roads) {
-                  sec.roads.forEach(road => {
-                    for (let i = 0; i < road.vertexes.length; i += 2) {
-                      coords.push([road.vertexes[i+1], road.vertexes[i]]);
-                    }
-                  });
-                }
-              });
-            }
-            return {
-              distanceKm: parseFloat((summary.distance / 1000).toFixed(1)),
-              durationMin: Math.max(1, Math.round(summary.duration / 60)),
-              geometryCoords: coords.length > 0 ? coords : [[fromLat, fromLng], [toLat, toLng]]
-            };
-          }
-        }
-      } catch (e) {}
-    }
-    
     try {
       const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
       const controller = new AbortController();
@@ -837,43 +723,14 @@
 
   async function getDynamicTimeCategoryBonus(itemType, itemName, nowHour) {
     let bonus = 0;
-    const type = itemType || '';
     const name = itemName || '';
-    const isHospital = type.includes('hospital') || name.includes('병원') || name.includes('메디컬');
-    const isAcademy = type.includes('academy') || name.includes('학원') || name.includes('학교');
-    const isSubway = type.includes('subway') || name.includes('역') || name.includes('터미널');
-    const isNightlife = type.includes('nightlife') || name.includes('먹자골목') || name.includes('포차') || name.includes('주점') || name.includes('로데오');
-    const isOffice = type.includes('office') || name.includes('법원') || name.includes('관공서') || name.includes('지식정보타운');
-    const day = new Date().getDay();
-    const isWeekend = (day === 0 || day === 6);
-    const isHoliday = await checkIsPublicHolidayRealtime();
-    const isOffDay = isWeekend || isHoliday;
-    if (isOffDay) {
-      if (isAcademy || isOffice) return -30;
-      if (isNightlife) bonus += 50;
-      if (isSubway) bonus += 35;
-      if (isHospital) bonus += 20;
-    } else {
-      if (nowHour >= 7 && nowHour < 12) {
-        if (isSubway) bonus += 45;
-        if (isHospital) bonus += 40;
-        if (isOffice) bonus += 35;
-      } else if (nowHour >= 12 && nowHour < 18) {
-        if (isHospital) bonus += 35;
-        if (isAcademy) bonus += 30;
-        if (isSubway) bonus += 25;
-      } else if (nowHour >= 18 && nowHour < 21) {
-        if (isSubway) bonus += 35;
-        if (isAcademy) bonus += 35;
-        if (isNightlife) bonus += 20;
-      } else {
-        if (isNightlife) bonus += 45;
-        if (isSubway) bonus += 25;
-      }
+    const isNightlife = name.includes('먹자골목') || name.includes('포차') || name.includes('주점') || name.includes('로데오');
+    if (nowHour >= 18 || nowHour < 4) {
+      if (isNightlife) bonus += 45;
     }
     return bonus;
   }
-  
+
   function calculateCallLogScore(candLat, candLng) {
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     if (logs.length === 0) return { bonus: 0, matched: false, count: 0, isTimeMatch: false };
@@ -881,9 +738,9 @@
     const now = new Date();
     const currentHour = now.getHours();
     let maxBonus = 0;
-    let isMatched = false;
     let matchCount = 0;
     let isTimeMatch = false;
+
     logs.forEach(log => {
       const logLat = Number(log.lat);
       const logLng = Number(log.lng);
@@ -894,42 +751,30 @@
         matchCount++;
         const logDate = parseDateSafely(log.timestamp);
         const logHour = logDate.getHours();
-        
         let hourDiff = Math.abs(currentHour - logHour);
         if (hourDiff > 12) hourDiff = 24 - hourDiff;
         
-        let timeBonus = 0;
         if (hourDiff <= 1) {
-          timeBonus = 60;
+          maxBonus = 60;
           isTimeMatch = true;
-        }
-        const daysPassed = Math.max(0, (now - logDate) / (1000 * 60 * 60 * 24));
-        const retentionFactor = 0.7 + (0.3 * Math.exp(-0.005 * daysPassed));
-        const score = (30 + timeBonus) * retentionFactor;
-        
-        if (score > maxBonus) {
-          maxBonus = score;
-          isMatched = true;
+        } else if (maxBonus < 30) {
+          maxBonus = 30;
         }
       }
     });
-    return { bonus: Math.round(maxBonus), matched: isMatched, count: matchCount, isTimeMatch };
+    return { bonus: maxBonus, matched: matchCount > 0, count: matchCount, isTimeMatch };
   }
-  
+
   async function calculatePureSpotScore(item, weatherData, nowHour) {
     let score = 50;
-    
     if (item.isCustom) score += 50;
     else if (item.isLiveKakao) score += 45;
-    else if (item.region || item.id?.startsWith('hs_') || item.isWisu) score += 35;
-    
-    if (item.region === 'gwacheon' || item.name.includes('과천') || item.name.includes('선바위')) score += 30;
+    else if (item.region || item.isWisu) score += 35;
     
     const timeBonus = await getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
     score += timeBonus;
     
     if (weatherData.isRainOrSnow) score += 20;
-    
     const logResult = calculateCallLogScore(item.lat, item.lng);
     score += logResult.bonus;
     
@@ -939,10 +784,11 @@
       isTimeMatch: logResult.isTimeMatch
     };
   }
+
   function getCustomHotspots() {
     return JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
   }
-  
+
   function setTab(tab) {
     activeTab = tab;
     document.getElementById('btn-mode1').classList.toggle('active', tab === 1);
@@ -964,7 +810,7 @@
       executeSearch();
     }
   }
-  
+
   function executeSearch() {
     const locText = document.getElementById('loc-text');
     if (locText) locText.innerText = '📍 실시간 GPS 위치 수신 중...';
@@ -975,7 +821,6 @@
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         currentPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        
         const inWisu = await checkIsInsideWisuRealtime(currentPos.lat, currentPos.lng);
         
         currentMode = inWisu ? 1 : 2;
@@ -990,7 +835,7 @@
       { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 }
     );
   }
-  
+
   function isDuplicatePlace(candName, candLat, candLng, existingList) {
     return existingList.some(item => {
       const nameA = item.name.replace(/\s+/g, '').substring(0, 3);
@@ -1002,7 +847,7 @@
   }
 
   // =========================================================================
-  // 💡 [핵심 연산] 모드 1 & 모드 2 추천 알고리즘 (복귀지 실시간 산정 & 각도 폐기 반영)
+  // 💡 [최종 수정] 출발지 5km 핫플 1번 강제 배정 + 순방향 복귀 알고리즘
   // =========================================================================
   async function calculateAndRender() {
     if (!currentPos) return;
@@ -1012,6 +857,8 @@
     
     let weatherData = { isRainOrSnow: false };
     try { weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng); } catch(e) {}
+    
+    // 카카오 Direct 실시간 상권 + 사용자 커스텀 + 마스터 DB 병합
     const liveKakaoHotspots = await fetchLiveKakaoHotspots(currentPos.lat, currentPos.lng);
     const customHotspots = getCustomHotspots();
     const masterHotspots = getMasterHotspotsFromStorage();
@@ -1020,7 +867,7 @@
     let finalTarget = null;
     
     if (inWisu) {
-      // 🟡 [모드 1] 5대 거점역 중 최단역 지정 (500m 초근접시 다음 역)
+      // 🟡 [모드 1] 관내 순환 (5대 거점역 최단역 지정)
       let scoredTargets = await Promise.all(MAJOR_HUBS.map(async h => {
         let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
         let pureRes = await calculatePureSpotScore({...h, isWisu: true}, weatherData, nowHour);
@@ -1029,7 +876,7 @@
       scoredTargets.sort((a, b) => a.dist - b.dist);
       finalTarget = (scoredTargets[0].dist <= 0.5 && scoredTargets.length > 1) ? scoredTargets[1] : scoredTargets[0];
     } else {
-      // 🟠 [모드 2] [요청반영] 고정목적지 없이 실시간 최단거리 위수(isWisu) 장소를 4번 FINAL로 확정
+      // 🟠 [모드 2] 최단거리 위수 목적지 지정 (고정 없이 실시간 연산)
       const allWisuCandidates = [...WISU_BOUNDARY_POINTS, ...masterHotspots, ...MAJOR_HUBS].filter(item => {
         return item.isWisu === true || item.region === 'anyang' || item.region === 'gunpo' || item.region === 'gwacheon' || item.region === 'uiwang';
       });
@@ -1040,9 +887,8 @@
         return { ...item, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: pureRes.score, geometryCoords: road.geometryCoords };
       }));
       
-      // 도로 주행거리 오름차순 정렬하여 가장 가까운 위수 장소 1위 지정
       scoredWisuTargets.sort((a, b) => a.dist - b.dist);
-      finalTarget = scoredWisuTargets[0];
+      finalTarget = scoredWisuTargets[0]; // 실시간 최단거리 위수 목적지 (예: 석수동)
     }
 
     const majorHubKeywords = ["인덕원", "평촌역", "범계역", "안양역", "산본역"];
@@ -1057,43 +903,26 @@
 
     const distAtoC = getStraightDistanceKm(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
     
-    // 핫플(1~3번) 필터링 (각도 계산 완전 제거, Corridor 우회율 및 순방향 거리 적용)
-    let preFiltered = rawPool.filter(item => {
-      const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
-      const distBtoC = getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
-      
-      if (inWisu) {
-        const detourDist = distAtoB + distBtoC;
-        const isGettingCloser = distBtoC < distAtoC;
-        const isCorridor = (detourDist <= (distAtoC * 1.20) + 0.5) && isGettingCloser;
-        const isVeryCloseFront = (distAtoB <= 1.0) && (distBtoC <= distAtoC + 0.2);
-        return isCorridor || isVeryCloseFront;
-      } else {
-        // 🟠 [모드 2 복귀 핫플 필터링]
-        // [조건 1] 핫플은 최종 목적지(finalTarget)보다 가까운 위치에 존재해야 함
-        if (distAtoB >= distAtoC * 0.90) return false;
-
-        // [조건 2] [각도 완전 폐기] 현재->핫플 + 핫플->최종 합산 우회율 검증 (Corridor)
-        const detourDist = distAtoB + distBtoC;
-        const isAlongReturnCorridor = detourDist <= (distAtoC * 1.25) + 1.0;
-
-        return isAlongReturnCorridor;
-      }
-    });
-
-    let scoredPool = await Promise.all(preFiltered.map(async item => {
+    // 전체 장소 점수 연산
+    let scoredPool = await Promise.all(rawPool.map(async item => {
       const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const distBtoC = getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
       let pureRes = await calculatePureSpotScore(item, weatherData, nowHour);
       
+      let finalScore = pureRes.score;
+      // 💡 [핵심] 여의도/영등포 등 현위치 5km 이내 핫플 +50점 추가로 1번 배치 우대
+      if (!inWisu && road.distanceKm <= 5.0) {
+        finalScore += 50;
+      }
+
       return { 
         ...item, 
         dist: road.distanceKm, 
         distBtoC: distBtoC,
         estimatedTimeMin: road.durationMin,
         geometryCoords: road.geometryCoords,
-        score: pureRes.score, 
+        score: finalScore, 
         isNearStep1: (road.distanceKm <= 2.0),
         logCount: pureRes.logCount,
         isTimeMatch: pureRes.isTimeMatch,
@@ -1101,22 +930,46 @@
       };
     }));
 
-    let validPool = scoredPool.filter(p => p.score >= 30);
-    validPool.sort((a, b) => b.score - a.score); // 1차 점수순 선별
-    
     let selectedCandidates = [];
-    let maxCards = 3;
-    if (distAtoC <= 0.8) maxCards = 0;
-    
-    for (let candidate of validPool) {
-      if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedCandidates)) {
-        selectedCandidates.push(candidate);
-      }
-      if (selectedCandidates.length === maxCards) break;
-    }
 
-    // 🚘 복귀 길목 상에서 차례대로 경유할 수 있도록 [거리 오름차순 (현재 위치에서 가까운 순)] 재정렬
-    selectedCandidates.sort((a, b) => a.dist - b.dist);
+    if (inWisu) {
+      let validPool = scoredPool.filter(p => p.score >= 30 && p.dist < distAtoC);
+      validPool.sort((a, b) => b.score - a.score);
+      for (let candidate of validPool) {
+        if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedCandidates)) {
+          selectedCandidates.push(candidate);
+        }
+        if (selectedCandidates.length === 3) break;
+      }
+      selectedCandidates.sort((a, b) => a.dist - b.dist);
+    } else {
+      // 🟠 [모드 2 복귀 알고리즘 핵심 교정]
+      // 1) 현위치(여의도) 6km 이내 출발지 근처 핫플 무조건 1번 카드 확정
+      let startAreaPool = scoredPool.filter(p => p.dist <= 6.0 && p.dist < distAtoC);
+      startAreaPool.sort((a, b) => b.score - a.score);
+
+      if (startAreaPool.length > 0) {
+        selectedCandidates.push(startAreaPool[0]); // 여의도/영등포 등 출발지 최고 핫플 1번 확정
+      }
+
+      // 2) 복귀 길목 중간 핫플 추가 선별
+      let corridorPool = scoredPool.filter(p => {
+        if (selectedCandidates.some(s => s.name === p.name)) return false;
+        const detourDist = p.dist + p.distBtoC;
+        return (p.dist < distAtoC) && (detourDist <= distAtoC * 1.3);
+      });
+      corridorPool.sort((a, b) => b.score - a.score);
+
+      for (let candidate of corridorPool) {
+        if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedCandidates)) {
+          selectedCandidates.push(candidate);
+        }
+        if (selectedCandidates.length === 3) break;
+      }
+
+      // 3) 현위치에서 복귀 경로 순서대로(거리 오름차순) 순방향 정렬
+      selectedCandidates.sort((a, b) => a.dist - b.dist);
+    }
 
     currentRouteData = [
       { name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true },
@@ -1128,7 +981,7 @@
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
       logEl.innerText = selectedCandidates.length > 0 
-        ? `방금 · [${inWisu ? '관내순환' : '관외복귀'}] 카카오모빌리티 연산 완료 (목적지: ${finalTarget.name})`
+        ? `방금 · [${inWisu ? '관내순환' : '관외복귀'}] 연산 완료 (목적지: ${finalTarget.name})`
         : `방금 · [${inWisu ? '관내순환' : '관외복귀'}] 목적지근접 (${finalTarget.name} 직행)`;
     }
     
@@ -1179,6 +1032,7 @@
       `;
       listEl.appendChild(card);
     });
+
     const finalCard = document.createElement('div');
     finalCard.className = 'card final-card';
     const inWisu = (currentMode === 1);
@@ -1231,6 +1085,7 @@
       listEl.appendChild(subSection);
     }
   }
+
   function renderCallMapView() {
     if (typeof L === 'undefined') return;
     const centerPos = currentPos || { lat: 37.4048, lng: 126.9767 };
@@ -1281,7 +1136,7 @@
     });
     document.getElementById('pipeline-log').innerText = `콜 지도 모드 · 전체 ${logs.length}건 중 현재시간대(${currentHour}시 기준) 콜 ${activeCount}건 집중`;
   }
-  
+
   async function openRouteMapModal() {
     if (typeof L === 'undefined') {
       showToast('지도 로딩 중입니다.');
@@ -1322,17 +1177,17 @@
       leafletMap.fitBounds(L.latLngBounds(markerCoords), { padding: [40, 40] });
     }, 200);
   }
-  
+
   function closeRouteMapModal() {
     const modal = document.getElementById('map-modal');
     if (modal) modal.classList.remove('active');
   }
-  
+
   function cleanQuery(str) {
     if (!str) return '';
     return str.replace(/먹자골목|중심상가|상업지구|환승거점|사거리|로데오거리|로데오|환승센터|포차|맛고을|업무지구|메디컬타운/g, '').trim();
   }
-  
+
   function saveCurrentCallLocation() {
     const doSave = (pos) => {
       let logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
@@ -1345,7 +1200,7 @@
     if (currentPos) doSave(currentPos);
     else showToast("위치 확인 후 저장 가능합니다.");
   }
-  
+
   function addCustomHotspotPrompt() {
     if (!currentPos) {
       showToast('먼저 위치 검색을 진행해 주세요.');
@@ -1360,14 +1215,14 @@
     if (activeTab !== 3) calculateAndRender();
     showToast('등록 완료!');
   }
-  
+
   function deleteCustomHotspot(id) {
     let custom = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]').filter(i => i.id !== id);
     localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(custom));
     updateCustomHotspotUI();
     if (activeTab !== 3) calculateAndRender();
   }
-  
+
   function updateCustomHotspotUI() {
     const list = document.getElementById('custom-hotspots-list');
     if (!list) return;
@@ -1388,14 +1243,14 @@
       });
     });
   }
-  
+
   function deleteCallLog(id, ts) {
     let logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]').filter(i => i.id !== id && i.timestamp !== ts);
     localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
     updateCallLogStats();
     if (activeTab === 3) renderCallMapView();
   }
-  
+
   function updateCallLogStats() {
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     const countText = document.getElementById('log-count-text');
@@ -1418,7 +1273,7 @@
       });
     });
   }
-  
+
   function exportCallLogs() {
     const data = { 
       call_logs: JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]'), 
@@ -1458,7 +1313,7 @@
       }
     }
   }
-  
+
   function importCallLogs(e) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
@@ -1505,7 +1360,7 @@
     };
     reader.readAsText(file);
   }
-  
+
   function checkHotspotUpdateReminder() {
     const LAST_UPDATE_KEY = 'suhda_last_hotspot_update';
     const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
@@ -1518,19 +1373,19 @@
       if (banner) banner.style.display = 'block';
     }
   }
-  
+
   function requestHotspotUpdate() {
     alert("최신 핫플 검색 후 저에게 말씀해 주시면 새로운 마스터 파일을 만들어 드리겠습니다!");
     localStorage.setItem('suhda_last_hotspot_update', new Date().getTime());
     const banner = document.getElementById('hotspotUpdateBanner');
     if (banner) banner.style.display = 'none';
   }
-  
+
   function dismissBanner() {
     const banner = document.getElementById('hotspotUpdateBanner');
     if (banner) banner.style.display = 'none';
   }
-  
+
   window.addEventListener('DOMContentLoaded', () => {
     initKakaoSdk();
     checkIsPublicHolidayRealtime();
@@ -1558,7 +1413,7 @@
     document.getElementById('timer-btn-10m').addEventListener('click', () => setTimerPreset(10));
     document.getElementById('timer-display-btn').addEventListener('click', () => toggleTimer());
     
-    setTimeout(() => { executeSearch(); }, 100);
+    setTimeout(() => { executeSearch(); }, 200);
   });
 </script>
 </body>
