@@ -136,7 +136,6 @@
     .tag.masterdb { background: #581C87; color: #F3E8FF; border: 1px solid #9333EA; font-weight: 700; }
     .tag.livekakaomap { background: #854D0E; color: #FEF08A; border: 1px solid #EAB308; font-weight: 800; }
     
-    /* 💡 컴팩트하게 축소된 하단 참고용 거점역 스타일 (v2.2.3) */
     .sub-final-section { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
     .sub-final-title { font-size: 10px; font-weight: 800; color: var(--theme-accent); margin-bottom: 1px; }
     .sub-final-list { display: flex; flex-direction: column; gap: 4px; }
@@ -291,24 +290,30 @@
     </div>
 
     <details style="margin-top: 8px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 1.4;">
-      <summary style="font-weight: 800; color: #FFC800; cursor: pointer;">💡 수다택시 K 핵심 운행 및 추천 엔진 가이드 (터치하여 펼치기)</summary>
+      <summary style="font-weight: 800; color: #FFC800; cursor: pointer;">💡 수다택시 K 모드별 검색 조건 가이드 (터치하여 펼치기)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px; font-size: 10px;">
         <div>
-          <strong style="color: #FFC800;">⚡ 모드 1 (관내 반경 5km 실시간)</strong>: 현재 위치 반경 5km 이내의 최적 콜 핫플 3곳을 실시간 추천하며, 관내 거점역 현황은 하단 소형 카드로 표시
+          <strong style="color: #FFC800;">⚡ 모드 1 (관내 4개 도시: 안양·군포·의왕·과천)</strong><br>
+          • 고정 목적지 강제 없이, 현재 위치 반경 5km 이내의 실시간 최적 핫플 3곳 다이렉트 추천<br>
+          • 하단에 관내 5대 핵심 거점역 현황을 소형 참고 카드로 표시
         </div>
         <div>
-          <strong style="color: #FF6B00;">🧭 모드 2 (관외복귀)</strong>: 외곽/타지역 수송 후 복귀 시 출발지 2.0km 초근접 1순위 경유지 연산 후 관내 복귀
+          <strong style="color: #FF6B00;">🧭 모드 2 (관외/타지역: 안산·서울·수원 등)</strong><br>
+          • 관내(안양권) 거점을 완전 배제하고 현지 승탑에 100% 집중<br>
+          • 현재 위치 반경 6km 이내의 현지 실시간 상권 + 기사님 콜 기록 + 복원 마스터 DB 기반 Top 3 다이렉트 추천
         </div>
       </div>
     </details>
 
     <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;" open>
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.2.3 모드2 참고 카드 분기 및 컴팩트 디자인 적용 (터치)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.2.4 마스터 DB 연동 버그 수정 & 모드2 개편 내역 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v2.2.3 (2026.09) - 디자인 및 모드 분기 최적화</strong><br>
-          • 🚫 <strong>모드 2 하단 거점역 완벽 제외</strong>: 관외(타지역)에 있을 때 관내 거점역 카드가 출력되는 현상을 완전히 제어했습니다.<br>
-          • 📏 <strong>하단 참고 거점역 소형화</strong>: 모드 1 하단 참고 영역의 카드를 슬림형(Compact)으로 재설계하여 한눈에 들어오도록 개선했습니다.
+          <strong style="color: #4ADE80;">v2.2.4 (2026.09) - 백업 마스터 DB 연동 보완 및 모드 2 현지화</strong><br>
+          • 🛠️ <strong>복원 마스터 DB 연동 버그 완벽 수정</strong>: 백업 JSON으로 복원한 기사님 전용 마스터 DB(`master_hotspots`)가 추천 연산에 100% 최우선 반영되도록 로직을 수정했습니다.<br>
+          • 🚫 <strong>모드 2 관내 거점 차단 & 현지 핫플 추천</strong>: 관외 운행 시 안양권 거점을 제외하고, 현지 실시간 상권/콜기록/마스터DB 중심 Top 3를 즉시 추천합니다.<br>
+          • 🏙️ <strong>안산 주요 거점 기본 탑재</strong>: 중앙역 로데오, 고잔역, 상록수역, 한대앞역, 초지역, 안산역 DB를 기본 내장했습니다.<br>
+          • 📐 <strong>모드 1 하단 참고 거점 소형화</strong>: 관내 운행 시 하단 참고 카드의 높이와 패딩을 컴팩트(Slim)하게 축소했습니다.
         </div>
       </div>
     </details>
@@ -552,7 +557,14 @@
     }, 1000);
   }
 
+  /* 💡 안산 DB 보강 및 마스터 DB 구조 정의 */
   const DEFAULT_MASTER_HOTSPOTS = [
+    { "id": "hs_ansan_1", "name": "중앙역 로데오거리 및 메디컬타운", "lat": 37.3186, "lng": 126.8385, "address": "고잔동", "type": "subway_nightlife", "region": "ansan", "isWisu": false },
+    { "id": "hs_ansan_2", "name": "고잔역 법원·검찰청 및 신도시 중심상가", "lat": 37.3168, "lng": 126.8232, "address": "고잔동", "type": "office_nightlife", "region": "ansan", "isWisu": false },
+    { "id": "hs_ansan_3", "name": "상록수역 환승 거점 및 먹자골목", "lat": 37.3025, "lng": 126.8654, "address": "본오동", "type": "subway_nightlife", "region": "ansan", "isWisu": false },
+    { "id": "hs_ansan_4", "name": "한대앞역 로데오거리", "lat": 37.3097, "lng": 126.8534, "address": "이동", "type": "subway_nightlife", "region": "ansan", "isWisu": false },
+    { "id": "hs_ansan_5", "name": "초지역 환승 거점", "lat": 37.3205, "lng": 126.8058, "address": "원곡동", "type": "subway", "region": "ansan", "isWisu": false },
+    { "id": "hs_ansan_6", "name": "안산역 및 다문화거리", "lat": 37.3267, "lng": 126.7904, "address": "원곡동", "type": "subway_shopping", "region": "ansan", "isWisu": false },
     { "id": "hs_s_sadang_1", "name": "사당역 환승 거점 및 먹자골목", "lat": 37.4765, "lng": 126.9816, "address": "사당역", "type": "subway_nightlife", "region": "seoul", "isWisu": false },
     { "id": "hs_s_yeouido_1", "name": "여의도역 및 증권가 상권", "lat": 37.5216, "lng": 126.9242, "address": "여의도동", "type": "office_nightlife", "region": "seoul", "isWisu": false },
     { "id": "hs_s_yeongdeungpo_1", "name": "영등포역 환승 거점 및 타임스퀘어", "lat": 37.5158, "lng": 126.9075, "address": "영등포동", "type": "subway_shopping", "region": "seoul", "isWisu": false },
@@ -572,15 +584,19 @@
     { "id": "hs_s_01", "name": "강남역 상업지구 및 병원거리", "lat": 37.4981, "lng": 127.0276, "address": "강남역", "type": "subway_hospital", "region": "seoul", "isWisu": false }
   ];
 
-  const WISU_BOUNDARY_POINTS = [
-    { name: "안양 석수동 경계 (인천/부천/서울 방면)", lat: 37.4265, lng: 126.9050, address: "석수동", isWisu: true },
-    { name: "안양 박달동 경계 (시흥/인천 방면)", lat: 37.4080, lng: 126.8920, address: "박달동", isWisu: true },
-    { name: "안양 만안구 경계", lat: 37.3850, lng: 126.9100, address: "안양동", isWisu: true },
-    { name: "군포 대야미/부곡 경계 (안산 방면)", lat: 37.3320, lng: 126.9150, address: "대야미동", isWisu: true },
-    { name: "의왕 부곡/월암 경계 (수원 방면)", lat: 37.3080, lng: 126.9580, address: "월암동", isWisu: true },
-    { name: "의왕 청계/포일 경계 (성남/분당 방면)", lat: 37.3950, lng: 127.0120, address: "포일동", isWisu: true },
-    { name: "과천 주암/선바위 경계 (서울/강남 방면)", lat: 37.4520, lng: 127.0050, address: "과천동", isWisu: true }
-  ];
+  /* 💡 저장소에서 복원된 기사님 전용 마스터 DB 불러오기 (버그 완전 수정) */
+  function getMasterHotspotsFromStorage() {
+    const saved = localStorage.getItem('sudataxi_master_hotspots');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      } catch(e) {}
+    }
+    return DEFAULT_MASTER_HOTSPOTS;
+  }
 
   async function checkIsInsideWisuRealtime(lat, lng) {
     return new Promise((resolve) => {
@@ -609,12 +625,6 @@
     { name: "안양역 일번가 및 메디컬타운", lat: 37.4013, lng: 126.9222, address: "안양역", type: "subway_hospital", isWisu: true },
     { name: "산본역 중심상가 및 원광대병원", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway_hospital", isWisu: true }
   ];
-
-  function getMasterHotspotsFromStorage() {
-    const saved = localStorage.getItem('sudataxi_master_hotspots');
-    if (saved) { try { return JSON.parse(saved); } catch(e) {} }
-    return DEFAULT_MASTER_HOTSPOTS;
-  }
 
   function getStraightDistanceKm(lat1, lon1, lat2, lon2) {
     const R = 6371;
@@ -862,7 +872,7 @@
         
         currentMode = inWisu ? 1 : 2;
         document.body.className = `mode-${currentMode}`;
-        if (locText) locText.innerText = `📍 ${currentRegionName || currentPos.lat.toFixed(4)} (${inWisu ? '위수 안 - 반경 5km 추천' : '외곽/타지역 - 복귀'})`;
+        if (locText) locText.innerText = `📍 ${currentRegionName || currentPos.lat.toFixed(4)} (${inWisu ? '관내 반경 5km 추천' : '관외 현지 핫플 추천'})`;
         if (activeTab !== 3) calculateAndRender();
       },
       (err) => {
@@ -883,21 +893,23 @@
     });
   }
 
+  /* 💡 v2.2.4 핵심 연산 엔진 (마스터 DB 최우선 불러오기 적용) */
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
     const inWisu = (currentMode === 1);
-    if (logEl) logEl.innerText = `⚡ [스마트 ${inWisu ? '반경 5km 추천' : '관외복귀'}] 길찾기 연산 중...`;
+    if (logEl) logEl.innerText = `⚡ [스마트 ${inWisu ? '관내 반경 5km' : '관외 현지 핫플'}] 연산 중...`;
     
     let weatherData = { isRainOrSnow: false };
     try { weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng); } catch(e) {}
     
     const liveKakaoHotspots = await fetchLiveKakaoHotspots(currentPos.lat, currentPos.lng);
     const customHotspots = getCustomHotspots();
-    const masterHotspots = getMasterHotspotsFromStorage();
+    
+    // 💡 저장된 마스터 DB 최우선 호출 (연동 버그 완전 보완)
+    const activeMasterHotspots = getMasterHotspotsFromStorage();
     const nowHour = new Date().getHours();
 
-    // 💡 모드 1일 때만 5대 거점역 실시간 상태 연산
     let referenceHubs = [];
     if (inWisu) {
       for (let h of MAJOR_HUBS) {
@@ -913,22 +925,34 @@
       referenceHubs.sort((a, b) => a.dist - b.dist);
     }
 
-    let rawPool = [...liveKakaoHotspots, ...customHotspots, ...masterHotspots];
+    // 모드 2일 경우 안양/군포/의왕/과천 거점 완전히 제외하고 현지 데이터에 집중
+    let rawPool = [...liveKakaoHotspots, ...customHotspots, ...activeMasterHotspots].filter(item => {
+      if (!inWisu) {
+        const isWisuHub = MAJOR_HUBS.some(h => item.name.includes(h.name.substring(0,2)));
+        if (isWisuHub || item.isWisu === true) return false;
+      }
+      return true;
+    });
 
     let scoredPool = [];
     for (let item of rawPool) {
       const directDist = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
+      
       if (inWisu && directDist > 5.0) continue; 
+      if (!inWisu && directDist > 6.0) continue;
 
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
       let pureRes = await calculatePureSpotScore(item, weatherData, nowHour);
       
+      let finalScore = pureRes.score;
+      if (!inWisu && road.distanceKm <= 2.0) finalScore += 40;
+
       scoredPool.push({
         ...item, 
         dist: Number(road.distanceKm), 
         estimatedTimeMin: road.durationMin,
         geometryCoords: road.geometryCoords,
-        score: pureRes.score, 
+        score: finalScore, 
         isNearStep1: (road.distanceKm <= 2.0),
         logCount: pureRes.logCount,
         isTimeMatch: pureRes.isTimeMatch,
@@ -955,8 +979,8 @@
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
       logEl.innerText = selectedCandidates.length > 0 
-        ? `방금 · [반경 5km 실시간 Top 3] 연산 완료`
-        : `방금 · 주변 5km 이내 검색 결과 없음`;
+        ? `방금 · [${inWisu ? '반경 5km 실시간' : '관외 현지 핫플'}] Top 3 연산 완료`
+        : `방금 · 주변 검색 결과 없음`;
     }
     
     renderCards(selectedCandidates, referenceHubs);
@@ -967,8 +991,8 @@
     if (!listEl) return;
     
     const fragment = document.createDocumentFragment();
+    const inWisu = (currentMode === 1);
     
-    // Top 3 추천 카드
     routeCards.forEach((item, index) => {
       const card = document.createElement('div');
       card.className = 'card';
@@ -989,7 +1013,7 @@
           </div>
         </div>
         <div class="tag-group">
-          ${item.isNearStep1 ? '<span class="tag near">#초근접</span>' : '<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#반경5km</span>'}
+          ${item.isNearStep1 ? '<span class="tag near">#초근접</span>' : `<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#${inWisu ? '반경5km' : '현지핫플'}</span>`}
           ${item.isLiveKakao ? '<span class="tag livekakaomap">⚡실시간상권</span>' : ''}
           ${item.isTimeMatch ? '<span class="tag timematch">🔥시간대콜</span>' : ''}
           ${item.isMasterDb ? '<span class="tag masterdb">#마스터DB</span>' : ''}
@@ -1000,8 +1024,7 @@
       fragment.appendChild(card);
     });
 
-    // 💡 모드 1일 때만 슬림형 하단 참고 거점역 렌더링 (v2.2.3 컴팩트 디자인)
-    if (currentMode === 1 && referenceHubs && referenceHubs.length > 0) {
+    if (inWisu && referenceHubs && referenceHubs.length > 0) {
       const subSection = document.createElement('div');
       subSection.className = 'sub-final-section';
       subSection.innerHTML = `
@@ -1236,6 +1259,7 @@
     }
   }
 
+  /* 💡 복원 시 master_hotspots도 localStorage에 안전 저장 후 연산 재실행 */
   function importCallLogs(e) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
@@ -1265,7 +1289,7 @@
         localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(Array.from(hotspotMap.values())));
         updateCallLogStats();
         updateCustomHotspotUI();
-        showToast(`🎉 병합 완료!`);
+        showToast(`🎉 복원/병합 완료! 마스터 DB 연동됨`);
         if (activeTab === 3) renderCallMapView(); else calculateAndRender();
       } catch(err) { showToast('❌ 오류: 올바르지 않은 JSON 파일입니다.'); } 
       finally { e.target.value = ''; }
