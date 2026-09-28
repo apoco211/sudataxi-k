@@ -262,18 +262,6 @@
     </button>
   </div>
 
-  <details style="margin-bottom: 8px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 1.4;">
-    <summary style="font-weight: 800; color: #FFC800; cursor: pointer;">💡 수다택시 K 핵심 운행 및 추천 엔진 가이드 (터치하여 펼치기)</summary>
-    <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px; font-size: 10px;">
-      <div>
-        <strong style="color: #FFC800;">⚡ 모드 1 (관내순환)</strong>: 안양권 영역 내 주행 시 가장 효율적인 최단 5대 거점역으로 순환 및 동선 추천
-      </div>
-      <div>
-        <strong style="color: #FF6B00;">🧭 모드 2 (관외복귀)</strong>: 외곽/타지역 수송 후 복귀 시 출발지 2.0km 초근접 1순위 경유지 연산 후 안양권 복귀
-      </div>
-    </div>
-  </details>
-
   <div id="heatmap-container">
     <div class="map-legend">
       <div class="legend-item"><span class="dot-sample" style="background:#22C55E;"></span> 현재시간 집중</div>
@@ -308,14 +296,27 @@
       <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 2px;"></div>
     </div>
     
+    <!-- 요청하신 위치: 히스토리 바로 위로 재배치된 핵심 가이드 박스 -->
+    <details style="margin-top: 8px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 1.4;">
+      <summary style="font-weight: 800; color: #FFC800; cursor: pointer;">💡 수다택시 K 핵심 운행 및 추천 엔진 가이드 (터치하여 펼치기)</summary>
+      <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px; font-size: 10px;">
+        <div>
+          <strong style="color: #FFC800;">⚡ 모드 1 (관내순환)</strong>: 안양권 영역 내 주행 시 가장 효율적인 최단 5대 거점역으로 순환 및 동선 추천
+        </div>
+        <div>
+          <strong style="color: #FF6B00;">🧭 모드 2 (관외복귀)</strong>: 외곽/타지역 수송 후 복귀 시 출발지 2.0km 초근접 1순위 경유지 연산 후 안양권 복귀
+        </div>
+      </div>
+    </details>
+
     <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;">
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.0.7 업데이트 내역 (터치)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.0.8 업데이트 내역 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v2.0.7 (2026.09) - 타이머 영구 상태 저장 패치</strong><br>
-          • ⏱️ 새로고침/앱재시작 발생 시에도 타이머가 끊기지 않고 남은 시간 보존<br>
-          • 📍 GPS 리로드 과부하 방지 및 위치 수신 안전장치 강화<br>
-          • 🗺️ 지도 마커 숫자 깨짐 완벽 방지 및 도로망 곡선 표기 보장
+          <strong style="color: #4ADE80;">v2.0.8 (2026.09) - 연산속도 최적화 & 위치 재배치</strong><br>
+          • ⚡ 도로망 OSRM 및 카카오 길찾기 병렬 연산으로 대기시간 획기적 단축<br>
+          • 📍 핵심 운행 가이드 박스를 히스토리 바로 위로 재배치하여 상단 공간 확보<br>
+          • ⏱️ 새로고침/앱재시작 발생 시 타이머 남은 시간 영구 복원 보장
         </div>
       </div>
     </details>
@@ -447,7 +448,6 @@
     triggerSystemNotification();
   }
 
-  /* ---------------- TIMER PERSISTENCE FIX (새로고침 방지 시스템) ---------------- */
   function saveTimerState() {
     const state = {
       presetMin: timerPresetMin,
@@ -726,12 +726,13 @@
     return new Date(0);
   }
 
+  /* OSRM 길찾기 타임아웃 단축 (빠른 처리) */
   async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const directDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng);
     try {
       const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      const timeoutId = setTimeout(() => controller.abort(), 1200); // 1.2초 내 응답 시 적용
       const res = await fetch(osrmUrl, { signal: controller.signal });
       clearTimeout(timeoutId);
       if (res.ok) {
@@ -878,35 +879,37 @@
     });
   }
 
+  /* ⚡ [속도 최적화] 병렬 연산을 통한 즉시 계산 처리 */
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
     const inWisu = (currentMode === 1);
     if (logEl) logEl.innerText = `⚡ [스마트 ${inWisu ? '관내순환' : '관외복귀'}] 길찾기 연산 중...`;
     
-    let weatherData = { isRainOrSnow: false };
-    try { weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng); } catch(e) {}
+    const nowHour = new Date().getHours();
+
+    // 외부 API 수신 병렬 실행
+    const [weatherData, liveKakaoHotspots] = await Promise.all([
+      fetchRealtimeWeather(currentPos.lat, currentPos.lng),
+      fetchLiveKakaoHotspots(currentPos.lat, currentPos.lng)
+    ]);
     
-    const liveKakaoHotspots = await fetchLiveKakaoHotspots(currentPos.lat, currentPos.lng);
     const customHotspots = getCustomHotspots();
     const masterHotspots = getMasterHotspotsFromStorage();
-    const nowHour = new Date().getHours();
-    
     let finalTarget = null;
     
     if (inWisu) {
-      let scoredTargets = [];
-      for (let h of MAJOR_HUBS) {
+      let scoredTargets = await Promise.all(MAJOR_HUBS.map(async (h) => {
         let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
         let pureRes = await calculatePureSpotScore({...h, isWisu: true}, weatherData, nowHour);
-        scoredTargets.push({
+        return {
           ...h,
           dist: Number(road.distanceKm),
           estimatedTimeMin: road.durationMin,
           score: pureRes.score,
           geometryCoords: road.geometryCoords
-        });
-      }
+        };
+      }));
       scoredTargets.sort((a, b) => a.dist - b.dist);
       finalTarget = (scoredTargets[0].dist <= 0.5 && scoredTargets.length > 1) ? scoredTargets[1] : scoredTargets[0];
     } else {
@@ -914,18 +917,17 @@
         return item.isWisu === true || item.region === 'anyang' || item.region === 'gunpo' || item.region === 'gwacheon' || item.region === 'uiwang';
       });
 
-      let scoredWisuTargets = [];
-      for (let item of allWisuCandidates) {
+      let scoredWisuTargets = await Promise.all(allWisuCandidates.map(async (item) => {
         let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
         let pureRes = await calculatePureSpotScore({...item, isWisu: true}, weatherData, nowHour);
-        scoredWisuTargets.push({
+        return {
           ...item,
           dist: Number(road.distanceKm),
           estimatedTimeMin: road.durationMin,
           score: pureRes.score,
           geometryCoords: road.geometryCoords
-        });
-      }
+        };
+      }));
       scoredWisuTargets.sort((a, b) => a.dist - b.dist);
       finalTarget = scoredWisuTargets[0]; 
     }
@@ -942,8 +944,8 @@
 
     const distAtoC = getStraightDistanceKm(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
     
-    let scoredPool = [];
-    for (let item of rawPool) {
+    // 후보지 길찾기 및 점수 부여 고속 병렬 처리
+    let scoredPool = await Promise.all(rawPool.map(async (item) => {
       const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const distBtoC = getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
@@ -954,7 +956,7 @@
         finalScore += 50;
       }
 
-      scoredPool.push({
+      return {
         ...item, 
         dist: Number(road.distanceKm), 
         distBtoC: distBtoC,
@@ -965,8 +967,8 @@
         logCount: pureRes.logCount,
         isTimeMatch: pureRes.isTimeMatch,
         isMasterDb: !item.isCustom && !item.isLiveKakao && (item.region !== undefined || item.id?.startsWith('hs_'))
-      });
-    }
+      };
+    }));
 
     let selectedCandidates = [];
 
@@ -1025,13 +1027,13 @@
     
     let subFinalCandidates = [];
     if (inWisu) {
-      for (let h of MAJOR_HUBS.filter(h => h.name !== finalTarget.name)) {
+      subFinalCandidates = await Promise.all(MAJOR_HUBS.filter(h => h.name !== finalTarget.name).map(async (h) => {
         let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
         let pureRes = await calculatePureSpotScore({...h, isWisu: true}, weatherData, nowHour);
-        subFinalCandidates.push({
+        return {
           ...h, dist: Number(road.distanceKm), estimatedTimeMin: road.durationMin, score: pureRes.score
-        });
-      }
+        };
+      }));
       subFinalCandidates.sort((a, b) => a.dist - b.dist);
     }
     renderCards(selectedCandidates, finalTarget, subFinalCandidates);
@@ -1399,7 +1401,7 @@
     updateCallLogStats();
     updateCustomHotspotUI();
     checkHotspotUpdateReminder();
-    restoreTimerState(); // 타이머 영구 상태 복원
+    restoreTimerState();
     
     document.getElementById('btn-mode1').addEventListener('click', () => setTab(1));
     document.getElementById('btn-mode3').addEventListener('click', () => setTab(3));
