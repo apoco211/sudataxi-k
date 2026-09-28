@@ -277,9 +277,8 @@
           <strong style="color: #FF6B00;">🟠 [모드 2] 타지역/관외 복귀 영업 (오렌지색 테마)</strong><br>
           • <strong>영업 목적:</strong> 서울/수원/판교 등 타지역 하차 후 내 영업구역(위수지역)으로의 귀로 영업<br>
           • <strong>자동 모드 전환:</strong> 카카오 실시간 행정구역(시/군/구) 수신으로 위수 밖 진입 시 100% 자동 스위칭<br>
-          • <strong>4번 최단 진입 복귀지:</strong> 현위치에서 위수지역으로 들어가는 <strong>가장 가까운 관내 진입 경계점</strong>(과천 주암/선바위, 안양 박달, 군포 대야미, 의왕 월암 등)이 4번 목적지로 고정<br>
-          • <strong>실시간 API 병렬연산 (v1.7.8):</strong> 타임아웃 방지 병렬 조회로 현위치 주변 실시간 카카오 상권 100% 즉시 수신<br>
-          • <strong>서울 서북/서부 DB 보강:</strong> 상암DMC, 홍대, 신촌, 연신내, 합정 등 복귀 길목 마스터 DB 대폭 강화 및 15km 거리 제한 차단
+          • <strong>실시간 최단 복귀지 산정:</strong> 현재 위치에서 위수지역 내부(isWisu) 장소 중 도로거리가 가장 짧은 곳이 실시간 4번 목적지로 결정<br>
+          • <strong>복귀 경로 길목 탐색:</strong> 진행 각도 없이 현재 위치에서 최종 목적지로 가는 복귀 동선 상의 알짜 핫플을 1~3번 경유지로 배치
         </div>
         
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
@@ -301,17 +300,14 @@
       <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 12px;">📜 수다택시 K 전체 업데이트 히스토리 (터치하여 펼치기)</summary>
       <div style="margin-top: 10px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #4ADE80;">v1.7.8 (2026.09) - 카카오 실시간 API 병렬수신 & 서울 서북권 마스터 DB 보강</strong><br>
-          • 🎯 실시간 검색 타임아웃 해결을 위해 Promise.all 병렬 수신 적용<br>
-          • 🧭 상암 DMC, 홍대입구, 신촌, 합정, 연신내 등 서울 서북/서부권 주요 복귀 길목 마스터 DB 추가
+          <strong style="color: #4ADE80;">v1.8.0 (2026.09) - 실시간 복귀지 산정 & 각도폐기 복귀길목 엔진 고정</strong><br>
+          • 🎯 진행 각도 연산 완전 폐기, 복귀 경로(Corridor) 우회율 알고리즘 전환<br>
+          • 🧭 관외 복귀 시 최단 거리 위수 장소를 실시간 연산하여 4번 목적지로 자동 지정
         </div>
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 6px;">
-          <strong style="color: #888888;">v1.7.7 (2026.09) - 모드 2 벡터 각도 및 수직 이탈거리 정밀 엔진 도입</strong><br>
-          • 🎯 진행 방향 각도(22도) 및 수직 거리(1.5km) 제한 적용
-        </div>
-        <div>
-          <strong style="color: #888888;">v1.7.6 (2026.09) - 경유지 잔여거리 순차 정렬</strong><br>
-          • 🎯 목적지 잔여거리(distBtoC) 내림차순 적용
+          <strong style="color: #888888;">v1.7.8 (2026.09) - 카카오 실시간 API 병렬수신 & 서울 서북권 마스터 DB 보강</strong><br>
+          • 🎯 실시간 검색 타임아웃 해결을 위해 Promise.all 병렬 수신 적용<br>
+          • 🧭 상암 DMC, 홍대입구, 신촌, 합정, 연신내 등 서울 서북/서부권 주요 복귀 길목 마스터 DB 추가
         </div>
       </div>
     </details>
@@ -372,8 +368,7 @@
       } catch(e) {}
     }
   }
-
-  // 🚘 카카오내비 실행 (share 연동: 경로 선택 요약 화면 우선 표시)
+  // 🚘 카카오내비 실행
   function openKakaoNaviApp(name, lat, lng) {
     initKakaoSdk();
     let cleanName = cleanQuery(name) || name;
@@ -391,7 +386,6 @@
     }
     window.location.href = `https://m.map.kakao.com/scheme/route?ep=${lat},${lng}&by=car`;
   }
-
   function showToast(msg) {
     const t = document.getElementById('toast-banner');
     if (!t) return;
@@ -399,14 +393,12 @@
     t.style.display = 'block';
     setTimeout(() => { t.style.display = 'none'; }, 2200);
   }
-
   function initOrResumeAudioContext() {
     try {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume();
     } catch(e) {}
   }
-
   function startBackgroundAudioKeepAlive() {
     try {
       if (!silentAudioElement) {
@@ -416,15 +408,12 @@
       silentAudioElement.play().catch(e => {});
     } catch(e) {}
   }
-
   function stopBackgroundAudioKeepAlive() {
     try { if (silentAudioElement) silentAudioElement.pause(); } catch(e) {}
   }
-
   function requestNotificationPermission() {
     if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
   }
-
   function triggerSystemNotification() {
     if ('Notification' in window && Notification.permission === 'granted') {
       try {
@@ -435,7 +424,6 @@
       } catch(e) {}
     }
   }
-
   function playTimerAlarm() {
     try {
       initOrResumeAudioContext();
@@ -460,37 +448,36 @@
     triggerSystemNotification();
   }
   
-  // 💡 [v1.7.8] 서울 서북/서부권 주요 복귀 길목 마스터 DB 대폭 추가
   const DEFAULT_MASTER_HOTSPOTS = [
-    { "id": "hs_s_sangam_1", "name": "상암 DMC 오피스 및 방송타운", "lat": 37.5780, "lng": 126.8900, "address": "상암동", "type": "office", "region": "seoul" },
-    { "id": "hs_s_hongdae_1", "name": "홍대입구역 및 연남동 로데오", "lat": 37.5575, "lng": 126.9244, "address": "홍대입구역", "type": "subway_nightlife", "region": "seoul" },
-    { "id": "hs_s_hapjeong_1", "name": "합정역 환승 거점 및 메세나폴리스", "lat": 37.5495, "lng": 126.9138, "address": "합정역", "type": "subway", "region": "seoul" },
-    { "id": "hs_s_sinchon_1", "name": "신촌역 로데오 및 메디컬타운", "lat": 37.5552, "lng": 126.9368, "address": "신촌역", "type": "subway_hospital", "region": "seoul" },
-    { "id": "hs_s_yeonsinnae_1", "name": "연신내역 로데오거리 및 먹자골목", "lat": 37.6190, "lng": 126.9210, "address": "연신내역", "type": "subway_nightlife", "region": "seoul" },
-    { "id": "hs_s_yeongdeungpo_1", "name": "영등포역 환승 거점 및 타임스퀘어", "lat": 37.5158, "lng": 126.9075, "address": "영등포역", "type": "subway_shopping", "region": "seoul" },
-    { "id": "hs_g_gwangmyeong_1", "name": "KTX 광명역 및 일직동 로데오", "lat": 37.4162, "lng": 126.8845, "address": "광명역", "type": "subway_shopping", "region": "gwangmyeong" },
-    { "id": "hs_g_gwacheon_1", "name": "정부과천청사역 중심상가 및 로데오", "lat": 37.4262, "lng": 126.9898, "address": "정부과천청사역", "type": "subway_nightlife", "region": "gwacheon" },
-    { "id": "hs_g_gwacheon_2", "name": "선바위역 환승장 및 먹자골목", "lat": 37.4518, "lng": 127.0022, "address": "선바위역", "type": "subway", "region": "gwacheon" },
-    { "id": "hs_g_gwacheon_3", "name": "과천지식정보타운(지정타) 오피스", "lat": 37.4085, "lng": 126.9812, "address": "갈현동", "type": "office", "region": "gwacheon" },
-    { "id": "hs_g_anyang_1", "name": "평촌역 먹자골목 및 한림대병원", "lat": 37.3942, "lng": 126.9638, "address": "평촌역", "type": "subway_hospital", "region": "anyang" },
-    { "id": "hs_g_anyang_2", "name": "범계역 로데오거리 및 학원가", "lat": 37.3898, "lng": 126.9508, "address": "범계역", "type": "subway_academy", "region": "anyang" },
-    { "id": "hs_g_anyang_3", "name": "인덕원역 환승 거점", "lat": 37.4048, "lng": 126.9767, "address": "인덕원역", "type": "subway", "region": "anyang" },
-    { "id": "hs_g_anyang_4", "name": "안양역 일번가 및 메디컬타운", "lat": 37.4013, "lng": 126.9222, "address": "안양역", "type": "subway_hospital", "region": "anyang" },
-    { "id": "hs_g_anyang_5", "name": "산본역 중심상가 및 원광대병원", "lat": 37.3554, "lng": 126.9331, "address": "산본역", "type": "subway_hospital", "region": "gunpo" },
-    { "id": "hs_g_anyang_6", "name": "금정역 환승 먹자골목", "lat": 37.3718, "lng": 126.9415, "address": "금정역", "type": "subway", "region": "gunpo" },
-    { "id": "hs_g_ansan_1", "name": "안산 중앙동 로데오 및 고려대병원", "lat": 37.3164, "lng": 126.8381, "address": "중앙동 로데오", "type": "subway_hospital", "region": "ansan" },
-    { "id": "hs_s_01", "name": "강남역 상업지구 및 병원거리", "lat": 37.4981, "lng": 127.0276, "address": "강남역", "type": "subway_hospital", "region": "seoul" },
-    { "id": "hs_s_25", "name": "사당역 환승 거점 및 먹자골목", "lat": 37.4765, "lng": 126.9816, "address": "사당역", "type": "subway", "region": "seoul" }
+    { "id": "hs_s_sangam_1", "name": "상암 DMC 오피스 및 방송타운", "lat": 37.5780, "lng": 126.8900, "address": "상암동", "type": "office", "region": "seoul", "isWisu": false },
+    { "id": "hs_s_hongdae_1", "name": "홍대입구역 및 연남동 로데오", "lat": 37.5575, "lng": 126.9244, "address": "홍대입구역", "type": "subway_nightlife", "region": "seoul", "isWisu": false },
+    { "id": "hs_s_hapjeong_1", "name": "합정역 환승 거점 및 메세나폴리스", "lat": 37.5495, "lng": 126.9138, "address": "합정역", "type": "subway", "region": "seoul", "isWisu": false },
+    { "id": "hs_s_sinchon_1", "name": "신촌역 로데오 및 메디컬타운", "lat": 37.5552, "lng": 126.9368, "address": "신촌역", "type": "subway_hospital", "region": "seoul", "isWisu": false },
+    { "id": "hs_s_yeonsinnae_1", "name": "연신내역 로데오거리 및 먹자골목", "lat": 37.6190, "lng": 126.9210, "address": "연신내역", "type": "subway_nightlife", "region": "seoul", "isWisu": false },
+    { "id": "hs_s_yeongdeungpo_1", "name": "영등포역 환승 거점 및 타임스퀘어", "lat": 37.5158, "lng": 126.9075, "address": "영등포역", "type": "subway_shopping", "region": "seoul", "isWisu": false },
+    { "id": "hs_g_gwangmyeong_1", "name": "KTX 광명역 및 일직동 로데오", "lat": 37.4162, "lng": 126.8845, "address": "광명역", "type": "subway_shopping", "region": "gwangmyeong", "isWisu": false },
+    { "id": "hs_g_gwacheon_1", "name": "정부과천청사역 중심상가 및 로데오", "lat": 37.4262, "lng": 126.9898, "address": "정부과천청사역", "type": "subway_nightlife", "region": "gwacheon", "isWisu": true },
+    { "id": "hs_g_gwacheon_2", "name": "선바위역 환승장 및 먹자골목", "lat": 37.4518, "lng": 127.0022, "address": "선바위역", "type": "subway", "region": "gwacheon", "isWisu": true },
+    { "id": "hs_g_gwacheon_3", "name": "과천지식정보타운(지정타) 오피스", "lat": 37.4085, "lng": 126.9812, "address": "갈현동", "type": "office", "region": "gwacheon", "isWisu": true },
+    { "id": "hs_g_anyang_1", "name": "평촌역 먹자골목 및 한림대병원", "lat": 37.3942, "lng": 126.9638, "address": "평촌역", "type": "subway_hospital", "region": "anyang", "isWisu": true },
+    { "id": "hs_g_anyang_2", "name": "범계역 로데오거리 및 학원가", "lat": 37.3898, "lng": 126.9508, "address": "범계역", "type": "subway_academy", "region": "anyang", "isWisu": true },
+    { "id": "hs_g_anyang_3", "name": "인덕원역 환승 거점", "lat": 37.4048, "lng": 126.9767, "address": "인덕원역", "type": "subway", "region": "anyang", "isWisu": true },
+    { "id": "hs_g_anyang_4", "name": "안양역 일번가 및 메디컬타운", "lat": 37.4013, "lng": 126.9222, "address": "안양역", "type": "subway_hospital", "region": "anyang", "isWisu": true },
+    { "id": "hs_g_anyang_5", "name": "산본역 중심상가 및 원광대병원", "lat": 37.3554, "lng": 126.9331, "address": "산본역", "type": "subway_hospital", "region": "gunpo", "isWisu": true },
+    { "id": "hs_g_anyang_6", "name": "금정역 환승 먹자골목", "lat": 37.3718, "lng": 126.9415, "address": "금정역", "type": "subway", "region": "gunpo", "isWisu": true },
+    { "id": "hs_g_ansan_1", "name": "안산 중앙동 로데오 및 고려대병원", "lat": 37.3164, "lng": 126.8381, "address": "중앙동 로데오", "type": "subway_hospital", "region": "ansan", "isWisu": false },
+    { "id": "hs_s_01", "name": "강남역 상업지구 및 병원거리", "lat": 37.4981, "lng": 127.0276, "address": "강남역", "type": "subway_hospital", "region": "seoul", "isWisu": false },
+    { "id": "hs_s_25", "name": "사당역 환승 거점 및 먹자골목", "lat": 37.4765, "lng": 126.9816, "address": "사당역", "type": "subway", "region": "seoul", "isWisu": false }
   ];
   
   const WISU_BOUNDARY_POINTS = [
-    { name: "안양 석수동 경계 (인천/부천/서울 방면)", lat: 37.4265, lng: 126.9050, address: "석수동" },
-    { name: "안양 박달동 경계 (시흥/인천 방면)", lat: 37.4080, lng: 126.8920, address: "박달동" },
-    { name: "안양 만안구 경계", lat: 37.3850, lng: 126.9100, address: "안양동" },
-    { name: "군포 대야미/부곡 경계 (안산 방면)", lat: 37.3320, lng: 126.9150, address: "대야미동" },
-    { name: "의왕 부곡/월암 경계 (수원 방면)", lat: 37.3080, lng: 126.9580, address: "월암동" },
-    { name: "의왕 청계/포일 경계 (성남/분당 방면)", lat: 37.3950, lng: 127.0120, address: "포일동" },
-    { name: "과천 주암/선바위 경계 (서울/강남 방면)", lat: 37.4520, lng: 127.0050, address: "과천동" }
+    { name: "안양 석수동 경계 (인천/부천/서울 방면)", lat: 37.4265, lng: 126.9050, address: "석수동", isWisu: true },
+    { name: "안양 박달동 경계 (시흥/인천 방면)", lat: 37.4080, lng: 126.8920, address: "박달동", isWisu: true },
+    { name: "안양 만안구 경계", lat: 37.3850, lng: 126.9100, address: "안양동", isWisu: true },
+    { name: "군포 대야미/부곡 경계 (안산 방면)", lat: 37.3320, lng: 126.9150, address: "대야미동", isWisu: true },
+    { name: "의왕 부곡/월암 경계 (수원 방면)", lat: 37.3080, lng: 126.9580, address: "월암동", isWisu: true },
+    { name: "의왕 청계/포일 경계 (성남/분당 방면)", lat: 37.3950, lng: 127.0120, address: "포일동", isWisu: true },
+    { name: "과천 주암/선바위 경계 (서울/강남 방면)", lat: 37.4520, lng: 127.0050, address: "과천동", isWisu: true }
   ];
   
   async function checkIsInsideWisuRealtime(lat, lng) {
@@ -522,58 +509,6 @@
       }
     } catch(e) {}
     return (lat >= 37.34 && lat <= 37.445 && lng >= 126.90 && lng <= 127.015);
-  }
-  
-  function findClosestWisuGatewayFallback(currentLat, currentLng) {
-    let minDistance = Infinity;
-    let closestPoint = WISU_BOUNDARY_POINTS[0];
-    WISU_BOUNDARY_POINTS.forEach(pt => {
-      const dist = getStraightDistanceKm(currentLat, currentLng, pt.lat, pt.lng);
-      if (dist < minDistance) {
-        minDistance = dist;
-        closestPoint = pt;
-      }
-    });
-    return { ...closestPoint, type: "gateway", isWisu: true };
-  }
-  
-  async function fetchRealtimeWisuGateway(currentLat, currentLng) {
-    if (!KAKAO_REST_KEY) return findClosestWisuGatewayFallback(currentLat, currentLng);
-    try {
-      const regionUrl = `https://dapi.kakao.com/v2/local/geo/coord2regioncode.json?x=${currentLng}&y=${currentLat}`;
-      const proxyUrl = PROXY_BASE_URL + encodeURIComponent(regionUrl);
-      
-      const res = await fetch(proxyUrl, { headers: { 'Authorization': `KakaoAK ${KAKAO_REST_KEY}` } });
-      if (res.ok) {
-        const data = await res.json();
-        const currentRegion = data.documents?.[0]?.region_2depth_name || "";
-        let targetKeyword = "과천 선바위역";
-        if (currentRegion.includes("수원")) targetKeyword = "의왕 월암동";
-        else if (currentRegion.includes("안산")) targetKeyword = "군포 대야미역";
-        else if (currentRegion.includes("시흥") || currentRegion.includes("인천") || currentRegion.includes("광명")) targetKeyword = "안양 박달동";
-        else if (currentRegion.includes("서울") || currentRegion.includes("성남")) targetKeyword = "과천 선바위역";
-        
-        const searchUrl = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(targetKeyword)}&x=${currentLng}&y=${currentLat}&sort=distance`;
-        const searchProxyUrl = PROXY_BASE_URL + encodeURIComponent(searchUrl);
-        
-        const searchRes = await fetch(searchProxyUrl, { headers: { 'Authorization': `KakaoAK ${KAKAO_REST_KEY}` } });
-        if (searchRes.ok) {
-          const searchData = await searchRes.json();
-          if (searchData.documents && searchData.documents.length > 0) {
-            const place = searchData.documents[0];
-            return {
-              name: `${place.place_name} (실시간 복귀경계)`,
-              lat: parseFloat(place.y),
-              lng: parseFloat(place.x),
-              address: place.address_name,
-              type: "gateway",
-              isWisu: true
-            };
-          }
-        }
-      }
-    } catch (e) {}
-    return findClosestWisuGatewayFallback(currentLat, currentLng);
   }
   
   const MAJOR_HUBS = [
@@ -767,7 +702,6 @@
     headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) ${badgeHtml}`;
   }
   
-  // 💡 [v1.7.8] 카카오 실시간 API 타임아웃 3.5초 연장 및 Promise.all 병렬 호출
   async function fetchLiveKakaoHotspots(lat, lng) {
     if (!KAKAO_REST_KEY) return [];
     const nowHour = new Date().getHours();
@@ -1005,7 +939,6 @@
       isTimeMatch: logResult.isTimeMatch
     };
   }
-
   function getCustomHotspots() {
     return JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
   }
@@ -1067,7 +1000,10 @@
       return sameName || closeDist;
     });
   }
-  
+
+  // =========================================================================
+  // 💡 [핵심 연산] 모드 1 & 모드 2 추천 알고리즘 (복귀지 실시간 산정 & 각도 폐기 반영)
+  // =========================================================================
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
@@ -1084,34 +1020,36 @@
     let finalTarget = null;
     
     if (inWisu) {
+      // 🟡 [모드 1] 5대 거점역 중 최단역 지정 (500m 초근접시 다음 역)
       let scoredTargets = await Promise.all(MAJOR_HUBS.map(async h => {
         let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
         let pureRes = await calculatePureSpotScore({...h, isWisu: true}, weatherData, nowHour);
         return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: pureRes.score, geometryCoords: road.geometryCoords };
       }));
-      scoredTargets.sort((a, b) => b.score - a.score);
+      scoredTargets.sort((a, b) => a.dist - b.dist);
       finalTarget = (scoredTargets[0].dist <= 0.5 && scoredTargets.length > 1) ? scoredTargets[1] : scoredTargets[0];
     } else {
-      const closestGateway = await fetchRealtimeWisuGateway(currentPos.lat, currentPos.lng);
-      let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, closestGateway.lat, closestGateway.lng);
-      let pureRes = await calculatePureSpotScore({...closestGateway, isWisu: true}, weatherData, nowHour);
-      finalTarget = {
-        ...closestGateway,
-        dist: road.distanceKm,
-        estimatedTimeMin: road.durationMin,
-        score: pureRes.score,
-        geometryCoords: road.geometryCoords
-      };
+      // 🟠 [모드 2] [요청반영] 고정목적지 없이 실시간 최단거리 위수(isWisu) 장소를 4번 FINAL로 확정
+      const allWisuCandidates = [...WISU_BOUNDARY_POINTS, ...masterHotspots, ...MAJOR_HUBS].filter(item => {
+        return item.isWisu === true || item.region === 'anyang' || item.region === 'gunpo' || item.region === 'gwacheon' || item.region === 'uiwang';
+      });
+
+      let scoredWisuTargets = await Promise.all(allWisuCandidates.map(async item => {
+        let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
+        let pureRes = await calculatePureSpotScore({...item, isWisu: true}, weatherData, nowHour);
+        return { ...item, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: pureRes.score, geometryCoords: road.geometryCoords };
+      }));
+      
+      // 도로 주행거리 오름차순 정렬하여 가장 가까운 위수 장소 1위 지정
+      scoredWisuTargets.sort((a, b) => a.dist - b.dist);
+      finalTarget = scoredWisuTargets[0];
     }
 
     const majorHubKeywords = ["인덕원", "평촌역", "범계역", "안양역", "산본역"];
-
     let rawPool = [...liveKakaoHotspots, ...customHotspots, ...masterHotspots].filter(item => {
       const itemName = item.name.replace(/\s+/g, '');
-      
       const isMajorHub = majorHubKeywords.some(kw => itemName.includes(kw));
       if (isMajorHub) return false;
-
       const nameA = itemName.substring(0, 3);
       const nameB = finalTarget.name.replace(/\s+/g, '').substring(0, 3);
       return nameA !== nameB;
@@ -1119,6 +1057,7 @@
 
     const distAtoC = getStraightDistanceKm(currentPos.lat, currentPos.lng, finalTarget.lat, finalTarget.lng);
     
+    // 핫플(1~3번) 필터링 (각도 계산 완전 제거, Corridor 우회율 및 순방향 거리 적용)
     let preFiltered = rawPool.filter(item => {
       const distAtoB = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       const distBtoC = getStraightDistanceKm(item.lat, item.lng, finalTarget.lat, finalTarget.lng);
@@ -1130,39 +1069,15 @@
         const isVeryCloseFront = (distAtoB <= 1.0) && (distBtoC <= distAtoC + 0.2);
         return isCorridor || isVeryCloseFront;
       } else {
-        // 💡 [v1.7.8] 모드 2 경유지 최대 거리 제한 (현위치에서 15km 초과 원거리 장소 강제 차단)
-        if (distAtoB > 15.0 && !item.isWisu) return false;
+        // 🟠 [모드 2 복귀 핫플 필터링]
+        // [조건 1] 핫플은 최종 목적지(finalTarget)보다 가까운 위치에 존재해야 함
+        if (distAtoB >= distAtoC * 0.90) return false;
 
-        const dyAC = finalTarget.lat - currentPos.lat;
-        const dxAC = (finalTarget.lng - currentPos.lng) * Math.cos(currentPos.lat * Math.PI / 180);
-        
-        const dyAB = item.lat - currentPos.lat;
-        const dxAB = (item.lng - currentPos.lng) * Math.cos(currentPos.lat * Math.PI / 180);
-        
-        const lenAC = Math.sqrt(dxAC * dxAC + dyAC * dyAC);
-        const lenAB = Math.sqrt(dxAB * dxAB + dyAB * dyAB);
-        
-        if (lenAC === 0 || lenAB === 0) return false;
-        
-        const dot = (dxAC * dxAB + dyAC * dyAB) / (lenAC * lenAB);
-        const clampedDot = Math.max(-1, Math.min(1, dot));
-        const angleRad = Math.acos(clampedDot);
-        const angleDeg = angleRad * (180 / Math.PI);
-        
-        // 실시간 상권(isLiveKakao)은 현위치 근처(3.5km 이내)라면 진행 각도 조건을 대폭 완화
-        if (item.isLiveKakao && distAtoB <= 3.5) {
-          return true;
-        }
+        // [조건 2] [각도 완전 폐기] 현재->핫플 + 핫플->최종 합산 우회율 검증 (Corridor)
+        const detourDist = distAtoB + distBtoC;
+        const isAlongReturnCorridor = detourDist <= (distAtoC * 1.25) + 1.0;
 
-        if (angleDeg > 28) return false;
-        
-        const crossTrackDistKm = distAtoB * Math.sin(angleRad);
-        if (crossTrackDistKm > 2.5) return false;
-        
-        const progressKm = distAtoB * Math.cos(angleRad);
-        const isProgressValid = (progressKm >= 0.2) && (progressKm <= distAtoC - 0.2);
-        
-        return isProgressValid;
+        return isAlongReturnCorridor;
       }
     });
 
@@ -1187,7 +1102,7 @@
     }));
 
     let validPool = scoredPool.filter(p => p.score >= 30);
-    validPool.sort((a, b) => b.score - a.score);
+    validPool.sort((a, b) => b.score - a.score); // 1차 점수순 선별
     
     let selectedCandidates = [];
     let maxCards = 3;
@@ -1200,7 +1115,8 @@
       if (selectedCandidates.length === maxCards) break;
     }
 
-    selectedCandidates.sort((a, b) => b.distBtoC - a.distBtoC);
+    // 🚘 복귀 길목 상에서 차례대로 경유할 수 있도록 [거리 오름차순 (현재 위치에서 가까운 순)] 재정렬
+    selectedCandidates.sort((a, b) => a.dist - b.dist);
 
     currentRouteData = [
       { name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true },
@@ -1263,7 +1179,6 @@
       `;
       listEl.appendChild(card);
     });
-
     const finalCard = document.createElement('div');
     finalCard.className = 'card final-card';
     const inWisu = (currentMode === 1);
@@ -1316,7 +1231,6 @@
       listEl.appendChild(subSection);
     }
   }
-
   function renderCallMapView() {
     if (typeof L === 'undefined') return;
     const centerPos = currentPos || { lat: 37.4048, lng: 126.9767 };
@@ -1332,7 +1246,6 @@
     L.marker([centerPos.lat, centerPos.lng], {
       icon: L.divIcon({ html: '<div class="custom-map-marker current">📍</div>', className: '', iconSize: [30, 30], iconAnchor: [15, 15] })
     }).addTo(callMapViewLeaflet).bindPopup('<b>현재 위치</b>');
-
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     const currentHour = new Date().getHours();
     if (logs.length === 0) {
