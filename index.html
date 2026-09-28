@@ -290,30 +290,30 @@
     </div>
 
     <details style="margin-top: 8px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 1.4;">
-      <summary style="font-weight: 800; color: #FFC800; cursor: pointer;">💡 수다택시 K 모드별 검색 조건 가이드 (터치하여 펼치기)</summary>
+      <summary style="font-weight: 800; color: #FFC800; cursor: pointer;">💡 수다택시 K 모드별 동작 및 검색 조건 노트 (터치하여 펼치기)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px; font-size: 10px;">
         <div>
-          <strong style="color: #FFC800;">⚡ 모드 1 (관내 4개 도시: 안양·군포·의왕·과천)</strong><br>
-          • 고정 목적지 강제 없이, 현재 위치 반경 5km 이내의 실시간 최적 핫플 3곳 다이렉트 추천<br>
-          • 하단에 관내 5대 핵심 거점역 현황을 소형 참고 카드로 표시
+          <strong style="color: #FFC800;">⚡ 모드 1 (관내 반경 5km 실시간 추천)</strong><br>
+          • 4개 도시(안양·군포·의왕·과천) 관내 운행 시 고정 목적지 없이 현재 위치 기준 반경 5km 내 실시간 콜 핫플 Top 3 추천<br>
+          • 하단에 5대 핵심 거점역 상태를 소형 참고 카드로 표시
         </div>
         <div>
-          <strong style="color: #FF6B00;">🧭 모드 2 (관외/타지역: 안산·서울·수원 등)</strong><br>
-          • 관내(안양권) 거점을 완전 배제하고 현지 승탑에 100% 집중<br>
-          • 현재 위치 반경 6km 이내의 현지 실시간 상권 + 기사님 콜 기록 + 복원 마스터 DB 기반 Top 3 다이렉트 추천
+          <strong style="color: #FF6B00;">🧭 모드 2 (관외 복귀 - 가장 가까운 관내 경계점 + 경로상 핫플)</strong><br>
+          • 관외/타지역(안산, 서울, 수원 등)에 있을 때 현재 위치 기준 <strong>가장 가까운 위수지역 진입 경계점(대야미, 박달, 석수, 선바위 등)</strong>을 복귀 목적지로 자동 산출<br>
+          • 목적지 이동 경로 상에 위치한 현지 초근접 핫플 및 경로 주변 최적 핫플 3곳 추천 (멀리 떨어진 안양 중심가 15~20km 오추천 원천 차단)
         </div>
       </div>
     </details>
 
     <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;" open>
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.2.4 마스터 DB 연동 버그 수정 & 모드2 개편 내역 (터치)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.2.4 모드2 복귀 경로 핫플 스캔 & 마스터 DB 연동 보완 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v2.2.4 (2026.09) - 백업 마스터 DB 연동 보완 및 모드 2 현지화</strong><br>
-          • 🛠️ <strong>복원 마스터 DB 연동 버그 완벽 수정</strong>: 백업 JSON으로 복원한 기사님 전용 마스터 DB(`master_hotspots`)가 추천 연산에 100% 최우선 반영되도록 로직을 수정했습니다.<br>
-          • 🚫 <strong>모드 2 관내 거점 차단 & 현지 핫플 추천</strong>: 관외 운행 시 안양권 거점을 제외하고, 현지 실시간 상권/콜기록/마스터DB 중심 Top 3를 즉시 추천합니다.<br>
-          • 🏙️ <strong>안산 주요 거점 기본 탑재</strong>: 중앙역 로데오, 고잔역, 상록수역, 한대앞역, 초지역, 안산역 DB를 기본 내장했습니다.<br>
-          • 📐 <strong>모드 1 하단 참고 거점 소형화</strong>: 관내 운행 시 하단 참고 카드의 높이와 패딩을 컴팩트(Slim)하게 축소했습니다.
+          <strong style="color: #4ADE80;">v2.2.4 (2026.09) - 관외 복귀 알고리즘 원점 재정립 & 버그 수정</strong><br>
+          • 🎯 <strong>모드 2 최종 목적지 자동 지정</strong>: 관외에서 가장 가까운 위수지역 진입 경계점(대야미, 박달, 석수 등)을 복귀 목적지로 설정.<br>
+          • 🛣️ <strong>목적지 이동 경로 주변 핫플 3곳 추천</strong>: 관외 위치에서 목적지(경계점)로 향하는 주행 경로 상의 핫플을 선별하여 추천 (15~20km 떨어진 안양 중심가 오추천 완전 제거).<br>
+          • 🛠️ <strong>복원 마스터 DB(`master_hotspots`) 연동 버그 완벽 수정</strong>: 백업 파일로 복원된 기사님 마스터 DB가 실시간 연산에 100% 반영되도록 연결.<br>
+          • 📐 <strong>모드 1 하단 참고 거점 컴팩트화</strong>: 관내 운행 시 하단 참고용 카드 디자인 슬림화.
         </div>
       </div>
     </details>
@@ -557,7 +557,6 @@
     }, 1000);
   }
 
-  /* 💡 안산 DB 보강 및 마스터 DB 구조 정의 */
   const DEFAULT_MASTER_HOTSPOTS = [
     { "id": "hs_ansan_1", "name": "중앙역 로데오거리 및 메디컬타운", "lat": 37.3186, "lng": 126.8385, "address": "고잔동", "type": "subway_nightlife", "region": "ansan", "isWisu": false },
     { "id": "hs_ansan_2", "name": "고잔역 법원·검찰청 및 신도시 중심상가", "lat": 37.3168, "lng": 126.8232, "address": "고잔동", "type": "office_nightlife", "region": "ansan", "isWisu": false },
@@ -584,15 +583,21 @@
     { "id": "hs_s_01", "name": "강남역 상업지구 및 병원거리", "lat": 37.4981, "lng": 127.0276, "address": "강남역", "type": "subway_hospital", "region": "seoul", "isWisu": false }
   ];
 
-  /* 💡 저장소에서 복원된 기사님 전용 마스터 DB 불러오기 (버그 완전 수정) */
+  /* 💡 관외 복귀 시 가장 가까운 위수지역 진입 경계 포인트 정의 */
+  const WISU_BOUNDARY_POINTS = [
+    { name: "군포 대야미/부곡 경계 (안산 방면)", lat: 37.3320, lng: 126.9150, address: "대야미동", isWisu: true },
+    { name: "안양 박달/석수 경계 (인천/시흥 방면)", lat: 37.4150, lng: 126.8980, address: "박달동", isWisu: true },
+    { name: "의왕 부곡/월암 경계 (수원 방면)", lat: 37.3080, lng: 126.9580, address: "월암동", isWisu: true },
+    { name: "의왕 청계/포일 경계 (성남/분당 방면)", lat: 37.3950, lng: 127.0120, address: "포일동", isWisu: true },
+    { name: "과천 주암/선바위 경계 (서울/강남 방면)", lat: 37.4520, lng: 127.0050, address: "과천동", isWisu: true }
+  ];
+
   function getMasterHotspotsFromStorage() {
     const saved = localStorage.getItem('sudataxi_master_hotspots');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       } catch(e) {}
     }
     return DEFAULT_MASTER_HOTSPOTS;
@@ -872,7 +877,7 @@
         
         currentMode = inWisu ? 1 : 2;
         document.body.className = `mode-${currentMode}`;
-        if (locText) locText.innerText = `📍 ${currentRegionName || currentPos.lat.toFixed(4)} (${inWisu ? '관내 반경 5km 추천' : '관외 현지 핫플 추천'})`;
+        if (locText) locText.innerText = `📍 ${currentRegionName || currentPos.lat.toFixed(4)} (${inWisu ? '관내 반경 5km 추천' : '관외 복귀 경로 추천'})`;
         if (activeTab !== 3) calculateAndRender();
       },
       (err) => {
@@ -893,24 +898,24 @@
     });
   }
 
-  /* 💡 v2.2.4 핵심 연산 엔진 (마스터 DB 최우선 불러오기 적용) */
+  /* 💡 v2.2.4 모드 2 가장 가까운 경계점 목적지 산출 & 경로상 핫플 연산 엔진 */
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
     const inWisu = (currentMode === 1);
-    if (logEl) logEl.innerText = `⚡ [스마트 ${inWisu ? '관내 반경 5km' : '관외 현지 핫플'}] 연산 중...`;
+    if (logEl) logEl.innerText = `⚡ [스마트 ${inWisu ? '관내 반경 5km' : '관외 복귀 경로'}] 연산 중...`;
     
     let weatherData = { isRainOrSnow: false };
     try { weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng); } catch(e) {}
     
     const liveKakaoHotspots = await fetchLiveKakaoHotspots(currentPos.lat, currentPos.lng);
     const customHotspots = getCustomHotspots();
-    
-    // 💡 저장된 마스터 DB 최우선 호출 (연동 버그 완전 보완)
     const activeMasterHotspots = getMasterHotspotsFromStorage();
     const nowHour = new Date().getHours();
 
     let referenceHubs = [];
+    let targetBoundaryPoint = null;
+
     if (inWisu) {
       for (let h of MAJOR_HUBS) {
         let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
@@ -923,9 +928,19 @@
         });
       }
       referenceHubs.sort((a, b) => a.dist - b.dist);
+    } else {
+      // 💡 모드 2일 때 현재 위치에서 가장 가까운 위수지역 진입 경계 포인트(목적지) 산출
+      let minBoundaryDist = Infinity;
+      for (let bp of WISU_BOUNDARY_POINTS) {
+        let dist = getStraightDistanceKm(currentPos.lat, currentPos.lng, bp.lat, bp.lng);
+        if (dist < minBoundaryDist) {
+          minBoundaryDist = dist;
+          targetBoundaryPoint = bp;
+        }
+      }
     }
 
-    // 모드 2일 경우 안양/군포/의왕/과천 거점 완전히 제외하고 현지 데이터에 집중
+    // 관외(모드 2)일 때 멀리 떨어진 안양/과천 중심가 장소 완전 제외
     let rawPool = [...liveKakaoHotspots, ...customHotspots, ...activeMasterHotspots].filter(item => {
       if (!inWisu) {
         const isWisuHub = MAJOR_HUBS.some(h => item.name.includes(h.name.substring(0,2)));
@@ -938,14 +953,27 @@
     for (let item of rawPool) {
       const directDist = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       
+      // 모드 1: 반경 5km 이내 제한
       if (inWisu && directDist > 5.0) continue; 
-      if (!inWisu && directDist > 6.0) continue;
 
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
-      let pureRes = await calculatePureSpotScore(item, weatherData, nowHour);
       
+      // 💡 [핵심 차단] 모드 2일 때 도로거리 6.0km 넘는 멀리 있는 장소 원천 배제
+      if (!inWisu && road.distanceKm > 6.0) continue;
+
+      let pureRes = await calculatePureSpotScore(item, weatherData, nowHour);
       let finalScore = pureRes.score;
-      if (!inWisu && road.distanceKm <= 2.0) finalScore += 40;
+
+      // 모드 2: 목적지(경계점) 방향으로 가는 경로상 핫플 가산점 부여 (Corridor Scoring)
+      if (!inWisu && targetBoundaryPoint) {
+        const currentToBoundary = getStraightDistanceKm(currentPos.lat, currentPos.lng, targetBoundaryPoint.lat, targetBoundaryPoint.lng);
+        const itemToBoundary = getStraightDistanceKm(item.lat, item.lng, targetBoundaryPoint.lat, targetBoundaryPoint.lng);
+        // 목적지와 더 가까워지는 복귀 경로상의 핫플에 가산점
+        if (itemToBoundary < currentToBoundary) {
+          finalScore += 35;
+        }
+        if (road.distanceKm <= 2.0) finalScore += 30; // 초근접 현지 핫플 추가 가산
+      }
 
       scoredPool.push({
         ...item, 
@@ -979,7 +1007,7 @@
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
       logEl.innerText = selectedCandidates.length > 0 
-        ? `방금 · [${inWisu ? '반경 5km 실시간' : '관외 현지 핫플'}] Top 3 연산 완료`
+        ? `방금 · [${inWisu ? '반경 5km 실시간' : '복귀 경로 주변 핫플'}] Top 3 연산 완료`
         : `방금 · 주변 검색 결과 없음`;
     }
     
@@ -1013,7 +1041,7 @@
           </div>
         </div>
         <div class="tag-group">
-          ${item.isNearStep1 ? '<span class="tag near">#초근접</span>' : `<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#${inWisu ? '반경5km' : '현지핫플'}</span>`}
+          ${item.isNearStep1 ? '<span class="tag near">#초근접</span>' : `<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#${inWisu ? '반경5km' : '경로핫플'}</span>`}
           ${item.isLiveKakao ? '<span class="tag livekakaomap">⚡실시간상권</span>' : ''}
           ${item.isTimeMatch ? '<span class="tag timematch">🔥시간대콜</span>' : ''}
           ${item.isMasterDb ? '<span class="tag masterdb">#마스터DB</span>' : ''}
@@ -1259,7 +1287,6 @@
     }
   }
 
-  /* 💡 복원 시 master_hotspots도 localStorage에 안전 저장 후 연산 재실행 */
   function importCallLogs(e) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
