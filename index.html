@@ -98,7 +98,7 @@
     .card-list { display: flex; flex-direction: column; gap: 6px; }
     .card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 12px; padding: 8px 10px; position: relative; }
     
-    /* 🎯 최종 복귀 목적지 카드 맨 아래 스타일 */
+    /* 🎯 모드 2 최종 복귀 목적지 카드 맨 아래 스타일 */
     .card.target-destination-card {
       background: #2D1A0A;
       border: 1.5px solid #FF6B00;
@@ -300,29 +300,53 @@
       <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 2px;"></div>
     </div>
 
-    <details style="margin-top: 8px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 1.4;">
-      <summary style="font-weight: 800; color: #FFC800; cursor: pointer;">💡 수다택시 K 모드별 동작 가이드 (터치하여 펼치기)</summary>
-      <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px; font-size: 10px;">
+    <!-- 💡 상세 가이드 노트 영역 -->
+    <details style="margin-top: 8px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 1.4;" open>
+      <summary style="font-weight: 800; color: #FFC800; cursor: pointer;">💡 [수다택시 K] 점수 산출 및 모드별 동작 가이드 (터치하여 접기/펼치기)</summary>
+      <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px; font-size: 10px;">
         <div>
-          <strong style="color: #FFC800;">⚡ 모드 1 (관내 4개 도시: 안양·군포·의왕·과천)</strong><br>
-          • 관내 반경 5km 이내 최적 콜 핫플 3곳 실시간 추천<br>
-          • 하단에 5대 핵심 거점역 현황을 소형 카드로 표시
+          <strong style="color: #FFC800;">1. 기본 점수 체계 (Base 0점 시작)</strong><br>
+          • 기본 시작 점수: <strong>0점</strong> (기존 50점 일괄 부여 삭제)<br>
+          • 나만의 핫플: <strong>+20점</strong> | 카카오 실시간: <strong>+15점</strong> | 마스터 DB: <strong>+10점</strong><br>
+          • <strong>거리 차등 가산점 전면 삭제</strong> (거리는 추천 반경 필터링 및 동점 시 가까운 순 정렬 용도로만 사용)
         </div>
         <div>
-          <strong style="color: #FF6B00;">🧭 모드 2 (관외 복귀 모드)</strong><br>
-          • 상단에 복귀 경로 상의 현지 최적 핫플 3곳 제시 (경유지 1, 2, 3번)<br>
-          • <strong>맨 하단 카드에 가장 가까운 관내 진입 경계점(🎯 최종 복귀 목적지)</strong>을 순서대로 명확히 표시
+          <strong style="color: #4ADE80;">2. 24시간 시간대별 구체적 가중치</strong><br>
+          • <strong>출근/아침 (06:00~09:59)</strong>: 환승역/KTX +30점, 병원/메디컬 +25점, 주거지 버스정류장 +20점 (유흥가 -15점)<br>
+          • <strong>낮/주간 (10:00~16:59)</strong>: 대형쇼핑몰/백화점 +25점, 오피스/관공서 +20점, 메디컬 +20점 (유흥가 -10점)<br>
+          • <strong>퇴근/저녁 1차 (17:00~20:59)</strong>: 환승 거점역 +25점, 오피스 식당가 +25점, 먹자골목 +20점<br>
+          • <strong>심야/야간 피크 (21:00~01:59)</strong>: 로데오/먹자골목/주점 +35점, 환승 거점역 +20점 (오피스 -15점)<br>
+          • <strong>새벽/단대 (02:00~05:59)</strong>: 24시 유흥상권 +30점, 심야 환승거점 +25점 (오피스/병원 -20점)
+        </div>
+        <div>
+          <strong style="color: #C084FC;">3. 콜 저장 기록 & 환경 가산점</strong><br>
+          • 콜 저장 기록 (300m 이내): 저장 기록 +15점 (현재 시간대 ±1시간 일치 시 <strong>+30점</strong>)<br>
+          • 기상 조건 (비/눈): <strong>+15점</strong><br>
+          • 모드 2 복귀 동선 상 위치: <strong>+20점</strong>
+        </div>
+        <div>
+          <strong style="color: #FF6B00;">4. 모드 2 (관외 복귀) UI 카드 순서</strong><br>
+          • 복귀 주행 경로 상의 현지 최적 핫플 1, 2, 3번(경유지): <strong>상단에 순서대로 배치</strong><br>
+          • 가장 가까운 관내 진입 경계점(🎯 최종 복귀 목적지): <strong>목록 맨 아래에만 배치</strong>
+        </div>
+        <div>
+          <strong style="color: #38BDF8;">5. 점수 등급 기준</strong><br>
+          • 🔥 높음 (HIGH): 70점 이상 | ⚡ 보통 (MID): 40~69점 | 💧 낮음 (LOW): 39점 이하
         </div>
       </div>
     </details>
 
+    <!-- 💡 상세 업데이트 히스토리 영역 -->
     <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;" open>
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.2.6 UI 카드 순서 정립 (경유지 핫플 ➔ 맨 아래 최종 목적지)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.2.8 상세 업데이트 히스토리 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v2.2.6 (2026.09) - 카드 렌더링 순서 완전 수정</strong><br>
-          • 📍 <strong>순서 올바르게 정립</strong>: 복귀 동선 상의 추천 핫플 1, 2, 3번 카드를 상단에 배치하고, <strong>🎯 최종 복귀 목적지 카드는 맨 아래에 배치</strong>합니다.<br>
-          • 🛠️ <strong>복원 마스터 DB(`master_hotspots`) 연동 보완</strong>: 백업 파일로 복원된 기사님 마스터 DB가 실시간 연산에 100% 최우선 반영되도록 유지.
+          <strong style="color: #4ADE80;">v2.2.8 (2026.09) - 점수 알고리즘 Base 0점 재정립 & 24H 가중치 및 UI 완성</strong><br>
+          • 🎯 <strong>기본 점수 Base 0점 개편</strong>: 모든 장소가 85점으로 획일화되던 문제를 해결하고 Base 0점부터 정밀하게 점수 산출.<br>
+          • 🛑 <strong>거리 차등 가산점 전면 삭제</strong>: 거리 가산점 완전히 배제. (거리는 $5\text{km}$ 필터 및 동점 시 정렬로만 연동)<br>
+          • ⏰ <strong>24시간 시간대별 구체적 가중치 완비</strong>: 출근, 주간, 퇴근, 심야피크, 새벽 5개 구간별 차등 가산점 및 감점 정밀 적용.<br>
+          • 🧭 <strong>모드 2 카드 순서 교정</strong>: 복귀 동선 핫플 1, 2, 3번 상단 배치 ➔ `🎯 최종 복귀 목적지` 카드 맨 아래 배치.<br>
+          • 📜 <strong>앱 가이드 노트 상 기재 완비</strong>: 알고리즘 세부 가이드 노트 완벽 수록.
         </div>
       </div>
     </details>
@@ -650,8 +674,8 @@
   }
 
   function getScoreLevelBadge(score) {
-    if (score >= 100) return '<span class="level-badge level-high">🔥 높음</span>';
-    if (score >= 60) return '<span class="level-badge level-mid">⚡ 보통</span>';
+    if (score >= 70) return '<span class="level-badge level-high">🔥 높음</span>';
+    if (score >= 40) return '<span class="level-badge level-mid">⚡ 보통</span>';
     return '<span class="level-badge level-low">💧 낮음</span>';
   }
 
@@ -783,11 +807,46 @@
     };
   }
 
+  /* 💡 24시간 시간대별 구체적 가중치 연산 구문 */
   async function getDynamicTimeCategoryBonus(itemType, itemName, nowHour) {
     let bonus = 0;
     const name = itemName || '';
     const isNightlife = name.includes('먹자골목') || name.includes('포차') || name.includes('주점') || name.includes('로데오');
-    if (nowHour >= 18 || nowHour < 4) { if (isNightlife) bonus += 45; }
+    const isTransitHub = name.includes('역') || name.includes('터미널') || name.includes('환승');
+    const isHospital = name.includes('병원') || name.includes('메디컬');
+    const isOffice = name.includes('오피스') || name.includes('청사') || name.includes('법원');
+    const isShopping = name.includes('백화점') || name.includes('아울렛') || name.includes('몰') || name.includes('시장');
+
+    // 1) 출근 / 아침 시간대 (06:00 ~ 09:59)
+    if (nowHour >= 6 && nowHour < 10) {
+      if (isTransitHub) bonus += 30;
+      if (isHospital) bonus += 25;
+      if (isNightlife) bonus -= 15;
+    } 
+    // 2) 낮 / 주간 시간대 (10:00 ~ 16:59)
+    else if (nowHour >= 10 && nowHour < 17) {
+      if (isShopping) bonus += 25;
+      if (isOffice || isHospital) bonus += 20;
+      if (isNightlife) bonus -= 10;
+    } 
+    // 3) 퇴근 / 저녁 1차 시간대 (17:00 ~ 20:59)
+    else if (nowHour >= 17 && nowHour < 21) {
+      if (isTransitHub || isOffice) bonus += 25;
+      if (isNightlife) bonus += 20;
+    } 
+    // 4) 심야 / 야간 피크 시간대 (21:00 ~ 01:59)
+    else if (nowHour >= 21 || nowHour < 2) {
+      if (isNightlife) bonus += 35;
+      if (isTransitHub) bonus += 20;
+      if (isOffice) bonus -= 15;
+    } 
+    // 5) 새벽 / 단대 시간대 (02:00 ~ 05:59)
+    else if (nowHour >= 2 && nowHour < 6) {
+      if (isNightlife) bonus += 30;
+      if (isTransitHub) bonus += 25;
+      if (isOffice || isHospital) bonus -= 20;
+    }
+
     return bonus;
   }
 
@@ -815,31 +874,38 @@
         if (hourDiff > 12) hourDiff = 24 - hourDiff;
         
         if (hourDiff <= 1) {
-          maxBonus = 60;
-          isTimeMatch = true;
-        } else if (maxBonus < 30) {
           maxBonus = 30;
+          isTimeMatch = true;
+        } else if (maxBonus < 15) {
+          maxBonus = 15;
         }
       }
     });
     return { bonus: maxBonus, matched: matchCount > 0, count: matchCount, isTimeMatch };
   }
 
+  /* 💡 Base 0점 시작 정밀 점수 산출 함수 (거리 차등 완전 삭제) */
   async function calculatePureSpotScore(item, weatherData, nowHour) {
-    let score = 50;
-    if (item.isCustom) score += 50;
-    else if (item.isLiveKakao) score += 45;
-    else if (item.region || item.isWisu) score += 35;
+    let score = 0; // Base 0점 시작
     
+    // 출처 가산점
+    if (item.isCustom) score += 20;
+    else if (item.isLiveKakao) score += 15;
+    else if (item.region || item.isWisu) score += 10;
+
+    // 24시간 시간대 가중치
     const timeBonus = await getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
     score += timeBonus;
     
-    if (weatherData.isRainOrSnow) score += 20;
+    // 비/눈 환경 가산
+    if (weatherData.isRainOrSnow) score += 15;
+
+    // 콜 저장 기록 연동
     const logResult = calculateCallLogScore(item.lat, item.lng);
     score += logResult.bonus;
     
     return {
-      score: Math.max(10, score),
+      score: Math.max(0, score),
       logCount: logResult.count,
       isTimeMatch: logResult.isTimeMatch
     };
@@ -951,7 +1017,7 @@
           ...closestBp,
           dist: Number(roadToBp.distanceKm),
           estimatedTimeMin: roadToBp.durationMin,
-          score: 150,
+          score: 100,
           isTargetBoundary: true
         };
       }
@@ -967,22 +1033,20 @@
 
     let scoredPool = [];
     for (let item of rawPool) {
-      const directDist = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
-      
-      if (inWisu && directDist > 5.0) continue; 
-
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
       
+      // 모드 1 (관내): 5km 초과 배제 | 모드 2 (관외): 6km 초과 배제
+      if (inWisu && road.distanceKm > 5.0) continue; 
       if (!inWisu && road.distanceKm > 6.0) continue;
 
       let pureRes = await calculatePureSpotScore(item, weatherData, nowHour);
       let finalScore = pureRes.score;
 
+      // 모드 2일 때 복귀 동선 상의 핫플 가산점
       if (!inWisu && targetBoundaryCardData) {
         const currentToBoundary = getStraightDistanceKm(currentPos.lat, currentPos.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng);
         const itemToBoundary = getStraightDistanceKm(item.lat, item.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng);
-        if (itemToBoundary < currentToBoundary) finalScore += 35;
-        if (road.distanceKm <= 2.0) finalScore += 30;
+        if (itemToBoundary < currentToBoundary) finalScore += 20;
       }
 
       scoredPool.push({
@@ -1027,7 +1091,6 @@
     renderCards(selectedCandidates, referenceHubs, targetBoundaryCardData);
   }
 
-  /* 💡 v2.2.6 순서 완벽 교정: 경유지 핫플 1,2,3번 ➔ 맨 아래 🎯 최종 복귀 목적지 */
   function renderCards(routeCards, referenceHubs, targetBoundaryCardData) {
     const listEl = document.getElementById('card-list');
     if (!listEl) return;
