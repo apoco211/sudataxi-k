@@ -96,9 +96,10 @@
     .pipeline-log { font-family: monospace; font-size: 10px; color: #8A8A8A; margin: 0 0 8px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     
     .card-list { display: flex; flex-direction: column; gap: 6px; }
-    .card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 12px; padding: 8px 10px; position: relative; }
     
-    /* 🎯 모드 2 최종 복귀 목적지 카드 맨 아래 스타일 */
+    /* 💡 카드 전체 높이 대폭 슬림화 (padding 6px 8px) */
+    .card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 12px; padding: 6px 8px; position: relative; }
+    
     .card.target-destination-card {
       background: #2D1A0A;
       border: 1.5px solid #FF6B00;
@@ -106,60 +107,69 @@
       margin-top: 4px;
     }
     
-    .card-main-content { display: flex; flex-direction: column; gap: 4px; }
+    .card-main-content { display: flex; flex-direction: column; gap: 2px; }
     
-    /* 💡 우측 내비 버튼을 위한 콤팩트 레이아웃 고도화 */
-    .card-compact-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .card-left-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-    .card-title-group { display: flex; align-items: flex-start; gap: 6px; min-width: 0; }
+    .card-compact-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+    .card-title-group { display: flex; align-items: center; gap: 6px; min-width: 0; flex: 1; }
     
-    .num-badge { width: 22px; height: 22px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
-    .num-badge.target-badge { background: #FF6B00; color: #FFFFFF; font-size: 13px; }
+    .num-badge { width: 20px; height: 20px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .num-badge.target-badge { background: #FF6B00; color: #FFFFFF; font-size: 12px; }
     
-    .place-info { flex: 1; min-width: 0; }
-    .place-name { font-size: 13.5px; font-weight: 900; color: #FFFFFF; word-break: keep-all; line-height: 1.25; }
+    .place-info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
     
-    .score-dist { font-size: 10.5px; font-weight: 800; color: var(--theme-accent); font-family: monospace; margin-top: 1px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    /* 💡 제목 1줄 고정 (말줄임표) 처리로 카드 높이 줄임 */
+    .place-name { 
+      font-size: 13px; 
+      font-weight: 900; 
+      color: #FFFFFF; 
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis; 
+      line-height: 1.2; 
+    }
     
-    .level-badge { font-weight: 900; padding: 1px 4px; border-radius: 4px; font-size: 9px; display: inline-flex; align-items: center; gap: 2px; }
+    .score-dist { font-size: 10px; font-weight: 800; color: var(--theme-accent); font-family: monospace; margin-top: 1px; display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; white-space: nowrap; }
+    
+    .level-badge { font-weight: 900; padding: 1px 3px; border-radius: 3px; font-size: 8.5px; display: inline-flex; align-items: center; gap: 1px; }
     .level-high { background: rgba(74, 222, 128, 0.2); color: #4ADE80; border: 1px solid #4ADE80; }
     .level-mid { background: rgba(255, 200, 0, 0.2); color: #FFC800; border: 1px solid #FFC800; }
     .level-low { background: rgba(255, 107, 107, 0.2); color: #FF6B6B; border: 1px solid #FF6B6B; }
     
-    /* 💡 우측 상단 둥근 사각형 카카오내비 버튼 */
+    /* 💡 슬림화된 둥근 사각형 내비 버튼 (폭 52px 고정) */
     .right-navi-btn {
-      width: 76px;
-      height: 40px;
+      width: 52px;
+      height: 34px;
       background: #FFE800 !important;
       color: #000000 !important;
       font-weight: 900;
-      font-size: 11px;
-      border-radius: 10px;
+      font-size: 10px;
+      border-radius: 8px;
       cursor: pointer;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 1px;
+      gap: 0px;
       border: none;
       flex-shrink: 0;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      line-height: 1.1;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+      line-height: 1;
     }
-    .right-navi-btn:active { opacity: 0.85; transform: scale(0.97); }
+    .right-navi-btn:active { opacity: 0.85; transform: scale(0.96); }
     
+    /* 💡 태그 영역 1줄 가로 스크롤 고정 */
     .tag-group { 
       display: flex; 
-      gap: 4px; 
+      gap: 3px; 
       flex-wrap: nowrap; 
       overflow-x: auto; 
-      margin-top: 4px; 
-      padding-bottom: 2px;
+      margin-top: 3px; 
+      padding-bottom: 1px;
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
     .tag-group::-webkit-scrollbar { display: none; }
-    .tag { font-size: 9px; padding: 1px 4px; border-radius: 4px; background: #2A2A2A; color: #A0A0A0; white-space: nowrap; flex-shrink: 0; }
+    .tag { font-size: 8.5px; padding: 1px 3px; border-radius: 3px; background: #2A2A2A; color: #A0A0A0; white-space: nowrap; flex-shrink: 0; }
     .tag.target { background: #7C2D12; color: #FFEDD5; border: 1px solid #EA580C; font-weight: 800; }
     .tag.near { background: #1E3A8A; color: #93C5FD; border: 1px solid #3B82F6; font-weight: 700; }
     .tag.custom { background: #3B0764; color: #E9D5FF; border: 1px solid #7E22CE; font-weight: 700; }
@@ -359,12 +369,14 @@
 
     <!-- 💡 상세 업데이트 히스토리 영역 -->
     <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;" open>
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.2.9 상세 업데이트 히스토리 (터치)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.3.0 상세 업데이트 히스토리 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v2.2.9 (2026.09) - 카드 우측 둥근 사각형 내비 버튼 배치 (컴팩트 UI)</strong><br>
-          • 📱 <strong>슬림 슬라이딩 카카오내비 버튼</strong>: 카카오내비 버튼을 우측 상단 둥근 사각형으로 축소 배치하여 한 화면에 카드 정보를 한눈에 파악할 수 있도록 컴팩트 UI 개편.<br>
-          • 🎯 <strong>기존 알고리즘 100% 보존</strong>: Base 0점 시작, 24시간 가중치 연산, 모드 2 하단 배치 로직 및 기존 기능 모두 완전 유지.
+          <strong style="color: #4ADE80;">v2.3.0 (2026.09) - 카드 1줄 슬림화 및 초컴팩트 우측 버튼 UI</strong><br>
+          • 📱 <strong>초컴팩트 우측 내비 버튼 (폭 52px)</strong>: 버튼 폭을 대폭 축소하여 좌측 제목 공간 완벽 확보.<br>
+          • ✂️ <strong>제목 1줄 고정 & 말줄임표 적용</strong>: 장소명이 길어도 2줄로 줄바꿈되지 않고 1줄 고정되어 카드 세로 높이가 대폭 감소.<br>
+          • 🏷️ <strong>태그 1줄 고정 가로 스크롤</strong>: 태그 줄바꿈 방지 처리로 카드 전체 슬림화 완성.<br>
+          • 🎯 <strong>기존 알고리즘 100% 보존</strong>: Base 0점 시작, 24시간 가중치 연산, 모드 2 하단 배치 로직 및 기능 완전 유지.
         </div>
       </div>
     </details>
@@ -1109,7 +1121,7 @@
     renderCards(selectedCandidates, referenceHubs, targetBoundaryCardData);
   }
 
-  /* 💡 우측 컴팩트 둥근 사각형 내비 버튼 반영 랜더링 */
+  /* 💡 1줄 슬림화 & 52px 초컴팩트 내비 버튼 적용 */
   function renderCards(routeCards, referenceHubs, targetBoundaryCardData) {
     const listEl = document.getElementById('card-list');
     if (!listEl) return;
@@ -1117,7 +1129,7 @@
     const fragment = document.createDocumentFragment();
     const inWisu = (currentMode === 1);
 
-    // 1. 추천 핫플 1, 2, 3번 경유지 카드를 먼저 상단에 렌더링 (우측 버튼 적용)
+    // 1. 추천 핫플 1, 2, 3번 경유지 카드를 먼저 상단에 렌더링 (슬림 1줄 레이아웃)
     routeCards.forEach((item, index) => {
       const card = document.createElement('div');
       card.className = 'card';
@@ -1133,8 +1145,7 @@
               </div>
             </div>
             <button type="button" class="right-navi-btn" onclick="openKakaoNaviApp('${safeName}', ${item.lat}, ${item.lng})">
-              <span>🚘</span>
-              <span>내비</span>
+              <span>🚘내비</span>
             </button>
           </div>
         </div>
@@ -1166,8 +1177,7 @@
               </div>
             </div>
             <button type="button" class="right-navi-btn" style="background:#FF6B00 !important; color:#FFF !important;" onclick="openKakaoNaviApp('${safeTargetName}', ${targetBoundaryCardData.lat}, ${targetBoundaryCardData.lng})">
-              <span>🎯</span>
-              <span>복귀내비</span>
+              <span>🎯복귀</span>
             </button>
           </div>
         </div>
