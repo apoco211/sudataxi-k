@@ -336,37 +336,34 @@
           • 나만의 핫플: <strong>+20점</strong> | 카카오 실시간: <strong>+15점</strong> | 마스터 DB: <strong>+10점</strong>
         </div>
         <div>
-          <strong style="color: #FF6B00;">2. 모드 2 (관외 복귀) 경로 탐색 로직</strong><br>
+          <strong style="color: #FF6B00;">2. 모드 2 (관외 복귀) 최적 탐색 로직</strong><br>
           • 최종 복귀 목적지(경계점) 우선 확정<br>
-          • 현재 위치 반경 2km 이내 핫플 존재 시 ➔ **2번 카드(첫 경유지)**로 지정<br>
-          • 해당 위치부터 목적지까지의 경로 상에서 **현재 위치에 가까운 순서대로** 핫플 안내<br>
-          • 반경 2km 내 핫플이 없으면 ➔ 목적지까지 경로 상의 핫플을 가까운 순서대로 안내
+          • 경로 상의 핫플 중 **점수가 높은 곳 위주로 엄선하여 최대 3개** 선정<br>
+          • 마지막 4번째 카드에 최종 목적지(🎯) 고정 배치
         </div>
       </div>
     </details>
 
     <!-- 💡 누적 업데이트 히스토리 영역 -->
     <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;" open>
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.3.3 상세 누적 업데이트 히스토리 (터치)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.3.4 상세 누적 업데이트 히스토리 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v2.3.3 (2026.09) - 모드 2 반경 2km 연계 및 목적지 경로 순차 탐색 완성</strong><br>
-          • 🎯 <strong>목적지 우선 확정 및 반경 2km 체크</strong>: 모드 2 진입 시 최종 복귀 경계점 목적지 먼저 산출.<br>
-          • 📍 <strong>2번 카드 매칭 및 경로 정렬</strong>: 현재 위치 반경 2km 이내에 핫플이 있으면 2번 카드로 고정하고, 해당 위치부터 목적지까지의 경로 상에서 현재 위치에 가까운 순서대로 핫플 배열. 반경 2km 내에 없으면 곧바로 목적지 경로 상의 핫플을 가까운 순으로 안내.
+          <strong style="color: #4ADE80;">v2.3.4 (2026.09) - 모드 2 고득점 핫플 최대 3개 엄선 및 목표지점 고정</strong><br>
+          • 🎯 <strong>최적 핫플 Top 3 추출</strong>: 경로 상의 모든 핫플을 나열하지 않고, 점수가 높은 순으로 엄선하여 **최대 3개**만 표시하도록 간소화.<br>
+          • 🏁 <strong>목표 지점 고정</strong>: 4번째 카드로 최종 복귀 목적지(경계점) 배치 유지.
+        </div>
+        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px; color:#888888;">
+          <strong style="color: #888888;">v2.3.3 - 모드 2 반경 2km 연계 및 목적지 경로 순차 탐색 완성</strong><br>
         </div>
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px; color:#888888;">
           <strong style="color: #888888;">v2.3.2 - 모드 2 복귀 목적지 방향(순방향) 전용 탐색 고도화</strong><br>
-          • 목적지와 멀어지는 역방향 핫플 배제 및 목적지 근접 순서 정렬.
         </div>
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px; color:#888888;">
           <strong style="color: #888888;">v2.3.1 - 모드 2 귀로 방향 순차 정렬 & 지그재그 동선 수정</strong><br>
-          • 지도 경로선 꼬임 방지 및 거리순 정렬.
-        </div>
-        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px; color:#888888;">
-          <strong style="color: #888888;">v2.3.0 - 카드 1줄 슬림화 및 52px 컴팩트 내비 버튼</strong><br>
         </div>
         <div style="color:#888888;">
-          <strong style="color: #888888;">v2.2.8 - Base 0점 산출 체계 및 모드 2 하단 경계점 고정</strong><br>
+          <strong style="color: #888888;">v2.3.0 - 카드 1줄 슬림화 및 52px 컴팩트 내비 버튼</strong><br>
         </div>
       </div>
     </details>
@@ -1073,46 +1070,13 @@
 
     let selectedCandidates = [];
 
-    /* 💡 기사님 요청 핵심 로직 반영 */
-    if (!inWisu) {
-      // 1. 현재 위치에서 반경 2km 이내에 핫플이 있는지 확인
-      let within2kmHotspots = scoredPool.filter(item => item.dist <= 2.0);
-      
-      if (within2kmHotspots.length > 0) {
-        // 반경 2km 이내 핫플 중 점수가 가장 높은 것을 2번 카드(첫 경유지)로 우선 지정
-        within2kmHotspots.sort((a, b) => b.score - a.score || a.dist - b.dist);
-        let firstHotspot = within2kmHotspots[0];
-        selectedCandidates.push(firstHotspot);
-
-        // 2번 카드 위치부터 최종 목적지까지의 경로 상에서 현재 위치에 가까운 순서대로 나머지 핫플 탐색
-        let remainingPool = scoredPool.filter(item => item.name !== firstHotspot.name);
-        remainingPool.sort((a, b) => a.dist - b.dist); // 현재 위치에서 가까운 순서
-        
-        for (let candidate of remainingPool) {
-          if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedCandidates)) {
-            selectedCandidates.push(candidate);
-          }
-          if (selectedCandidates.length === 3) break;
-        }
-      } else {
-        // 반경 2km 안에 핫플이 없으면 바로 목적지까지의 경로 상에서 가까운 순서대로 핫플 안내
-        scoredPool.sort((a, b) => a.dist - b.dist);
-        for (let candidate of scoredPool) {
-          if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedCandidates)) {
-            selectedCandidates.push(candidate);
-          }
-          if (selectedCandidates.length === 3) break;
-        }
+    /* 💡 기사님 요청 최종 반영: 점수가 높은 순으로 최대 3개만 엄선 */
+    scoredPool.sort((a, b) => b.score - a.score || a.dist - b.dist);
+    for (let candidate of scoredPool) {
+      if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedCandidates)) {
+        selectedCandidates.push(candidate);
       }
-    } else {
-      // 관내 모드 (모드 1)
-      scoredPool.sort((a, b) => b.score - a.score || a.dist - b.dist);
-      for (let candidate of scoredPool) {
-        if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedCandidates)) {
-          selectedCandidates.push(candidate);
-        }
-        if (selectedCandidates.length === 3) break;
-      }
+      if (selectedCandidates.length === 3) break;
     }
 
     currentRouteData = [
@@ -1127,7 +1091,7 @@
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
       logEl.innerText = selectedCandidates.length > 0 
-        ? `방금 · [${inWisu ? '반경 5km 실시간' : '반경 2km 및 경로 순차 핫플'}] Top 3 연산 완료`
+        ? `방금 · [${inWisu ? '반경 5km 실시간' : '경로상 고득점 Top 3'}] 연산 완료`
         : `방금 · 주변 검색 결과 없음`;
     }
     
