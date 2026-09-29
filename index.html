@@ -96,8 +96,6 @@
     .pipeline-log { font-family: monospace; font-size: 10px; color: #8A8A8A; margin: 0 0 8px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     
     .card-list { display: flex; flex-direction: column; gap: 6px; }
-    
-    /* 💡 카드 전체 높이 대폭 슬림화 (padding 6px 8px) */
     .card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 12px; padding: 6px 8px; position: relative; }
     
     .card.target-destination-card {
@@ -117,7 +115,6 @@
     
     .place-info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
     
-    /* 💡 제목 1줄 고정 (말줄임표) 처리로 카드 높이 줄임 */
     .place-name { 
       font-size: 13px; 
       font-weight: 900; 
@@ -135,7 +132,6 @@
     .level-mid { background: rgba(255, 200, 0, 0.2); color: #FFC800; border: 1px solid #FFC800; }
     .level-low { background: rgba(255, 107, 107, 0.2); color: #FF6B6B; border: 1px solid #FF6B6B; }
     
-    /* 💡 슬림화된 둥근 사각형 내비 버튼 (폭 52px 고정) */
     .right-navi-btn {
       width: 52px;
       height: 34px;
@@ -157,7 +153,6 @@
     }
     .right-navi-btn:active { opacity: 0.85; transform: scale(0.96); }
     
-    /* 💡 태그 영역 1줄 가로 스크롤 고정 */
     .tag-group { 
       display: flex; 
       gap: 3px; 
@@ -357,7 +352,7 @@
         </div>
         <div>
           <strong style="color: #FF6B00;">4. 모드 2 (관외 복귀) UI 카드 순서</strong><br>
-          • 복귀 주행 경로 상의 현지 최적 핫플 1, 2, 3번(경유지): <strong>상단에 순서대로 배치</strong><br>
+          • 복귀 주행 경로 상의 현지 최적 핫플 1, 2, 3번(경유지): <strong>복귀 방향 지리적 순서대로 배치</strong><br>
           • 가장 가까운 관내 진입 경계점(🎯 최종 복귀 목적지): <strong>목록 맨 아래에만 배치</strong>
         </div>
         <div>
@@ -369,14 +364,13 @@
 
     <!-- 💡 상세 업데이트 히스토리 영역 -->
     <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;" open>
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.3.0 상세 업데이트 히스토리 (터치)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.3.1 상세 업데이트 히스토리 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v2.3.0 (2026.09) - 카드 1줄 슬림화 및 초컴팩트 우측 버튼 UI</strong><br>
-          • 📱 <strong>초컴팩트 우측 내비 버튼 (폭 52px)</strong>: 버튼 폭을 대폭 축소하여 좌측 제목 공간 완벽 확보.<br>
-          • ✂️ <strong>제목 1줄 고정 & 말줄임표 적용</strong>: 장소명이 길어도 2줄로 줄바꿈되지 않고 1줄 고정되어 카드 세로 높이가 대폭 감소.<br>
-          • 🏷️ <strong>태그 1줄 고정 가로 스크롤</strong>: 태그 줄바꿈 방지 처리로 카드 전체 슬림화 완성.<br>
-          • 🎯 <strong>기존 알고리즘 100% 보존</strong>: Base 0점 시작, 24시간 가중치 연산, 모드 2 하단 배치 로직 및 기능 완전 유지.
+          <strong style="color: #4ADE80;">v2.3.1 (2026.09) - 모드 2 귀로 방향 순차 정렬 & 지그재그 동선 수정</strong><br>
+          • 🛣️ <strong>귀로 방향 순차 정렬</strong>: 모드 2에서 상단 핫플 3곳을 '복귀 목적지 방향 순서(현재 위치에서 가까운 순)'로 자동 재정렬하여 1번➔2번➔3번➔목적지 순서로 곧바로 이어지도록 수정.<br>
+          • 🗺️ <strong>도로 동선 선 꼬임 방지</strong>: 지도의 경로선이 뒤죽박죽 지그재그로 연결되던 현상을 해결하여 순차적인 올바른 복귀 동선 시각화.<br>
+          • 📱 <strong>기존 기능 및 1줄 슬림 UI 유지</strong>: 초컴팩트 52px 내비 버튼 및 슬림 카드 높이 완벽 보존.
         </div>
       </div>
     </details>
@@ -837,7 +831,6 @@
     };
   }
 
-  /* 💡 24시간 시간대별 구체적 가중치 연산 구문 */
   async function getDynamicTimeCategoryBonus(itemType, itemName, nowHour) {
     let bonus = 0;
     const name = itemName || '';
@@ -847,31 +840,22 @@
     const isOffice = name.includes('오피스') || name.includes('청사') || name.includes('법원');
     const isShopping = name.includes('백화점') || name.includes('아울렛') || name.includes('몰') || name.includes('시장');
 
-    // 1) 출근 / 아침 시간대 (06:00 ~ 09:59)
     if (nowHour >= 6 && nowHour < 10) {
       if (isTransitHub) bonus += 30;
       if (isHospital) bonus += 25;
       if (isNightlife) bonus -= 15;
-    } 
-    // 2) 낮 / 주간 시간대 (10:00 ~ 16:59)
-    else if (nowHour >= 10 && nowHour < 17) {
+    } else if (nowHour >= 10 && nowHour < 17) {
       if (isShopping) bonus += 25;
       if (isOffice || isHospital) bonus += 20;
       if (isNightlife) bonus -= 10;
-    } 
-    // 3) 퇴근 / 저녁 1차 시간대 (17:00 ~ 20:59)
-    else if (nowHour >= 17 && nowHour < 21) {
+    } else if (nowHour >= 17 && nowHour < 21) {
       if (isTransitHub || isOffice) bonus += 25;
       if (isNightlife) bonus += 20;
-    } 
-    // 4) 심야 / 야간 피크 시간대 (21:00 ~ 01:59)
-    else if (nowHour >= 21 || nowHour < 2) {
+    } else if (nowHour >= 21 || nowHour < 2) {
       if (isNightlife) bonus += 35;
       if (isTransitHub) bonus += 20;
       if (isOffice) bonus -= 15;
-    } 
-    // 5) 새벽 / 단대 시간대 (02:00 ~ 05:59)
-    else if (nowHour >= 2 && nowHour < 6) {
+    } else if (nowHour >= 2 && nowHour < 6) {
       if (isNightlife) bonus += 30;
       if (isTransitHub) bonus += 25;
       if (isOffice || isHospital) bonus -= 20;
@@ -914,23 +898,18 @@
     return { bonus: maxBonus, matched: matchCount > 0, count: matchCount, isTimeMatch };
   }
 
-  /* 💡 Base 0점 시작 정밀 점수 산출 함수 (거리 차등 완전 삭제) */
   async function calculatePureSpotScore(item, weatherData, nowHour) {
-    let score = 0; // Base 0점 시작
+    let score = 0;
     
-    // 출처 가산점
     if (item.isCustom) score += 20;
     else if (item.isLiveKakao) score += 15;
     else if (item.region || item.isWisu) score += 10;
 
-    // 24시간 시간대 가중치
     const timeBonus = await getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
     score += timeBonus;
     
-    // 비/눈 환경 가산
     if (weatherData.isRainOrSnow) score += 15;
 
-    // 콜 저장 기록 연동
     const logResult = calculateCallLogScore(item.lat, item.lng);
     score += logResult.bonus;
     
@@ -1065,14 +1044,12 @@
     for (let item of rawPool) {
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
       
-      // 모드 1 (관내): 5km 초과 배제 | 모드 2 (관외): 6km 초과 배제
       if (inWisu && road.distanceKm > 5.0) continue; 
       if (!inWisu && road.distanceKm > 6.0) continue;
 
       let pureRes = await calculatePureSpotScore(item, weatherData, nowHour);
       let finalScore = pureRes.score;
 
-      // 모드 2일 때 복귀 동선 상의 핫플 가산점
       if (!inWisu && targetBoundaryCardData) {
         const currentToBoundary = getStraightDistanceKm(currentPos.lat, currentPos.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng);
         const itemToBoundary = getStraightDistanceKm(item.lat, item.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng);
@@ -1102,6 +1079,11 @@
       if (selectedCandidates.length === 3) break;
     }
 
+    /* 💡 모드 2일 때 귀로 방향(현재 위치에서 가까운 순)으로 차례대로 정렬 */
+    if (!inWisu && selectedCandidates.length > 0) {
+      selectedCandidates.sort((a, b) => a.dist - b.dist);
+    }
+
     currentRouteData = [
       { name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true },
       ...selectedCandidates
@@ -1121,7 +1103,6 @@
     renderCards(selectedCandidates, referenceHubs, targetBoundaryCardData);
   }
 
-  /* 💡 1줄 슬림화 & 52px 초컴팩트 내비 버튼 적용 */
   function renderCards(routeCards, referenceHubs, targetBoundaryCardData) {
     const listEl = document.getElementById('card-list');
     if (!listEl) return;
@@ -1129,7 +1110,6 @@
     const fragment = document.createDocumentFragment();
     const inWisu = (currentMode === 1);
 
-    // 1. 추천 핫플 1, 2, 3번 경유지 카드를 먼저 상단에 렌더링 (슬림 1줄 레이아웃)
     routeCards.forEach((item, index) => {
       const card = document.createElement('div');
       card.className = 'card';
@@ -1161,7 +1141,6 @@
       fragment.appendChild(card);
     });
 
-    // 2. 🎯 [모드 2 전용] 경유지 핫플 아래 맨 마지막에 최종 복귀 목적지 카드 렌더링
     if (!inWisu && targetBoundaryCardData) {
       const targetCard = document.createElement('div');
       targetCard.className = 'card target-destination-card';
@@ -1264,6 +1243,7 @@
     document.getElementById('pipeline-log').innerText = `총 ${logs.length}건 중 현재시간(${currentHour}시) 콜 ${activeCount}건 집중`;
   }
 
+  /* 💡 동선 지그재그 꼬임 해결: 순차 선 연결 로직 */
   async function openRouteMapModal() {
     if (typeof L === 'undefined') { showToast('지도 로딩 중입니다.'); return; }
     const modal = document.getElementById('map-modal');
@@ -1291,11 +1271,9 @@
         const start = currentRouteData[i];
         const end = currentRouteData[i+1];
         
-        if (end.geometryCoords && end.geometryCoords.length > 0) {
-          allRoadCoords.push(...end.geometryCoords);
-        } else {
-          const roadRes = await fetchKakaoRoadRoute(start.lat, start.lng, end.lat, end.lng);
-          if (roadRes && roadRes.geometryCoords) allRoadCoords.push(...roadRes.geometryCoords);
+        const roadRes = await fetchKakaoRoadRoute(start.lat, start.lng, end.lat, end.lng);
+        if (roadRes && roadRes.geometryCoords) {
+          allRoadCoords.push(...roadRes.geometryCoords);
         }
       }
       if (allRoadCoords.length > 0) {
