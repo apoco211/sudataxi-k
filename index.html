@@ -352,7 +352,7 @@
         </div>
         <div>
           <strong style="color: #FF6B00;">4. 모드 2 (관외 복귀) UI 카드 순서</strong><br>
-          • 복귀 주행 경로 상의 현지 최적 핫플 1, 2, 3번(경유지): <strong>복귀 방향 지리적 순서대로 배치</strong><br>
+          • 복귀 주행 경로 상의 현지 최적 핫플 1, 2, 3번(경유지): <strong>복귀 방향 지리적 순서대로 차례대로 안내</strong><br>
           • 가장 가까운 관내 진입 경계점(🎯 최종 복귀 목적지): <strong>목록 맨 아래에만 배치</strong>
         </div>
         <div>
@@ -362,15 +362,23 @@
       </div>
     </details>
 
-    <!-- 💡 상세 업데이트 히스토리 영역 -->
+    <!-- 💡 누적 업데이트 히스토리 영역 -->
     <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;" open>
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.3.1 상세 업데이트 히스토리 (터치)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.3.1 상세 누적 업데이트 히스토리 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v2.3.1 (2026.09) - 모드 2 귀로 방향 순차 정렬 & 지그재그 동선 수정</strong><br>
-          • 🛣️ <strong>귀로 방향 순차 정렬</strong>: 모드 2에서 상단 핫플 3곳을 '복귀 목적지 방향 순서(현재 위치에서 가까운 순)'로 자동 재정렬하여 1번➔2번➔3번➔목적지 순서로 곧바로 이어지도록 수정.<br>
-          • 🗺️ <strong>도로 동선 선 꼬임 방지</strong>: 지도의 경로선이 뒤죽박죽 지그재그로 연결되던 현상을 해결하여 순차적인 올바른 복귀 동선 시각화.<br>
-          • 📱 <strong>기존 기능 및 1줄 슬림 UI 유지</strong>: 초컴팩트 52px 내비 버튼 및 슬림 카드 높이 완벽 보존.
+          <strong style="color: #4ADE80;">v2.3.1 (2026.09) - 모드 2 귀로 방향 순차 정렬 & 지그재그 동선 완전 수정</strong><br>
+          • 🛣️ <strong>귀로 방향 순차 정렬 안내</strong>: 모드 2(관외 복귀) 연산 시 상단 추천 핫플 3곳을 '현재 위치에서 복귀 목적지로 이동하는 지리적 순서(거리순)'로 정렬하여 1번 ➔ 2번 ➔ 3번 ➔ 🎯 목적지 순서대로 차례대로 안내.<br>
+          • 🗺️ <strong>도로 동선 선 꼬임 해소</strong>: 지도의 경로선이 뒤죽박죽 지그재그로 연결되던 현상을 해결하고 순차적 복귀 동선 시각화.<br>
+          • 📱 <strong>1줄 슬림 카드 & 52px 초컴팩트 내비 버튼</strong>: 카드 세로 높이 최소화 및 버튼 폭 축소 UI 유지.
+        </div>
+        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px; color:#888888;">
+          <strong style="color: #888888;">v2.3.0 - 카드 1줄 슬림화 및 초컴팩트 우측 버튼 UI</strong><br>
+          • 제목 1줄 말줄임표 처리, 태그 영역 1줄 가로 스크롤 고정 및 52px 컴팩트 내비 버튼 배치.
+        </div>
+        <div style="color:#888888;">
+          <strong style="color: #888888;">v2.2.8 - Base 0점 산출 체계 및 모드 2 하단 경계점 고정</strong><br>
+          • 기본점 0점 시작, 24시간 시간대 가중치 적용, 거리 가산점 전면 삭제 및 모드 2 최종 목적지 맨 아래 배치.
         </div>
       </div>
     </details>
@@ -1243,7 +1251,6 @@
     document.getElementById('pipeline-log').innerText = `총 ${logs.length}건 중 현재시간(${currentHour}시) 콜 ${activeCount}건 집중`;
   }
 
-  /* 💡 동선 지그재그 꼬임 해결: 순차 선 연결 로직 */
   async function openRouteMapModal() {
     if (typeof L === 'undefined') { showToast('지도 로딩 중입니다.'); return; }
     const modal = document.getElementById('map-modal');
