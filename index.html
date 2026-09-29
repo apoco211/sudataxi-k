@@ -107,25 +107,46 @@
     }
     
     .card-main-content { display: flex; flex-direction: column; gap: 4px; }
-    .card-top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 4px; }
-    .card-title-group { display: flex; align-items: flex-start; gap: 6px; flex: 1; min-width: 0; }
     
-    .num-badge { width: 22px; height: 22px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    /* 💡 우측 내비 버튼을 위한 콤팩트 레이아웃 고도화 */
+    .card-compact-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .card-left-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .card-title-group { display: flex; align-items: flex-start; gap: 6px; min-width: 0; }
+    
+    .num-badge { width: 22px; height: 22px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
     .num-badge.target-badge { background: #FF6B00; color: #FFFFFF; font-size: 13px; }
     
     .place-info { flex: 1; min-width: 0; }
-    .place-name { font-size: 14px; font-weight: 900; color: #FFFFFF; word-break: keep-all; line-height: 1.2; }
+    .place-name { font-size: 13.5px; font-weight: 900; color: #FFFFFF; word-break: keep-all; line-height: 1.25; }
     
-    .score-dist { font-size: 11px; font-weight: 800; color: var(--theme-accent); font-family: monospace; margin-top: 1px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .score-dist { font-size: 10.5px; font-weight: 800; color: var(--theme-accent); font-family: monospace; margin-top: 1px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
     
     .level-badge { font-weight: 900; padding: 1px 4px; border-radius: 4px; font-size: 9px; display: inline-flex; align-items: center; gap: 2px; }
     .level-high { background: rgba(74, 222, 128, 0.2); color: #4ADE80; border: 1px solid #4ADE80; }
     .level-mid { background: rgba(255, 200, 0, 0.2); color: #FFC800; border: 1px solid #FFC800; }
     .level-low { background: rgba(255, 107, 107, 0.2); color: #FF6B6B; border: 1px solid #FF6B6B; }
     
-    .card-btn-row { display: flex; gap: 6px; margin-top: 2px; }
-    .action-btn { flex: 1; height: 32px; font-weight: 900; font-size: 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; text-decoration: none; border: none; }
-    .navi-btn { background: #FFE800 !important; color: #000000 !important; font-weight: 900; width: 100%; }
+    /* 💡 우측 상단 둥근 사각형 카카오내비 버튼 */
+    .right-navi-btn {
+      width: 76px;
+      height: 40px;
+      background: #FFE800 !important;
+      color: #000000 !important;
+      font-weight: 900;
+      font-size: 11px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1px;
+      border: none;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      line-height: 1.1;
+    }
+    .right-navi-btn:active { opacity: 0.85; transform: scale(0.97); }
     
     .tag-group { 
       display: flex; 
@@ -338,15 +359,12 @@
 
     <!-- 💡 상세 업데이트 히스토리 영역 -->
     <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;" open>
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.2.8 상세 업데이트 히스토리 (터치)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.2.9 상세 업데이트 히스토리 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v2.2.8 (2026.09) - 점수 알고리즘 Base 0점 재정립 & 24H 가중치 및 UI 완성</strong><br>
-          • 🎯 <strong>기본 점수 Base 0점 개편</strong>: 모든 장소가 85점으로 획일화되던 문제를 해결하고 Base 0점부터 정밀하게 점수 산출.<br>
-          • 🛑 <strong>거리 차등 가산점 전면 삭제</strong>: 거리 가산점 완전히 배제. (거리는 $5\text{km}$ 필터 및 동점 시 정렬로만 연동)<br>
-          • ⏰ <strong>24시간 시간대별 구체적 가중치 완비</strong>: 출근, 주간, 퇴근, 심야피크, 새벽 5개 구간별 차등 가산점 및 감점 정밀 적용.<br>
-          • 🧭 <strong>모드 2 카드 순서 교정</strong>: 복귀 동선 핫플 1, 2, 3번 상단 배치 ➔ `🎯 최종 복귀 목적지` 카드 맨 아래 배치.<br>
-          • 📜 <strong>앱 가이드 노트 상 기재 완비</strong>: 알고리즘 세부 가이드 노트 완벽 수록.
+          <strong style="color: #4ADE80;">v2.2.9 (2026.09) - 카드 우측 둥근 사각형 내비 버튼 배치 (컴팩트 UI)</strong><br>
+          • 📱 <strong>슬림 슬라이딩 카카오내비 버튼</strong>: 카카오내비 버튼을 우측 상단 둥근 사각형으로 축소 배치하여 한 화면에 카드 정보를 한눈에 파악할 수 있도록 컴팩트 UI 개편.<br>
+          • 🎯 <strong>기존 알고리즘 100% 보존</strong>: Base 0점 시작, 24시간 가중치 연산, 모드 2 하단 배치 로직 및 기존 기능 모두 완전 유지.
         </div>
       </div>
     </details>
@@ -1091,6 +1109,7 @@
     renderCards(selectedCandidates, referenceHubs, targetBoundaryCardData);
   }
 
+  /* 💡 우측 컴팩트 둥근 사각형 내비 버튼 반영 랜더링 */
   function renderCards(routeCards, referenceHubs, targetBoundaryCardData) {
     const listEl = document.getElementById('card-list');
     if (!listEl) return;
@@ -1098,14 +1117,14 @@
     const fragment = document.createDocumentFragment();
     const inWisu = (currentMode === 1);
 
-    // 1. 추천 핫플 1, 2, 3번 경유지 카드를 먼저 상단에 렌더링
+    // 1. 추천 핫플 1, 2, 3번 경유지 카드를 먼저 상단에 렌더링 (우측 버튼 적용)
     routeCards.forEach((item, index) => {
       const card = document.createElement('div');
       card.className = 'card';
       const safeName = item.name.replace(/'/g, "\\'");
       card.innerHTML = `
         <div class="card-main-content">
-          <div class="card-top-row">
+          <div class="card-compact-row">
             <div class="card-title-group">
               <div class="num-badge">${index + 1}</div>
               <div class="place-info">
@@ -1113,9 +1132,10 @@
                 <div class="score-dist">${item.dist.toFixed(1)}km (${item.estimatedTimeMin}분) · ${item.score}점 ${getScoreLevelBadge(item.score)}</div>
               </div>
             </div>
-          </div>
-          <div class="card-btn-row">
-            <button type="button" class="action-btn navi-btn" onclick="openKakaoNaviApp('${safeName}', ${item.lat}, ${item.lng})">🚘 카카오내비</button>
+            <button type="button" class="right-navi-btn" onclick="openKakaoNaviApp('${safeName}', ${item.lat}, ${item.lng})">
+              <span>🚘</span>
+              <span>내비</span>
+            </button>
           </div>
         </div>
         <div class="tag-group">
@@ -1137,17 +1157,18 @@
       const safeTargetName = targetBoundaryCardData.name.replace(/'/g, "\\'");
       targetCard.innerHTML = `
         <div class="card-main-content">
-          <div class="card-top-row">
+          <div class="card-compact-row">
             <div class="card-title-group">
               <div class="num-badge target-badge">🎯</div>
               <div class="place-info">
                 <div class="place-name" style="color: #FFD700;">${targetBoundaryCardData.name}</div>
-                <div class="score-dist" style="color: #FF6B00;">${targetBoundaryCardData.dist.toFixed(1)}km (${targetBoundaryCardData.estimatedTimeMin}분) · 복귀 최단 경계지점</div>
+                <div class="score-dist" style="color: #FF6B00;">${targetBoundaryCardData.dist.toFixed(1)}km (${targetBoundaryCardData.estimatedTimeMin}분) · 복귀 최단 경계점</div>
               </div>
             </div>
-          </div>
-          <div class="card-btn-row">
-            <button type="button" class="action-btn navi-btn" onclick="openKakaoNaviApp('${safeTargetName}', ${targetBoundaryCardData.lat}, ${targetBoundaryCardData.lng})">🚘 카카오내비 (최종 목적지 안내)</button>
+            <button type="button" class="right-navi-btn" style="background:#FF6B00 !important; color:#FFF !important;" onclick="openKakaoNaviApp('${safeTargetName}', ${targetBoundaryCardData.lat}, ${targetBoundaryCardData.lng})">
+              <span>🎯</span>
+              <span>복귀내비</span>
+            </button>
           </div>
         </div>
         <div class="tag-group">
