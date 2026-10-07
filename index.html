@@ -337,20 +337,20 @@
           • 승차기록 추천: <strong>+35점</strong> | 나만의 핫플: <strong>+20점</strong> | 카카오 실시간: <strong>+15점</strong> | 마스터 DB: <strong>+10점</strong>
         </div>
         <div>
-          <strong style="color: #FF6B00;">2. 모드 2 (관외 복귀) 최단 TSP 순차 동선 알고리즘</strong><br>
+          <strong style="color: #FF6B00;">2. 모드 2 (관외 복귀) 카플레이 최적화 순차 동선 알고리즘</strong><br>
           • 현위치 ➔ 1번 ➔ 2번 ➔ 3번 ➔ 🎯 복귀점까지 U턴/역주행 없는 최단 순방향 동선 정렬 보장<br>
-          • 우회거리(Detour ≤ 3.5km) 검증을 거친 고득점 핫플 순차 추천
+          • 카플레이 'Now Playing' 오디오 트릭 & 시스템 타이머(단축어) 완벽 호환
         </div>
       </div>
     </details>
   
     <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;" open>
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v5.9.1 상세 누적 업데이트 히스토리 (터치)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v5.9.2 상세 누적 업데이트 히스토리 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v5.9.1 (2026.10.07) - TSP 최단 순차 동선 알고리즘 표준화 및 버그 수정</strong><br>
-          • 🛣️ <strong>역주행 꼬임 완벽 제거</strong>: 화서역 ➔ 정자동 ➔ 성대역 ➔ 🎯 의왕경계처럼 현위치에서 복귀 목적지까지 되돌아감이 전혀 없는 100% 직진 순방향 순차 동선 보장.<br>
-          • 🔥 <strong>승차 데이터 전격 후보 반영</strong>: 512개 고객 승차 기록이 최우선 추천 후보로 노출됨.
+          <strong style="color: #4ADE80;">v5.9.2 (2026.10.07) - 카플레이(CarPlay) 연동 대기 알람 고도화</strong><br>
+          • 🚗 <strong>카플레이 Now Playing 오디오 트릭</strong>: 타이머 대기 중 무음 오디오를 유지하여 차량 스피커 및 카플레이 화면에 대기 상태 유지.<br>
+          • ⏱️ <strong>단축어 시스템 타이머 연동</strong>: 대기 버튼을 길게 누르거나 완료 시 `shortcuts://`를 통해 iOS 시스템 타이머 및 차량 배너 알람 연동.
         </div>
       </div>
     </details>
@@ -362,7 +362,7 @@
         <button class="timer-mode-btn active" id="timer-btn-5m">5분 대기</button>
         <button class="timer-mode-btn" id="timer-btn-10m">10분 대기</button>
       </div>
-      <button class="timer-display-btn" id="timer-display-btn">⏱️ 05:00 시작</button>
+      <button class="timer-display-btn" id="timer-display-btn" title="길게 누르면 iOS 시스템 타이머 실행">⏱️ 05:00 시작</button>
     </div>
     <button class="save-call-btn" id="btn-save-call">📍 고객 탑승<br>위치 저장</button>
   </div>
@@ -381,7 +381,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v5.9.1";
+  const BUILD_VERSION = "v5.9.2";
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -433,17 +433,27 @@
     } catch(e) {}
   }
   
-  function startBackgroundAudioKeepAlive() {
+  // 카플레이 Now Playing 오디오 트릭 (B안)
+  function startCarPlayAudioKeepAlive(title = "수다택시 K - 5분 대기중") {
     try {
       if (!silentAudioElement) {
         silentAudioElement = new Audio(SILENT_WAV_BASE64);
         silentAudioElement.loop = true;
       }
       silentAudioElement.play().catch(e => {});
+
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: title,
+          artist: '수다택시 K 기사전용',
+          album: '콜 대기 레이더',
+          artwork: [{ src: './icon-192.png', sizes: '192x192', type: 'image/png' }]
+        });
+      }
     } catch(e) {}
   }
   
-  function stopBackgroundAudioKeepAlive() {
+  function stopCarPlayAudioKeepAlive() {
     try { if (silentAudioElement) silentAudioElement.pause(); } catch(e) {}
   }
   
@@ -479,6 +489,17 @@
         osc.stop(startTime + 0.2);
       });
     } catch(e) {}
+    
+    // 카플레이 Now Playing 제목 변경 알림
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: '⏱️ 00:00 이동 추천!',
+        artist: '대기 완료 · 추천지로 이동하세요',
+        album: '수다택시 K',
+        artwork: [{ src: './icon-192.png', sizes: '192x192', type: 'image/png' }]
+      });
+    }
+    
     if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 300]);
     triggerSystemNotification();
   }
@@ -530,7 +551,7 @@
     if (isTimerRunning) {
       clearInterval(timerInterval);
       isTimerRunning = false;
-      stopBackgroundAudioKeepAlive();
+      stopCarPlayAudioKeepAlive();
     }
     timerPresetMin = min;
     timerRemainingSec = min * 60;
@@ -553,7 +574,7 @@
     if (isTimerRunning) {
       clearInterval(timerInterval);
       isTimerRunning = false;
-      stopBackgroundAudioKeepAlive();
+      stopCarPlayAudioKeepAlive();
       btn.classList.remove('running');
       btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 재개`;
       saveTimerState();
@@ -562,9 +583,19 @@
     }
   }
   
+  // 길게 누를 때 A안 (iOS 단축어 / 시스템 타이머 위임)
+  function handleTimerLongPress() {
+    const sec = timerPresetMin * 60;
+    showToast(`⏱️ iOS 시스템 타이머(${timerPresetMin}분) 위임 실행`);
+    try {
+      window.location.href = `shortcuts://run-shortcut?name=수다택시${timerPresetMin}분`;
+    } catch(e) {}
+    startTimerInternal();
+  }
+  
   function startTimerInternal() {
     isTimerRunning = true;
-    startBackgroundAudioKeepAlive();
+    startCarPlayAudioKeepAlive(`수다택시 K - ${timerPresetMin}분 대기중 (카플레이 연결됨)`);
     const btn = document.getElementById('timer-display-btn');
     btn.classList.add('running');
     btn.classList.remove('finished');
@@ -583,7 +614,7 @@
       if (timerRemainingSec <= 0) {
         clearInterval(timerInterval);
         isTimerRunning = false;
-        stopBackgroundAudioKeepAlive();
+        stopCarPlayAudioKeepAlive();
         timerRemainingSec = 0;
         btn.className = 'timer-display-btn finished';
         btn.innerText = `⏱️ 00:00 이동 추천!`;
@@ -596,7 +627,6 @@
   }
   
   const DEFAULT_MASTER_HOTSPOTS = [
-    // 수원 확장 핵심 핫플 DB
     { "id": "hs_suwon_1", "name": "성대역 먹자골목 및 상권", "lat": 37.2995, "lng": 126.9710, "address": "율전동", "type": "subway_nightlife", "region": "suwon", "isWisu": false },
     { "id": "hs_suwon_2", "name": "화서역 먹거리촌 및 상권", "lat": 37.2838, "lng": 126.9898, "address": "화서동", "type": "subway_nightlife", "region": "suwon", "isWisu": false },
     { "id": "hs_suwon_3", "name": "수원역 로데오거리 및 환승거점", "lat": 37.2662, "lng": 127.0001, "address": "매산로1가", "type": "subway_nightlife", "region": "suwon", "isWisu": false },
@@ -605,8 +635,6 @@
     { "id": "hs_suwon_6", "name": "광교중앙역 및 아브뉴프랑 상권", "lat": 37.2886, "lng": 127.0515, "address": "이의동", "type": "subway_shopping", "region": "suwon", "isWisu": false },
     { "id": "hs_suwon_7", "name": "행궁동 카페거리 및 행리단길", "lat": 37.2830, "lng": 127.0140, "address": "행궁동", "type": "shopping_nightlife", "region": "suwon", "isWisu": false },
     { "id": "hs_suwon_8", "name": "북수원 정자동 중심상가", "lat": 37.2980, "lng": 126.9910, "address": "정자동", "type": "subway_nightlife", "region": "suwon", "isWisu": false },
-    
-    // 안산 및 주요 핫플 DB
     { "id": "hs_ansan_1", "name": "중앙역 로데오거리 및 메디컬타운", "lat": 37.3186, "lng": 126.8385, "address": "고잔동", "type": "subway_nightlife", "region": "ansan", "isWisu": false },
     { "id": "hs_ansan_2", "name": "고잔역 법원·검찰청 및 신도시 중심상가", "lat": 37.3168, "lng": 126.8232, "address": "고잔동", "type": "office_nightlife", "region": "ansan", "isWisu": false },
     { "id": "hs_ansan_3", "name": "상록수역 환승 거점 및 먹자골목", "lat": 37.3025, "lng": 126.8654, "address": "본오동", "type": "subway_nightlife", "region": "ansan", "isWisu": false },
@@ -649,12 +677,9 @@
         if (Array.isArray(parsed) && parsed.length > 0) savedList = parsed;
       } catch(e) {}
     }
-    
-    // 백업본 유무와 무관하게 최신 수원/핵심 DB 상시 강제 병합
     const mergedMap = new Map();
     DEFAULT_MASTER_HOTSPOTS.forEach(item => mergedMap.set(item.id || item.name, item));
     savedList.forEach(item => mergedMap.set(item.id || item.name, item));
-    
     return Array.from(mergedMap.values());
   }
   
@@ -1217,7 +1242,7 @@
       if (selectedCandidates.length === 3) break;
     }
 
-    /* 🛣️ 4차 TSP 순차 동선 최적화 (2->3->1->🎯 역주행 완전 차단) */
+    /* 🛣️ 4차 TSP 순차 동선 최적화 (역주행 완전 차단) */
     if (selectedCandidates.length > 1) {
       const permutations = getPermutations(selectedCandidates);
       let bestPerm = selectedCandidates;
@@ -1648,6 +1673,22 @@
     document.getElementById('timer-btn-5m').addEventListener('click', () => setTimerPreset(5));
     document.getElementById('timer-btn-10m').addEventListener('click', () => setTimerPreset(10));
     document.getElementById('timer-display-btn').addEventListener('click', () => toggleTimer());
+    
+    // 길게 누를 때 A안 (iOS 단축어 / 시스템 타이머 위임)
+    const timerBtn = document.getElementById('timer-display-btn');
+    timerBtn.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      handleTimerLongPress();
+    });
+    let touchTimer = null;
+    timerBtn.addEventListener('touchstart', () => {
+      touchTimer = setTimeout(() => {
+        handleTimerLongPress();
+      }, 800);
+    });
+    timerBtn.addEventListener('touchend', () => {
+      if (touchTimer) clearTimeout(touchTimer);
+    });
   });
 </script>
 </body>
