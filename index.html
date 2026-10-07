@@ -59,22 +59,8 @@
       --final-card-glow: rgba(34, 197, 94, 0.25);
     }
     
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-    body {
-      background-color: #121212;
-      color: #FFFFFF;
-      max-width: 430px;
-      margin: 0 auto;
-      padding: 10px 10px 120px 10px;
-      min-height: 100vh;
-      transition: all 0.3s ease;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: #121212; color: #FFFFFF; max-width: 430px; margin: 0 auto; padding: 10px 10px 120px 10px; min-height: 100vh; transition: all 0.3s ease; }
     
     .update-banner {
       background-color: #3A2E0A;
@@ -86,193 +72,33 @@
       margin-bottom: 8px;
       display: none;
     }
-    .banner-content {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .banner-btns {
-      display: flex;
-      gap: 4px;
-    }
-    .btn-update {
-      flex: 1;
-      background-color: var(--theme-accent);
-      color: var(--theme-text-on-accent);
-      border: none;
-      padding: 4px;
-      border-radius: 4px;
-      font-weight: 900;
-      cursor: pointer;
-      font-size: 11px;
-    }
-    .btn-close {
-      background-color: #2A2A2A;
-      color: #CCCCCC;
-      border: 1px solid #444;
-      padding: 4px 6px;
-      border-radius: 4px;
-      font-weight: 700;
-      cursor: pointer;
-      font-size: 11px;
-    }
+    .banner-content { display: flex; flex-direction: column; gap: 4px; }
+    .banner-btns { display: flex; gap: 4px; }
+    .btn-update { flex: 1; background-color: var(--theme-accent); color: var(--theme-text-on-accent); border: none; padding: 4px; border-radius: 4px; font-weight: 900; cursor: pointer; font-size: 11px; }
+    .btn-close { background-color: #2A2A2A; color: #CCCCCC; border: 1px solid #444; padding: 4px 6px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 11px; }
     
-    .header {
-      text-align: center;
-      font-size: 16px;
-      font-weight: 900;
-      color: var(--theme-accent);
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      flex-wrap: wrap;
-    }
-    .holiday-badge {
-      font-size: 10px;
-      padding: 2px 4px;
-      border-radius: 4px;
-      background: #FF4444;
-      color: #FFFFFF;
-      font-weight: 800;
-      display: inline-block;
-      vertical-align: middle;
-    }
-    .weekday-badge {
-      font-size: 10px;
-      padding: 2px 4px;
-      border-radius: 4px;
-      background: #2A2A2A;
-      color: #AAAAAA;
-      font-weight: 700;
-      display: inline-block;
-      vertical-align: middle;
-    }
-    .build-ver-tag {
-      font-size: 10px;
-      color: var(--theme-accent);
-      opacity: 0.85;
-      font-weight: 800;
-      margin: 0 2px;
-      padding: 1px 4px;
-      background: rgba(255,200,0,0.15);
-      border-radius: 4px;
-      display: inline-block;
-      vertical-align: middle;
-    }
+    .header { text-align: center; font-size: 16px; font-weight: 900; color: var(--theme-accent); margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; flex-wrap: wrap; }
+    .holiday-badge { font-size: 10px; padding: 2px 4px; border-radius: 4px; background: #FF4444; color: #FFFFFF; font-weight: 800; display: inline-block; vertical-align: middle; }
+    .weekday-badge { font-size: 10px; padding: 2px 4px; border-radius: 4px; background: #2A2A2A; color: #AAAAAA; font-weight: 700; display: inline-block; vertical-align: middle; }
+    .build-ver-tag { font-size: 10px; color: var(--theme-accent); opacity: 0.85; font-weight: 800; margin: 0 2px; padding: 1px 4px; background: rgba(255,200,0,0.15); border-radius: 4px; display: inline-block; vertical-align: middle; }
     
-    .mode-container {
-      display: flex;
-      gap: 4px;
-      margin-bottom: 8px;
-    }
-    .mode-pill {
-      flex: 1;
-      height: 30px;
-      border-radius: 8px;
-      background: #2A2A2A;
-      color: #8A8A8A;
-      font-size: 11px;
-      font-weight: 800;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s;
-    }
-    .mode-pill.active {
-      background: var(--theme-accent) !important;
-      color: var(--theme-text-on-accent) !important;
-    }
+    .mode-container { display: flex; gap: 4px; margin-bottom: 8px; }
+    .mode-pill { flex: 1; height: 30px; border-radius: 8px; background: #2A2A2A; color: #8A8A8A; font-size: 11px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+    .mode-pill.active { background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; }
     
-    .loc-bar {
-      background: var(--theme-bg-dark);
-      height: 34px;
-      border: 1px solid var(--theme-border);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 8px;
-      font-size: 11px;
-      color: var(--theme-accent);
-      margin-bottom: 8px;
-    }
-    .refresh-btn {
-      background: none;
-      border: none;
-      color: var(--theme-accent);
-      font-size: 14px;
-      cursor: pointer;
-    }
+    .loc-bar { background: var(--theme-bg-dark); height: 34px; border: 1px solid var(--theme-border); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 0 8px; font-size: 11px; color: var(--theme-accent); margin-bottom: 8px; }
+    .refresh-btn { background: none; border: none; color: var(--theme-accent); font-size: 14px; cursor: pointer; }
     
-    .btn-group-main {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 8px;
-    }
-    .big-btn {
-      width: 100%;
-      height: 44px;
-      background: var(--theme-accent) !important;
-      color: var(--theme-text-on-accent) !important;
-      font-size: 15px;
-      font-weight: 900;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      box-shadow: 0 2px 8px var(--theme-border);
-    }
-    .big-btn:active {
-      opacity: 0.9;
-      transform: scale(0.99);
-    }
+    .btn-group-main { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+    .big-btn { width: 100%; height: 44px; background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; font-size: 15px; font-weight: 900; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 2px 8px var(--theme-border); }
+    .big-btn:active { opacity: 0.9; transform: scale(0.99); }
     
-    .map-btn {
-      width: 100%;
-      height: 34px;
-      background: #2A2A2A;
-      color: #FFFFFF;
-      font-size: 12px;
-      font-weight: 800;
-      border: 1px solid var(--theme-border);
-      border-radius: 8px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-    }
+    .map-btn { width: 100%; height: 34px; background: #2A2A2A; color: #FFFFFF; font-size: 12px; font-weight: 800; border: 1px solid var(--theme-border); border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
     
-    .pipeline-log {
-      font-family: monospace;
-      font-size: 10px;
-      color: #8A8A8A;
-      margin: 0 0 8px 4px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+    .pipeline-log { font-family: monospace; font-size: 10px; color: #8A8A8A; margin: 0 0 8px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     
-    .card-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .card {
-      background: #1E1E1E;
-      border: 1px solid #2A2A2A;
-      border-radius: 12px;
-      padding: 6px 8px;
-      position: relative;
-    }
+    .card-list { display: flex; flex-direction: column; gap: 6px; }
+    .card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 12px; padding: 6px 8px; position: relative; }
     
     .card.target-destination-card {
       background: #2D1A0A;
@@ -281,51 +107,14 @@
       margin-top: 4px;
     }
     
-    .card-main-content {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .card-compact-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
-    }
-    .card-title-group {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      min-width: 0;
-      flex: 1;
-    }
+    .card-main-content { display: flex; flex-direction: column; gap: 2px; }
+    .card-compact-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+    .card-title-group { display: flex; align-items: center; gap: 6px; min-width: 0; flex: 1; }
     
-    .num-badge {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: var(--theme-accent);
-      color: var(--theme-text-on-accent);
-      font-weight: 900;
-      font-size: 11px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .num-badge.target-badge {
-      background: #FF6B00;
-      color: #FFFFFF;
-      font-size: 12px;
-    }
+    .num-badge { width: 20px; height: 20px; border-radius: 50%; background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .num-badge.target-badge { background: #FF6B00; color: #FFFFFF; font-size: 12px; }
     
-    .place-info {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
+    .place-info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
     
     .place-name { 
       font-size: 13px; 
@@ -337,43 +126,12 @@
       line-height: 1.2; 
     }
     
-    .score-dist {
-      font-size: 10px;
-      font-weight: 800;
-      color: var(--theme-accent);
-      font-family: monospace;
-      margin-top: 1px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      flex-wrap: nowrap;
-      white-space: nowrap;
-    }
+    .score-dist { font-size: 10px; font-weight: 800; color: var(--theme-accent); font-family: monospace; margin-top: 1px; display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; white-space: nowrap; }
     
-    .level-badge {
-      font-weight: 900;
-      padding: 1px 3px;
-      border-radius: 3px;
-      font-size: 8.5px;
-      display: inline-flex;
-      align-items: center;
-      gap: 1px;
-    }
-    .level-high {
-      background: rgba(74, 222, 128, 0.2);
-      color: #4ADE80;
-      border: 1px solid #4ADE80;
-    }
-    .level-mid {
-      background: rgba(255, 200, 0, 0.2);
-      color: #FFC800;
-      border: 1px solid #FFC800;
-    }
-    .level-low {
-      background: rgba(255, 107, 107, 0.2);
-      color: #FF6B6B;
-      border: 1px solid #FF6B6B;
-    }
+    .level-badge { font-weight: 900; padding: 1px 3px; border-radius: 3px; font-size: 8.5px; display: inline-flex; align-items: center; gap: 1px; }
+    .level-high { background: rgba(74, 222, 128, 0.2); color: #4ADE80; border: 1px solid #4ADE80; }
+    .level-mid { background: rgba(255, 200, 0, 0.2); color: #FFC800; border: 1px solid #FFC800; }
+    .level-low { background: rgba(255, 107, 107, 0.2); color: #FF6B6B; border: 1px solid #FF6B6B; }
     
     .right-navi-btn {
       width: 52px;
@@ -394,10 +152,7 @@
       box-shadow: 0 1px 4px rgba(0,0,0,0.4);
       line-height: 1;
     }
-    .right-navi-btn:active {
-      opacity: 0.85;
-      transform: scale(0.96);
-    }
+    .right-navi-btn:active { opacity: 0.85; transform: scale(0.96); }
     
     .tag-group { 
       display: flex; 
@@ -409,385 +164,67 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
-    .tag-group::-webkit-scrollbar {
-      display: none;
-    }
-    .tag {
-      font-size: 8.5px;
-      padding: 1px 3px;
-      border-radius: 3px;
-      background: #2A2A2A;
-      color: #A0A0A0;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    .tag.target {
-      background: #7C2D12;
-      color: #FFEDD5;
-      border: 1px solid #EA580C;
-      font-weight: 800;
-    }
-    .tag.near {
-      background: #1E3A8A;
-      color: #93C5FD;
-      border: 1px solid #3B82F6;
-      font-weight: 700;
-    }
-    .tag.custom {
-      background: #3B0764;
-      color: #E9D5FF;
-      border: 1px solid #7E22CE;
-      font-weight: 700;
-    }
-    .tag.logmatch {
-      background: #2B1F3D;
-      color: #C084FC;
-      border: 1px solid #5B21B6;
-      font-weight: 700;
-    }
-    .tag.timematch {
-      background: #065F46;
-      color: #34D399;
-      border: 1px solid #10B981;
-      font-weight: 800;
-    }
-    .tag.masterdb {
-      background: #581C87;
-      color: #F3E8FF;
-      border: 1px solid #9333EA;
-      font-weight: 700;
-    }
-    .tag.livekakaomap {
-      background: #854D0E;
-      color: #FEF08A;
-      border: 1px solid #EAB308;
-      font-weight: 800;
-    }
-    .tag.usercallhistory {
-      background: #831843;
-      color: #FBCFE8;
-      border: 1px solid #F43F5E;
-      font-weight: 900;
-    }
+    .tag-group::-webkit-scrollbar { display: none; }
+    .tag { font-size: 8.5px; padding: 1px 3px; border-radius: 3px; background: #2A2A2A; color: #A0A0A0; white-space: nowrap; flex-shrink: 0; }
+    .tag.target { background: #7C2D12; color: #FFEDD5; border: 1px solid #EA580C; font-weight: 800; }
+    .tag.near { background: #1E3A8A; color: #93C5FD; border: 1px solid #3B82F6; font-weight: 700; }
+    .tag.custom { background: #3B0764; color: #E9D5FF; border: 1px solid #7E22CE; font-weight: 700; }
+    .tag.logmatch { background: #2B1F3D; color: #C084FC; border: 1px solid #5B21B6; font-weight: 700; }
+    .tag.timematch { background: #065F46; color: #34D399; border: 1px solid #10B981; font-weight: 800; }
+    .tag.masterdb { background: #581C87; color: #F3E8FF; border: 1px solid #9333EA; font-weight: 700; }
+    .tag.livekakaomap { background: #854D0E; color: #FEF08A; border: 1px solid #EAB308; font-weight: 800; }
+    .tag.usercallhistory { background: #831843; color: #FBCFE8; border: 1px solid #F43F5E; font-weight: 900; }
     
-    .sub-final-section {
-      margin-top: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .sub-final-title {
-      font-size: 10px;
-      font-weight: 800;
-      color: var(--theme-accent);
-      margin-bottom: 1px;
-    }
-    .sub-final-list {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .sub-final-card {
-      background: #181818;
-      border: 1px solid #282828;
-      border-radius: 8px;
-      padding: 5px 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
-    }
-    .sub-final-info {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-    .sub-final-name {
-      font-size: 11px;
-      font-weight: 800;
-      color: #DDDDDD;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .sub-final-meta {
-      font-size: 9px;
-      font-weight: 700;
-      color: #AAAAAA;
-      font-family: monospace;
-    }
-    .sub-navi-btn {
-      background: #FFE800 !important;
-      color: #000000 !important;
-      font-weight: 900;
-      height: 24px;
-      padding: 0 8px;
-      font-size: 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      border: none;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
+    .sub-final-section { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+    .sub-final-title { font-size: 10px; font-weight: 800; color: var(--theme-accent); margin-bottom: 1px; }
+    .sub-final-list { display: flex; flex-direction: column; gap: 4px; }
+    .sub-final-card { background: #181818; border: 1px solid #282828; border-radius: 8px; padding: 5px 8px; display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+    .sub-final-info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+    .sub-final-name { font-size: 11px; font-weight: 800; color: #DDDDDD; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sub-final-meta { font-size: 9px; font-weight: 700; color: #AAAAAA; font-family: monospace; }
+    .sub-navi-btn { background: #FFE800 !important; color: #000000 !important; font-weight: 900; height: 24px; padding: 0 8px; font-size: 10px; border-radius: 5px; cursor: pointer; border: none; white-space: nowrap; flex-shrink: 0; }
     
-    #heatmap-container {
-      display: none;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 8px;
-    }
-    #call-map-view {
-      width: 100%;
-      height: 320px;
-      background: #1E1E1E;
-      border-radius: 12px;
-      border: 1.5px solid var(--theme-accent);
-      overflow: hidden;
-    }
-    .map-legend {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #1E1E1E;
-      padding: 4px 8px;
-      border-radius: 8px;
-      border: 1px solid #2A2A2A;
-      font-size: 10px;
-    }
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-weight: 700;
-    }
-    .dot-sample {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      display: inline-block;
-    }
+    #heatmap-container { display: none; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+    #call-map-view { width: 100%; height: 320px; background: #1E1E1E; border-radius: 12px; border: 1.5px solid var(--theme-accent); overflow: hidden; }
+    .map-legend { display: flex; align-items: center; justify-content: space-between; background: #1E1E1E; padding: 4px 8px; border-radius: 8px; border: 1px solid #2A2A2A; font-size: 10px; }
+    .legend-item { display: flex; align-items: center; gap: 4px; font-weight: 700; }
+    .dot-sample { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
     
-    .backup-section {
-      margin-top: 12px;
-      background: #1E1E1E;
-      border: 1px solid #2A2A2A;
-      border-radius: 10px;
-      padding: 10px;
-    }
-    .backup-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-    }
-    .backup-title {
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--theme-accent);
-    }
-    .backup-count {
-      font-size: 10px;
-      color: #8A8A8A;
-    }
-    .backup-btn-group {
-      display: flex;
-      gap: 4px;
-    }
-    .backup-btn {
-      flex: 1;
-      height: 32px;
-      background: #2A2A2A;
-      color: #FFFFFF;
-      font-weight: 800;
-      border: 1px solid #3A3A3A;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 11px;
-    }
+    .backup-section { margin-top: 12px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 10px; padding: 10px; }
+    .backup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .backup-title { font-size: 12px; font-weight: 800; color: var(--theme-accent); }
+    .backup-count { font-size: 10px; color: #8A8A8A; }
+    .backup-btn-group { display: flex; gap: 4px; }
+    .backup-btn { flex: 1; height: 32px; background: #2A2A2A; color: #FFFFFF; font-weight: 800; border: 1px solid #3A3A3A; border-radius: 6px; cursor: pointer; font-size: 11px; }
     
-    .custom-section {
-      margin-top: 8px;
-      border-top: 1px dashed #3A3A3A;
-      padding-top: 6px;
-    }
-    .add-custom-btn {
-      width: 100%;
-      height: 34px;
-      background: #2A1A3A;
-      color: #D8B4FE;
-      border: 1px solid #6B21A8;
-      font-weight: 800;
-      font-size: 11px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+    .custom-section { margin-top: 8px; border-top: 1px dashed #3A3A3A; padding-top: 6px; }
+    .add-custom-btn { width: 100%; height: 34px; background: #2A1A3A; color: #D8B4FE; border: 1px solid #6B21A8; font-weight: 800; font-size: 11px; border-radius: 6px; cursor: pointer; }
     
-    .recent-log-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #242424;
-      border: 1px solid #2E2E2E;
-      border-radius: 6px;
-      padding: 4px 6px;
-    }
-    .recent-log-time {
-      font-size: 10px;
-      font-weight: 700;
-      color: #E0E0E0;
-      white-space: nowrap;
-    }
+    .recent-log-item { display: flex; align-items: center; justify-content: space-between; background: #242424; border: 1px solid #2E2E2E; border-radius: 6px; padding: 4px 6px; }
+    .recent-log-time { font-size: 10px; font-weight: 700; color: #E0E0E0; white-space: nowrap; }
     
-    .bottom-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 64px;
-      background: rgba(26,26,26,0.95);
-      backdrop-filter: blur(10px);
-      border-top: 2px solid var(--theme-accent);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 10px;
-      z-index: 100;
-      max-width: 430px;
-      margin: 0 auto;
-    }
-    .timer-container {
-      flex: 1;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-    .timer-mode-selector {
-      display: flex;
-      gap: 3px;
-      height: 16px;
-    }
-    .timer-mode-btn {
-      flex: 1;
-      background: #2A2A2A;
-      color: #8A8A8A;
-      font-size: 9px;
-      font-weight: 800;
-      border: 1px solid #3A3A3A;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .timer-mode-btn.active {
-      background: var(--theme-accent) !important;
-      color: var(--theme-text-on-accent) !important;
-      border-color: var(--theme-accent) !important;
-    }
-    .timer-display-btn {
-      flex: 1;
-      background: #2A2A2A;
-      border: 1px solid #3A3A3A;
-      color: #FFFFFF;
-      font-size: 12px;
-      font-weight: 900;
-      border-radius: 8px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .timer-display-btn.running {
-      background: #3A2E0A;
-      color: var(--theme-accent);
-      border-color: var(--theme-accent);
-    }
-    .timer-display-btn.finished {
-      background: #4A1A1A;
-      color: #FF5555;
-      border-color: #FF5555;
-      animation: alertBlink 1s infinite;
-    }
+    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 64px; background: rgba(26,26,26,0.95); backdrop-filter: blur(10px); border-top: 2px solid var(--theme-accent); display: flex; align-items: center; gap: 6px; padding: 6px 10px; z-index: 100; max-width: 430px; margin: 0 auto; }
+    .timer-container { flex: 1; height: 100%; display: flex; flex-direction: column; gap: 3px; }
+    .timer-mode-selector { display: flex; gap: 3px; height: 16px; }
+    .timer-mode-btn { flex: 1; background: #2A2A2A; color: #8A8A8A; font-size: 9px; font-weight: 800; border: 1px solid #3A3A3A; border-radius: 4px; cursor: pointer; }
+    .timer-mode-btn.active { background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; border-color: var(--theme-accent) !important; }
+    .timer-display-btn { flex: 1; background: #2A2A2A; border: 1px solid #3A3A3A; color: #FFFFFF; font-size: 12px; font-weight: 900; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .timer-display-btn.running { background: #3A2E0A; color: var(--theme-accent); border-color: var(--theme-accent); }
+    .timer-display-btn.finished { background: #4A1A1A; color: #FF5555; border-color: #FF5555; animation: alertBlink 1s infinite; }
     
     @keyframes alertBlink {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
     }
-    .save-call-btn {
-      flex: 1;
-      height: 100%;
-      background: var(--theme-accent) !important;
-      color: var(--theme-text-on-accent) !important;
-      font-weight: 900;
-      font-size: 12px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      line-height: 1.15;
-      word-break: keep-all;
-    }
+    .save-call-btn { flex: 1; height: 100%; background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; font-weight: 900; font-size: 12px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.15; word-break: keep-all; }
     
-    .map-modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.7);
-      z-index: 200;
-      display: none;
-      align-items: flex-end;
-      justify-content: center;
-    }
-    .map-modal-overlay.active {
-      display: flex;
-    }
-    .map-modal-content {
-      width: 100%;
-      max-width: 430px;
-      height: 75vh;
-      background: #1E1E1E;
-      border-top-left-radius: 16px;
-      border-top-right-radius: 16px;
-      border-top: 2px solid var(--theme-accent);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    .map-modal-header {
-      padding: 10px 12px;
-      background: #121212;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #2A2A2A;
-      flex-shrink: 0;
-    }
-    .map-modal-title {
-      font-size: 14px;
-      font-weight: 800;
-      color: var(--theme-accent);
-    }
-    .map-modal-close {
-      background: none;
-      border: none;
-      color: #8A8A8A;
-      font-size: 16px;
-      font-weight: 900;
-      cursor: pointer;
-    }
-    #route-map {
-      width: 100%;
-      height: 100%;
-      min-height: 350px;
-      flex: 1;
-      background: #121212;
-      z-index: 1;
-    }
+    .map-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
+    .map-modal-overlay.active { display: flex; }
+    .map-modal-content { width: 100%; max-width: 430px; height: 75vh; background: #1E1E1E; border-top-left-radius: 16px; border-top-right-radius: 16px; border-top: 2px solid var(--theme-accent); display: flex; flex-direction: column; overflow: hidden; }
+    .map-modal-header { padding: 10px 12px; background: #121212; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2A2A2A; flex-shrink: 0; }
+    .map-modal-title { font-size: 14px; font-weight: 800; color: var(--theme-accent); }
+    .map-modal-close { background: none; border: none; color: #8A8A8A; font-size: 16px; font-weight: 900; cursor: pointer; }
+    #route-map { width: 100%; height: 100%; min-height: 350px; flex: 1; background: #121212; z-index: 1; }
     
     .custom-map-marker {
       width: 24px;
@@ -836,23 +273,23 @@
     </div>
   </div>
   
-  <div class="header" id="app-header-title">📅 2026.10.8(목) <span class="build-ver-tag">v5.9.3</span> <span class="weekday-badge">🟢 평일</span></div>
+  <div class="header" id="app-header-title">📅 날짜 수신 대기 중...</div>
   
   <div class="mode-container">
-    <button class="mode-pill active" id="btn-mode1" onclick="setTab(1)">⚡ 스마트 자동 추천 모드</button>
-    <button class="mode-pill" id="btn-mode3" onclick="setTab(3)">📊 콜 지도 시각화</button>
+    <button class="mode-pill active" id="btn-mode1">⚡ 스마트 자동 추천 모드</button>
+    <button class="mode-pill" id="btn-mode3">📊 콜 지도 시각화</button>
   </div>
   
   <div class="loc-bar">
     <span id="loc-text">📍 실시간 GPS 위치 수신 대기 중...</span>
-    <button class="refresh-btn" id="btn-refresh" onclick="executeSearch()">⟳</button>
+    <button class="refresh-btn" id="btn-refresh">⟳</button>
   </div>
   
   <div class="btn-group-main" id="main-btn-group">
-    <button class="big-btn" id="btn-search" onclick="executeSearch()">
+    <button class="big-btn" id="btn-search">
       <span>📍 주변 콜 많은 곳 찾기</span>
     </button>
-    <button class="map-btn" id="btn-show-map" onclick="openRouteMapModal()" style="display: none;">
+    <button class="map-btn" id="btn-show-map" style="display: none;">
       <span>🗺️ 전체 도로 동선 지도 보기</span>
     </button>
   </div>
@@ -875,8 +312,8 @@
       <span class="backup-count" id="log-count-text">저장 기록: 0개</span>
     </div>
     <div class="backup-btn-group">
-      <button class="backup-btn" id="btn-export" onclick="exportCallLogs()">📤 백업</button>
-      <button class="backup-btn" id="btn-import-open" onclick="document.getElementById('import-file-input')?.click()">📥 복원</button>
+      <button class="backup-btn" id="btn-export">📤 백업</button>
+      <button class="backup-btn" id="btn-import-open">📥 복원</button>
       <input type="file" id="import-file-input" accept=".json,application/json" style="display: none;">
     </div>
     
@@ -886,7 +323,7 @@
     </div>
     
     <div class="custom-section">
-      <button class="add-custom-btn" id="btn-add-custom" onclick="addCustomHotspotPrompt()">⭐ 현재 위치 '나만의 핫플' 등록</button>
+      <button class="add-custom-btn" id="btn-add-custom">⭐ 현재 위치 '나만의 핫플' 등록</button>
       <div style="font-size: 10px; font-weight: 800; color: #C084FC; margin: 4px 0 2px 0;">📍 나만의 핫플 목록</div>
       <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 2px;"></div>
     </div>
@@ -908,13 +345,12 @@
     </details>
   
     <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;" open>
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v5.9.3 상세 누적 업데이트 히스토리 (터치)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v5.9.2 상세 누적 업데이트 히스토리 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v5.9.3 (2026.10.08) - 아침 출근 피크(06시) 핫플 보장 및 Top 3 추천 카드 100% 표출</strong><br>
-          • 🌅 <strong>아침 출근 모드(06시~) 적용</strong>: 카카오 실시간 상권 검색을 06시부터 지하철역/환승거점(`SW8`) 카테고리로 조기 전환하여 아침 피크 핫플 수집.<br>
-          • 🎯 <strong>상단 추천 카드 Top 3 보장</strong>: 관내 검색 반경을 8.5km로 확장하고, 유휴 슬롯 보완 알고리즘으로 상단 1~3번 추천 카드가 항상 꽉 차서 표출되도록 보완.<br>
-          • 🚗 <strong>카플레이 연동 유지</strong>: Now Playing 오디오 트릭 및 iOS 타이머 단축어 연동 기능 연속 보장.
+          <strong style="color: #4ADE80;">v5.9.2 (2026.10.07) - 카플레이(CarPlay) 연동 대기 알람 고도화</strong><br>
+          • 🚗 <strong>카플레이 Now Playing 오디오 트릭</strong>: 타이머 대기 중 무음 오디오를 유지하여 차량 스피커 및 카플레이 화면에 대기 상태 유지.<br>
+          • ⏱️ <strong>단축어 시스템 타이머 연동</strong>: 대기 버튼을 길게 누르거나 완료 시 `shortcuts://`를 통해 iOS 시스템 타이머 및 차량 배너 알람 연동.
         </div>
       </div>
     </details>
@@ -923,12 +359,12 @@
   <div class="bottom-bar">
     <div class="timer-container">
       <div class="timer-mode-selector">
-        <button class="timer-mode-btn active" id="timer-btn-5m" onclick="setTimerPreset(5)">5분 대기</button>
-        <button class="timer-mode-btn" id="timer-btn-10m" onclick="setTimerPreset(10)">10분 대기</button>
+        <button class="timer-mode-btn active" id="timer-btn-5m">5분 대기</button>
+        <button class="timer-mode-btn" id="timer-btn-10m">10분 대기</button>
       </div>
-      <button class="timer-display-btn" id="timer-display-btn" onclick="toggleTimer()" title="길게 누르면 iOS 시스템 타이머 실행">⏱️ 05:00 시작</button>
+      <button class="timer-display-btn" id="timer-display-btn" title="길게 누르면 iOS 시스템 타이머 실행">⏱️ 05:00 시작</button>
     </div>
-    <button class="save-call-btn" id="btn-save-call" onclick="saveCurrentCallLocation()">📍 고객 탑승<br>위치 저장</button>
+    <button class="save-call-btn" id="btn-save-call">📍 고객 탑승<br>위치 저장</button>
   </div>
   
   <div class="toast-banner" id="toast-banner" style="position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 12px; padding: 6px 12px; border-radius: 12px; z-index: 300; display: none; box-shadow: 0 3px 12px rgba(0,0,0,0.6);"></div>
@@ -937,7 +373,7 @@
     <div class="map-modal-content">
       <div class="map-modal-header">
         <span class="map-modal-title">🗺️ 도로 동선 지도</span>
-        <button class="map-modal-close" id="map-modal-close" onclick="closeRouteMapModal()">✕</button>
+        <button class="map-modal-close" id="map-modal-close">✕</button>
       </div>
       <div id="route-map"></div>
     </div>
@@ -945,30 +381,8 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v5.9.3";
+  const BUILD_VERSION = "v5.9.2";
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
-
-  // 안전한 localStorage 접근 Helper (보안 제한 환경에서의 스크립트 중단 방지)
-  function safeGetStorage(key, fallback = null) {
-    try {
-      const val = localStorage.getItem(key);
-      return val !== null ? val : fallback;
-    } catch (e) {
-      return fallback;
-    }
-  }
-
-  function safeSetStorage(key, value) {
-    try {
-      localStorage.setItem(key, value);
-    } catch (e) {}
-  }
-
-  function safeRemoveStorage(key) {
-    try {
-      localStorage.removeItem(key);
-    } catch (e) {}
-  }
   
   let currentMode = 1;
   let activeTab = 1;
@@ -981,42 +395,10 @@
   let timerRemainingSec = 300;
   let timerInterval = null;
   let isTimerRunning = false;
-  let isAppInitialized = false;
   
   let audioCtx = null;
   let silentAudioElement = null;
   const SILENT_WAV_BASE64 = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==';
-
-  function updateHeaderTitle(nowDate, isHoliday, holidayName) {
-    const headerEl = document.getElementById('app-header-title');
-    if (!headerEl) return;
-    
-    try {
-      const d = nowDate || new Date();
-      const year = d.getFullYear();
-      const month = d.getMonth() + 1;
-      const date = d.getDate();
-      const days = ['일', '월', '화', '수', '목', '금', '토'];
-      const dayStr = days[d.getDay()];
-      const isWeekend = (d.getDay() === 0 || d.getDay() === 6);
-      
-      let badgeHtml = '';
-      if (isHoliday) {
-        badgeHtml = `<span class="holiday-badge">🔴 ${holidayName || '공휴일'}</span>`;
-      } else if (isWeekend) {
-        badgeHtml = `<span class="holiday-badge" style="background:#FF8C00;">🟡 휴일</span>`;
-      } else {
-        badgeHtml = `<span class="weekday-badge">🟢 평일</span>`;
-      }
-      
-      headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) <span class="build-ver-tag">${BUILD_VERSION}</span> ${badgeHtml}`;
-    } catch(e) {}
-  }
-
-  // 동기 즉시 헤더 갱신 구동
-  try {
-    updateHeaderTitle(new Date(), false, null);
-  } catch(e) {}
   
   function initKakaoSdk() {
     if (window.Kakao && !window.Kakao.isInitialized()) {
@@ -1051,6 +433,7 @@
     } catch(e) {}
   }
   
+  // 카플레이 Now Playing 오디오 트릭 (B안)
   function startCarPlayAudioKeepAlive(title = "수다택시 K - 5분 대기중") {
     try {
       if (!silentAudioElement) {
@@ -1107,6 +490,7 @@
       });
     } catch(e) {}
     
+    // 카플레이 Now Playing 제목 변경 알림
     if ('mediaSession' in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({
         title: '⏱️ 00:00 이동 추천!',
@@ -1127,19 +511,17 @@
       isRunning: isTimerRunning,
       targetEndTime: isTimerRunning ? (Date.now() + timerRemainingSec * 1000) : null
     };
-    safeSetStorage('sudataxi_timer_state', JSON.stringify(state));
+    localStorage.setItem('sudataxi_timer_state', JSON.stringify(state));
   }
 
   function restoreTimerState() {
-    const saved = safeGetStorage('sudataxi_timer_state');
+    const saved = localStorage.getItem('sudataxi_timer_state');
     if (!saved) return;
     try {
       const state = JSON.parse(saved);
       timerPresetMin = state.presetMin || 5;
-      const btn5m = document.getElementById('timer-btn-5m');
-      const btn10m = document.getElementById('timer-btn-10m');
-      if (btn5m) btn5m.classList.toggle('active', timerPresetMin === 5);
-      if (btn10m) btn10m.classList.toggle('active', timerPresetMin === 10);
+      document.getElementById('timer-btn-5m').classList.toggle('active', timerPresetMin === 5);
+      document.getElementById('timer-btn-10m').classList.toggle('active', timerPresetMin === 10);
   
       if (state.isRunning && state.targetEndTime) {
         const now = Date.now();
@@ -1150,19 +532,15 @@
         } else {
           timerRemainingSec = 0;
           const btn = document.getElementById('timer-display-btn');
-          if (btn) {
-            btn.className = 'timer-display-btn finished';
-            btn.innerText = `⏱️ 00:00 이동 추천!`;
-          }
-          safeRemoveStorage('sudataxi_timer_state');
+          btn.className = 'timer-display-btn finished';
+          btn.innerText = `⏱️ 00:00 이동 추천!`;
+          localStorage.removeItem('sudataxi_timer_state');
         }
       } else if (state.remainingSec && state.remainingSec > 0) {
         timerRemainingSec = state.remainingSec;
         const btn = document.getElementById('timer-display-btn');
-        if (btn) {
-          btn.className = 'timer-display-btn';
-          btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 재개`;
-        }
+        btn.className = 'timer-display-btn';
+        btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 재개`;
       }
     } catch(e) {}
   }
@@ -1177,15 +555,11 @@
     }
     timerPresetMin = min;
     timerRemainingSec = min * 60;
-    const btn5m = document.getElementById('timer-btn-5m');
-    const btn10m = document.getElementById('timer-btn-10m');
-    if (btn5m) btn5m.classList.toggle('active', min === 5);
-    if (btn10m) btn10m.classList.toggle('active', min === 10);
+    document.getElementById('timer-btn-5m').classList.toggle('active', min === 5);
+    document.getElementById('timer-btn-10m').classList.toggle('active', min === 10);
     const btn = document.getElementById('timer-display-btn');
-    if (btn) {
-      btn.className = 'timer-display-btn';
-      btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 시작`;
-    }
+    btn.className = 'timer-display-btn';
+    btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 시작`;
     saveTimerState();
   }
   
@@ -1195,23 +569,23 @@
     const btn = document.getElementById('timer-display-btn');
     if (timerRemainingSec <= 0) {
       timerRemainingSec = timerPresetMin * 60;
-      if (btn) btn.className = 'timer-display-btn';
+      btn.className = 'timer-display-btn';
     }
     if (isTimerRunning) {
       clearInterval(timerInterval);
       isTimerRunning = false;
       stopCarPlayAudioKeepAlive();
-      if (btn) {
-        btn.classList.remove('running');
-        btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 재개`;
-      }
+      btn.classList.remove('running');
+      btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 재개`;
       saveTimerState();
     } else {
       startTimerInternal();
     }
   }
   
+  // 길게 누를 때 A안 (iOS 단축어 / 시스템 타이머 위임)
   function handleTimerLongPress() {
+    const sec = timerPresetMin * 60;
     showToast(`⏱️ iOS 시스템 타이머(${timerPresetMin}분) 위임 실행`);
     try {
       window.location.href = `shortcuts://run-shortcut?name=수다택시${timerPresetMin}분`;
@@ -1223,10 +597,8 @@
     isTimerRunning = true;
     startCarPlayAudioKeepAlive(`수다택시 K - ${timerPresetMin}분 대기중 (카플레이 연결됨)`);
     const btn = document.getElementById('timer-display-btn');
-    if (btn) {
-      btn.classList.add('running');
-      btn.classList.remove('finished');
-    }
+    btn.classList.add('running');
+    btn.classList.remove('finished');
     saveTimerState();
     
     if (timerInterval) clearInterval(timerInterval);
@@ -1244,372 +616,61 @@
         isTimerRunning = false;
         stopCarPlayAudioKeepAlive();
         timerRemainingSec = 0;
-        if (btn) {
-          btn.className = 'timer-display-btn finished';
-          btn.innerText = `⏱️ 00:00 이동 추천!`;
-        }
-        safeRemoveStorage('sudataxi_timer_state');
+        btn.className = 'timer-display-btn finished';
+        btn.innerText = `⏱️ 00:00 이동 추천!`;
+        localStorage.removeItem('sudataxi_timer_state');
         playTimerAlarm();
       } else {
-        if (btn) btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)}`;
+        btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)}`;
       }
     }, 1000);
   }
   
   const DEFAULT_MASTER_HOTSPOTS = [
-    {
-      "id": "hs_suwon_1",
-      "name": "성대역 먹자골목 및 상권",
-      "lat": 37.2995,
-      "lng": 126.9710,
-      "address": "율전동",
-      "type": "subway_nightlife",
-      "region": "suwon",
-      "isWisu": false
-    },
-    {
-      "id": "hs_suwon_2",
-      "name": "화서역 먹거리촌 및 상권",
-      "lat": 37.2838,
-      "lng": 126.9898,
-      "address": "화서동",
-      "type": "subway_nightlife",
-      "region": "suwon",
-      "isWisu": false
-    },
-    {
-      "id": "hs_suwon_3",
-      "name": "수원역 로데오거리 및 환승거점",
-      "lat": 37.2662,
-      "lng": 127.0001,
-      "address": "매산로1가",
-      "type": "subway_nightlife",
-      "region": "suwon",
-      "isWisu": false
-    },
-    {
-      "id": "hs_suwon_4",
-      "name": "인계동 나혜석거리 및 유흥상권",
-      "lat": 37.2635,
-      "lng": 127.0322,
-      "address": "인계동",
-      "type": "office_nightlife",
-      "region": "suwon",
-      "isWisu": false
-    },
-    {
-      "id": "hs_suwon_5",
-      "name": "영통역 중심상가 및 로데오",
-      "lat": 37.2515,
-      "lng": 127.0714,
-      "address": "영통동",
-      "type": "subway_nightlife",
-      "region": "suwon",
-      "isWisu": false
-    },
-    {
-      "id": "hs_suwon_6",
-      "name": "광교중앙역 및 아브뉴프랑 상권",
-      "lat": 37.2886,
-      "lng": 127.0515,
-      "address": "이의동",
-      "type": "subway_shopping",
-      "region": "suwon",
-      "isWisu": false
-    },
-    {
-      "id": "hs_suwon_7",
-      "name": "행궁동 카페거리 및 행리단길",
-      "lat": 37.2830,
-      "lng": 127.0140,
-      "address": "행궁동",
-      "type": "shopping_nightlife",
-      "region": "suwon",
-      "isWisu": false
-    },
-    {
-      "id": "hs_suwon_8",
-      "name": "북수원 정자동 중심상가",
-      "lat": 37.2980,
-      "lng": 126.9910,
-      "address": "정자동",
-      "type": "subway_nightlife",
-      "region": "suwon",
-      "isWisu": false
-    },
-    {
-      "id": "hs_ansan_1",
-      "name": "중앙역 로데오거리 및 메디컬타운",
-      "lat": 37.3186,
-      "lng": 126.8385,
-      "address": "고잔동",
-      "type": "subway_nightlife",
-      "region": "ansan",
-      "isWisu": false
-    },
-    {
-      "id": "hs_ansan_2",
-      "name": "고잔역 법원·검찰청 및 신도시 중심상가",
-      "lat": 37.3168,
-      "lng": 126.8232,
-      "address": "고잔동",
-      "type": "office_nightlife",
-      "region": "ansan",
-      "isWisu": false
-    },
-    {
-      "id": "hs_ansan_3",
-      "name": "상록수역 환승 거점 및 먹자골목",
-      "lat": 37.3025,
-      "lng": 126.8654,
-      "address": "본오동",
-      "type": "subway_nightlife",
-      "region": "ansan",
-      "isWisu": false
-    },
-    {
-      "id": "hs_ansan_4",
-      "name": "한대앞역 로데오거리",
-      "lat": 37.3097,
-      "lng": 126.8534,
-      "address": "이동",
-      "type": "subway_nightlife",
-      "region": "ansan",
-      "isWisu": false
-    },
-    {
-      "id": "hs_ansan_5",
-      "name": "초지역 환승 거점",
-      "lat": 37.3205,
-      "lng": 126.8058,
-      "address": "원곡동",
-      "type": "subway",
-      "region": "ansan",
-      "isWisu": false
-    },
-    {
-      "id": "hs_ansan_6",
-      "name": "안산역 및 다문화거리",
-      "lat": 37.3267,
-      "lng": 126.7904,
-      "address": "원곡동",
-      "type": "subway_shopping",
-      "region": "ansan",
-      "isWisu": false
-    },
-    {
-      "id": "hs_s_sadang_1",
-      "name": "사당역 환승 거점 및 먹자골목",
-      "lat": 37.4765,
-      "lng": 126.9816,
-      "address": "사당역",
-      "type": "subway_nightlife",
-      "region": "seoul",
-      "isWisu": false
-    },
-    {
-      "id": "hs_s_yeouido_1",
-      "name": "여의도역 및 증권가 상권",
-      "lat": 37.5216,
-      "lng": 126.9242,
-      "address": "여의도동",
-      "type": "office_nightlife",
-      "region": "seoul",
-      "isWisu": false
-    },
-    {
-      "id": "hs_s_yeongdeungpo_1",
-      "name": "영등포역 환승 거점 및 타임스퀘어",
-      "lat": 37.5158,
-      "lng": 126.9075,
-      "address": "영등포동",
-      "type": "subway_shopping",
-      "region": "seoul",
-      "isWisu": false
-    },
-    {
-      "id": "hs_s_guro_1",
-      "name": "구로디지털단지역 로데오",
-      "lat": 37.4852,
-      "lng": 126.9015,
-      "address": "구로동",
-      "type": "office_nightlife",
-      "region": "seoul",
-      "isWisu": false
-    },
-    {
-      "id": "hs_s_sangam_1",
-      "name": "상암 DMC 오피스 및 방송타운",
-      "lat": 37.5780,
-      "lng": 126.8900,
-      "address": "상암동",
-      "type": "office",
-      "region": "seoul",
-      "isWisu": false
-    },
-    {
-      "id": "hs_s_hongdae_1",
-      "name": "홍대입구역 및 연남동 로데오",
-      "lat": 37.5575,
-      "lng": 126.9244,
-      "address": "홍대입구역",
-      "type": "subway_nightlife",
-      "region": "seoul",
-      "isWisu": false
-    },
-    {
-      "id": "hs_s_hapjeong_1",
-      "name": "합정역 환승 거점 및 메세나폴리스",
-      "lat": 37.5495,
-      "lng": 126.9138,
-      "address": "합정역",
-      "type": "subway",
-      "region": "seoul",
-      "isWisu": false
-    },
-    {
-      "id": "hs_s_sinchon_1",
-      "name": "신촌역 로데오 및 메디컬타운",
-      "lat": 37.5552,
-      "lng": 126.9368,
-      "address": "신촌역",
-      "type": "subway_hospital",
-      "region": "seoul",
-      "isWisu": false
-    },
-    {
-      "id": "hs_g_gwangmyeong_1",
-      "name": "KTX 광명역 및 일직동 로데오",
-      "lat": 37.4162,
-      "lng": 126.8845,
-      "address": "광명역",
-      "type": "subway_shopping",
-      "region": "gwangmyeong",
-      "isWisu": false
-    },
-    {
-      "id": "hs_g_gwacheon_1",
-      "name": "정부과천청사역 중심상가 및 로데오",
-      "lat": 37.4262,
-      "lng": 126.9898,
-      "address": "정부과천청사역",
-      "type": "subway_nightlife",
-      "region": "gwacheon",
-      "isWisu": true
-    },
-    {
-      "id": "hs_g_gwacheon_2",
-      "name": "선바위역 환승장 및 먹자골목",
-      "lat": 37.4518,
-      "lng": 127.0022,
-      "address": "선바위역",
-      "type": "subway",
-      "region": "gwacheon",
-      "isWisu": true
-    },
-    {
-      "id": "hs_g_anyang_1",
-      "name": "평촌역 먹자골목 및 한림대병원",
-      "lat": 37.3942,
-      "lng": 126.9638,
-      "address": "평촌역",
-      "type": "subway_hospital",
-      "region": "anyang",
-      "isWisu": true
-    },
-    {
-      "id": "hs_g_anyang_2",
-      "name": "범계역 로데오거리 및 학원가",
-      "lat": 37.3898,
-      "lng": 126.9508,
-      "address": "범계역",
-      "type": "subway_academy",
-      "region": "anyang",
-      "isWisu": true
-    },
-    {
-      "id": "hs_g_anyang_3",
-      "name": "인덕원역 환승 거점",
-      "lat": 37.4048,
-      "lng": 126.9767,
-      "address": "인덕원역",
-      "type": "subway",
-      "region": "anyang",
-      "isWisu": true
-    },
-    {
-      "id": "hs_g_anyang_4",
-      "name": "안양역 일번가 및 메디컬타운",
-      "lat": 37.4013,
-      "lng": 126.9222,
-      "address": "안양역",
-      "type": "subway_hospital",
-      "region": "anyang",
-      "isWisu": true
-    },
-    {
-      "id": "hs_g_anyang_5",
-      "name": "산본역 중심상가 및 원광대병원",
-      "lat": 37.3554,
-      "lng": 126.9331,
-      "address": "산본역",
-      "type": "subway_hospital",
-      "region": "gunpo",
-      "isWisu": true
-    },
-    {
-      "id": "hs_s_01",
-      "name": "강남역 상업지구 및 병원거리",
-      "lat": 37.4981,
-      "lng": 127.0276,
-      "address": "강남역",
-      "type": "subway_hospital",
-      "region": "seoul",
-      "isWisu": false
-    }
+    { "id": "hs_suwon_1", "name": "성대역 먹자골목 및 상권", "lat": 37.2995, "lng": 126.9710, "address": "율전동", "type": "subway_nightlife", "region": "suwon", "isWisu": false },
+    { "id": "hs_suwon_2", "name": "화서역 먹거리촌 및 상권", "lat": 37.2838, "lng": 126.9898, "address": "화서동", "type": "subway_nightlife", "region": "suwon", "isWisu": false },
+    { "id": "hs_suwon_3", "name": "수원역 로데오거리 및 환승거점", "lat": 37.2662, "lng": 127.0001, "address": "매산로1가", "type": "subway_nightlife", "region": "suwon", "isWisu": false },
+    { "id": "hs_suwon_4", "name": "인계동 나혜석거리 및 유흥상권", "lat": 37.2635, "lng": 127.0322, "address": "인계동", "type": "office_nightlife", "region": "suwon", "isWisu": false },
+    { "id": "hs_suwon_5", "name": "영통역 중심상가 및 로데오", "lat": 37.2515, "lng": 127.0714, "address": "영통동", "type": "subway_nightlife", "region": "suwon", "isWisu": false },
+    { "id": "hs_suwon_6", "name": "광교중앙역 및 아브뉴프랑 상권", "lat": 37.2886, "lng": 127.0515, "address": "이의동", "type": "subway_shopping", "region": "suwon", "isWisu": false },
+    { "id": "hs_suwon_7", "name": "행궁동 카페거리 및 행리단길", "lat": 37.2830, "lng": 127.0140, "address": "행궁동", "type": "shopping_nightlife", "region": "suwon", "isWisu": false },
+    { "id": "hs_suwon_8", "name": "북수원 정자동 중심상가", "lat": 37.2980, "lng": 126.9910, "address": "정자동", "type": "subway_nightlife", "region": "suwon", "isWisu": false },
+    { "id": "hs_ansan_1", "name": "중앙역 로데오거리 및 메디컬타운", "lat": 37.3186, "lng": 126.8385, "address": "고잔동", "type": "subway_nightlife", "region": "ansan", "isWisu": false },
+    { "id": "hs_ansan_2", "name": "고잔역 법원·검찰청 및 신도시 중심상가", "lat": 37.3168, "lng": 126.8232, "address": "고잔동", "type": "office_nightlife", "region": "ansan", "isWisu": false },
+    { "id": "hs_ansan_3", "name": "상록수역 환승 거점 및 먹자골목", "lat": 37.3025, "lng": 126.8654, "address": "본오동", "type": "subway_nightlife", "region": "ansan", "isWisu": false },
+    { "id": "hs_ansan_4", "name": "한대앞역 로데오거리", "lat": 37.3097, "lng": 126.8534, "address": "이동", "type": "subway_nightlife", "region": "ansan", "isWisu": false },
+    { "id": "hs_ansan_5", "name": "초지역 환승 거점", "lat": 37.3205, "lng": 126.8058, "address": "원곡동", "type": "subway", "region": "ansan", "isWisu": false },
+    { "id": "hs_ansan_6", "name": "안산역 및 다문화거리", "lat": 37.3267, "lng": 126.7904, "address": "원곡동", "type": "subway_shopping", "region": "ansan", "isWisu": false },
+    { "id": "hs_s_sadang_1", "name": "사당역 환승 거점 및 먹자골목", "lat": 37.4765, "lng": 126.9816, "address": "사당역", "type": "subway_nightlife", "region": "seoul", "isWisu": false },
+    { "id": "hs_s_yeouido_1", "name": "여의도역 및 증권가 상권", "lat": 37.5216, "lng": 126.9242, "address": "여의도동", "type": "office_nightlife", "region": "seoul", "isWisu": false },
+    { "id": "hs_s_yeongdeungpo_1", "name": "영등포역 환승 거점 및 타임스퀘어", "lat": 37.5158, "lng": 126.9075, "address": "영등포동", "type": "subway_shopping", "region": "seoul", "isWisu": false },
+    { "id": "hs_s_guro_1", "name": "구로디지털단지역 로데오", "lat": 37.4852, "lng": 126.9015, "address": "구로동", "type": "office_nightlife", "region": "seoul", "isWisu": false },
+    { "id": "hs_s_sangam_1", "name": "상암 DMC 오피스 및 방송타운", "lat": 37.5780, "lng": 126.8900, "address": "상암동", "type": "office", "region": "seoul", "isWisu": false },
+    { "id": "hs_s_hongdae_1", "name": "홍대입구역 및 연남동 로데오", "lat": 37.5575, "lng": 126.9244, "address": "홍대입구역", "type": "subway_nightlife", "region": "seoul", "isWisu": false },
+    { "id": "hs_s_hapjeong_1", "name": "합정역 환승 거점 및 메세나폴리스", "lat": 37.5495, "lng": 126.9138, "address": "합정역", "type": "subway", "region": "seoul", "isWisu": false },
+    { "id": "hs_s_sinchon_1", "name": "신촌역 로데오 및 메디컬타운", "lat": 37.5552, "lng": 126.9368, "address": "신촌역", "type": "subway_hospital", "region": "seoul", "isWisu": false },
+    { "id": "hs_g_gwangmyeong_1", "name": "KTX 광명역 및 일직동 로데오", "lat": 37.4162, "lng": 126.8845, "address": "광명역", "type": "subway_shopping", "region": "gwangmyeong", "isWisu": false },
+    { "id": "hs_g_gwacheon_1", "name": "정부과천청사역 중심상가 및 로데오", "lat": 37.4262, "lng": 126.9898, "address": "정부과천청사역", "type": "subway_nightlife", "region": "gwacheon", "isWisu": true },
+    { "id": "hs_g_gwacheon_2", "name": "선바위역 환승장 및 먹자골목", "lat": 37.4518, "lng": 127.0022, "address": "선바위역", "type": "subway", "region": "gwacheon", "isWisu": true },
+    { "id": "hs_g_anyang_1", "name": "평촌역 먹자골목 및 한림대병원", "lat": 37.3942, "lng": 126.9638, "address": "평촌역", "type": "subway_hospital", "region": "anyang", "isWisu": true },
+    { "id": "hs_g_anyang_2", "name": "범계역 로데오거리 및 학원가", "lat": 37.3898, "lng": 126.9508, "address": "범계역", "type": "subway_academy", "region": "anyang", "isWisu": true },
+    { "id": "hs_g_anyang_3", "name": "인덕원역 환승 거점", "lat": 37.4048, "lng": 126.9767, "address": "인덕원역", "type": "subway", "region": "anyang", "isWisu": true },
+    { "id": "hs_g_anyang_4", "name": "안양역 일번가 및 메디컬타운", "lat": 37.4013, "lng": 126.9222, "address": "안양역", "type": "subway_hospital", "region": "anyang", "isWisu": true },
+    { "id": "hs_g_anyang_5", "name": "산본역 중심상가 및 원광대병원", "lat": 37.3554, "lng": 126.9331, "address": "산본역", "type": "subway_hospital", "region": "gunpo", "isWisu": true },
+    { "id": "hs_s_01", "name": "강남역 상업지구 및 병원거리", "lat": 37.4981, "lng": 127.0276, "address": "강남역", "type": "subway_hospital", "region": "seoul", "isWisu": false }
   ];
   
   const WISU_BOUNDARY_POINTS = [
-    {
-      name: "군포 대야미/부곡 경계 (안산 방면)",
-      lat: 37.3320,
-      lng: 126.9150,
-      address: "대야미동",
-      isWisu: true
-    },
-    {
-      name: "안양 박달/석수 경계 (인천/시흥/광명 방면)",
-      lat: 37.4150,
-      lng: 126.8980,
-      address: "박달동",
-      isWisu: true
-    },
-    {
-      name: "의왕 부곡/월암 경계 (수원 방면)",
-      lat: 37.3080,
-      lng: 126.9580,
-      address: "월암동",
-      isWisu: true
-    },
-    {
-      name: "의왕 청계/포일 경계 (성남/분당 방면)",
-      lat: 37.3950,
-      lng: 127.0120,
-      address: "포일동",
-      isWisu: true
-    },
-    {
-      name: "과천 주암/선바위 경계 (서울/강남 방면)",
-      lat: 37.4520,
-      lng: 127.0050,
-      address: "과천동",
-      isWisu: true
-    }
+    { name: "군포 대야미/부곡 경계 (안산 방면)", lat: 37.3320, lng: 126.9150, address: "대야미동", isWisu: true },
+    { name: "안양 박달/석수 경계 (인천/시흥/광명 방면)", lat: 37.4150, lng: 126.8980, address: "박달동", isWisu: true },
+    { name: "의왕 부곡/월암 경계 (수원 방면)", lat: 37.3080, lng: 126.9580, address: "월암동", isWisu: true },
+    { name: "의왕 청계/포일 경계 (성남/분당 방면)", lat: 37.3950, lng: 127.0120, address: "포일동", isWisu: true },
+    { name: "과천 주암/선바위 경계 (서울/강남 방면)", lat: 37.4520, lng: 127.0050, address: "과천동", isWisu: true }
   ];
   
   function getMasterHotspotsFromStorage() {
     let savedList = [];
-    const saved = safeGetStorage('sudataxi_master_hotspots');
+    const saved = localStorage.getItem('sudataxi_master_hotspots');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -1625,21 +686,17 @@
   async function checkIsInsideWisuRealtime(lat, lng) {
     return new Promise((resolve) => {
       if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
-        try {
-          const geocoder = new kakao.maps.services.Geocoder();
-          geocoder.coord2RegionCode(lng, lat, (result, status) => {
-            if (status === kakao.maps.services.Status.OK && result.length > 0) {
-              const region2 = result[0].region_2depth_name || "";
-              currentRegionName = `${result[0].region_1depth_name} ${region2}`.trim();
-              const isWisu = region2.includes("안양") || region2.includes("군포") || region2.includes("의왕") || region2.includes("과천");
-              resolve(isWisu);
-              return;
-            }
-            resolve(lat >= 37.34 && lat <= 37.445 && lng >= 126.90 && lng <= 127.015);
-          });
-        } catch(e) {
+        const geocoder = new kakao.maps.services.Geocoder();
+        geocoder.coord2RegionCode(lng, lat, (result, status) => {
+          if (status === kakao.maps.services.Status.OK && result.length > 0) {
+            const region2 = result[0].region_2depth_name || "";
+            currentRegionName = `${result[0].region_1depth_name} ${region2}`.trim();
+            const isWisu = region2.includes("안양") || region2.includes("군포") || region2.includes("의왕") || region2.includes("과천");
+            resolve(isWisu);
+            return;
+          }
           resolve(lat >= 37.34 && lat <= 37.445 && lng >= 126.90 && lng <= 127.015);
-        }
+        });
       } else {
         resolve(lat >= 37.34 && lat <= 37.445 && lng >= 126.90 && lng <= 127.015);
       }
@@ -1647,46 +704,11 @@
   }
   
   const MAJOR_HUBS = [
-    {
-      name: "인덕원역 환승 거점",
-      lat: 37.4048,
-      lng: 126.9767,
-      address: "인덕원역",
-      type: "subway",
-      isWisu: true
-    },
-    {
-      name: "평촌역 먹자골목 및 한림대병원",
-      lat: 37.3942,
-      lng: 126.9638,
-      address: "평촌역",
-      type: "subway_hospital",
-      isWisu: true
-    },
-    {
-      name: "범계역 로데오거리 및 학원가",
-      lat: 37.3898,
-      lng: 126.9508,
-      address: "범계역",
-      type: "subway_academy",
-      isWisu: true
-    },
-    {
-      name: "안양역 일번가 및 메디컬타운",
-      lat: 37.4013,
-      lng: 126.9222,
-      address: "안양역",
-      type: "subway_hospital",
-      isWisu: true
-    },
-    {
-      name: "산본역 중심상가 및 원광대병원",
-      lat: 37.3554,
-      lng: 126.9331,
-      address: "산본역",
-      type: "subway_hospital",
-      isWisu: true
-    }
+    { name: "인덕원역 환승 거점", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway", isWisu: true },
+    { name: "평촌역 먹자골목 및 한림대병원", lat: 37.3942, lng: 126.9638, address: "평촌역", type: "subway_hospital", isWisu: true },
+    { name: "범계역 로데오거리 및 학원가", lat: 37.3898, lng: 126.9508, address: "범계역", type: "subway_academy", isWisu: true },
+    { name: "안양역 일번가 및 메디컬타운", lat: 37.4013, lng: 126.9222, address: "안양역", type: "subway_hospital", isWisu: true },
+    { name: "산본역 중심상가 및 원광대병원", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway_hospital", isWisu: true }
   ];
   
   function getStraightDistanceKm(lat1, lon1, lat2, lon2) {
@@ -1758,59 +780,78 @@
     const day = String(now.getDate()).padStart(2, '0');
     const todayStr = `${year}${month}${day}`;
     
-    const fallbackHolidays = ["20260924", "20260926", "20261003", "20261009", "20261225"];
+    const fallbackHolidays = ["20260924", "20260925", "20260926", "20261003", "20261009", "20261225"];
     const isFallbackHol = fallbackHolidays.includes(todayStr);
     let fallbackName = isFallbackHol ? "공휴일" : null;
     updateHeaderTitle(now, isFallbackHol, fallbackName);
     return isFallbackHol;
   }
   
+  function updateHeaderTitle(nowDate, isHoliday, holidayName) {
+    const headerEl = document.getElementById('app-header-title');
+    if (!headerEl) return;
+    
+    const year = nowDate.getFullYear();
+    const month = nowDate.getMonth() + 1;
+    const date = nowDate.getDate();
+    const days = ['일', '월', '화', '수', '목', '금', '토'];
+    const dayStr = days[nowDate.getDay()];
+    const isWeekend = (nowDate.getDay() === 0 || nowDate.getDay() === 6);
+    
+    let badgeHtml = '';
+    if (isHoliday) {
+      badgeHtml = `<span class="holiday-badge">🔴 ${holidayName || '공휴일'}</span>`;
+    } else if (isWeekend) {
+      badgeHtml = `<span class="holiday-badge" style="background:#FF8C00;">🟡 휴일</span>`;
+    } else {
+      badgeHtml = `<span class="weekday-badge">🟢 평일</span>`;
+    }
+    
+    headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) <span class="build-ver-tag">${BUILD_VERSION}</span> ${badgeHtml}`;
+  }
+  
   async function fetchLiveKakaoHotspots(lat, lng) {
     return new Promise((resolve) => {
       if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) { resolve([]); return; }
-      try {
-        const ps = new kakao.maps.services.Places();
-        const options = { location: new kakao.maps.LatLng(lat, lng), radius: 3800, sort: kakao.maps.services.SortBy.DISTANCE };
-        const nowHour = new Date().getHours();
-        
-        // 06:00~09:59 아침 출근 피크 시간대는 지하철역(SW8) 우선 조회
-        let primaryCategory = (nowHour >= 6 && nowHour < 10) ? 'SW8' : ((nowHour >= 17 && nowHour < 24) ? 'FD6' : 'SW8');
+      const ps = new kakao.maps.services.Places();
+      const options = { location: new kakao.maps.LatLng(lat, lng), radius: 3500, sort: kakao.maps.services.SortBy.DISTANCE };
+      const nowHour = new Date().getHours();
+      
+      let primaryCategory = (nowHour >= 7 && nowHour < 12) ? 'SW8' : 'FD6';
 
-        ps.categorySearch(primaryCategory, (data, status) => {
-          let results = [];
-          if (status === kakao.maps.services.Status.OK && data && data.length > 0) {
-            results = data.slice(0, 15).map(place => ({
-              id: 'kakao_live_' + place.id,
-              name: place.place_name,
-              lat: parseFloat(place.y),
-              lng: parseFloat(place.x),
-              address: place.address_name || place.road_address_name,
-              type: (primaryCategory === 'SW8') ? 'subway' : 'nightlife',
-              isLiveKakao: true
-            }));
+      ps.categorySearch(primaryCategory, (data, status) => {
+        let results = [];
+        if (status === kakao.maps.services.Status.OK && data && data.length > 0) {
+          results = data.slice(0, 15).map(place => ({
+            id: 'kakao_live_' + place.id,
+            name: place.place_name,
+            lat: parseFloat(place.y),
+            lng: parseFloat(place.x),
+            address: place.address_name || place.road_address_name,
+            type: 'nightlife',
+            isLiveKakao: true
+          }));
+        }
+        
+        ps.categorySearch('SW8', (subData, subStatus) => {
+          if (subStatus === kakao.maps.services.Status.OK && subData) {
+            subData.slice(0, 5).forEach(p => {
+              if (!results.some(r => r.name === p.place_name)) {
+                results.push({
+                  id: 'kakao_live_subway_' + p.id,
+                  name: p.place_name,
+                  lat: parseFloat(p.y),
+                  lng: parseFloat(p.x),
+                  address: p.address_name || p.road_address_name,
+                  type: 'subway',
+                  isLiveKakao: true
+                });
+              }
+            });
           }
-          
-          const subCat = (primaryCategory === 'SW8') ? 'FD6' : 'SW8';
-          ps.categorySearch(subCat, (subData, subStatus) => {
-            if (subStatus === kakao.maps.services.Status.OK && subData) {
-              subData.slice(0, 8).forEach(p => {
-                if (!results.some(r => r.name === p.place_name)) {
-                  results.push({
-                    id: 'kakao_live_sub_' + p.id,
-                    name: p.place_name,
-                    lat: parseFloat(p.y),
-                    lng: parseFloat(p.x),
-                    address: p.address_name || p.road_address_name,
-                    type: (subCat === 'SW8') ? 'subway' : 'nightlife',
-                    isLiveKakao: true
-                  });
-                }
-              });
-            }
-            resolve(results);
-          }, options);
+          resolve(results);
         }, options);
-      } catch(e) { resolve([]); }
+      }, options);
     });
   }
   
@@ -1829,7 +870,7 @@
     const nowHour = new Date().getHours();
     
     let baseSpeedKmh = 28; 
-    if ((nowHour >= 6 && nowHour <= 9) || (nowHour >= 17 && nowHour <= 19)) {
+    if ((nowHour >= 7 && nowHour <= 9) || (nowHour >= 17 && nowHour <= 19)) {
       baseSpeedKmh = 18; 
     } else if (nowHour >= 22 || nowHour <= 5) {
       baseSpeedKmh = 38; 
@@ -1877,9 +918,9 @@
     const isShopping = name.includes('백화점') || name.includes('아울렛') || name.includes('몰') || name.includes('시장');
 
     if (nowHour >= 6 && nowHour < 10) {
-      if (isTransitHub) bonus += 35;
+      if (isTransitHub) bonus += 30;
       if (isHospital) bonus += 25;
-      if (isNightlife) bonus -= 10;
+      if (isNightlife) bonus -= 15;
     } else if (nowHour >= 10 && nowHour < 17) {
       if (isShopping) bonus += 25;
       if (isOffice || isHospital) bonus += 20;
@@ -1901,9 +942,8 @@
   }
   
   function calculateCallLogScore(candLat, candLng) {
-    let logs = [];
-    try { logs = JSON.parse(safeGetStorage('sudataxi_call_logs', '[]')); } catch(e) {}
-    if (!logs || logs.length === 0) return { bonus: 0, matched: false, count: 0, isTimeMatch: false };
+    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+    if (logs.length === 0) return { bonus: 0, matched: false, count: 0, isTimeMatch: false };
     
     const now = new Date();
     const currentHour = now.getHours();
@@ -1959,14 +999,11 @@
   }
   
   function getCustomHotspots() {
-    try {
-      return JSON.parse(safeGetStorage('sudataxi_custom_hotspots', '[]'));
-    } catch(e) { return []; }
+    return JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
   }
 
   function getCallLogsAsCandidates(currentLat, currentLng, nowHour) {
-    let logs = [];
-    try { logs = JSON.parse(safeGetStorage('sudataxi_call_logs', '[]')); } catch(e) {}
+    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     if (!logs || logs.length === 0) return [];
 
     const clusters = [];
@@ -2004,10 +1041,8 @@
   
   function setTab(tab) {
     activeTab = tab;
-    const btnMode1 = document.getElementById('btn-mode1');
-    const btnMode3 = document.getElementById('btn-mode3');
-    if (btnMode1) btnMode1.classList.toggle('active', tab === 1);
-    if (btnMode3) btnMode3.classList.toggle('active', tab === 3);
+    document.getElementById('btn-mode1').classList.toggle('active', tab === 1);
+    document.getElementById('btn-mode3').classList.toggle('active', tab === 3);
     
     const mainBtnGroup = document.getElementById('main-btn-group');
     const heatmapBox = document.getElementById('heatmap-container');
@@ -2017,7 +1052,7 @@
       if (mainBtnGroup) mainBtnGroup.style.display = 'none';
       if (heatmapBox) heatmapBox.style.display = 'flex';
       if (cardListEl) cardListEl.style.display = 'none';
-      setTimeout(() => { renderCallMapView(); }, 50);
+      renderCallMapView();
     } else {
       if (mainBtnGroup) mainBtnGroup.style.display = 'flex';
       if (heatmapBox) heatmapBox.style.display = 'none';
@@ -2028,51 +1063,26 @@
   
   function executeSearch() {
     const locText = document.getElementById('loc-text');
-    if (locText) locText.innerText = '📍 실시간 GPS 위치 수신 중...';
-
-    // 기본 위치 (안양 범계역 기준)
-    const fallbackPos = { lat: 37.3898, lng: 126.9508 };
-
+    if (locText) locText.innerText = '📍 실시간 GPS 수신 중...';
     if (!navigator.geolocation) {
-      currentPos = fallbackPos;
-      if (locText) locText.innerText = `📍 안양 범계 (기본 위치)`;
-      calculateAndRender();
+      if (locText) locText.innerText = `❌ GPS 미지원 기기입니다.`;
       return;
     }
-
-    let searchTimeout = setTimeout(() => {
-      if (!currentPos) {
-        currentPos = fallbackPos;
-        currentRegionName = "안양 범계";
-        document.body.className = "mode-1";
-        if (locText) locText.innerText = "📍 안양 범계 (GPS 수신 대기 기본위치)";
-        calculateAndRender();
-      }
-    }, 3500);
-
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
-        clearTimeout(searchTimeout);
         currentPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         const inWisu = await checkIsInsideWisuRealtime(currentPos.lat, currentPos.lng);
         
         currentMode = inWisu ? 1 : 2;
         document.body.className = `mode-${currentMode}`;
-        if (locText) locText.innerText = `📍 ${currentRegionName || currentPos.lat.toFixed(4)} (${inWisu ? '관내 반경 8.5km 추천' : '관외 복귀 경로 추천'})`;
+        if (locText) locText.innerText = `📍 ${currentRegionName || currentPos.lat.toFixed(4)} (${inWisu ? '관내 반경 5km 추천' : '관외 복귀 경로 추천'})`;
         if (activeTab !== 3) calculateAndRender();
       },
       (err) => {
-        clearTimeout(searchTimeout);
-        if (!currentPos) {
-          currentPos = fallbackPos;
-          currentRegionName = "안양 범계";
-          document.body.className = "mode-1";
-          if (locText) locText.innerText = "📍 안양 범계 (GPS 대기중)";
-          if (activeTab !== 3) calculateAndRender();
-        }
-        showToast("📍 위치 권한을 허용하시면 실시간 GPS 위치가 반영됩니다.");
+        if (locText) locText.innerText = `❌ GPS 수신 대기 (⟳ 클릭)`;
+        showToast("📍 위치 권한을 허용하신 후 ⟳ 새로고침을 누르세요.");
       },
-      { enableHighAccuracy: true, timeout: 6000, maximumAge: 3000 }
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 3000 }
     );
   }
   
@@ -2081,16 +1091,16 @@
       const nameA = item.name.replace(/\s+/g, '').substring(0, 3);
       const nameB = candName.replace(/\s+/g, '').substring(0, 3);
       const sameName = nameA === nameB || nameA.includes(nameB) || nameB.includes(nameA);
-      const closeDist = getStraightDistanceKm(item.lat, item.lng, candLat, candLng) < 0.5;
+      const closeDist = getStraightDistanceKm(item.lat, item.lng, candLat, candLng) < 0.6;
       return sameName || closeDist;
     });
   }
   
   async function calculateAndRender() {
-    if (!currentPos) currentPos = { lat: 37.3898, lng: 126.9508 };
+    if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
     const inWisu = (currentMode === 1);
-    if (logEl) logEl.innerText = `⚡ [스마트 ${inWisu ? '관내 반경 실시간' : '관외 복귀 경로'}] 연산 중...`;
+    if (logEl) logEl.innerText = `⚡ [스마트 ${inWisu ? '관내 반경 5km' : '관외 복귀 경로'}] 연산 중...`;
     
     let weatherData = { isRainOrSnow: false };
     try { weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng); } catch(e) {}
@@ -2120,6 +1130,7 @@
       referenceHubs = await Promise.all(hubPromises);
       referenceHubs.sort((a, b) => a.dist - b.dist);
     } else {
+      /* 모드 2: 최단 관내 복귀 경계점(🎯) 확정 */
       let minBoundaryDist = Infinity;
       let closestBp = null;
       for (let bp of WISU_BOUNDARY_POINTS) {
@@ -2144,7 +1155,7 @@
 
     let targetBearing = (!inWisu && targetBoundaryCardData) ? getBearing(currentPos.lat, currentPos.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng) : null;
 
-    let rawPool = [...userCallCandidates, ...liveKakaoHotspots, ...customHotspots, ...activeMasterHotspots, ...MAJOR_HUBS].filter(item => {
+    let rawPool = [...userCallCandidates, ...liveKakaoHotspots, ...customHotspots, ...activeMasterHotspots].filter(item => {
       if (!inWisu) {
         const isWisuHub = MAJOR_HUBS.some(h => item.name.includes(h.name.substring(0,2)));
         if (isWisuHub || item.isWisu === true) return false;
@@ -2152,11 +1163,12 @@
       return true;
     });
 
+    /* ⚡ 1차 삼각부등식 기하학적 사전 필터링 */
     let preFilteredCandidates = [];
     for (let item of rawPool) {
       let straightDist = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       
-      if (inWisu && straightDist > 8.5) continue;
+      if (inWisu && straightDist > 6.0) continue;
       
       if (!inWisu) {
         const maxAllowedSearch = directTargetDist <= 3.0 ? 6.0 : Math.min(22.0, directTargetDist + 5.0);
@@ -2195,8 +1207,9 @@
     }
 
     preFilteredCandidates.sort((a, b) => b.preliminaryScore - a.preliminaryScore);
-    const topCandidatesToRoute = preFilteredCandidates.slice(0, 12);
+    const topCandidatesToRoute = preFilteredCandidates.slice(0, 10);
 
+    /* ⚡ 2차 도로망 병렬 연산 */
     const routedCandidatesPromises = topCandidatesToRoute.map(async (item) => {
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
       return {
@@ -2211,13 +1224,16 @@
 
     let scoredPool = await Promise.all(routedCandidatesPromises);
 
+    /* 🎯 3차 고득점 후보 3개 엄선 */
     let selectedCandidates = [];
 
+    // 2km 이내 초근접 핫플 중 최고득점 1개 우선 포함
     const nearPool = scoredPool.filter(item => item.dist <= 2.0).sort((a, b) => b.score - a.score);
     if (nearPool.length > 0) {
       selectedCandidates.push(nearPool[0]);
     }
 
+    // 남은 핫플 중 고득점 순으로 3개까지 선택
     scoredPool.sort((a, b) => b.score - a.score || a.dist - b.dist);
     for (let candidate of scoredPool) {
       if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedCandidates)) {
@@ -2226,21 +1242,7 @@
       if (selectedCandidates.length === 3) break;
     }
 
-    if (inWisu && selectedCandidates.length < 3 && referenceHubs && referenceHubs.length > 0) {
-      for (let hub of referenceHubs) {
-        if (!isDuplicatePlace(hub.name, hub.lat, hub.lng, selectedCandidates)) {
-          selectedCandidates.push({
-            ...hub,
-            dist: hub.dist,
-            estimatedTimeMin: hub.estimatedTimeMin,
-            score: hub.score,
-            isNearStep1: hub.dist <= 2.0
-          });
-        }
-        if (selectedCandidates.length === 3) break;
-      }
-    }
-
+    /* 🛣️ 4차 TSP 순차 동선 최적화 (역주행 완전 차단) */
     if (selectedCandidates.length > 1) {
       const permutations = getPermutations(selectedCandidates);
       let bestPerm = selectedCandidates;
@@ -2280,7 +1282,7 @@
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
       logEl.innerText = selectedCandidates.length > 0 
-        ? `방금 · [${inWisu ? '관내 실시간 추천 Top 3' : '최단 순방향 동선 Top 3'}] 연산 완료`
+        ? `방금 · [${inWisu ? '반경 5km 실시간' : '최단 순방향 동선 Top 3'}] 연산 완료`
         : `방금 · 주변 검색 결과 없음`;
     }
     
@@ -2314,7 +1316,7 @@
           </div>
         </div>
         <div class="tag-group">
-          ${item.isNearStep1 ? '<span class="tag near">#초근접(2km)</span>' : `<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#${inWisu ? '추천핫플' : '경로핫플'}</span>`}
+          ${item.isNearStep1 ? '<span class="tag near">#초근접(2km)</span>' : `<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#${inWisu ? '반경5km' : '경로핫플'}</span>`}
           ${item.isUserCallLogCandidate ? '<span class="tag usercallhistory">🔥실제승차기록</span>' : ''}
           ${item.isLiveKakao ? '<span class="tag livekakaomap">⚡실시간상권</span>' : ''}
           ${item.isTimeMatch ? '<span class="tag timematch">🔥시간대콜</span>' : ''}
@@ -2381,7 +1383,7 @@
 
   function renderCallMapView() {
     if (typeof L === 'undefined') return;
-    const centerPos = currentPos || { lat: 37.3898, lng: 126.9508 };
+    const centerPos = currentPos || { lat: 37.4048, lng: 126.9767 };
     
     if (!callMapViewLeaflet) {
       callMapViewLeaflet = L.map('call-map-view', { zoomControl: false }).setView([centerPos.lat, centerPos.lng], 13);
@@ -2394,13 +1396,10 @@
     L.marker([centerPos.lat, centerPos.lng], {
       icon: L.divIcon({ html: '<div class="custom-map-marker current">📍</div>', className: '', iconSize: [24, 24], iconAnchor: [12, 12] })
     }).addTo(callMapViewLeaflet).bindPopup('<b>현재 위치</b>');
-    
-    let logs = [];
-    try { logs = JSON.parse(safeGetStorage('sudataxi_call_logs', '[]')); } catch(e) {}
+    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     const currentHour = new Date().getHours();
     if (logs.length === 0) {
-      const pLog = document.getElementById('pipeline-log');
-      if (pLog) pLog.innerText = '저장된 콜 기록이 없습니다.';
+      document.getElementById('pipeline-log').innerText = '저장된 콜 기록이 없습니다.';
       return;
     }
     let activeCount = 0;
@@ -2428,8 +1427,7 @@
         ${isActiveTime ? '<span style="color:#22C55E; font-weight:900;">🔥 집중지점</span>' : ''}
       `);
     });
-    const pLog = document.getElementById('pipeline-log');
-    if (pLog) pLog.innerText = `총 ${logs.length}건 중 현재시간(${currentHour}시) 콜 ${activeCount}건 집중`;
+    document.getElementById('pipeline-log').innerText = `총 ${logs.length}건 중 현재시간(${currentHour}시) 콜 ${activeCount}건 집중`;
   }
 
   async function openRouteMapModal() {
@@ -2467,9 +1465,7 @@
       if (allRoadCoords.length > 0) {
         L.polyline(allRoadCoords, { color: themeColor, weight: 5, opacity: 0.9, lineJoin: 'round', lineCap: 'round' }).addTo(leafletMap);
       }
-      if (markerCoords.length > 0) {
-        leafletMap.fitBounds(L.latLngBounds(markerCoords), { padding: [30, 30] });
-      }
+      leafletMap.fitBounds(L.latLngBounds(markerCoords), { padding: [30, 30] });
     }, 200);
   }
 
@@ -2485,10 +1481,9 @@
 
   function saveCurrentCallLocation() {
     const doSave = (pos) => {
-      let logs = [];
-      try { logs = JSON.parse(safeGetStorage('sudataxi_call_logs', '[]')); } catch(e) {}
+      let logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
       logs.push({ id: 'log_' + Date.now(), timestamp: new Date().toISOString(), lat: pos.lat, lng: pos.lng, mode: currentMode });
-      safeSetStorage('sudataxi_call_logs', JSON.stringify(logs));
+      localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
       updateCallLogStats();
       showToast('🎉 위치 저장 완료!');
       if (activeTab === 3) renderCallMapView();
@@ -2501,19 +1496,17 @@
     if (!currentPos) { showToast('먼저 위치 검색을 진행해 주세요.'); return; }
     const name = prompt('⭐ 나만의 콜 장소 이름:');
     if (!name || !name.trim()) return;
-    let custom = [];
-    try { custom = JSON.parse(safeGetStorage('sudataxi_custom_hotspots', '[]')); } catch(e) {}
+    let custom = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
     custom.push({ id: 'custom_' + Date.now(), name: name.trim(), lat: currentPos.lat, lng: currentPos.lng, type: 'subway', isCustom: true, address: name.trim() });
-    safeSetStorage('sudataxi_custom_hotspots', JSON.stringify(custom));
+    localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(custom));
     updateCustomHotspotUI();
     if (activeTab !== 3) calculateAndRender();
     showToast('등록 완료!');
   }
 
   function deleteCustomHotspot(id) {
-    let custom = [];
-    try { custom = JSON.parse(safeGetStorage('sudataxi_custom_hotspots', '[]')).filter(i => i.id !== id); } catch(e) {}
-    safeSetStorage('sudataxi_custom_hotspots', JSON.stringify(custom));
+    let custom = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]').filter(i => i.id !== id);
+    localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(custom));
     updateCustomHotspotUI();
     if (activeTab !== 3) calculateAndRender();
   }
@@ -2521,8 +1514,7 @@
   function updateCustomHotspotUI() {
     const list = document.getElementById('custom-hotspots-list');
     if (!list) return;
-    let custom = [];
-    try { custom = JSON.parse(safeGetStorage('sudataxi_custom_hotspots', '[]')); } catch(e) {}
+    const custom = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
     if (custom.length === 0) {
       list.innerHTML = '<div style="font-size:9px; color:#666; text-align:center;">등록된 장소가 없습니다.</div>';
       return;
@@ -2539,16 +1531,14 @@
   }
 
   function deleteCallLog(id, ts) {
-    let logs = [];
-    try { logs = JSON.parse(safeGetStorage('sudataxi_call_logs', '[]')).filter(i => i.id !== id && i.timestamp !== ts); } catch(e) {}
-    safeSetStorage('sudataxi_call_logs', JSON.stringify(logs));
+    let logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]').filter(i => i.id !== id && i.timestamp !== ts);
+    localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
     updateCallLogStats();
     if (activeTab === 3) renderCallMapView();
   }
 
   function updateCallLogStats() {
-    let logs = [];
-    try { logs = JSON.parse(safeGetStorage('sudataxi_call_logs', '[]')); } catch(e) {}
+    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     const countText = document.getElementById('log-count-text');
     if (countText) countText.innerText = `저장 기록: ${logs.length}개`;
     const list = document.getElementById('recent-logs-list');
@@ -2570,8 +1560,8 @@
 
   function exportCallLogs() {
     const data = { 
-      call_logs: JSON.parse(safeGetStorage('sudataxi_call_logs', '[]')), 
-      custom_hotspots: JSON.parse(safeGetStorage('sudataxi_custom_hotspots', '[]')),
+      call_logs: JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]'), 
+      custom_hotspots: JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]'),
       master_hotspots: getMasterHotspotsFromStorage()
     };
     const jsonStr = JSON.stringify(data, null, 2);
@@ -2605,15 +1595,15 @@
     reader.onload = function(evt) {
       try {
         const json = JSON.parse(evt.target.result);
-        let existingLogs = JSON.parse(safeGetStorage('sudataxi_call_logs', '[]'));
-        let existingHotspots = JSON.parse(safeGetStorage('sudataxi_custom_hotspots', '[]'));
+        let existingLogs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+        let existingHotspots = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
         
         let importedLogs = json.call_logs || (Array.isArray(json) ? json : []);
         let importedHotspots = json.custom_hotspots || [];
         let importedMaster = json.master_hotspots || json.hotspots || null;
         
         if (importedMaster && Array.isArray(importedMaster)) {
-          safeSetStorage('sudataxi_master_hotspots', JSON.stringify(importedMaster));
+          localStorage.setItem('sudataxi_master_hotspots', JSON.stringify(importedMaster));
         }
         let logMap = new Map();
         existingLogs.forEach(item => { logMap.set(item.id || `${item.timestamp}_${item.lat}_${item.lng}`, item); });
@@ -2623,8 +1613,8 @@
         existingHotspots.forEach(item => { hotspotMap.set(item.id || `${item.name}_${item.lat}_${item.lng}`, item); });
         importedHotspots.forEach(item => { hotspotMap.set(item.id || `${item.name}_${item.lat}_${item.lng}`, item); });
         
-        safeSetStorage('sudataxi_call_logs', JSON.stringify(Array.from(logMap.values())));
-        safeSetStorage('sudataxi_custom_hotspots', JSON.stringify(Array.from(hotspotMap.values())));
+        localStorage.setItem('sudataxi_call_logs', JSON.stringify(Array.from(logMap.values())));
+        localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(Array.from(hotspotMap.values())));
         updateCallLogStats();
         updateCustomHotspotUI();
         showToast(`🎉 복원/병합 완료! 마스터 DB 연동됨`);
@@ -2639,9 +1629,9 @@
   function checkHotspotUpdateReminder() {
     const LAST_UPDATE_KEY = 'suhda_last_hotspot_update';
     const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
-    const lastUpdate = safeGetStorage(LAST_UPDATE_KEY);
+    const lastUpdate = localStorage.getItem(LAST_UPDATE_KEY);
     const now = new Date().getTime();
-    if (!lastUpdate) { safeSetStorage(LAST_UPDATE_KEY, now); } 
+    if (!lastUpdate) { localStorage.setItem(LAST_UPDATE_KEY, now); } 
     else if (now - parseInt(lastUpdate, 10) > TWO_WEEKS_MS) {
       const banner = document.getElementById('hotspotUpdateBanner');
       if (banner) banner.style.display = 'block';
@@ -2650,73 +1640,56 @@
 
   function requestHotspotUpdate() {
     alert("최신 핫플 검색 후 말씀해 주시면 새 마스터 파일을 만들어 드립니다!");
-    safeSetStorage('suhda_last_hotspot_update', new Date().getTime());
+    localStorage.setItem('suhda_last_hotspot_update', new Date().getTime());
     document.getElementById('hotspotUpdateBanner').style.display = 'none';
   }
 
   function dismissBanner() { document.getElementById('hotspotUpdateBanner').style.display = 'none'; }
 
-  function setupEventListeners() {
-    document.getElementById('btn-mode1')?.addEventListener('click', () => setTab(1));
-    document.getElementById('btn-mode3')?.addEventListener('click', () => setTab(3));
+  window.addEventListener('DOMContentLoaded', () => {
+    initKakaoSdk();
+    checkIsPublicHolidayRealtime();
+    updateCallLogStats();
+    updateCustomHotspotUI();
+    checkHotspotUpdateReminder();
+    restoreTimerState();
     
-    document.getElementById('btn-refresh')?.addEventListener('click', () => executeSearch());
-    document.getElementById('btn-search')?.addEventListener('click', () => executeSearch());
-    document.getElementById('btn-show-map')?.addEventListener('click', () => openRouteMapModal());
-    document.getElementById('map-modal-close')?.addEventListener('click', () => closeRouteMapModal());
-    document.getElementById('map-modal')?.addEventListener('click', (e) => { if(e.target === e.currentTarget) closeRouteMapModal(); });
+    document.getElementById('btn-mode1').addEventListener('click', () => setTab(1));
+    document.getElementById('btn-mode3').addEventListener('click', () => setTab(3));
     
-    document.getElementById('btn-export')?.addEventListener('click', () => exportCallLogs());
-    document.getElementById('btn-import-open')?.addEventListener('click', () => document.getElementById('import-file-input')?.click());
-    document.getElementById('import-file-input')?.addEventListener('change', (e) => importCallLogs(e));
+    document.getElementById('btn-refresh').addEventListener('click', () => executeSearch());
+    document.getElementById('btn-search').addEventListener('click', () => executeSearch());
+    document.getElementById('btn-show-map').addEventListener('click', () => openRouteMapModal());
+    document.getElementById('map-modal-close').addEventListener('click', () => closeRouteMapModal());
+    document.getElementById('map-modal').addEventListener('click', (e) => { if(e.target === e.currentTarget) closeRouteMapModal(); });
     
-    document.getElementById('btn-add-custom')?.addEventListener('click', () => addCustomHotspotPrompt());
-    document.getElementById('btn-save-call')?.addEventListener('click', () => saveCurrentCallLocation());
+    document.getElementById('btn-export').addEventListener('click', () => exportCallLogs());
+    document.getElementById('btn-import-open').addEventListener('click', () => document.getElementById('import-file-input').click());
+    document.getElementById('import-file-input').addEventListener('change', (e) => importCallLogs(e));
     
-    document.getElementById('timer-btn-5m')?.addEventListener('click', () => setTimerPreset(5));
-    document.getElementById('timer-btn-10m')?.addEventListener('click', () => setTimerPreset(10));
-    document.getElementById('timer-display-btn')?.addEventListener('click', () => toggleTimer());
+    document.getElementById('btn-add-custom').addEventListener('click', () => addCustomHotspotPrompt());
+    document.getElementById('btn-save-call').addEventListener('click', () => saveCurrentCallLocation());
     
+    document.getElementById('timer-btn-5m').addEventListener('click', () => setTimerPreset(5));
+    document.getElementById('timer-btn-10m').addEventListener('click', () => setTimerPreset(10));
+    document.getElementById('timer-display-btn').addEventListener('click', () => toggleTimer());
+    
+    // 길게 누를 때 A안 (iOS 단축어 / 시스템 타이머 위임)
     const timerBtn = document.getElementById('timer-display-btn');
-    if (timerBtn) {
-      timerBtn.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
+    timerBtn.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      handleTimerLongPress();
+    });
+    let touchTimer = null;
+    timerBtn.addEventListener('touchstart', () => {
+      touchTimer = setTimeout(() => {
         handleTimerLongPress();
-      });
-      let touchTimer = null;
-      timerBtn.addEventListener('touchstart', () => {
-        touchTimer = setTimeout(() => {
-          handleTimerLongPress();
-        }, 800);
-      });
-      timerBtn.addEventListener('touchend', () => {
-        if (touchTimer) clearTimeout(touchTimer);
-      });
-    }
-  }
-
-  function initApp() {
-    if (isAppInitialized) return;
-    isAppInitialized = true;
-
-    try { updateHeaderTitle(new Date(), false, null); } catch(e) {}
-    try { initKakaoSdk(); } catch(e) {}
-    try { checkIsPublicHolidayRealtime(); } catch(e) {}
-    try { updateCallLogStats(); } catch(e) {}
-    try { updateCustomHotspotUI(); } catch(e) {}
-    try { checkHotspotUpdateReminder(); } catch(e) {}
-    try { restoreTimerState(); } catch(e) {}
-    try { setupEventListeners(); } catch(e) {}
-    try { executeSearch(); } catch(e) {}
-  }
-
-  if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    initApp();
-  } else {
-    document.addEventListener('DOMContentLoaded', initApp);
-    window.addEventListener('load', initApp);
-    try { updateHeaderTitle(new Date(), false, null); } catch(e) {}
-  }
+      }, 800);
+    });
+    timerBtn.addEventListener('touchend', () => {
+      if (touchTimer) clearTimeout(touchTimer);
+    });
+  });
 </script>
 </body>
 </html>
