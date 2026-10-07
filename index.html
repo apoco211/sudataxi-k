@@ -4,27 +4,27 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>수다택시 K</title>
-  
+
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
-  
+
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="수다택시K">
   <link rel="apple-touch-icon" href="./icon-180.png">
   <link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png">
   <link rel="apple-touch-icon" sizes="1024x1024" href="./icon-1024.png">
-  
+
   <link rel="shortcut icon" href="./icon-192.png">
   <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
-  
+
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  
+
   <!-- 카카오 공식 JS SDK 및 지도/장소 API 연동 -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
   <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=7ee80d17f027cf99b9634ae13731a6a9&libraries=services"></script>
-  
+
   <style>
     :root {
       --theme-accent: #FFC800;
@@ -312,7 +312,7 @@
       <span class="backup-count" id="log-count-text">저장 기록: 0개</span>
     </div>
     <div class="backup-btn-group">
-      <button class="backup-btn" id="btn-export">📤 백업</button>
+      <button class="backup-btn" id="btn-export">📦 백업</button>
       <button class="backup-btn" id="btn-import-open">📥 복원</button>
       <input type="file" id="import-file-input" accept=".json,application/json" style="display: none;">
     </div>
@@ -345,12 +345,13 @@
     </details>
   
     <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;" open>
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v5.9.2 상세 누적 업데이트 히스토리 (터치)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v5.9.3 상세 누적 업데이트 히스토리 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v5.9.2 (2026.10.07) - 카플레이(CarPlay) 연동 대기 알람 고도화</strong><br>
-          • 🚗 <strong>카플레이 Now Playing 오디오 트릭</strong>: 타이머 대기 중 무음 오디오를 유지하여 차량 스피커 및 카플레이 화면에 대기 상태 유지.<br>
-          • ⏱️ <strong>단축어 시스템 타이머 연동</strong>: 대기 버튼을 길게 누르거나 완료 시 `shortcuts://`를 통해 iOS 시스템 타이머 및 차량 배너 알람 연동.
+          <strong style="color: #4ADE80;">v5.9.3 (2026.10.08) - 의왕 관내 판정 보강 & 5km 알고리즘 고도화 & JSON 복원 다중 호환</strong><br>
+          • 📍 <strong>의왕/군포 남부 위수 판정 완벽 보정</strong>: 의왕 부곡/월암/초평 등 남부 지역(위도 37.300 이상) 카카오 역지오코더 다중 검증 및 백업 좌표 범위 확정.<br>
+          • 🎯 <strong>관내 반경 5.0km 복원 및 실질 알고리즘 고도화</strong>: 관내 반경 5.0km 엄격 유지 + 시간대별 카테고리 가중치(06~09시 출근거점 `SW8` 우선) 및 승차히스토리 시각 매칭 고도화로 알짜배기 Top 3 추천.<br>
+          • 📥 <strong>구버전 백업 JSON 복원 완벽 지원</strong>: `call_logs`, `logs`, `sudataxi_logs`, `hotplaces` 등 다양한 포맷 자동 판별 및 병합.
         </div>
       </div>
     </details>
@@ -381,7 +382,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v5.9.2";
+  const BUILD_VERSION = "v5.9.3";
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -425,7 +426,7 @@
     t.style.display = 'block';
     setTimeout(() => { t.style.display = 'none'; }, 2200);
   }
-  
+
   function initOrResumeAudioContext() {
     try {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -433,7 +434,6 @@
     } catch(e) {}
   }
   
-  // 카플레이 Now Playing 오디오 트릭 (B안)
   function startCarPlayAudioKeepAlive(title = "수다택시 K - 5분 대기중") {
     try {
       if (!silentAudioElement) {
@@ -441,7 +441,7 @@
         silentAudioElement.loop = true;
       }
       silentAudioElement.play().catch(e => {});
-
+  
       if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: title,
@@ -490,7 +490,6 @@
       });
     } catch(e) {}
     
-    // 카플레이 Now Playing 제목 변경 알림
     if ('mediaSession' in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({
         title: '⏱️ 00:00 이동 추천!',
@@ -503,7 +502,7 @@
     if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 300]);
     triggerSystemNotification();
   }
-  
+
   function saveTimerState() {
     const state = {
       presetMin: timerPresetMin,
@@ -513,7 +512,7 @@
     };
     localStorage.setItem('sudataxi_timer_state', JSON.stringify(state));
   }
-
+  
   function restoreTimerState() {
     const saved = localStorage.getItem('sudataxi_timer_state');
     if (!saved) return;
@@ -583,9 +582,7 @@
     }
   }
   
-  // 길게 누를 때 A안 (iOS 단축어 / 시스템 타이머 위임)
   function handleTimerLongPress() {
-    const sec = timerPresetMin * 60;
     showToast(`⏱️ iOS 시스템 타이머(${timerPresetMin}분) 위임 실행`);
     try {
       window.location.href = `shortcuts://run-shortcut?name=수다택시${timerPresetMin}분`;
@@ -625,7 +622,7 @@
       }
     }, 1000);
   }
-  
+
   const DEFAULT_MASTER_HOTSPOTS = [
     { "id": "hs_suwon_1", "name": "성대역 먹자골목 및 상권", "lat": 37.2995, "lng": 126.9710, "address": "율전동", "type": "subway_nightlife", "region": "suwon", "isWisu": false },
     { "id": "hs_suwon_2", "name": "화서역 먹거리촌 및 상권", "lat": 37.2838, "lng": 126.9898, "address": "화서동", "type": "subway_nightlife", "region": "suwon", "isWisu": false },
@@ -659,7 +656,7 @@
     { "id": "hs_g_anyang_5", "name": "산본역 중심상가 및 원광대병원", "lat": 37.3554, "lng": 126.9331, "address": "산본역", "type": "subway_hospital", "region": "gunpo", "isWisu": true },
     { "id": "hs_s_01", "name": "강남역 상업지구 및 병원거리", "lat": 37.4981, "lng": 127.0276, "address": "강남역", "type": "subway_hospital", "region": "seoul", "isWisu": false }
   ];
-  
+
   const WISU_BOUNDARY_POINTS = [
     { name: "군포 대야미/부곡 경계 (안산 방면)", lat: 37.3320, lng: 126.9150, address: "대야미동", isWisu: true },
     { name: "안양 박달/석수 경계 (인천/시흥/광명 방면)", lat: 37.4150, lng: 126.8980, address: "박달동", isWisu: true },
@@ -667,7 +664,7 @@
     { name: "의왕 청계/포일 경계 (성남/분당 방면)", lat: 37.3950, lng: 127.0120, address: "포일동", isWisu: true },
     { name: "과천 주암/선바위 경계 (서울/강남 방면)", lat: 37.4520, lng: 127.0050, address: "과천동", isWisu: true }
   ];
-  
+
   function getMasterHotspotsFromStorage() {
     let savedList = [];
     const saved = localStorage.getItem('sudataxi_master_hotspots');
@@ -682,27 +679,42 @@
     savedList.forEach(item => mergedMap.set(item.id || item.name, item));
     return Array.from(mergedMap.values());
   }
-  
+
   async function checkIsInsideWisuRealtime(lat, lng) {
     return new Promise((resolve) => {
+      // 1차: 카카오 역지오코더 실시간 확인 (다중 매칭)
       if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
         const geocoder = new kakao.maps.services.Geocoder();
         geocoder.coord2RegionCode(lng, lat, (result, status) => {
-          if (status === kakao.maps.services.Status.OK && result.length > 0) {
-            const region2 = result[0].region_2depth_name || "";
-            currentRegionName = `${result[0].region_1depth_name} ${region2}`.trim();
-            const isWisu = region2.includes("안양") || region2.includes("군포") || region2.includes("의왕") || region2.includes("과천");
-            resolve(isWisu);
-            return;
+          if (status === kakao.maps.services.Status.OK && result && result.length > 0) {
+            let isWisu = result.some(r => {
+              const r2 = r.region_2depth_name || "";
+              const r1 = r.region_1depth_name || "";
+              return r2.includes("안양") || r2.includes("군포") || r2.includes("의왕") || r2.includes("과천") ||
+                     r1.includes("안양") || r1.includes("군포") || r1.includes("의왕") || r1.includes("과천");
+            });
+
+            if (result[0]) {
+              currentRegionName = `${result[0].region_1depth_name} ${result[0].region_2depth_name || ''}`.trim();
+            }
+
+            if (isWisu) {
+              resolve(true);
+              return;
+            }
           }
-          resolve(lat >= 37.34 && lat <= 37.445 && lng >= 126.90 && lng <= 127.015);
+          // 카카오 역지오코딩 미포함/실패시 백업 좌표 박스 검증 (의왕 남부 부곡/월암 lat 37.300 이상 완벽 포함)
+          const fallbackIsWisu = (lat >= 37.300 && lat <= 37.450 && lng >= 126.890 && lng <= 127.020);
+          resolve(fallbackIsWisu);
         });
       } else {
-        resolve(lat >= 37.34 && lat <= 37.445 && lng >= 126.90 && lng <= 127.015);
+        // 카카오 SDK 미로드시 백업 좌표 박스 검증
+        const fallbackIsWisu = (lat >= 37.300 && lat <= 37.450 && lng >= 126.890 && lng <= 127.020);
+        resolve(fallbackIsWisu);
       }
     });
   }
-  
+
   const MAJOR_HUBS = [
     { name: "인덕원역 환승 거점", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway", isWisu: true },
     { name: "평촌역 먹자골목 및 한림대병원", lat: 37.3942, lng: 126.9638, address: "평촌역", type: "subway_hospital", isWisu: true },
@@ -710,7 +722,7 @@
     { name: "안양역 일번가 및 메디컬타운", lat: 37.4013, lng: 126.9222, address: "안양역", type: "subway_hospital", isWisu: true },
     { name: "산본역 중심상가 및 원광대병원", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway_hospital", isWisu: true }
   ];
-  
+
   function getStraightDistanceKm(lat1, lon1, lat2, lon2) {
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -747,19 +759,19 @@
     }
     return result;
   }
-  
+
   function getScoreLevelBadge(score) {
     if (score >= 70) return '<span class="level-badge level-high">🔥 높음</span>';
     if (score >= 40) return '<span class="level-badge level-mid">⚡ 보통</span>';
     return '<span class="level-badge level-low">💧 낮음</span>';
   }
-  
+
   function formatMMSS(seconds) {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${String(m).padStart(2,'0')}:${String(s).padStart(2, '0')}`;
   }
-  
+
   async function fetchRealtimeWeather(lat, lng) {
     try {
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=precipitation,rain,showers,snowfall&timezone=Asia%2FTokyo`;
@@ -772,7 +784,7 @@
       return { isRainOrSnow: false, precip: 0 };
     }
   }
-  
+
   async function checkIsPublicHolidayRealtime() {
     const now = new Date();
     const year = now.getFullYear();
@@ -786,7 +798,7 @@
     updateHeaderTitle(now, isFallbackHol, fallbackName);
     return isFallbackHol;
   }
-  
+
   function updateHeaderTitle(nowDate, isHoliday, holidayName) {
     const headerEl = document.getElementById('app-header-title');
     if (!headerEl) return;
@@ -809,15 +821,16 @@
     
     headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) <span class="build-ver-tag">${BUILD_VERSION}</span> ${badgeHtml}`;
   }
-  
+
   async function fetchLiveKakaoHotspots(lat, lng) {
     return new Promise((resolve) => {
       if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) { resolve([]); return; }
       const ps = new kakao.maps.services.Places();
-      const options = { location: new kakao.maps.LatLng(lat, lng), radius: 3500, sort: kakao.maps.services.SortBy.DISTANCE };
+      const options = { location: new kakao.maps.LatLng(lat, lng), radius: 4500, sort: kakao.maps.services.SortBy.DISTANCE };
       const nowHour = new Date().getHours();
       
-      let primaryCategory = (nowHour >= 7 && nowHour < 12) ? 'SW8' : 'FD6';
+      // 06시~09시59분 출근 피크 시 지하철역/환승거점(SW8) 최우선 조회
+      let primaryCategory = (nowHour >= 6 && nowHour < 10) ? 'SW8' : 'FD6';
 
       ps.categorySearch(primaryCategory, (data, status) => {
         let results = [];
@@ -828,22 +841,23 @@
             lat: parseFloat(place.y),
             lng: parseFloat(place.x),
             address: place.address_name || place.road_address_name,
-            type: 'nightlife',
+            type: (primaryCategory === 'SW8') ? 'subway' : 'nightlife',
             isLiveKakao: true
           }));
         }
         
-        ps.categorySearch('SW8', (subData, subStatus) => {
+        let subCategory = (primaryCategory === 'SW8') ? 'FD6' : 'SW8';
+        ps.categorySearch(subCategory, (subData, subStatus) => {
           if (subStatus === kakao.maps.services.Status.OK && subData) {
             subData.slice(0, 5).forEach(p => {
               if (!results.some(r => r.name === p.place_name)) {
                 results.push({
-                  id: 'kakao_live_subway_' + p.id,
+                  id: 'kakao_live_sub_' + p.id,
                   name: p.place_name,
                   lat: parseFloat(p.y),
                   lng: parseFloat(p.x),
                   address: p.address_name || p.road_address_name,
-                  type: 'subway',
+                  type: (subCategory === 'SW8') ? 'subway' : 'nightlife',
                   isLiveKakao: true
                 });
               }
@@ -854,7 +868,7 @@
       }, options);
     });
   }
-  
+
   function parseDateSafely(dateStr) {
     if (!dateStr) return new Date(0);
     if (dateStr instanceof Date) return dateStr;
@@ -864,7 +878,7 @@
     if (!isNaN(d.getTime())) return d;
     return new Date(0);
   }
-  
+
   async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const directDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng);
     const nowHour = new Date().getHours();
@@ -907,7 +921,7 @@
       geometryCoords: [[fromLat, fromLng], [toLat, toLng]]
     };
   }
-  
+
   async function getDynamicTimeCategoryBonus(itemType, itemName, nowHour) {
     let bonus = 0;
     const name = itemName || '';
@@ -940,7 +954,7 @@
 
     return bonus;
   }
-  
+
   function calculateCallLogScore(candLat, candLng) {
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     if (logs.length === 0) return { bonus: 0, matched: false, count: 0, isTimeMatch: false };
@@ -959,7 +973,7 @@
       const dist = getStraightDistanceKm(candLat, candLng, logLat, logLng);
       if (dist <= 0.4) {
         matchCount++;
-        const logDate = parseDateSafely(log.timestamp);
+        const logDate = parseDateSafely(log.timestamp || log.time);
         const logHour = logDate.getHours();
         let hourDiff = Math.abs(currentHour - logHour);
         if (hourDiff > 12) hourDiff = 24 - hourDiff;
@@ -974,7 +988,7 @@
     });
     return { bonus: maxBonus, matched: matchCount > 0, count: matchCount, isTimeMatch };
   }
-  
+
   async function calculatePureSpotScore(item, weatherData, nowHour) {
     let score = 0;
     
@@ -997,7 +1011,7 @@
       isTimeMatch: logResult.isTimeMatch || (item.isUserCallLogCandidate && item.isTimeMatch)
     };
   }
-  
+
   function getCustomHotspots() {
     return JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
   }
@@ -1012,7 +1026,7 @@
       const logLng = Number(log.lng);
       if (isNaN(logLat) || isNaN(logLng)) return;
 
-      const logDate = parseDateSafely(log.timestamp);
+      const logDate = parseDateSafely(log.timestamp || log.time);
       const logHour = logDate.getHours();
       let hourDiff = Math.abs(nowHour - logHour);
       if (hourDiff > 12) hourDiff = 24 - hourDiff;
@@ -1025,7 +1039,7 @@
       } else {
         clusters.push({
           id: 'user_call_log_' + (log.id || Math.random()),
-          name: `📍 실제탑승지점 (${log.lat.toFixed(3)}, ${log.lng.toFixed(3)})`,
+          name: `📍 실제탑승지점 (${logLat.toFixed(3)}, ${logLng.toFixed(3)})`,
           lat: logLat,
           lng: logLng,
           type: 'subway_nightlife',
@@ -1038,7 +1052,7 @@
 
     return clusters;
   }
-  
+
   function setTab(tab) {
     activeTab = tab;
     document.getElementById('btn-mode1').classList.toggle('active', tab === 1);
@@ -1060,7 +1074,7 @@
       executeSearch();
     }
   }
-  
+
   function executeSearch() {
     const locText = document.getElementById('loc-text');
     if (locText) locText.innerText = '📍 실시간 GPS 수신 중...';
@@ -1085,7 +1099,7 @@
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 3000 }
     );
   }
-  
+
   function isDuplicatePlace(candName, candLat, candLng, existingList) {
     return existingList.some(item => {
       const nameA = item.name.replace(/\s+/g, '').substring(0, 3);
@@ -1095,12 +1109,12 @@
       return sameName || closeDist;
     });
   }
-  
+
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
     const inWisu = (currentMode === 1);
-    if (logEl) logEl.innerText = `⚡ [스마트 ${inWisu ? '관내 반경 5km' : '관외 복귀 경로'}] 연산 중...`;
+    if (logEl) logEl.innerText = `⚡ [스마트 ${inWisu ? '관내 반경 5km 추천' : '관외 복귀 경로'}] 연산 중...`;
     
     let weatherData = { isRainOrSnow: false };
     try { weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng); } catch(e) {}
@@ -1163,12 +1177,13 @@
       return true;
     });
 
-    /* ⚡ 1차 삼각부등식 기하학적 사전 필터링 */
+    /* ⚡ 1차 기하학적 사전 필터링 (관내 5.0km 엄격 제한 유지) */
     let preFilteredCandidates = [];
     for (let item of rawPool) {
       let straightDist = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
       
-      if (inWisu && straightDist > 6.0) continue;
+      // 관내 영업 모드일 때 반경 5.0km 제한
+      if (inWisu && straightDist > 5.0) continue;
       
       if (!inWisu) {
         const maxAllowedSearch = directTargetDist <= 3.0 ? 6.0 : Math.min(22.0, directTargetDist + 5.0);
@@ -1178,6 +1193,7 @@
       let pureRes = await calculatePureSpotScore(item, weatherData, nowHour);
       let preliminaryScore = pureRes.score;
 
+      // 2km 이내 초근접 가산점
       if (straightDist <= 2.0) {
         preliminaryScore += 40;
       }
@@ -1224,7 +1240,7 @@
 
     let scoredPool = await Promise.all(routedCandidatesPromises);
 
-    /* 🎯 3차 고득점 후보 3개 엄선 */
+    /* 🎯 3차 고득점 후보 3개 엄선 (Top 3 보장) */
     let selectedCandidates = [];
 
     // 2km 이내 초근접 핫플 중 최고득점 1개 우선 포함
@@ -1282,13 +1298,13 @@
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
       logEl.innerText = selectedCandidates.length > 0 
-        ? `방금 · [${inWisu ? '반경 5km 실시간' : '최단 순방향 동선 Top 3'}] 연산 완료`
+        ? `방금 · [${inWisu ? '관내 5km 실시간' : '최단 순방향 동선 Top 3'}] 연산 완료`
         : `방금 · 주변 검색 결과 없음`;
     }
     
     renderCards(selectedCandidates, referenceHubs, targetBoundaryCardData);
   }
-  
+
   function renderCards(routeCards, referenceHubs, targetBoundaryCardData) {
     const listEl = document.getElementById('card-list');
     if (!listEl) return;
@@ -1316,7 +1332,7 @@
           </div>
         </div>
         <div class="tag-group">
-          ${item.isNearStep1 ? '<span class="tag near">#초근접(2km)</span>' : `<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#${inWisu ? '반경5km' : '경로핫플'}</span>`}
+          ${item.isNearStep1 ? '<span class="tag near">#초근접(2km)</span>' : `<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#${inWisu ? '관내5km' : '경로핫플'}</span>`}
           ${item.isUserCallLogCandidate ? '<span class="tag usercallhistory">🔥실제승차기록</span>' : ''}
           ${item.isLiveKakao ? '<span class="tag livekakaomap">⚡실시간상권</span>' : ''}
           ${item.isTimeMatch ? '<span class="tag timematch">🔥시간대콜</span>' : ''}
@@ -1407,7 +1423,7 @@
       const logLat = Number(log.lat);
       const logLng = Number(log.lng);
       if (isNaN(logLat) || isNaN(logLng)) return;
-      const logDate = parseDateSafely(log.timestamp);
+      const logDate = parseDateSafely(log.timestamp || log.time);
       const logHour = logDate.getHours();
       let hourDiff = Math.abs(currentHour - logHour);
       if (hourDiff > 12) hourDiff = 24 - hourDiff;
@@ -1549,8 +1565,8 @@
     }
     list.innerHTML = logs.slice(-3).reverse().map(item => `
       <div class="recent-log-item">
-        <span class="recent-log-time">📍 ${new Date(item.timestamp).toLocaleTimeString()} [M${item.mode || 1}]</span>
-        <button class="delete-log-item-btn" data-id="${item.id}" data-ts="${item.timestamp}" style="background:#2E1815; color:#FF5555; border:1px solid #4A2020; border-radius:4px; padding:2px 6px; font-size:9px; font-weight:700; cursor:pointer;">삭제</button>
+        <span class="recent-log-time">📍 ${new Date(item.timestamp || item.time).toLocaleTimeString()} [M${item.mode || 1}]</span>
+        <button class="delete-log-item-btn" data-id="${item.id}" data-ts="${item.timestamp || item.time}" style="background:#2E1815; color:#FF5555; border:1px solid #4A2020; border-radius:4px; padding:2px 6px; font-size:9px; font-weight:700; cursor:pointer;">삭제</button>
       </div>
     `).join('');
     document.querySelectorAll('.delete-log-item-btn').forEach(btn => {
@@ -1598,20 +1614,38 @@
         let existingLogs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
         let existingHotspots = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
         
-        let importedLogs = json.call_logs || (Array.isArray(json) ? json : []);
-        let importedHotspots = json.custom_hotspots || [];
-        let importedMaster = json.master_hotspots || json.hotspots || null;
+        // 다중 백업 포맷 호환: call_logs, logs, sudataxi_logs, callLogs, history, 단일 배열 지원
+        let importedLogs = json.call_logs || json.logs || json.sudataxi_logs || json.callLogs || json.history || (Array.isArray(json) ? json : []);
+        let importedHotspots = json.custom_hotspots || json.hotplaces || json.sudataxi_my_hotplaces || json.myHotplaces || json.customHotspots || [];
+        let importedMaster = json.master_hotspots || json.masterHotspots || json.hotspots || null;
         
-        if (importedMaster && Array.isArray(importedMaster)) {
+        if (importedMaster && Array.isArray(importedMaster) && importedMaster.length > 0) {
           localStorage.setItem('sudataxi_master_hotspots', JSON.stringify(importedMaster));
         }
+
         let logMap = new Map();
-        existingLogs.forEach(item => { logMap.set(item.id || `${item.timestamp}_${item.lat}_${item.lng}`, item); });
-        importedLogs.forEach(item => { logMap.set(item.id || `${item.timestamp}_${item.lat}_${item.lng}`, item); });
+        existingLogs.forEach(item => {
+          const key = item.id || `${item.timestamp || item.time}_${item.lat}_${item.lng}`;
+          logMap.set(key, item);
+        });
+        if (Array.isArray(importedLogs)) {
+          importedLogs.forEach(item => {
+            const key = item.id || `${item.timestamp || item.time}_${item.lat}_${item.lng}`;
+            logMap.set(key, item);
+          });
+        }
         
         let hotspotMap = new Map();
-        existingHotspots.forEach(item => { hotspotMap.set(item.id || `${item.name}_${item.lat}_${item.lng}`, item); });
-        importedHotspots.forEach(item => { hotspotMap.set(item.id || `${item.name}_${item.lat}_${item.lng}`, item); });
+        existingHotspots.forEach(item => {
+          const key = item.id || `${item.name}_${item.lat}_${item.lng}`;
+          hotspotMap.set(key, item);
+        });
+        if (Array.isArray(importedHotspots)) {
+          importedHotspots.forEach(item => {
+            const key = item.id || `${item.name}_${item.lat}_${item.lng}`;
+            hotspotMap.set(key, item);
+          });
+        }
         
         localStorage.setItem('sudataxi_call_logs', JSON.stringify(Array.from(logMap.values())));
         localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(Array.from(hotspotMap.values())));
@@ -1639,7 +1673,7 @@
   }
 
   function requestHotspotUpdate() {
-    alert("최신 핫플 검색 후 말씀해 주시면 새 마스터 파일을 만들어 드립니다!");
+    showToast("최신 핫플 검색 후 말씀해 주시면 새 마스터 파일을 만들어 드립니다!");
     localStorage.setItem('suhda_last_hotspot_update', new Date().getTime());
     document.getElementById('hotspotUpdateBanner').style.display = 'none';
   }
@@ -1674,7 +1708,6 @@
     document.getElementById('timer-btn-10m').addEventListener('click', () => setTimerPreset(10));
     document.getElementById('timer-display-btn').addEventListener('click', () => toggleTimer());
     
-    // 길게 누를 때 A안 (iOS 단축어 / 시스템 타이머 위임)
     const timerBtn = document.getElementById('timer-display-btn');
     timerBtn.addEventListener('contextmenu', (e) => {
       e.preventDefault();
@@ -1689,6 +1722,8 @@
     timerBtn.addEventListener('touchend', () => {
       if (touchTimer) clearTimeout(touchTimer);
     });
+
+    executeSearch();
   });
 </script>
 </body>
