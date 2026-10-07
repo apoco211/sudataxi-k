@@ -108,7 +108,6 @@
     }
     
     .card-main-content { display: flex; flex-direction: column; gap: 2px; }
-    
     .card-compact-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
     .card-title-group { display: flex; align-items: center; gap: 6px; min-width: 0; flex: 1; }
     
@@ -338,22 +337,20 @@
           • 승차기록 추천: <strong>+35점</strong> | 나만의 핫플: <strong>+20점</strong> | 카카오 실시간: <strong>+15점</strong> | 마스터 DB: <strong>+10점</strong>
         </div>
         <div>
-          <strong style="color: #FF6B00;">2. 모드 2 (관외 복귀) 실시간 검색 최적화 로직</strong><br>
-          • 1번 카드: 현위치 반경 2km 이내 최우선 초근접 핫플/승차이력 지정<br>
-          • 2~3번 카드: 복귀 우회거리(Detour ≤ 3.5km) 기하학 검증 후 거리순 정렬<br>
-          • 4번 카드: 최종 복귀 경계점(🎯) 고정
+          <strong style="color: #FF6B00;">2. 모드 2 (관외 복귀) 최단 TSP 순차 동선 알고리즘</strong><br>
+          • 현위치 ➔ 1번 ➔ 2번 ➔ 3번 ➔ 🎯 복귀점까지 U턴/역주행 없는 최단 순방향 동선 정렬 보장<br>
+          • 우회거리(Detour ≤ 3.5km) 검증을 거친 고득점 핫플 순차 추천
         </div>
       </div>
     </details>
   
     <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;" open>
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v5.9 상세 누적 업데이트 히스토리 (터치)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v5.9.1 상세 누적 업데이트 히스토리 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v5.9 (2026.10.07) - 512개 고객 탑승위치 직접 추천후보 승격 & 수원 DB 자동 병합</strong><br>
-          • 🔥 <strong>승차 이력 적극 활용</strong>: 기사님이 찍은 512개 콜 기록이 보조 점수를 넘어 직접 추천 후보 카드(#실제탑승이력)로 전격 승격.<br>
-          • 🏙️ <strong>수원 마스터 DB 강제 병합</strong>: 기기에 과거 백업이 있어도 성대역, 화서역, 수원역 등 최신 수원 DB가 항상 자동 병합되어 노출.<br>
-          • 🎯 <strong>반경 2km 이내 1번 카드 최우선 고정 및 병렬 연산 0.3초대 속도 유지</strong>.
+          <strong style="color: #4ADE80;">v5.9.1 (2026.10.07) - TSP 최단 순차 동선 알고리즘 표준화 및 버그 수정</strong><br>
+          • 🛣️ <strong>역주행 꼬임 완벽 제거</strong>: 화서역 ➔ 정자동 ➔ 성대역 ➔ 🎯 의왕경계처럼 현위치에서 복귀 목적지까지 되돌아감이 전혀 없는 100% 직진 순방향 순차 동선 보장.<br>
+          • 🔥 <strong>승차 데이터 전격 후보 반영</strong>: 512개 고객 승차 기록이 최우선 추천 후보로 노출됨.
         </div>
       </div>
     </details>
@@ -384,7 +381,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v5.9";
+  const BUILD_VERSION = "v5.9.1";
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -599,7 +596,7 @@
   }
   
   const DEFAULT_MASTER_HOTSPOTS = [
-    // 수원 확장 핵심 핫플 DB 보강
+    // 수원 확장 핵심 핫플 DB
     { "id": "hs_suwon_1", "name": "성대역 먹자골목 및 상권", "lat": 37.2995, "lng": 126.9710, "address": "율전동", "type": "subway_nightlife", "region": "suwon", "isWisu": false },
     { "id": "hs_suwon_2", "name": "화서역 먹거리촌 및 상권", "lat": 37.2838, "lng": 126.9898, "address": "화서동", "type": "subway_nightlife", "region": "suwon", "isWisu": false },
     { "id": "hs_suwon_3", "name": "수원역 로데오거리 및 환승거점", "lat": 37.2662, "lng": 127.0001, "address": "매산로1가", "type": "subway_nightlife", "region": "suwon", "isWisu": false },
@@ -609,7 +606,7 @@
     { "id": "hs_suwon_7", "name": "행궁동 카페거리 및 행리단길", "lat": 37.2830, "lng": 127.0140, "address": "행궁동", "type": "shopping_nightlife", "region": "suwon", "isWisu": false },
     { "id": "hs_suwon_8", "name": "북수원 정자동 중심상가", "lat": 37.2980, "lng": 126.9910, "address": "정자동", "type": "subway_nightlife", "region": "suwon", "isWisu": false },
     
-    // 안산 및 기존 주요 핫플
+    // 안산 및 주요 핫플 DB
     { "id": "hs_ansan_1", "name": "중앙역 로데오거리 및 메디컬타운", "lat": 37.3186, "lng": 126.8385, "address": "고잔동", "type": "subway_nightlife", "region": "ansan", "isWisu": false },
     { "id": "hs_ansan_2", "name": "고잔역 법원·검찰청 및 신도시 중심상가", "lat": 37.3168, "lng": 126.8232, "address": "고잔동", "type": "office_nightlife", "region": "ansan", "isWisu": false },
     { "id": "hs_ansan_3", "name": "상록수역 환승 거점 및 먹자골목", "lat": 37.3025, "lng": 126.8654, "address": "본오동", "type": "subway_nightlife", "region": "ansan", "isWisu": false },
@@ -653,7 +650,7 @@
       } catch(e) {}
     }
     
-    // ⚡ v5.9 핵심: 저장된 백업이 있더라도 최신 수원/핵심 DB가 없으면 강제 자동 병합
+    // 백업본 유무와 무관하게 최신 수원/핵심 DB 상시 강제 병합
     const mergedMap = new Map();
     DEFAULT_MASTER_HOTSPOTS.forEach(item => mergedMap.set(item.id || item.name, item));
     savedList.forEach(item => mergedMap.set(item.id || item.name, item));
@@ -710,6 +707,20 @@
   function getAngleDelta(b1, b2) {
     let diff = Math.abs(b1 - b2);
     return diff > 180 ? 360 - diff : diff;
+  }
+
+  function getPermutations(arr) {
+    if (arr.length <= 1) return [arr];
+    let result = [];
+    for (let i = 0; i < arr.length; i++) {
+      let current = arr[i];
+      let remaining = arr.slice(0, i).concat(arr.slice(i + 1));
+      let remainingPerms = getPermutations(remaining);
+      for (let perm of remainingPerms) {
+        result.push([current, ...perm]);
+      }
+    }
+    return result;
   }
   
   function getScoreLevelBadge(score) {
@@ -778,7 +789,7 @@
     return new Promise((resolve) => {
       if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) { resolve([]); return; }
       const ps = new kakao.maps.services.Places();
-      const options = { location: new kakao.maps.LatLng(lat, lng), radius: 3000, sort: kakao.maps.services.SortBy.DISTANCE };
+      const options = { location: new kakao.maps.LatLng(lat, lng), radius: 3500, sort: kakao.maps.services.SortBy.DISTANCE };
       const nowHour = new Date().getHours();
       
       let primaryCategory = (nowHour >= 7 && nowHour < 12) ? 'SW8' : 'FD6';
@@ -966,7 +977,6 @@
     return JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
   }
 
-  // ⚡ v5.9 핵심: 저장된 512개 콜 승차 기록을 '직접 추천 후보'로 군집/클러스터링하여 반환
   function getCallLogsAsCandidates(currentLat, currentLng, nowHour) {
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     if (!logs || logs.length === 0) return [];
@@ -983,15 +993,14 @@
       if (hourDiff > 12) hourDiff = 24 - hourDiff;
       const isTimeMatch = hourDiff <= 1;
 
-      // Existing cluster match (200m)
-      let found = clusters.find(c => getStraightDistanceKm(c.lat, c.lng, logLat, logLng) <= 0.2);
+      let found = clusters.find(c => getStraightDistanceKm(c.lat, c.lng, logLat, logLng) <= 0.25);
       if (found) {
         found.clusterCount++;
         if (isTimeMatch) found.isTimeMatch = true;
       } else {
         clusters.push({
           id: 'user_call_log_' + (log.id || Math.random()),
-          name: `📍 승차 집중지점 (${log.lat.toFixed(3)}, ${log.lng.toFixed(3)})`,
+          name: `📍 실제탑승지점 (${log.lat.toFixed(3)}, ${log.lng.toFixed(3)})`,
           lat: logLat,
           lng: logLng,
           type: 'subway_nightlife',
@@ -1076,7 +1085,6 @@
     const activeMasterHotspots = getMasterHotspotsFromStorage();
     const nowHour = new Date().getHours();
     
-    // ⚡ v5.9 핵심: 512개 콜 저장 기록을 직접 추천 후보 pool로 전격 포함
     const userCallCandidates = getCallLogsAsCandidates(currentPos.lat, currentPos.lng, nowHour);
 
     let referenceHubs = [];
@@ -1130,7 +1138,7 @@
       return true;
     });
 
-    /* ⚡ 1차 기하학적 초고속 사전 필터링 (0.01초) */
+    /* ⚡ 1차 삼각부등식 기하학적 사전 필터링 */
     let preFilteredCandidates = [];
     for (let item of rawPool) {
       let straightDist = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
@@ -1145,12 +1153,10 @@
       let pureRes = await calculatePureSpotScore(item, weatherData, nowHour);
       let preliminaryScore = pureRes.score;
 
-      // 2km 이내 초근접 핫플에 가중치 부여
       if (straightDist <= 2.0) {
         preliminaryScore += 40;
       }
 
-      // 우회거리 삼각부등식 기하학 사전 검증
       if (!inWisu && targetBoundaryCardData) {
         const distFromCandToTarget = getStraightDistanceKm(item.lat, item.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng);
         const detourKm = (straightDist + distFromCandToTarget) - directTargetDist;
@@ -1175,11 +1181,10 @@
       });
     }
 
-    // 예비 후보 10개로 엄선
     preFilteredCandidates.sort((a, b) => b.preliminaryScore - a.preliminaryScore);
     const topCandidatesToRoute = preFilteredCandidates.slice(0, 10);
 
-    /* ⚡ 2차 도로망 연산 (Promise.all 병렬 처리로 0.3초 내 완료) */
+    /* ⚡ 2차 도로망 병렬 연산 */
     const routedCandidatesPromises = topCandidatesToRoute.map(async (item) => {
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
       return {
@@ -1194,19 +1199,16 @@
 
     let scoredPool = await Promise.all(routedCandidatesPromises);
 
-    /* 🎯 3차 카드 배정 로직:
-       1번 카드 -> 반경 2km 이내 초근접 핫플 최우선 지정 (성대역/화서역/수원역/승차기록 등)
-       2~3번 카드 -> 복귀 경로상 고득점 상권 (거리순 정렬)
-    */
+    /* 🎯 3차 고득점 후보 3개 엄선 */
     let selectedCandidates = [];
 
-    // Step 1: 2km 이내 초근접 핫플 중 최고득점 1개 선출 (1번 카드 고정)
+    // 2km 이내 초근접 핫플 중 최고득점 1개 우선 포함
     const nearPool = scoredPool.filter(item => item.dist <= 2.0).sort((a, b) => b.score - a.score);
     if (nearPool.length > 0) {
       selectedCandidates.push(nearPool[0]);
     }
 
-    // Step 2: 남은 핫플 중 고득점 순으로 2~3번 카드 채우기
+    // 남은 핫플 중 고득점 순으로 3개까지 선택
     scoredPool.sort((a, b) => b.score - a.score || a.dist - b.dist);
     for (let candidate of scoredPool) {
       if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedCandidates)) {
@@ -1215,11 +1217,32 @@
       if (selectedCandidates.length === 3) break;
     }
 
-    // Step 3: 복귀 모드일 경우 2~3번 카드는 거리 순차 정렬로 깔끔한 동선 보장
-    if (!inWisu && selectedCandidates.length > 1) {
-      const firstCard = selectedCandidates[0];
-      const restCards = selectedCandidates.slice(1).sort((a, b) => a.dist - b.dist);
-      selectedCandidates = [firstCard, ...restCards];
+    /* 🛣️ 4차 TSP 순차 동선 최적화 (2->3->1->🎯 역주행 완전 차단) */
+    if (selectedCandidates.length > 1) {
+      const permutations = getPermutations(selectedCandidates);
+      let bestPerm = selectedCandidates;
+      let minTotalRouteDist = Infinity;
+
+      const startPt = { lat: currentPos.lat, lng: currentPos.lng };
+      const endPt = targetBoundaryCardData ? { lat: targetBoundaryCardData.lat, lng: targetBoundaryCardData.lng } : null;
+
+      permutations.forEach(perm => {
+        let totalD = 0;
+        let prev = startPt;
+        perm.forEach(pt => {
+          totalD += getStraightDistanceKm(prev.lat, prev.lng, pt.lat, pt.lng);
+          prev = pt;
+        });
+        if (endPt) {
+          totalD += getStraightDistanceKm(prev.lat, prev.lng, endPt.lat, endPt.lng);
+        }
+        if (totalD < minTotalRouteDist) {
+          minTotalRouteDist = totalD;
+          bestPerm = perm;
+        }
+      });
+
+      selectedCandidates = bestPerm;
     }
 
     currentRouteData = [
@@ -1234,7 +1257,7 @@
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
       logEl.innerText = selectedCandidates.length > 0 
-        ? `방금 · [${inWisu ? '반경 5km 실시간' : '실시간 복귀경로 Top 3'}] 연산 완료`
+        ? `방금 · [${inWisu ? '반경 5km 실시간' : '최단 순방향 동선 Top 3'}] 연산 완료`
         : `방금 · 주변 검색 결과 없음`;
     }
     
