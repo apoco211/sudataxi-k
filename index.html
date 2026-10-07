@@ -80,6 +80,8 @@
     .header { text-align: center; font-size: 16px; font-weight: 900; color: var(--theme-accent); margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; flex-wrap: wrap; }
     .holiday-badge { font-size: 10px; padding: 2px 4px; border-radius: 4px; background: #FF4444; color: #FFFFFF; font-weight: 800; display: inline-block; vertical-align: middle; }
     .weekday-badge { font-size: 10px; padding: 2px 4px; border-radius: 4px; background: #2A2A2A; color: #AAAAAA; font-weight: 700; display: inline-block; vertical-align: middle; }
+    .build-ver-tag { font-size: 10px; color: var(--theme-accent); opacity: 0.85; font-weight: 800; margin: 0 2px; padding: 1px 4px; background: rgba(255,200,0,0.15); border-radius: 4px; display: inline-block; vertical-align: middle; }
+    
     .mode-container { display: flex; gap: 4px; margin-bottom: 8px; }
     .mode-pill { flex: 1; height: 30px; border-radius: 8px; background: #2A2A2A; color: #8A8A8A; font-size: 11px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
     .mode-pill.active { background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; }
@@ -338,26 +340,24 @@
         <div>
           <strong style="color: #FF6B00;">2. 모드 2 (관외 복귀) 실시간 검색 최적화 로직</strong><br>
           • 최종 복귀 목적지(경계점) 우선 확정<br>
-          • 복귀 경로 벡터 연산을 적용하여 경로상 동선에 맞는 상권 추천<br>
-          • 거리순 순차 정렬로 지그재그 이탈 방지 후 4번째 카드에 최종 목적지(🎯) 고정
+          • 복귀 삼각부등식 연산(Detour ≤ 3.5km 제한)을 적용하여 이탈 및 지그재그 철저 예방<br>
+          • 거리순 순차 정렬로 깔끔한 복귀 동선 구성 후 4번째 카드에 최종 목적지(🎯) 고정
         </div>
       </div>
     </details>
   
     <!-- 💡 누적 업데이트 히스토리 영역 -->
     <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;" open>
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.3.7 상세 누적 업데이트 히스토리 (터치)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v5.8.40 상세 누적 업데이트 히스토리 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v2.3.7 (2026.10) - 모드 2 복귀 경로 벡터 필터링 및 순차 정렬 고도화</strong><br>
-          • 🧭 <strong>지그재그 동선 방지</strong>: 출발지→최종복귀점 벡터축에서 벗어나는 핫플 제외 필터 및 1→2→3번 거리순 순차 정렬 적용.<br>
+          <strong style="color: #4ADE80;">v5.8.40 (2026.10.07) - 모드 2 복귀 우회거리(Detour) 삼각부등식 검증 완비</strong><br>
+          • 🧭 <strong>지그재그 이탈 완벽 통제</strong>: 출발지→경유지→목적지 간 우회거리(Detour) 3.5km 초과 장소 완전 제외.<br>
+          • 🏷️ <strong>빌드 버전 표시</strong>: 헤더 날짜 우측에 `v5.8.40` 식별 태그 적용.<br>
           • 🎯 <strong>목표지점 4번 카드 고정 유지</strong>.
         </div>
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px; color:#888888;">
-          <strong style="color: #888888;">v2.3.6 (2026.09) - 카카오 실시간 상권 검색 및 경로 동선 연동 대폭 강화</strong><br>
-        </div>
-        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px; color:#888888;">
-          <strong style="color: #888888;">v2.3.5 - 모드 2 역방향 과다 필터링 버그 긴급 수정</strong><br>
+          <strong style="color: #888888;">v2.3.7 - 모드 2 복귀 경로 벡터 필터링 및 순차 정렬 고도화</strong><br>
         </div>
       </div>
     </details>
@@ -388,6 +388,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+  const BUILD_VERSION = "v5.8.40";
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -757,7 +758,9 @@
     } else {
       badgeHtml = `<span class="weekday-badge">🟢 평일</span>`;
     }
-    headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) ${badgeHtml}`;
+    
+    /* 1. 상단 날짜 바로 옆에 빌드 버전을 작고 명확하게 표시 */
+    headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) <span class="build-ver-tag">${BUILD_VERSION}</span> ${badgeHtml}`;
   }
   
   async function fetchLiveKakaoHotspots(lat, lng) {
@@ -999,6 +1002,7 @@
 
     let referenceHubs = [];
     let targetBoundaryCardData = null;
+    let directTargetDist = 0;
 
     if (inWisu) {
       for (let h of MAJOR_HUBS) {
@@ -1013,7 +1017,7 @@
       }
       referenceHubs.sort((a, b) => a.dist - b.dist);
     } else {
-      /* 1. 최종 목적지(경계점) 우선 확정 */
+      /* 1. 모드 2: 최단 관내 복귀 경계점(🎯) 우선 확정 */
       let minBoundaryDist = Infinity;
       let closestBp = null;
       for (let bp of WISU_BOUNDARY_POINTS) {
@@ -1025,9 +1029,10 @@
       }
       if (closestBp) {
         let roadToBp = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, closestBp.lat, closestBp.lng);
+        directTargetDist = Number(roadToBp.distanceKm);
         targetBoundaryCardData = {
           ...closestBp,
-          dist: Number(roadToBp.distanceKm),
+          dist: directTargetDist,
           estimatedTimeMin: roadToBp.durationMin,
           score: 100,
           isTargetBoundary: true
@@ -1050,24 +1055,35 @@
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
       
       if (inWisu && road.distanceKm > 5.0) continue; 
-      if (!inWisu && road.distanceKm > 20.0) continue;
+      
+      /* 모드 2일 때: 관내 경계점 근처(3km 이내)에 이미 도달한 경우 멀리 있는 장소 제외 */
+      if (!inWisu) {
+        const maxAllowedSearch = directTargetDist <= 3.0 ? 5.0 : Math.min(20.0, directTargetDist + 4.0);
+        if (road.distanceKm > maxAllowedSearch) continue;
+      }
 
       let pureRes = await calculatePureSpotScore(item, weatherData, nowHour);
       let finalScore = pureRes.score;
 
-      /* 모드 2 전용 복귀 벡터 및 각도 이탈 방지 검증 */
-      if (!inWisu && targetBearing !== null) {
-        let candBearing = getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng);
-        let deltaAngle = getAngleDelta(candBearing, targetBearing);
-
-        /* 출발지->복귀목적지 축에서 55도 이상 심하게 벗어나는 지역(예: 강남, 가산 등)은 이탈 방지 차원에서 제외 */
-        if (deltaAngle > 55 && road.distanceKm > 1.5) {
+      /* 2. 핵심 고도화: 모드 2 우회거리(Detour) 삼각부등식 검증식 적용 (지그재그 이탈 원천 차단) */
+      if (!inWisu && targetBoundaryCardData) {
+        const distFromCandToTarget = getStraightDistanceKm(item.lat, item.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng);
+        const detourKm = (road.distanceKm + distFromCandToTarget) - directTargetDist;
+        
+        /* 복귀 경로상 허용 우회 한계치 (최대 3.5km 제한) */
+        const maxAllowedDetour = Math.min(3.5, directTargetDist * 0.35 + 1.2);
+        
+        /* 우회거리가 허용치를 초과하는 외곽 지역(예: 안산, 군포, 강남, 가산 등) 완전 통제 */
+        if (detourKm > maxAllowedDetour) {
           continue;
         }
 
+        let candBearing = getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng);
+        let deltaAngle = getAngleDelta(candBearing, targetBearing);
+
         if (deltaAngle <= 30) finalScore += 25;
         else if (deltaAngle <= 45) finalScore += 10;
-        else if (deltaAngle > 55) finalScore -= 30;
+        else if (deltaAngle > 50) finalScore -= 30;
       }
 
       scoredPool.push({
@@ -1094,7 +1110,7 @@
       if (selectedCandidates.length === 3) break;
     }
 
-    /* 🧭 모드 2 핵심 보완: 선정된 핫플 Top 3를 출발지에서 가까운 순서대로 순차 정렬 (1번->2번->3번->🎯4번 경계점)하여 지그재그 이탈 방지 */
+    /* 🧭 3. 모드 2 최적화: 엄선된 Top 3 핫플을 출발지 기준 거리순(1->2->3) 순차 정렬하여 동선 직진화 */
     if (!inWisu) {
       selectedCandidates.sort((a, b) => a.dist - b.dist);
     }
@@ -1111,7 +1127,7 @@
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) {
       logEl.innerText = selectedCandidates.length > 0 
-        ? `방금 · [${inWisu ? '반경 5km 실시간' : '실시간 상권 & 경로 Top 3'}] 연산 완료`
+        ? `방금 · [${inWisu ? '반경 5km 실시간' : '실시간 복귀경로 Top 3'}] 연산 완료`
         : `방금 · 주변 검색 결과 없음`;
     }
     
