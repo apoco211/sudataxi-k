@@ -174,6 +174,7 @@
     .tag.timematch { background: #065F46; color: #34D399; border: 1px solid #10B981; font-weight: 800; }
     .tag.masterdb { background: #581C87; color: #F3E8FF; border: 1px solid #9333EA; font-weight: 700; }
     .tag.livekakaomap { background: #854D0E; color: #FEF08A; border: 1px solid #EAB308; font-weight: 800; }
+    .tag.usercallhistory { background: #831843; color: #FBCFE8; border: 1px solid #F43F5E; font-weight: 900; }
     
     .sub-final-section { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
     .sub-final-title { font-size: 10px; font-weight: 800; color: var(--theme-accent); margin-bottom: 1px; }
@@ -334,11 +335,11 @@
         <div>
           <strong style="color: #FFC800;">1. 기본 점수 체계 (Base 0점 시작)</strong><br>
           • 기본 시작 점수: <strong>0점</strong><br>
-          • 나만의 핫플: <strong>+20점</strong> | 카카오 실시간: <strong>+15점</strong> | 마스터 DB: <strong>+10점</strong>
+          • 승차기록 추천: <strong>+35점</strong> | 나만의 핫플: <strong>+20점</strong> | 카카오 실시간: <strong>+15점</strong> | 마스터 DB: <strong>+10점</strong>
         </div>
         <div>
           <strong style="color: #FF6B00;">2. 모드 2 (관외 복귀) 실시간 검색 최적화 로직</strong><br>
-          • 1번 카드: 현위치 반경 2km 이내 최우선 초근접 핫플 지정<br>
+          • 1번 카드: 현위치 반경 2km 이내 최우선 초근접 핫플/승차이력 지정<br>
           • 2~3번 카드: 복귀 우회거리(Detour ≤ 3.5km) 기하학 검증 후 거리순 정렬<br>
           • 4번 카드: 최종 복귀 경계점(🎯) 고정
         </div>
@@ -346,13 +347,13 @@
     </details>
   
     <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;" open>
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v5.8.41 상세 누적 업데이트 히스토리 (터치)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v5.9 상세 누적 업데이트 히스토리 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v5.8.41 (2026.10.07) - 반경 2km 이내 1번 카드 최우선 선출 & 수원 DB/병렬연산 고도화</strong><br>
-          • 🎯 <strong>반경 2km 초근접 핫플 지정</strong>: 현위치 2km 이내 핫플(성대역, 화서역, 수원역 등)을 1번 카드 최우선 고정.<br>
-          • ⚡ <strong>병렬 연산 0.3초대 속도</strong>: 기하학 1차 초압축 후 Promise.all 병렬 경로 연산으로 10배 이상 단축.<br>
-          • 🏙️ <strong>수원 핵심 상권 마스터 DB 대폭 보강</strong>.
+          <strong style="color: #4ADE80;">v5.9 (2026.10.07) - 512개 고객 탑승위치 직접 추천후보 승격 & 수원 DB 자동 병합</strong><br>
+          • 🔥 <strong>승차 이력 적극 활용</strong>: 기사님이 찍은 512개 콜 기록이 보조 점수를 넘어 직접 추천 후보 카드(#실제탑승이력)로 전격 승격.<br>
+          • 🏙️ <strong>수원 마스터 DB 강제 병합</strong>: 기기에 과거 백업이 있어도 성대역, 화서역, 수원역 등 최신 수원 DB가 항상 자동 병합되어 노출.<br>
+          • 🎯 <strong>반경 2km 이내 1번 카드 최우선 고정 및 병렬 연산 0.3초대 속도 유지</strong>.
         </div>
       </div>
     </details>
@@ -383,7 +384,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v5.8.41";
+  const BUILD_VERSION = "v5.9";
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -606,6 +607,7 @@
     { "id": "hs_suwon_5", "name": "영통역 중심상가 및 로데오", "lat": 37.2515, "lng": 127.0714, "address": "영통동", "type": "subway_nightlife", "region": "suwon", "isWisu": false },
     { "id": "hs_suwon_6", "name": "광교중앙역 및 아브뉴프랑 상권", "lat": 37.2886, "lng": 127.0515, "address": "이의동", "type": "subway_shopping", "region": "suwon", "isWisu": false },
     { "id": "hs_suwon_7", "name": "행궁동 카페거리 및 행리단길", "lat": 37.2830, "lng": 127.0140, "address": "행궁동", "type": "shopping_nightlife", "region": "suwon", "isWisu": false },
+    { "id": "hs_suwon_8", "name": "북수원 정자동 중심상가", "lat": 37.2980, "lng": 126.9910, "address": "정자동", "type": "subway_nightlife", "region": "suwon", "isWisu": false },
     
     // 안산 및 기존 주요 핫플
     { "id": "hs_ansan_1", "name": "중앙역 로데오거리 및 메디컬타운", "lat": 37.3186, "lng": 126.8385, "address": "고잔동", "type": "subway_nightlife", "region": "ansan", "isWisu": false },
@@ -642,14 +644,21 @@
   ];
   
   function getMasterHotspotsFromStorage() {
+    let savedList = [];
     const saved = localStorage.getItem('sudataxi_master_hotspots');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) savedList = parsed;
       } catch(e) {}
     }
-    return DEFAULT_MASTER_HOTSPOTS;
+    
+    // ⚡ v5.9 핵심: 저장된 백업이 있더라도 최신 수원/핵심 DB가 없으면 강제 자동 병합
+    const mergedMap = new Map();
+    DEFAULT_MASTER_HOTSPOTS.forEach(item => mergedMap.set(item.id || item.name, item));
+    savedList.forEach(item => mergedMap.set(item.id || item.name, item));
+    
+    return Array.from(mergedMap.values());
   }
   
   async function checkIsInsideWisuRealtime(lat, lng) {
@@ -788,7 +797,6 @@
           }));
         }
         
-        // 추가: 지하철역/환승 거점 수집
         ps.categorySearch('SW8', (subData, subStatus) => {
           if (subStatus === kakao.maps.services.Status.OK && subData) {
             subData.slice(0, 5).forEach(p => {
@@ -913,7 +921,7 @@
       if (isNaN(logLat) || isNaN(logLng)) return;
       
       const dist = getStraightDistanceKm(candLat, candLng, logLat, logLng);
-      if (dist <= 0.3) {
+      if (dist <= 0.4) {
         matchCount++;
         const logDate = parseDateSafely(log.timestamp);
         const logHour = logDate.getHours();
@@ -921,10 +929,10 @@
         if (hourDiff > 12) hourDiff = 24 - hourDiff;
         
         if (hourDiff <= 1) {
-          maxBonus = 30;
+          maxBonus = 35;
           isTimeMatch = true;
-        } else if (maxBonus < 15) {
-          maxBonus = 15;
+        } else if (maxBonus < 20) {
+          maxBonus = 20;
         }
       }
     });
@@ -934,7 +942,8 @@
   async function calculatePureSpotScore(item, weatherData, nowHour) {
     let score = 0;
     
-    if (item.isCustom) score += 20;
+    if (item.isUserCallLogCandidate) score += 35;
+    else if (item.isCustom) score += 20;
     else if (item.isLiveKakao) score += 15;
     else if (item.region || item.isWisu) score += 10;
 
@@ -948,13 +957,52 @@
     
     return {
       score: Math.max(0, score),
-      logCount: logResult.count,
-      isTimeMatch: logResult.isTimeMatch
+      logCount: logResult.count + (item.isUserCallLogCandidate ? (item.clusterCount || 1) : 0),
+      isTimeMatch: logResult.isTimeMatch || (item.isUserCallLogCandidate && item.isTimeMatch)
     };
   }
   
   function getCustomHotspots() {
     return JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
+  }
+
+  // ⚡ v5.9 핵심: 저장된 512개 콜 승차 기록을 '직접 추천 후보'로 군집/클러스터링하여 반환
+  function getCallLogsAsCandidates(currentLat, currentLng, nowHour) {
+    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+    if (!logs || logs.length === 0) return [];
+
+    const clusters = [];
+    logs.forEach(log => {
+      const logLat = Number(log.lat);
+      const logLng = Number(log.lng);
+      if (isNaN(logLat) || isNaN(logLng)) return;
+
+      const logDate = parseDateSafely(log.timestamp);
+      const logHour = logDate.getHours();
+      let hourDiff = Math.abs(nowHour - logHour);
+      if (hourDiff > 12) hourDiff = 24 - hourDiff;
+      const isTimeMatch = hourDiff <= 1;
+
+      // Existing cluster match (200m)
+      let found = clusters.find(c => getStraightDistanceKm(c.lat, c.lng, logLat, logLng) <= 0.2);
+      if (found) {
+        found.clusterCount++;
+        if (isTimeMatch) found.isTimeMatch = true;
+      } else {
+        clusters.push({
+          id: 'user_call_log_' + (log.id || Math.random()),
+          name: `📍 승차 집중지점 (${log.lat.toFixed(3)}, ${log.lng.toFixed(3)})`,
+          lat: logLat,
+          lng: logLng,
+          type: 'subway_nightlife',
+          isUserCallLogCandidate: true,
+          clusterCount: 1,
+          isTimeMatch
+        });
+      }
+    });
+
+    return clusters;
   }
   
   function setTab(tab) {
@@ -1009,7 +1057,7 @@
       const nameA = item.name.replace(/\s+/g, '').substring(0, 3);
       const nameB = candName.replace(/\s+/g, '').substring(0, 3);
       const sameName = nameA === nameB || nameA.includes(nameB) || nameB.includes(nameA);
-      const closeDist = getStraightDistanceKm(item.lat, item.lng, candLat, candLng) < 0.8;
+      const closeDist = getStraightDistanceKm(item.lat, item.lng, candLat, candLng) < 0.6;
       return sameName || closeDist;
     });
   }
@@ -1027,13 +1075,15 @@
     const customHotspots = getCustomHotspots();
     const activeMasterHotspots = getMasterHotspotsFromStorage();
     const nowHour = new Date().getHours();
+    
+    // ⚡ v5.9 핵심: 512개 콜 저장 기록을 직접 추천 후보 pool로 전격 포함
+    const userCallCandidates = getCallLogsAsCandidates(currentPos.lat, currentPos.lng, nowHour);
 
     let referenceHubs = [];
     let targetBoundaryCardData = null;
     let directTargetDist = 0;
 
     if (inWisu) {
-      // 모드 1: 5대 거점역 연산 (병렬 처리)
       const hubPromises = MAJOR_HUBS.map(async (h) => {
         let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
         let pureRes = await calculatePureSpotScore({...h, isWisu: true}, weatherData, nowHour);
@@ -1072,7 +1122,7 @@
 
     let targetBearing = (!inWisu && targetBoundaryCardData) ? getBearing(currentPos.lat, currentPos.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng) : null;
 
-    let rawPool = [...liveKakaoHotspots, ...customHotspots, ...activeMasterHotspots].filter(item => {
+    let rawPool = [...userCallCandidates, ...liveKakaoHotspots, ...customHotspots, ...activeMasterHotspots].filter(item => {
       if (!inWisu) {
         const isWisuHub = MAJOR_HUBS.some(h => item.name.includes(h.name.substring(0,2)));
         if (isWisuHub || item.isWisu === true) return false;
@@ -1097,7 +1147,7 @@
 
       // 2km 이내 초근접 핫플에 가중치 부여
       if (straightDist <= 2.0) {
-        preliminaryScore += 35;
+        preliminaryScore += 40;
       }
 
       // 우회거리 삼각부등식 기하학 사전 검증
@@ -1106,7 +1156,6 @@
         const detourKm = (straightDist + distFromCandToTarget) - directTargetDist;
         const maxAllowedDetour = Math.min(3.5, directTargetDist * 0.35 + 1.5);
         
-        // 2km 이내 초근접이 아니면서 우회거리가 큰 곳 제거
         if (straightDist > 2.0 && detourKm > maxAllowedDetour) continue;
 
         let candBearing = getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng);
@@ -1122,13 +1171,13 @@
         preliminaryScore,
         logCount: pureRes.logCount,
         isTimeMatch: pureRes.isTimeMatch,
-        isMasterDb: !item.isCustom && !item.isLiveKakao && (item.region !== undefined || item.id?.startsWith('hs_'))
+        isMasterDb: !item.isCustom && !item.isLiveKakao && !item.isUserCallLogCandidate && (item.region !== undefined || item.id?.startsWith('hs_'))
       });
     }
 
-    // 예비 후보 8개로 엄선
+    // 예비 후보 10개로 엄선
     preFilteredCandidates.sort((a, b) => b.preliminaryScore - a.preliminaryScore);
-    const topCandidatesToRoute = preFilteredCandidates.slice(0, 8);
+    const topCandidatesToRoute = preFilteredCandidates.slice(0, 10);
 
     /* ⚡ 2차 도로망 연산 (Promise.all 병렬 처리로 0.3초 내 완료) */
     const routedCandidatesPromises = topCandidatesToRoute.map(async (item) => {
@@ -1146,7 +1195,7 @@
     let scoredPool = await Promise.all(routedCandidatesPromises);
 
     /* 🎯 3차 카드 배정 로직:
-       1번 카드 -> 반경 2km 이내 초근접 핫플 최우선 지정 (성대역/화서역/수원역 등)
+       1번 카드 -> 반경 2km 이내 초근접 핫플 최우선 지정 (성대역/화서역/수원역/승차기록 등)
        2~3번 카드 -> 복귀 경로상 고득점 상권 (거리순 정렬)
     */
     let selectedCandidates = [];
@@ -1168,7 +1217,7 @@
 
     // Step 3: 복귀 모드일 경우 2~3번 카드는 거리 순차 정렬로 깔끔한 동선 보장
     if (!inWisu && selectedCandidates.length > 1) {
-      const firstCard = selectedCandidates[0]; // 1번 카드(2km 이내 초근접) 유지
+      const firstCard = selectedCandidates[0];
       const restCards = selectedCandidates.slice(1).sort((a, b) => a.dist - b.dist);
       selectedCandidates = [firstCard, ...restCards];
     }
@@ -1220,6 +1269,7 @@
         </div>
         <div class="tag-group">
           ${item.isNearStep1 ? '<span class="tag near">#초근접(2km)</span>' : `<span class="tag near" style="background:#065F46; color:#34D399; border-color:#10B981;">#${inWisu ? '반경5km' : '경로핫플'}</span>`}
+          ${item.isUserCallLogCandidate ? '<span class="tag usercallhistory">🔥실제승차기록</span>' : ''}
           ${item.isLiveKakao ? '<span class="tag livekakaomap">⚡실시간상권</span>' : ''}
           ${item.isTimeMatch ? '<span class="tag timematch">🔥시간대콜</span>' : ''}
           ${item.isMasterDb ? '<span class="tag masterdb">#마스터DB</span>' : ''}
