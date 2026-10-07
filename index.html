@@ -291,7 +291,7 @@
       <span>🗺️ 전체 도로 동선 지도 보기</span>
     </button>
   </div>
-
+  
   <div id="heatmap-container">
     <div class="map-legend">
       <div class="legend-item"><span class="dot-sample" style="background:#22C55E;"></span> 현재시간 집중</div>
@@ -325,7 +325,7 @@
       <div style="font-size: 10px; font-weight: 800; color: #C084FC; margin: 4px 0 2px 0;">📍 나만의 핫플 목록</div>
       <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 2px;"></div>
     </div>
-
+  
     <!-- 💡 상세 가이드 노트 영역 -->
     <details style="margin-top: 8px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 1.4;" open>
       <summary style="font-weight: 800; color: #FFC800; cursor: pointer;">💡 [수다택시 K] 점수 산출 및 모드별 동작 가이드 (터치하여 접기/펼치기)</summary>
@@ -338,32 +338,26 @@
         <div>
           <strong style="color: #FF6B00;">2. 모드 2 (관외 복귀) 실시간 검색 최적화 로직</strong><br>
           • 최종 복귀 목적지(경계점) 우선 확정<br>
-          • 카카오 실시간 상권 검색을 통해 경로 주변의 생생한 상권들을 넓게 탐색<br>
-          • 고득점 핫플 최대 3개 엄선 후 4번째 카드에 최종 목적지(🎯) 고정 배치
+          • 복귀 경로 벡터 연산을 적용하여 경로상 동선에 맞는 상권 추천<br>
+          • 거리순 순차 정렬로 지그재그 이탈 방지 후 4번째 카드에 최종 목적지(🎯) 고정
         </div>
       </div>
     </details>
-
+  
     <!-- 💡 누적 업데이트 히스토리 영역 -->
     <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;" open>
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.3.6 상세 누적 업데이트 히스토리 (터치)</summary>
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v2.3.7 상세 누적 업데이트 히스토리 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v2.3.6 (2026.09) - 카카오 실시간 상권 검색 및 경로 동선 연동 대폭 강화</strong><br>
-          • ⚡ <strong>실시간 상권 적극 반영</strong>: 마스터 DB 의존성을 낮추고, 카카오 장소 API를 통해 현재 위치 및 복귀 경로 상의 생생한 실시간 상권(음식점/지하철/카페)을 다수 수집하여 고득점 순으로 3개 표출.<br>
+          <strong style="color: #4ADE80;">v2.3.7 (2026.10) - 모드 2 복귀 경로 벡터 필터링 및 순차 정렬 고도화</strong><br>
+          • 🧭 <strong>지그재그 동선 방지</strong>: 출발지→최종복귀점 벡터축에서 벗어나는 핫플 제외 필터 및 1→2→3번 거리순 순차 정렬 적용.<br>
           • 🎯 <strong>목표지점 4번 카드 고정 유지</strong>.
         </div>
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px; color:#888888;">
+          <strong style="color: #888888;">v2.3.6 (2026.09) - 카카오 실시간 상권 검색 및 경로 동선 연동 대폭 강화</strong><br>
+        </div>
+        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px; color:#888888;">
           <strong style="color: #888888;">v2.3.5 - 모드 2 역방향 과다 필터링 버그 긴급 수정</strong><br>
-        </div>
-        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px; color:#888888;">
-          <strong style="color: #888888;">v2.3.4 - 모드 2 고득점 핫플 최대 3개 엄선 및 목표지점 고정</strong><br>
-        </div>
-        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px; color:#888888;">
-          <strong style="color: #888888;">v2.3.3 - 모드 2 반경 2km 연계 및 목적지 경로 순차 탐색 완성</strong><br>
-        </div>
-        <div style="color:#888888;">
-          <strong style="color: #888888;">v2.3.2 - 모드 2 복귀 목적지 방향(순방향) 전용 탐색 고도화</strong><br>
         </div>
       </div>
     </details>
@@ -417,7 +411,7 @@
       try { window.Kakao.init(KAKAO_JS_KEY); } catch(e) {}
     }
   }
-
+  
   function openKakaoNaviApp(name, lat, lng) {
     initKakaoSdk();
     let cleanName = cleanQuery(name) || name;
@@ -429,7 +423,7 @@
     }
     window.location.href = `https://m.map.kakao.com/scheme/route?ep=${lat},${lng}&by=car`;
   }
-
+  
   function showToast(msg) {
     const t = document.getElementById('toast-banner');
     if (!t) return;
@@ -437,14 +431,14 @@
     t.style.display = 'block';
     setTimeout(() => { t.style.display = 'none'; }, 2200);
   }
-
+  
   function initOrResumeAudioContext() {
     try {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume();
     } catch(e) {}
   }
-
+  
   function startBackgroundAudioKeepAlive() {
     try {
       if (!silentAudioElement) {
@@ -454,15 +448,15 @@
       silentAudioElement.play().catch(e => {});
     } catch(e) {}
   }
-
+  
   function stopBackgroundAudioKeepAlive() {
     try { if (silentAudioElement) silentAudioElement.pause(); } catch(e) {}
   }
-
+  
   function requestNotificationPermission() {
     if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
   }
-
+  
   function triggerSystemNotification() {
     if ('Notification' in window && Notification.permission === 'granted') {
       try {
@@ -470,7 +464,7 @@
       } catch(e) {}
     }
   }
-
+  
   function playTimerAlarm() {
     try {
       initOrResumeAudioContext();
@@ -494,7 +488,7 @@
     if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 300]);
     triggerSystemNotification();
   }
-
+  
   function saveTimerState() {
     const state = {
       presetMin: timerPresetMin,
@@ -504,7 +498,7 @@
     };
     localStorage.setItem('sudataxi_timer_state', JSON.stringify(state));
   }
-
+  
   function restoreTimerState() {
     const saved = localStorage.getItem('sudataxi_timer_state');
     if (!saved) return;
@@ -513,7 +507,7 @@
       timerPresetMin = state.presetMin || 5;
       document.getElementById('timer-btn-5m').classList.toggle('active', timerPresetMin === 5);
       document.getElementById('timer-btn-10m').classList.toggle('active', timerPresetMin === 10);
-
+  
       if (state.isRunning && state.targetEndTime) {
         const now = Date.now();
         const leftSec = Math.round((state.targetEndTime - now) / 1000);
@@ -535,7 +529,7 @@
       }
     } catch(e) {}
   }
-
+  
   function setTimerPreset(min) {
     initOrResumeAudioContext();
     requestNotificationPermission();
@@ -553,7 +547,7 @@
     btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 시작`;
     saveTimerState();
   }
-
+  
   function toggleTimer() {
     initOrResumeAudioContext();
     requestNotificationPermission();
@@ -573,7 +567,7 @@
       startTimerInternal();
     }
   }
-
+  
   function startTimerInternal() {
     isTimerRunning = true;
     startBackgroundAudioKeepAlive();
@@ -606,7 +600,7 @@
       }
     }, 1000);
   }
-
+  
   const DEFAULT_MASTER_HOTSPOTS = [
     { "id": "hs_ansan_1", "name": "중앙역 로데오거리 및 메디컬타운", "lat": 37.3186, "lng": 126.8385, "address": "고잔동", "type": "subway_nightlife", "region": "ansan", "isWisu": false },
     { "id": "hs_ansan_2", "name": "고잔역 법원·검찰청 및 신도시 중심상가", "lat": 37.3168, "lng": 126.8232, "address": "고잔동", "type": "office_nightlife", "region": "ansan", "isWisu": false },
@@ -632,7 +626,7 @@
     { "id": "hs_g_anyang_5", "name": "산본역 중심상가 및 원광대병원", "lat": 37.3554, "lng": 126.9331, "address": "산본역", "type": "subway_hospital", "region": "gunpo", "isWisu": true },
     { "id": "hs_s_01", "name": "강남역 상업지구 및 병원거리", "lat": 37.4981, "lng": 127.0276, "address": "강남역", "type": "subway_hospital", "region": "seoul", "isWisu": false }
   ];
-
+  
   const WISU_BOUNDARY_POINTS = [
     { name: "군포 대야미/부곡 경계 (안산 방면)", lat: 37.3320, lng: 126.9150, address: "대야미동", isWisu: true },
     { name: "안양 박달/석수 경계 (인천/시흥/광명 방면)", lat: 37.4150, lng: 126.8980, address: "박달동", isWisu: true },
@@ -640,7 +634,7 @@
     { name: "의왕 청계/포일 경계 (성남/분당 방면)", lat: 37.3950, lng: 127.0120, address: "포일동", isWisu: true },
     { name: "과천 주암/선바위 경계 (서울/강남 방면)", lat: 37.4520, lng: 127.0050, address: "과천동", isWisu: true }
   ];
-
+  
   function getMasterHotspotsFromStorage() {
     const saved = localStorage.getItem('sudataxi_master_hotspots');
     if (saved) {
@@ -651,7 +645,7 @@
     }
     return DEFAULT_MASTER_HOTSPOTS;
   }
-
+  
   async function checkIsInsideWisuRealtime(lat, lng) {
     return new Promise((resolve) => {
       if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
@@ -671,7 +665,7 @@
       }
     });
   }
-
+  
   const MAJOR_HUBS = [
     { name: "인덕원역 환승 거점", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway", isWisu: true },
     { name: "평촌역 먹자골목 및 한림대병원", lat: 37.3942, lng: 126.9638, address: "평촌역", type: "subway_hospital", isWisu: true },
@@ -679,7 +673,7 @@
     { name: "안양역 일번가 및 메디컬타운", lat: 37.4013, lng: 126.9222, address: "안양역", type: "subway_hospital", isWisu: true },
     { name: "산본역 중심상가 및 원광대병원", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway_hospital", isWisu: true }
   ];
-
+  
   function getStraightDistanceKm(lat1, lon1, lat2, lon2) {
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -690,18 +684,33 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
 
+  /* 두 위치 간의 방위각(Bearing, 0~360도) 계산 */
+  function getBearing(lat1, lon1, lat2, lon2) {
+    const y = Math.sin((lon2 - lon1) * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180);
+    const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
+              Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos((lon2 - lon1) * Math.PI / 180);
+    let brng = Math.atan2(y, x) * 180 / Math.PI;
+    return (brng + 360) % 360;
+  }
+
+  /* 두 방위각 사이의 최단 각도 차이(0~180도) 계산 */
+  function getAngleDelta(b1, b2) {
+    let diff = Math.abs(b1 - b2);
+    return diff > 180 ? 360 - diff : diff;
+  }
+  
   function getScoreLevelBadge(score) {
     if (score >= 70) return '<span class="level-badge level-high">🔥 높음</span>';
     if (score >= 40) return '<span class="level-badge level-mid">⚡ 보통</span>';
     return '<span class="level-badge level-low">💧 낮음</span>';
   }
-
+  
   function formatMMSS(seconds) {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${String(m).padStart(2,'0')}:${String(s).padStart(2, '0')}`;
   }
-
+  
   async function fetchRealtimeWeather(lat, lng) {
     try {
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=precipitation,rain,showers,snowfall&timezone=Asia%2FTokyo`;
@@ -714,7 +723,7 @@
       return { isRainOrSnow: false, precip: 0 };
     }
   }
-
+  
   async function checkIsPublicHolidayRealtime() {
     const now = new Date();
     const year = now.getFullYear();
@@ -728,7 +737,7 @@
     updateHeaderTitle(now, isFallbackHol, fallbackName);
     return isFallbackHol;
   }
-
+  
   function updateHeaderTitle(nowDate, isHoliday, holidayName) {
     const headerEl = document.getElementById('app-header-title');
     if (!headerEl) return;
@@ -750,7 +759,7 @@
     }
     headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) ${badgeHtml}`;
   }
-
+  
   async function fetchLiveKakaoHotspots(lat, lng) {
     return new Promise((resolve) => {
       if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) { resolve([]); return; }
@@ -770,7 +779,7 @@
       }, options);
     });
   }
-
+  
   function parseDateSafely(dateStr) {
     if (!dateStr) return new Date(0);
     if (dateStr instanceof Date) return dateStr;
@@ -780,7 +789,7 @@
     if (!isNaN(d.getTime())) return d;
     return new Date(0);
   }
-
+  
   async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const directDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng);
     const nowHour = new Date().getHours();
@@ -823,7 +832,7 @@
       geometryCoords: [[fromLat, fromLng], [toLat, toLng]]
     };
   }
-
+  
   async function getDynamicTimeCategoryBonus(itemType, itemName, nowHour) {
     let bonus = 0;
     const name = itemName || '';
@@ -856,7 +865,7 @@
 
     return bonus;
   }
-
+  
   function calculateCallLogScore(candLat, candLng) {
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     if (logs.length === 0) return { bonus: 0, matched: false, count: 0, isTimeMatch: false };
@@ -890,7 +899,7 @@
     });
     return { bonus: maxBonus, matched: matchCount > 0, count: matchCount, isTimeMatch };
   }
-
+  
   async function calculatePureSpotScore(item, weatherData, nowHour) {
     let score = 0;
     
@@ -912,11 +921,11 @@
       isTimeMatch: logResult.isTimeMatch
     };
   }
-
+  
   function getCustomHotspots() {
     return JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
   }
-
+  
   function setTab(tab) {
     activeTab = tab;
     document.getElementById('btn-mode1').classList.toggle('active', tab === 1);
@@ -938,7 +947,7 @@
       executeSearch();
     }
   }
-
+  
   function executeSearch() {
     const locText = document.getElementById('loc-text');
     if (locText) locText.innerText = '📍 실시간 GPS 수신 중...';
@@ -963,7 +972,7 @@
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 3000 }
     );
   }
-
+  
   function isDuplicatePlace(candName, candLat, candLng, existingList) {
     return existingList.some(item => {
       const nameA = item.name.replace(/\s+/g, '').substring(0, 3);
@@ -973,7 +982,7 @@
       return sameName || closeDist;
     });
   }
-
+  
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
@@ -1026,6 +1035,8 @@
       }
     }
 
+    let targetBearing = (!inWisu && targetBoundaryCardData) ? getBearing(currentPos.lat, currentPos.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng) : null;
+
     let rawPool = [...liveKakaoHotspots, ...customHotspots, ...activeMasterHotspots].filter(item => {
       if (!inWisu) {
         const isWisuHub = MAJOR_HUBS.some(h => item.name.includes(h.name.substring(0,2)));
@@ -1044,6 +1055,21 @@
       let pureRes = await calculatePureSpotScore(item, weatherData, nowHour);
       let finalScore = pureRes.score;
 
+      /* 모드 2 전용 복귀 벡터 및 각도 이탈 방지 검증 */
+      if (!inWisu && targetBearing !== null) {
+        let candBearing = getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng);
+        let deltaAngle = getAngleDelta(candBearing, targetBearing);
+
+        /* 출발지->복귀목적지 축에서 55도 이상 심하게 벗어나는 지역(예: 강남, 가산 등)은 이탈 방지 차원에서 제외 */
+        if (deltaAngle > 55 && road.distanceKm > 1.5) {
+          continue;
+        }
+
+        if (deltaAngle <= 30) finalScore += 25;
+        else if (deltaAngle <= 45) finalScore += 10;
+        else if (deltaAngle > 55) finalScore -= 30;
+      }
+
       scoredPool.push({
         ...item, 
         dist: Number(road.distanceKm), 
@@ -1059,13 +1085,18 @@
 
     let selectedCandidates = [];
 
-    /* 💡 실시간 상권 및 마스터 DB 합산 후 고득점 순 최대 3개 엄선 */
+    /* 고득점 순 Top 3 엄선 */
     scoredPool.sort((a, b) => b.score - a.score || a.dist - b.dist);
     for (let candidate of scoredPool) {
       if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedCandidates)) {
         selectedCandidates.push(candidate);
       }
       if (selectedCandidates.length === 3) break;
+    }
+
+    /* 🧭 모드 2 핵심 보완: 선정된 핫플 Top 3를 출발지에서 가까운 순서대로 순차 정렬 (1번->2번->3번->🎯4번 경계점)하여 지그재그 이탈 방지 */
+    if (!inWisu) {
+      selectedCandidates.sort((a, b) => a.dist - b.dist);
     }
 
     currentRouteData = [
@@ -1086,7 +1117,7 @@
     
     renderCards(selectedCandidates, referenceHubs, targetBoundaryCardData);
   }
-
+  
   function renderCards(routeCards, referenceHubs, targetBoundaryCardData) {
     const listEl = document.getElementById('card-list');
     if (!listEl) return;
@@ -1109,7 +1140,7 @@
               </div>
             </div>
             <button type="button" class="right-navi-btn" onclick="openKakaoNaviApp('${safeName}', ${item.lat}, ${item.lng})">
-              <span>🚘내비</span>
+              <span>🚗내비</span>
             </button>
           </div>
         </div>
@@ -1166,7 +1197,7 @@
                 <div class="sub-final-name">${sub.name}</div>
                 <div class="sub-final-meta">${sub.dist.toFixed(1)}km (${sub.estimatedTimeMin}분) · ${sub.score}점</div>
               </div>
-              <button type="button" class="sub-navi-btn" onclick="openKakaoNaviApp('${safeSubName}', ${sub.lat},${sub.lng})">🚘 안내</button>
+              <button type="button" class="sub-navi-btn" onclick="openKakaoNaviApp('${safeSubName}', ${sub.lat},${sub.lng})">🚗 안내</button>
             </div>
           `}).join('')}
         </div>
@@ -1470,8 +1501,6 @@
     document.getElementById('timer-btn-5m').addEventListener('click', () => setTimerPreset(5));
     document.getElementById('timer-btn-10m').addEventListener('click', () => setTimerPreset(10));
     document.getElementById('timer-display-btn').addEventListener('click', () => toggleTimer());
-    
-    setTimeout(() => { executeSearch(); }, 200);
   });
 </script>
 </body>
