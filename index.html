@@ -417,6 +417,7 @@
   <div class="mode-container">
     <button class="mode-pill active" id="btn-mode1">⚡ 스마트 자동 추천 모드</button>
     <button class="mode-pill" id="btn-mode3">📊 콜 지도 시각화</button>
+    <button class="mode-pill" id="btn-mode4">🚘 운행 일지</button>
   </div>
   
   <div class="loc-bar">
@@ -507,6 +508,38 @@
       </div>
     </details>
   </div>
+
+  <!-- 4번 탭 (운행 일지) 전용 노출 섹션 -->
+  <div id="tab4-extras" style="display: none;">
+    <div class="backup-section" style="margin-top: 0;">
+      <div class="backup-title" style="font-size: 14px; margin-bottom: 8px;">🚘 실시간 운행 제어</div>
+      <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+        <button id="btn-drive-toggle" style="flex: 1; height: 40px; background: #22C55E; color: #000; border: none; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 13px;">▶️ 운행 시작</button>
+        <button id="btn-break-toggle" style="flex: 1; height: 40px; background: #2A2A2A; color: #8A8A8A; border: 1px solid #3A3A3A; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 13px;" disabled>☕ 휴식 시작</button>
+      </div>
+      <div style="display: flex; gap: 6px;">
+        <button id="btn-board" style="flex: 1; height: 40px; background: #2A2A2A; color: #8A8A8A; border: 1px solid #3A3A3A; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 13px;" disabled>🙋‍♂️ 승차</button>
+        <button id="btn-alight" style="flex: 1; height: 40px; background: #2A2A2A; color: #8A8A8A; border: 1px solid #3A3A3A; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 13px;" disabled>👋 하차</button>
+      </div>
+    </div>
+    <div class="backup-section">
+      <div class="backup-title" style="margin-bottom: 6px;">⏱️ 오늘 운행 현황 (<span id="driving-current-status" style="color: #8A8A8A;">운행 대기</span>)</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px;">
+        <div style="background: #242424; padding: 6px 8px; border-radius: 6px;">🚗 Total Drive: <strong id="stat-today-total" style="color: var(--theme-accent);">00:00:00</strong></div>
+        <div style="background: #242424; padding: 6px 8px; border-radius: 6px;">🙋 Passenger: <strong id="stat-today-board" style="color: #22C55E;">00:00:00</strong></div>
+        <div style="background: #242424; padding: 6px 8px; border-radius: 6px;">🈳 Empty Car: <strong id="stat-today-empty" style="color: #FF6B00;">00:00:00</strong></div>
+        <div style="background: #242424; padding: 6px 8px; border-radius: 6px;">☕ Break: <strong id="stat-today-break" style="color: #C084FC;">00:00:00</strong></div>
+      </div>
+    </div>
+    <div class="backup-section">
+      <div class="backup-title" style="margin-bottom: 6px;">📊 평균 운행 통계</div>
+      <div style="display: flex; flex-direction: column; gap: 4px; font-size: 11px;">
+        <div style="background: #242424; padding: 6px 8px; border-radius: 6px; display: flex; justify-content: space-between;"><span>📅 Daily Avg (일 평균):</span> <strong id="stat-avg-daily">00:00:00</strong></div>
+        <div style="background: #242424; padding: 6px 8px; border-radius: 6px; display: flex; justify-content: space-between;"><span>🗓️ Weekly Avg (주 평균):</span> <strong id="stat-avg-weekly">00:00:00</strong></div>
+        <div style="background: #242424; padding: 6px 8px; border-radius: 6px; display: flex; justify-content: space-between;"><span>📆 Monthly Avg (월 평균):</span> <strong id="stat-avg-monthly">00:00:00</strong></div>
+      </div>
+    </div>
+  </div>
   
   <div class="bottom-bar">
     <div class="timer-container">
@@ -538,6 +571,8 @@
   
   let currentMode = 1;
   let activeTab = 1;
+  let drivingState = { isDriving: false, isPassengerBoarded: false, isBreak: false, currentStatus: 'idle', startTime: null, lastTickTime: null };
+  let drivingStatsTimer = null;
   let currentPos = null;
   let currentRegionName = "";
   let leafletMap = null;
@@ -1237,6 +1272,8 @@
     activeTab = tab;
     document.getElementById('btn-mode1').classList.toggle('active', tab === 1);
     document.getElementById('btn-mode3').classList.toggle('active', tab === 3);
+    const btnMode4 = document.getElementById('btn-mode4');
+    if (btnMode4) btnMode4.classList.toggle('active', tab === 4);
     
     const mainBtnGroup = document.getElementById('main-btn-group');
     const tab1Extras = document.getElementById('tab1-extras'); // 백업/데이터관리 섹션
@@ -1245,22 +1282,31 @@
     const pipelineLogEl = document.getElementById('pipeline-log');
     
     const tab3Extras = document.getElementById('tab3-extras'); // 콜지도 및 아코디언들
+    const tab4Extras = document.getElementById('tab4-extras');
     
     if (tab === 3) {
       if (mainBtnGroup) mainBtnGroup.style.display = 'none';
       if (pipelineLogEl) pipelineLogEl.style.display = 'none';
       if (cardListEl) cardListEl.style.display = 'none';
       if (tab1Extras) tab1Extras.style.display = 'none';
-      
       if (tab3Extras) tab3Extras.style.display = 'block';
+      if (tab4Extras) tab4Extras.style.display = 'none';
       renderCallMapView();
+    } else if (tab === 4) {
+      if (mainBtnGroup) mainBtnGroup.style.display = 'none';
+      if (pipelineLogEl) pipelineLogEl.style.display = 'none';
+      if (cardListEl) cardListEl.style.display = 'none';
+      if (tab1Extras) tab1Extras.style.display = 'none';
+      if (tab3Extras) tab3Extras.style.display = 'none';
+      if (tab4Extras) tab4Extras.style.display = 'block';
+      renderDrivingLogStats();
     } else {
       if (mainBtnGroup) mainBtnGroup.style.display = 'flex';
       if (pipelineLogEl) pipelineLogEl.style.display = 'block';
       if (cardListEl) cardListEl.style.display = 'flex';
       if (tab1Extras) tab1Extras.style.display = 'block';
-      
       if (tab3Extras) tab3Extras.style.display = 'none';
+      if (tab4Extras) tab4Extras.style.display = 'none';
       executeSearch();
     }
   }
@@ -1658,7 +1704,9 @@
       localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
       updateCallLogStats();
       showToast('🎉 위치 저장 완료!');
-      if (activeTab === 3) renderCallMapView();
+      if (!drivingState.isDriving) { toggleDriving(); }
+      handleBoarding();
+      setTab(4);
     };
     if (currentPos) doSave(currentPos);
     else showToast("위치 확인 후 저장 가능합니다.");
@@ -1818,6 +1866,208 @@
 
   function dismissBanner() { document.getElementById('hotspotUpdateBanner').style.display = 'none'; }
 
+  function formatHHMMSS(sec) {
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+  function getTodayKey() {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  }
+  function getTodayDrivingData() {
+    const key = getTodayKey();
+    const records = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
+    if (!records[key]) {
+      records[key] = { totalDrive: 0, passengerBoard: 0, emptyCar: 0, breakTime: 0 };
+    }
+    return records[key];
+  }
+  function saveTodayDrivingData(data) {
+    const key = getTodayKey();
+    const records = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
+    records[key] = data;
+    localStorage.setItem('sudataxi_driving_records', JSON.stringify(records));
+  }
+  function toggleDriving() {
+    drivingState.isDriving = !drivingState.isDriving;
+    const driveBtn = document.getElementById('btn-drive-toggle');
+    const breakBtn = document.getElementById('btn-break-toggle');
+    const boardBtn = document.getElementById('btn-board');
+    const alightBtn = document.getElementById('btn-alight');
+    const statusEl = document.getElementById('driving-current-status');
+    if (drivingState.isDriving) {
+      drivingState.isPassengerBoarded = false;
+      drivingState.isBreak = false;
+      drivingState.lastTickTime = Date.now();
+      driveBtn.innerText = '⏹️ 운행 종료';
+      driveBtn.style.background = '#EF4444';
+      driveBtn.style.color = '#FFF';
+      breakBtn.disabled = false;
+      breakBtn.style.background = '#2A2A2A';
+      breakBtn.style.color = '#FFF';
+      boardBtn.disabled = false;
+      boardBtn.style.background = 'var(--theme-accent)';
+      boardBtn.style.color = 'var(--theme-text-on-accent)';
+      alightBtn.disabled = true;
+      alightBtn.style.background = '#2A2A2A';
+      alightBtn.style.color = '#8A8A8A';
+      if (statusEl) statusEl.innerText = '🈳 빈차 운행 중';
+      startDrivingTimer();
+      showToast('🚗 운행이 시작되었습니다.');
+    } else {
+      drivingState.isPassengerBoarded = false;
+      drivingState.isBreak = false;
+      driveBtn.innerText = '▶️ 운행 시작';
+      driveBtn.style.background = '#22C55E';
+      driveBtn.style.color = '#000';
+      breakBtn.disabled = true;
+      breakBtn.style.background = '#2A2A2A';
+      breakBtn.style.color = '#8A8A8A';
+      boardBtn.disabled = true;
+      boardBtn.style.background = '#2A2A2A';
+      boardBtn.style.color = '#8A8A8A';
+      alightBtn.disabled = true;
+      alightBtn.style.background = '#2A2A2A';
+      alightBtn.style.color = '#8A8A8A';
+      if (statusEl) statusEl.innerText = '운행 대기';
+      stopDrivingTimer();
+      showToast('⏹️ 운행이 종료되었습니다.');
+    }
+  }
+  function toggleBreak() {
+    if (!drivingState.isDriving) return;
+    drivingState.isBreak = !drivingState.isBreak;
+    const breakBtn = document.getElementById('btn-break-toggle');
+    const boardBtn = document.getElementById('btn-board');
+    const alightBtn = document.getElementById('btn-alight');
+    const statusEl = document.getElementById('driving-current-status');
+    if (drivingState.isBreak) {
+      breakBtn.innerText = '▶️ 휴식 종료';
+      breakBtn.style.background = '#C084FC';
+      breakBtn.style.color = '#000';
+      boardBtn.disabled = true;
+      boardBtn.style.background = '#2A2A2A';
+      boardBtn.style.color = '#8A8A8A';
+      alightBtn.disabled = true;
+      alightBtn.style.background = '#2A2A2A';
+      alightBtn.style.color = '#8A8A8A';
+      if (statusEl) statusEl.innerText = '☕ 휴식 중';
+      showToast('☕ 휴식을 시작합니다.');
+    } else {
+      breakBtn.innerText = '☕ 휴식 시작';
+      breakBtn.style.background = '#2A2A2A';
+      breakBtn.style.color = '#FFF';
+      if (drivingState.isPassengerBoarded) {
+        alightBtn.disabled = false;
+        alightBtn.style.background = '#FF6B00';
+        alightBtn.style.color = '#FFF';
+        if (statusEl) statusEl.innerText = '🙋 손님 탑승 중';
+      } else {
+        boardBtn.disabled = false;
+        boardBtn.style.background = 'var(--theme-accent)';
+        boardBtn.style.color = 'var(--theme-text-on-accent)';
+        if (statusEl) statusEl.innerText = '🈳 빈차 운행 중';
+      }
+      showToast('🚗 운행을 재개합니다.');
+    }
+  }
+  function handleBoarding() {
+    if (!drivingState.isDriving || drivingState.isBreak) return;
+    drivingState.isPassengerBoarded = true;
+    const boardBtn = document.getElementById('btn-board');
+    const alightBtn = document.getElementById('btn-alight');
+    const statusEl = document.getElementById('driving-current-status');
+    boardBtn.disabled = true;
+    boardBtn.style.background = '#2A2A2A';
+    boardBtn.style.color = '#8A8A8A';
+    alightBtn.disabled = false;
+    alightBtn.style.background = '#FF6B00';
+    alightBtn.style.color = '#FFF';
+    if (statusEl) statusEl.innerText = '🙋 손님 탑승 중';
+    showToast('🙋 승차 처리되었습니다.');
+  }
+  function handleAlighting() {
+    if (!drivingState.isDriving || drivingState.isBreak || !drivingState.isPassengerBoarded) return;
+    drivingState.isPassengerBoarded = false;
+    const boardBtn = document.getElementById('btn-board');
+    const alightBtn = document.getElementById('btn-alight');
+    const statusEl = document.getElementById('driving-current-status');
+    boardBtn.disabled = false;
+    boardBtn.style.background = 'var(--theme-accent)';
+    boardBtn.style.color = 'var(--theme-text-on-accent)';
+    alightBtn.disabled = true;
+    alightBtn.style.background = '#2A2A2A';
+    alightBtn.style.color = '#8A8A8A';
+    if (statusEl) statusEl.innerText = '🈳 빈차 운행 중';
+    showToast('👋 하차 처리되었습니다.');
+  }
+  function startDrivingTimer() {
+    stopDrivingTimer();
+    drivingState.lastTickTime = Date.now();
+    drivingStatsTimer = setInterval(() => {
+      const now = Date.now();
+      const elapsed = Math.floor((now - drivingState.lastTickTime) / 1000);
+      if (elapsed >= 1) {
+        drivingState.lastTickTime = now;
+        const todayData = getTodayDrivingData();
+        if (drivingState.isBreak) {
+          todayData.breakTime = (todayData.breakTime || 0) + elapsed;
+        } else {
+          todayData.totalDrive = (todayData.totalDrive || 0) + elapsed;
+          if (drivingState.isPassengerBoarded) {
+            todayData.passengerBoard = (todayData.passengerBoard || 0) + elapsed;
+          } else {
+            todayData.emptyCar = (todayData.emptyCar || 0) + elapsed;
+          }
+        }
+        saveTodayDrivingData(todayData);
+        if (activeTab === 4) renderDrivingLogStats();
+      }
+    }, 1000);
+  }
+  function stopDrivingTimer() {
+    if (drivingStatsTimer) {
+      clearInterval(drivingStatsTimer);
+      drivingStatsTimer = null;
+    }
+  }
+  function renderDrivingLogStats() {
+    const today = getTodayDrivingData();
+    document.getElementById('stat-today-total').innerText = formatHHMMSS(today.totalDrive || 0);
+    document.getElementById('stat-today-board').innerText = formatHHMMSS(today.passengerBoard || 0);
+    document.getElementById('stat-today-empty').innerText = formatHHMMSS(today.emptyCar || 0);
+    document.getElementById('stat-today-break').innerText = formatHHMMSS(today.breakTime || 0);
+    const records = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
+    const keys = Object.keys(records).sort();
+    if (keys.length === 0) return;
+    const now = new Date();
+    let dailySum = 0, dailyCount = 0;
+    let weeklySum = 0, weeklyCount = 0;
+    let monthlySum = 0, monthlyCount = 0;
+    keys.forEach(k => {
+      const rec = records[k];
+      const driveSec = rec.totalDrive || 0;
+      const dateParts = k.split('-');
+      const recDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+      const diffDays = Math.floor((now - recDate) / (1000 * 60 * 60 * 24));
+      dailySum += driveSec;
+      dailyCount++;
+      if (diffDays <= 7) {
+        weeklySum += driveSec;
+        weeklyCount++;
+      }
+      if (diffDays <= 30) {
+        monthlySum += driveSec;
+        monthlyCount++;
+      }
+    });
+    document.getElementById('stat-avg-daily').innerText = formatHHMMSS(Math.round(dailySum / Math.max(1, dailyCount)));
+    document.getElementById('stat-avg-weekly').innerText = formatHHMMSS(Math.round(weeklySum / Math.max(1, weeklyCount)));
+    document.getElementById('stat-avg-monthly').innerText = formatHHMMSS(Math.round(monthlySum / Math.max(1, monthlyCount)));
+  }
+
   window.addEventListener('DOMContentLoaded', () => {
     initKakaoSdk();
     applyThemeMode(currentThemeMode);
@@ -1829,6 +2079,8 @@
     
     document.getElementById('btn-mode1').addEventListener('click', () => setTab(1));
     document.getElementById('btn-mode3').addEventListener('click', () => setTab(3));
+    const btnMode4 = document.getElementById('btn-mode4');
+    if (btnMode4) btnMode4.addEventListener('click', () => setTab(4));
     
     document.getElementById('btn-refresh').addEventListener('click', () => executeSearch());
     document.getElementById('btn-search').addEventListener('click', () => executeSearch());
@@ -1880,6 +2132,11 @@
       }
       toggleTimer();
     });
+
+    document.getElementById('btn-drive-toggle').addEventListener('click', toggleDriving);
+    document.getElementById('btn-break-toggle').addEventListener('click', toggleBreak);
+    document.getElementById('btn-board').addEventListener('click', handleBoarding);
+    document.getElementById('btn-alight').addEventListener('click', handleAlighting);
 
     executeSearch();
   });
