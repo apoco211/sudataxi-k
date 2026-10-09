@@ -24,6 +24,8 @@
   <!-- 카카오 공식 JS SDK 및 지도/장소 API 연동 -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
   <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=7ee80d17f027cf99b9634ae13731a6a9&libraries=services"></script>
+  <!-- 곡선 렌더링을 위한 turf.js 라이브러리 추가 -->
+  <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
 
   <style>
     :root {
@@ -57,6 +59,139 @@
       --theme-text-on-accent: #000000;
       --final-card-bg: #0B1F14;
       --final-card-glow: rgba(34, 197, 94, 0.25);
+    }
+
+    /* 주간 모드 (Day Mode) 스타일 */
+    body.theme-day {
+      background-color: #F3F4F6 !important;
+      color: #1F2937 !important;
+    }
+    body.theme-day .update-banner {
+      background-color: #FEF3C7 !important;
+      border-color: #F59E0B !important;
+      color: #92400E !important;
+    }
+    body.theme-day .header {
+      color: #D97706 !important;
+    }
+    body.theme-day .build-ver-tag {
+      background: rgba(217, 119, 6, 0.15) !important;
+      color: #B45309 !important;
+    }
+    body.theme-day .weekday-badge {
+      background: #E5E7EB !important;
+      color: #374151 !important;
+    }
+    body.theme-day .mode-pill {
+      background: #E5E7EB !important;
+      color: #4B5563 !important;
+    }
+    body.theme-day .mode-pill.active {
+      background: var(--theme-accent) !important;
+      color: var(--theme-text-on-accent) !important;
+    }
+    body.theme-day .loc-bar {
+      background: #FEF3C7 !important;
+      border-color: #FDE68A !important;
+      color: #92400E !important;
+    }
+    body.theme-day .refresh-btn {
+      color: #92400E !important;
+    }
+    body.theme-day .map-btn {
+      background: #FFFFFF !important;
+      color: #111827 !important;
+      border-color: #D1D5DB !important;
+    }
+    body.theme-day .pipeline-log {
+      color: #6B7280 !important;
+    }
+    body.theme-day .card {
+      background: #FFFFFF !important;
+      border-color: #E5E7EB !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    body.theme-day .card.target-destination-card {
+      background: #FFF7ED !important;
+      border-color: #EA580C !important;
+      box-shadow: 0 0 10px rgba(234, 88, 12, 0.2);
+    }
+    body.theme-day .place-name {
+      color: #111827 !important;
+    }
+    body.theme-day .tag {
+      background: #F3F4F6 !important;
+      color: #4B5563 !important;
+    }
+    body.theme-day .backup-section {
+      background: #FFFFFF !important;
+      border-color: #E5E7EB !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    body.theme-day .recent-log-item {
+      background: #F9FAFB !important;
+      border-color: #E5E7EB !important;
+    }
+    body.theme-day .recent-log-time {
+      color: #1F2937 !important;
+    }
+    body.theme-day details {
+      background: #F9FAFB !important;
+      border-color: #E5E7EB !important;
+    }
+    body.theme-day .sub-final-card {
+      background: #F9FAFB !important;
+      border-color: #E5E7EB !important;
+    }
+    body.theme-day .sub-final-name {
+      color: #111827 !important;
+    }
+    body.theme-day .sub-final-meta {
+      color: #4B5563 !important;
+    }
+    body.theme-day #call-map-view, body.theme-day #route-map {
+      background: #E5E7EB !important;
+    }
+    body.theme-day .map-legend {
+      background: #FFFFFF !important;
+      border-color: #E5E7EB !important;
+      color: #111827 !important;
+    }
+    body.theme-day .map-modal-content {
+      background: #FFFFFF !important;
+    }
+    body.theme-day .map-modal-header {
+      background: #F9FAFB !important;
+      border-bottom-color: #E5E7EB !important;
+    }
+    body.theme-day .bottom-bar {
+      background: rgba(255, 255, 255, 0.95) !important;
+      border-top-color: var(--theme-accent) !important;
+    }
+    body.theme-day .timer-mode-btn {
+      background: #E5E7EB !important;
+      color: #4B5563 !important;
+      border-color: #D1D5DB !important;
+    }
+    body.theme-day .timer-display-btn {
+      background: #FFFFFF !important;
+      color: #111827 !important;
+      border-color: #D1D5DB !important;
+    }
+    body.theme-day .timer-display-btn.running {
+      background: #FEF3C7 !important;
+      color: #92400E !important;
+      border-color: #F59E0B !important;
+    }
+    body.theme-day .timer-display-btn.finished {
+      background: #FEE2E2 !important;
+      color: #DC2626 !important;
+      border-color: #EF4444 !important;
+    }
+    body.theme-day .add-custom-btn {
+      background: #F3E8FF !important;
+      color: #6B21A8 !important;
+      border-color: #C084FC !important;
     }
     
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -273,7 +408,11 @@
     </div>
   </div>
   
-  <div class="header" id="app-header-title">📅 날짜 수신 대기 중...</div>
+  <!-- 주간/야간 테마 변경 토글 유지 영역 -->
+  <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 8px;">
+    <div class="header" id="app-header-title" style="margin-bottom: 0; flex: 1;">📅 날짜 수신 대기 중...</div>
+    <button id="btn-theme-toggle" onclick="toggleTheme()" style="background: #2A2A2A; color: var(--theme-accent); border: 1px solid var(--theme-border); border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 800; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all 0.2s;">☀️ 주간</button>
+  </div>
   
   <div class="mode-container">
     <button class="mode-pill active" id="btn-mode1">⚡ 스마트 자동 추천 모드</button>
@@ -294,41 +433,47 @@
     </button>
   </div>
   
-  <div id="heatmap-container">
-    <div class="map-legend">
-      <div class="legend-item"><span class="dot-sample" style="background:#22C55E;"></span> 현재시간 집중</div>
-      <div class="legend-item"><span class="dot-sample" style="background:#64748B;"></span> 기타 시간</div>
-    </div>
-    <div id="call-map-view"></div>
-  </div>
-  
   <div class="pipeline-log" id="pipeline-log">대기 중 · 카카오 실시간 내비 연산 대기</div>
-  
   <div class="card-list" id="card-list"></div>
-  
-  <div class="backup-section">
-    <div class="backup-header">
-      <span class="backup-title">📊 데이터 관리 & 백업</span>
-      <span class="backup-count" id="log-count-text">저장 기록: 0개</span>
+
+  <!-- 1번 탭 (스마트 자동 추천 모드) 전용 하단 유지 섹션 -->
+  <div id="tab1-extras">
+    <div class="backup-section">
+      <div class="backup-header">
+        <span class="backup-title">📊 데이터 관리 & 백업</span>
+        <span class="backup-count" id="log-count-text">저장 기록: 0개</span>
+      </div>
+      <div class="backup-btn-group">
+        <button class="backup-btn" id="btn-export">📦 백업</button>
+        <button class="backup-btn" id="btn-import-open">📥 복원</button>
+        <input type="file" id="import-file-input" accept=".json,application/json" style="display: none;">
+      </div>
+      
+      <div style="margin-top: 6px; border-top: 1px dashed #3A3A3A; padding-top: 4px;">
+        <div style="font-size: 10px; font-weight: 800; color: #8A8A8A; margin-bottom: 2px;">🕒 최근 저장 목록</div>
+        <div id="recent-logs-list" style="display: flex; flex-direction: column; gap: 2px;"></div>
+      </div>
+      
+      <div class="custom-section">
+        <button class="add-custom-btn" id="btn-add-custom">⭐ 현재 위치 '나만의 핫플' 등록</button>
+        <div style="font-size: 10px; font-weight: 800; color: #C084FC; margin: 4px 0 2px 0;">📍 나만의 핫플 목록</div>
+        <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 2px;"></div>
+      </div>
     </div>
-    <div class="backup-btn-group">
-      <button class="backup-btn" id="btn-export">📦 백업</button>
-      <button class="backup-btn" id="btn-import-open">📥 복원</button>
-      <input type="file" id="import-file-input" accept=".json,application/json" style="display: none;">
+  </div>
+
+  <!-- 3번 탭 (콜 지도 시각화) 전용 노출 섹션 -->
+  <div id="tab3-extras" style="display: none;">
+    <div id="heatmap-container" style="display: flex;">
+      <div class="map-legend">
+        <div class="legend-item"><span class="dot-sample" style="background:#22C55E;"></span> 현재시간 집중</div>
+        <div class="legend-item"><span class="dot-sample" style="background:#64748B;"></span> 기타 시간</div>
+      </div>
+      <div id="call-map-view"></div>
     </div>
-    
-    <div style="margin-top: 6px; border-top: 1px dashed #3A3A3A; padding-top: 4px;">
-      <div style="font-size: 10px; font-weight: 800; color: #8A8A8A; margin-bottom: 2px;">🕒 최근 저장 목록</div>
-      <div id="recent-logs-list" style="display: flex; flex-direction: column; gap: 2px;"></div>
-    </div>
-    
-    <div class="custom-section">
-      <button class="add-custom-btn" id="btn-add-custom">⭐ 현재 위치 '나만의 핫플' 등록</button>
-      <div style="font-size: 10px; font-weight: 800; color: #C084FC; margin: 4px 0 2px 0;">📍 나만의 핫플 목록</div>
-      <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 2px;"></div>
-    </div>
-  
-    <details style="margin-top: 8px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 1.4;" open>
+
+    <!-- 가이드 및 히스토리는 콜 지도 시각화 탭으로 이동 -->
+    <details style="margin-top: 8px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 1.4;">
       <summary style="font-weight: 800; color: #FFC800; cursor: pointer;">💡 [수다택시 K] 점수 산출 및 모드별 동작 가이드 (터치하여 접기/펼치기)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px; font-size: 10px;">
         <div>
@@ -344,11 +489,18 @@
       </div>
     </details>
   
-    <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;" open>
-      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v5.9.5 상세 누적 업데이트 히스토리 (터치)</summary>
+    <details style="margin-top: 8px; background: #161616; border: 1px solid #333333; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;">
+      <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 v5.9.7 최신 업데이트 히스토리 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v5.9.5 (2026.10.08) - 독립 실시간 도로 거리 산출 적용</strong><br>
+          <strong style="color: #4ADE80;">v5.9.7 (2026.10.09) - UI/UX 개선 및 곡선 동선 렌더링</strong><br>
+          • 🎨 <strong>경로 지도 개선</strong>: 직선 경로가 아닌 곡선 경로 렌더링 적용 (BezierCurve).<br>
+          • ⏱️ <strong>타이머 오작동 방지</strong>: 단순 터치 시 단축어가 실행되지 않도록 '길게 누르기(Long Press)' 기능 완벽 분리 적용.<br>
+          • 📑 <strong>UI 배치 최적화</strong>: 점수 가이드 및 업데이트 히스토리를 콜 지도 탭으로 분리 배치 적용.<br>
+          • ☀️ <strong>주/야간 토글 복원</strong>: 최상단 주/야간 테마 변경 토글 기능 안정적 유지.
+        </div>
+        <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
+          <strong style="color: #888888;">v5.9.5 (2026.10.08) - 독립 실시간 도로 거리 산출 적용</strong><br>
           • 🚗 <strong>개별 실시간 도로 거리</strong>: 누적 동선 거리 합산을 전면 폐지하고 현위치 기준 각 핫플별 독립적 카카오 도로 거리/시간 산출.<br>
           • 🎯 <strong>위수 및 범위 보정</strong>: 의왕/군포 남부 위수 판정 정밀화 및 독립 거리 표시 보장.
         </div>
@@ -381,7 +533,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v5.9.5";
+  const BUILD_VERSION = "v5.9.7";
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -397,10 +549,39 @@
   let isTimerRunning = false;
   let isTodayHoliday = false;
   
+  let currentThemeMode = localStorage.getItem('sudataxi_theme_mode') || 'night';
+  
   let audioCtx = null;
   let silentAudioElement = null;
   const SILENT_WAV_BASE64 = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==';
+
+  function applyThemeMode(theme) {
+    currentThemeMode = theme;
+    localStorage.setItem('sudataxi_theme_mode', theme);
+    const btn = document.getElementById('btn-theme-toggle');
+    if (theme === 'day') {
+      document.body.classList.add('theme-day');
+      if (btn) {
+        btn.innerText = '🌙 야간';
+        btn.style.background = '#E5E7EB';
+        btn.style.color = '#1F2937';
+        btn.style.borderColor = '#D1D5DB';
+      }
+    } else {
+      document.body.classList.remove('theme-day');
+      if (btn) {
+        btn.innerText = '☀️ 주간';
+        btn.style.background = '#2A2A2A';
+        btn.style.color = 'var(--theme-accent)';
+        btn.style.borderColor = 'var(--theme-border)';
+      }
+    }
+  }
   
+  function toggleTheme() {
+    applyThemeMode(currentThemeMode === 'day' ? 'night' : 'day');
+  }
+
   function initKakaoSdk() {
     if (window.Kakao && !window.Kakao.isInitialized()) {
       try { window.Kakao.init(KAKAO_JS_KEY); } catch(e) {}
@@ -1051,24 +1232,35 @@
     return clusters;
   }
 
+  // 탭 이동 로직 (UI 분리 반영)
   function setTab(tab) {
     activeTab = tab;
     document.getElementById('btn-mode1').classList.toggle('active', tab === 1);
     document.getElementById('btn-mode3').classList.toggle('active', tab === 3);
     
     const mainBtnGroup = document.getElementById('main-btn-group');
-    const heatmapBox = document.getElementById('heatmap-container');
+    const tab1Extras = document.getElementById('tab1-extras'); // 백업/데이터관리 섹션
+    
     const cardListEl = document.getElementById('card-list');
+    const pipelineLogEl = document.getElementById('pipeline-log');
+    
+    const tab3Extras = document.getElementById('tab3-extras'); // 콜지도 및 아코디언들
     
     if (tab === 3) {
       if (mainBtnGroup) mainBtnGroup.style.display = 'none';
-      if (heatmapBox) heatmapBox.style.display = 'flex';
+      if (pipelineLogEl) pipelineLogEl.style.display = 'none';
       if (cardListEl) cardListEl.style.display = 'none';
+      if (tab1Extras) tab1Extras.style.display = 'none';
+      
+      if (tab3Extras) tab3Extras.style.display = 'block';
       renderCallMapView();
     } else {
       if (mainBtnGroup) mainBtnGroup.style.display = 'flex';
-      if (heatmapBox) heatmapBox.style.display = 'none';
+      if (pipelineLogEl) pipelineLogEl.style.display = 'block';
       if (cardListEl) cardListEl.style.display = 'flex';
+      if (tab1Extras) tab1Extras.style.display = 'block';
+      
+      if (tab3Extras) tab3Extras.style.display = 'none';
       executeSearch();
     }
   }
@@ -1086,7 +1278,7 @@
         const inWisu = await checkIsInsideWisuRealtime(currentPos.lat, currentPos.lng);
         
         currentMode = inWisu ? 1 : 2;
-        document.body.className = `mode-${currentMode}`;
+        document.body.className = `mode-${currentMode}` + (currentThemeMode === 'day' ? ' theme-day' : '');
         if (locText) locText.innerText = `📍 ${currentRegionName || currentPos.lat.toFixed(4)} (${inWisu ? '관내 반경 5km 추천' : '관외 복귀 경로 추천'})`;
         if (activeTab !== 3) calculateAndRender();
       },
@@ -1103,7 +1295,7 @@
       const nameA = item.name.replace(/\s+/g, '').substring(0, 3);
       const nameB = candName.replace(/\s+/g, '').substring(0, 3);
       const sameName = nameA === nameB || nameA.includes(nameB) || nameB.includes(nameA);
-      const closeDist = getStraightDistanceKm(item.lat, item.lng, candLat, candLng) < 0.3; // 300m 중복 필터
+      const closeDist = getStraightDistanceKm(item.lat, item.lng, candLat, candLng) < 0.3; 
       return sameName || closeDist;
     });
   }
@@ -1219,7 +1411,7 @@
     preFilteredCandidates.sort((a, b) => b.preliminaryScore - a.preliminaryScore);
     const topCandidatesToRoute = preFilteredCandidates.slice(0, 10);
 
-    /* 🚗 각 후보지별 현재 위치 기준 '독립적' 실시간 도로망 병렬 연산 (누적거리 버그 해결) */
+    /* 🚗 개별 도로망 독립 연산 */
     const routedCandidatesPromises = topCandidatesToRoute.map(async (item) => {
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
       return {
@@ -1378,7 +1570,6 @@
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     const currentHour = new Date().getHours();
     if (logs.length === 0) {
-      document.getElementById('pipeline-log').innerText = '저장된 콜 기록이 없습니다.';
       return;
     }
     let activeCount = 0;
@@ -1406,11 +1597,11 @@
         ${isActiveTime ? '<span style="color:#22C55E; font-weight:900;">🔥 집중지점</span>' : ''}
       `);
     });
-    document.getElementById('pipeline-log').innerText = `총 ${logs.length}건 중 현재시간(${currentHour}시) 콜 ${activeCount}건 집중`;
   }
 
+  // 곡선 경로 렌더링 적용 (Turf.js)
   async function openRouteMapModal() {
-    if (typeof L === 'undefined') { showToast('지도 로딩 중입니다.'); return; }
+    if (typeof L === 'undefined' || typeof turf === 'undefined') { showToast('지도 로딩 중입니다.'); return; }
     const modal = document.getElementById('map-modal');
     if (modal) modal.classList.add('active');
     setTimeout(async () => {
@@ -1431,19 +1622,21 @@
           .addTo(leafletMap).bindPopup(`<b>${pt.name}</b>`);
       });
       
-      let allRoadCoords = [];
-      for (let i = 0; i < currentRouteData.length - 1; i++) {
-        const start = currentRouteData[i];
-        const end = currentRouteData[i+1];
-        
-        const roadRes = await fetchKakaoRoadRoute(start.lat, start.lng, end.lat, end.lng);
-        if (roadRes && roadRes.geometryCoords) {
-          allRoadCoords.push(...roadRes.geometryCoords);
+      // 베지에 곡선 적용
+      if (markerCoords.length >= 2) {
+        try {
+          const turfCoords = markerCoords.map(pt => [pt[1], pt[0]]); // [lng, lat] for turf
+          const lineString = turf.lineString(turfCoords);
+          const curved = turf.bezierSpline(lineString, { resolution: 10000, sharpness: 0.85 });
+          const leafletCurvedCoords = curved.geometry.coordinates.map(c => [c[1], c[0]]); // return to [lat, lng]
+          
+          L.polyline(leafletCurvedCoords, { color: themeColor, weight: 5, opacity: 0.9, lineJoin: 'round', lineCap: 'round' }).addTo(leafletMap);
+        } catch (e) {
+          // 실패 시 기존 직선 폴리라인
+          L.polyline(markerCoords, { color: themeColor, weight: 5, opacity: 0.9, lineJoin: 'round', lineCap: 'round' }).addTo(leafletMap);
         }
       }
-      if (allRoadCoords.length > 0) {
-        L.polyline(allRoadCoords, { color: themeColor, weight: 5, opacity: 0.9, lineJoin: 'round', lineCap: 'round' }).addTo(leafletMap);
-      }
+      
       leafletMap.fitBounds(L.latLngBounds(markerCoords), { padding: [30, 30] });
     }, 200);
   }
@@ -1627,6 +1820,7 @@
 
   window.addEventListener('DOMContentLoaded', () => {
     initKakaoSdk();
+    applyThemeMode(currentThemeMode);
     checkIsPublicHolidayRealtime();
     updateCallLogStats();
     updateCustomHotspotUI();
@@ -1651,21 +1845,40 @@
     
     document.getElementById('timer-btn-5m').addEventListener('click', () => setTimerPreset(5));
     document.getElementById('timer-btn-10m').addEventListener('click', () => setTimerPreset(10));
-    document.getElementById('timer-display-btn').addEventListener('click', () => toggleTimer());
     
+    // 타이머 버튼 오터치 방지 및 롱프레스 완벽 분리 로직
     const timerBtn = document.getElementById('timer-display-btn');
+    let touchTimer = null;
+    let isLongPress = false;
+    
     timerBtn.addEventListener('contextmenu', (e) => {
       e.preventDefault();
       handleTimerLongPress();
     });
-    let touchTimer = null;
-    timerBtn.addEventListener('touchstart', () => {
+    
+    timerBtn.addEventListener('touchstart', (e) => {
+      isLongPress = false;
       touchTimer = setTimeout(() => {
+        isLongPress = true;
         handleTimerLongPress();
       }, 800);
-    });
+    }, {passive: true});
+    
     timerBtn.addEventListener('touchend', () => {
       if (touchTimer) clearTimeout(touchTimer);
+    });
+    
+    timerBtn.addEventListener('touchcancel', () => {
+      if (touchTimer) clearTimeout(touchTimer);
+    });
+    
+    timerBtn.addEventListener('click', (e) => {
+      if (isLongPress) {
+        e.preventDefault();
+        isLongPress = false;
+        return;
+      }
+      toggleTimer();
     });
 
     executeSearch();
