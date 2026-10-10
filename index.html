@@ -378,7 +378,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v6.2.0";
+  const BUILD_VERSION = "v6.2.1";
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -848,6 +848,13 @@
     const s = seconds % 60;
     return `${String(m).padStart(2,'0')}:${String(s).padStart(2, '0')}`;
   }
+  
+  function formatHHMMSS(sec) {
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
 
   async function fetchRealtimeWeather(lat, lng) {
     try {
@@ -892,7 +899,7 @@
     if (isHoliday) {
       badgeHtml = `<span class="holiday-badge">🔴 ${holidayName || '공휴일'}</span>`;
     } else if (isWeekend) {
-      badgeHtml = `<span class="holiday-badge" style="background:#F97316;">🟡 휴일</span>`;
+      badgeHtml = `<span class="holiday-badge" style="background:#FF8C00;">🟡 휴일</span>`;
     } else {
       badgeHtml = `<span class="weekday-badge">🟢 평일</span>`;
     }
@@ -1675,6 +1682,172 @@
     });
   }
 
+  function getTodayKey() {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  }
+
+  function getTodayDrivingData() {
+    const key = getTodayKey();
+    const records = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
+    if (!records[key]) {
+      records[key] = { totalDrive: 0, passengerBoard: 0, emptyCar: 0, breakTime: 0 };
+    }
+    return records[key];
+  }
+
+  function saveTodayDrivingData(data) {
+    const key = getTodayKey();
+    const records = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
+    records[key] = data;
+    localStorage.setItem('sudataxi_driving_records', JSON.stringify(records));
+  }
+
+  function toggleDriving() {
+    drivingState.isDriving = !drivingState.isDriving;
+    if (drivingState.isDriving) {
+      drivingState.isPassengerBoarded = false;
+      drivingState.isBreak = false;
+      drivingState.lastTickTime = Date.now();
+      drivingState.stateStartTime = Date.now();
+      startDrivingTimer();
+      showToast('🚗 운행이 시작되었습니다.');
+    } else {
+      drivingState.isPassengerBoarded = false;
+      drivingState.isBreak = false;
+      drivingState.stateStartTime = null;
+      stopDrivingTimer();
+      showToast('⏹️ 운행이 종료되었습니다.');
+    }
+    updateDrivingUI();
+    saveDrivingState();
+  }
+
+  function toggleBreak() {
+    if (!drivingState.isDriving) return;
+    drivingState.isBreak = !drivingState.isBreak;
+    drivingState.stateStartTime = Date.now();
+    
+    if (drivingState.isBreak) {
+      showToast('☕ 휴식을 시작합니다.');
+    } else {
+      showToast('🚗 운행을 재개합니다.');
+    }
+    updateDrivingUI();
+    saveDrivingState();
+  }
+
+  function handleBoarding() {
+    if (!drivingState.isDriving || drivingState.isBreak) return;
+    drivingState.isPassengerBoarded = true;
+    drivingState.stateStartTime = Date.now();
+    updateDrivingUI();
+    showToast('🙋 승차 처리되었습니다.');
+    saveDrivingState();
+  }
+
+  function handleAlighting() {
+    if (!drivingState.isDriving || drivingState.isBreak || !drivingState.isPassengerBoarded) return;
+    drivingState.isPassengerBoarded = false;
+    drivingState.stateStartTime = Date.now();
+    
+    updateDrivingUI();
+    showToast('👋 하차 완료!\n자동추천모드 이동 및 5분 타이머가 시작됩니다.');
+    saveDrivingState();
+    
+    // 자동추천 탭 이동 + 5분 타이머 자동 실행
+    setTab(1);
+    setTimerPreset(5);
+    startTimerInternal();
+  }
+
+  function startDrivingTimer() {
+    stopDrivingTimer();
+    drivingState.lastTickTime = Date.now();
+    drivingStatsTimer = setInterval(() => {
+      const now = Date.now();
+      const elapsed = Math.floor((now - drivingState.lastTickTime) / 1000);
+      if (elapsed >= 1) {
+        drivingState.lastTickTime = now;
+        const todayData = getTodayDrivingData();
+        if (drivingState.isBreak) {
+          todayData.breakTime = (todayData.breakTime || 0) + elapsed;
+        } else {
+          todayData.totalDrive = (todayData.totalDrive || 0) + elapsed;
+          if (drivingState.isPassengerBoarded) {
+            todayData.passengerBoard = (todayData.passengerBoard || 0) + elapsed;
+          } else {
+            todayData.emptyCar = (todayData.emptyCar || 0) + elapsed;
+          }
+        }
+        saveTodayDrivingData(todayData);
+        saveDrivingState();
+        if (activeTab === 4) renderDrivingLogStats();
+        
+        renderCurrentStateTime(now);
+      }
+    }, 1000);
+  }
+
+  function stopDrivingTimer() {
+    if (drivingStatsTimer) {
+      clearInterval(drivingStatsTimer);
+      drivingStatsTimer = null;
+    }
+  }
+
+  function renderDrivingLogStats() {
+    const today = getTodayDrivingData();
+    document.getElementById('stat-today-total').innerText = formatHHMMSS(today.totalDrive || 0);
+    document.getElementById('stat-today-board').innerText = formatHHMMSS(today.passengerBoard || 0);
+    document.getElementById('stat-today-empty').innerText = formatHHMMSS(today.emptyCar || 0);
+    document.getElementById('stat-today-break').innerText = formatHHMMSS(today.breakTime || 0);
+    
+    const records = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
+    const keys = Object.keys(records).sort();
+    if (keys.length === 0) return;
+    
+    const now = new Date();
+    let dailySum = 0, dailyBoard = 0, dailyEmpty = 0, dailyCount = 0;
+    let weeklySum = 0, weeklyBoard = 0, weeklyEmpty = 0, weeklyCount = 0;
+    let monthlySum = 0, monthlyBoard = 0, monthlyEmpty = 0, monthlyCount = 0;
+    
+    keys.forEach(k => {
+      const rec = records[k];
+      const driveSec = rec.totalDrive || 0;
+      const boardSec = rec.passengerBoard || 0;
+      const emptySec = rec.emptyCar || 0;
+      
+      const dateParts = k.split('-');
+      const recDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+      const diffDays = Math.floor((now - recDate) / (1000 * 60 * 60 * 24));
+      
+      dailySum += driveSec; dailyBoard += boardSec; dailyEmpty += emptySec;
+      dailyCount++;
+      
+      if (diffDays <= 7) {
+        weeklySum += driveSec; weeklyBoard += boardSec; weeklyEmpty += emptySec;
+        weeklyCount++;
+      }
+      if (diffDays <= 30) {
+        monthlySum += driveSec; monthlyBoard += boardSec; monthlyEmpty += emptySec;
+        monthlyCount++;
+      }
+    });
+    
+    document.getElementById('stat-avg-daily-total').innerText = formatHHMMSS(Math.round(dailySum / Math.max(1, dailyCount)));
+    document.getElementById('stat-avg-weekly-total').innerText = formatHHMMSS(Math.round(weeklySum / Math.max(1, weeklyCount)));
+    document.getElementById('stat-avg-monthly-total').innerText = formatHHMMSS(Math.round(monthlySum / Math.max(1, monthlyCount)));
+    
+    document.getElementById('stat-avg-daily-board').innerText = formatHHMMSS(Math.round(dailyBoard / Math.max(1, dailyCount)));
+    document.getElementById('stat-avg-weekly-board').innerText = formatHHMMSS(Math.round(weeklyBoard / Math.max(1, weeklyCount)));
+    document.getElementById('stat-avg-monthly-board').innerText = formatHHMMSS(Math.round(monthlyBoard / Math.max(1, monthlyCount)));
+    
+    document.getElementById('stat-avg-daily-empty').innerText = formatHHMMSS(Math.round(dailyEmpty / Math.max(1, dailyCount)));
+    document.getElementById('stat-avg-weekly-empty').innerText = formatHHMMSS(Math.round(weeklyEmpty / Math.max(1, weeklyCount)));
+    document.getElementById('stat-avg-monthly-empty').innerText = formatHHMMSS(Math.round(monthlyEmpty / Math.max(1, monthlyCount)));
+  }
+
   function exportCallLogs() {
     const data = { 
       call_logs: JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]'), 
@@ -1772,85 +1945,6 @@
   }
 
   function dismissBanner() { document.getElementById('hotspotUpdateBanner').style.display = 'none'; }
-
-  function getTodayKey() {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-  }
-
-  function getTodayDrivingData() {
-    const key = getTodayKey();
-    const records = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
-    if (!records[key]) {
-      records[key] = { totalDrive: 0, passengerBoard: 0, emptyCar: 0, breakTime: 0 };
-    }
-    return records[key];
-  }
-
-  function saveTodayDrivingData(data) {
-    const key = getTodayKey();
-    const records = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
-    records[key] = data;
-    localStorage.setItem('sudataxi_driving_records', JSON.stringify(records));
-  }
-
-  function toggleDriving() {
-    drivingState.isDriving = !drivingState.isDriving;
-    if (drivingState.isDriving) {
-      drivingState.isPassengerBoarded = false;
-      drivingState.isBreak = false;
-      drivingState.lastTickTime = Date.now();
-      drivingState.stateStartTime = Date.now();
-      startDrivingTimer();
-      showToast('🚗 운행이 시작되었습니다.');
-    } else {
-      drivingState.isPassengerBoarded = false;
-      drivingState.isBreak = false;
-      drivingState.stateStartTime = null;
-      stopDrivingTimer();
-      showToast('⏹️ 운행이 종료되었습니다.');
-    }
-    updateDrivingUI();
-    saveDrivingState();
-  }
-
-  function toggleBreak() {
-    if (!drivingState.isDriving) return;
-    drivingState.isBreak = !drivingState.isBreak;
-    drivingState.stateStartTime = Date.now();
-    
-    if (drivingState.isBreak) {
-      showToast('☕ 휴식을 시작합니다.');
-    } else {
-      showToast('🚗 운행을 재개합니다.');
-    }
-    updateDrivingUI();
-    saveDrivingState();
-  }
-
-  function handleBoarding() {
-    if (!drivingState.isDriving || drivingState.isBreak) return;
-    drivingState.isPassengerBoarded = true;
-    drivingState.stateStartTime = Date.now();
-    updateDrivingUI();
-    showToast('🙋 승차 처리되었습니다.');
-    saveDrivingState();
-  }
-
-  function handleAlighting() {
-    if (!drivingState.isDriving || drivingState.isBreak || !drivingState.isPassengerBoarded) return;
-    drivingState.isPassengerBoarded = false;
-    drivingState.stateStartTime = Date.now();
-    
-    updateDrivingUI();
-    showToast('👋 하차 완료!\n자동추천모드 이동 및 5분 타이머가 시작됩니다.');
-    saveDrivingState();
-    
-    // 자동추천 탭 이동 + 5분 타이머 자동 실행
-    setTab(1);
-    setTimerPreset(5);
-    startTimerInternal();
-  }
 
   window.addEventListener('DOMContentLoaded', () => {
     initKakaoSdk();
