@@ -109,7 +109,7 @@
     .build-ver-tag { font-size: 10px; color: var(--theme-accent); opacity: 0.85; font-weight: 800; margin: 0 2px; padding: 1px 4px; background: rgba(255,200,0,0.15); border-radius: 4px; display: inline-block; vertical-align: middle; }
     
     .mode-container { display: flex; gap: 4px; margin-bottom: 8px; }
-    .mode-pill { flex: 1; height: 30px; border-radius: 8px; background: #2A2A2A; color: #8A8A8A; font-size: 11px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+    .mode-pill { flex: 1; height: 30px; border-radius: 8px; background: #2A2A2A; color: #8A8A8A; font-size: 11px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; white-space: nowrap; }
     .mode-pill.active { background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; }
     
     .loc-bar { background: var(--theme-bg-dark); height: 34px; border: 1px solid var(--theme-border); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 0 8px; font-size: 11px; color: var(--theme-accent); margin-bottom: 8px; }
@@ -231,7 +231,7 @@
   </div>
   
   <div class="mode-container">
-    <button class="mode-pill active" id="btn-mode1">⚡ 스마트 자동 추천 모드</button>
+    <button class="mode-pill active" id="btn-mode1">⚡ 자동추천모드</button>
     <button class="mode-pill" id="btn-mode3">📊 콜 지도 시각화</button>
     <button class="mode-pill" id="btn-mode4">🚘 운행 일지</button>
   </div>
@@ -253,7 +253,7 @@
   <div class="pipeline-log" id="pipeline-log">대기 중 · 카카오 실시간 내비 연산 대기</div>
   <div class="card-list" id="card-list"></div>
 
-  <!-- 1번 탭 (스마트 자동 추천 모드) 전용 하단 유지 섹션 -->
+  <!-- 1번 탭 (자동추천모드) 전용 하단 유지 섹션 -->
   <div id="tab1-extras">
     <div class="backup-section">
       <div class="backup-header">
@@ -261,7 +261,7 @@
         <span class="backup-count" id="log-count-text">저장 기록: 0개</span>
       </div>
       <div class="backup-btn-group">
-        <button class="backup-btn" id="btn-export">📦 백업</button>
+        <button class="backup-btn" id="btn-export">📦 백업 (운행일지 포함)</button>
         <button class="backup-btn" id="btn-import-open">📥 복원</button>
         <input type="file" id="import-file-input" accept=".json,application/json" style="display: none;">
       </div>
@@ -289,7 +289,6 @@
       <div id="call-map-view"></div>
     </div>
 
-    <!-- 가이드 및 히스토리는 콜 지도 시각화 탭으로 이동 -->
     <details style="margin-top: 8px; background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 1.4;">
       <summary style="font-weight: 800; color: #FFC800; cursor: pointer;">💡 [수다택시 K] 점수 산출 및 모드별 동작 가이드 (터치하여 접기/펼치기)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 8px; font-size: 10px;">
@@ -310,10 +309,11 @@
       <summary style="font-weight: 800; color: #4ADE80; cursor: pointer; font-size: 11px;">📜 최신 업데이트 히스토리 (터치)</summary>
       <div style="margin-top: 6px; color: #CCCCCC; display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed #2A2A2A; padding-bottom: 4px;">
-          <strong style="color: #4ADE80;">v6.0.2 - 오류 수정 및 통계 안정화</strong><br>
-          • 🐞 <strong>스크립트 충돌 해결</strong>: 운행일지 탭의 평균 통계 텍스트 ID 맵핑 오류로 인해 탭 전환 및 운행시작 버튼이 먹통이 되던 크리티컬 버그를 완전히 해결했습니다.<br>
-          • 📊 <strong>상세 통계 로직 활성화</strong>: 일/주/월별 전체 운행, 탑승, 공차 시간이 정상적으로 분할 누적되어 대시보드에 실시간 반영됩니다.<br>
-          • 🗺️ <strong>실시간 실제 도로망 연동</strong>: 모드2 복귀 시 점들이 뒤섞이지 않게 가까운 순으로 재정렬하고, OSRM API를 사용해 직선이나 곡선이 아닌 실제 도로 궤적을 렌더링합니다. (OSRM 서버 응답 지연 시 Turf.js 곡선 자동 전환 적용)
+          <strong style="color: #4ADE80;">v6.1.0 - 편의성 대폭 강화</strong><br>
+          • 🕒 <strong>타이머 기능 연동</strong>: 업무일지 탭에서 '하차' 클릭 시 자동으로 '자동추천모드'로 이동하며 5분 타이머가 바로 실행됩니다.<br>
+          • 💾 <strong>백그라운드 자동 백업</strong>: 운행 데이터를 보호하기 위해 10분마다 브라우저 내부 저장소에 전체 기록(운행일지 포함)이 안전하게 자동 백업됩니다.<br>
+          • ⏳ <strong>상태별 실시간 타이머</strong>: 오늘 운행 현황 상태 표시줄 옆에 현재 상태(손님탑승중, 빈차, 휴식)로 흐른 시간이 실시간 파란색 텍스트로 표시됩니다.<br>
+          • 🔔 <strong>알림 푸시 업그레이드</strong>: 카플레이 이외의 환경에서도 타이머 종료 시 백그라운드 푸시 알림과 함께 크고 명확한 경고음, 진동 패턴이 울리도록 개선되었습니다.
         </div>
       </div>
     </details>
@@ -394,12 +394,12 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v6.0.2";
+  const BUILD_VERSION = "v6.1.0";
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
   let activeTab = 1;
-  let drivingState = { isDriving: false, isPassengerBoarded: false, isBreak: false, currentStatus: 'idle', startTime: null, lastTickTime: null };
+  let drivingState = { isDriving: false, isPassengerBoarded: false, isBreak: false, currentStatus: 'idle', startTime: null, lastTickTime: null, stateStartTime: null };
   let drivingStatsTimer = null;
   let currentPos = null;
   let currentRegionName = "";
@@ -478,7 +478,7 @@
     } catch(e) {}
   }
   
-  function startCarPlayAudioKeepAlive(title = "수다택시 K - 5분 대기중") {
+  function startCarPlayAudioKeepAlive(title = "수다택시 K - 대기중") {
     try {
       if (!silentAudioElement) {
         silentAudioElement = new Audio(SILENT_WAV_BASE64);
@@ -502,13 +502,30 @@
   }
   
   function requestNotificationPermission() {
-    if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
   }
   
   function triggerSystemNotification() {
     if ('Notification' in window && Notification.permission === 'granted') {
       try {
-        new Notification('⏱️ [수다택시 K]', { body: `${timerPresetMin}분 대기 완료! 추천지로 이동하세요.`, requireInteraction: true });
+        if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+           navigator.serviceWorker.ready.then(registration => {
+             registration.showNotification('⏱️ [수다택시 K]', {
+               body: `${timerPresetMin}분 대기 완료! 추천지로 이동하세요.`,
+               icon: './icon-192.png',
+               vibrate: [300, 150, 300, 150, 500],
+               requireInteraction: true
+             });
+           });
+        } else {
+          new Notification('⏱️ [수다택시 K]', { 
+            body: `${timerPresetMin}분 대기 완료! 추천지로 이동하세요.`,
+            icon: './icon-192.png',
+            requireInteraction: true 
+          });
+        }
       } catch(e) {}
     }
   }
@@ -518,19 +535,20 @@
       initOrResumeAudioContext();
       if (!audioCtx) return;
       const now = audioCtx.currentTime;
-      const beepFreqs = [880, 1050, 1250];
+      // 사운드 패턴 강화 (총 6번 울림)
+      const beepFreqs = [880, 1050, 1250, 880, 1050, 1250];
       beepFreqs.forEach((freq, idx) => {
-        const startTime = now + (idx * 0.25);
+        const startTime = now + (idx * 0.3);
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = 'sine';
         osc.frequency.setValueAtTime(freq, startTime);
-        gain.gain.setValueAtTime(0.8, startTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.2);
+        gain.gain.setValueAtTime(0.9, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.25);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start(startTime);
-        osc.stop(startTime + 0.2);
+        osc.stop(startTime + 0.25);
       });
     } catch(e) {}
     
@@ -543,7 +561,7 @@
       });
     }
     
-    if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 300]);
+    if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 500]);
     triggerSystemNotification();
   }
 
@@ -588,6 +606,19 @@
     } catch(e) {}
   }
 
+  // 10분마다 백그라운드 자동 백업 (운행일지 데이터 포함)
+  function executeAutoBackup() {
+    try {
+      const backupData = {
+        call_logs: JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]'),
+        custom_hotspots: JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]'),
+        driving_records: JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}'),
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem('sudataxi_auto_backup', JSON.stringify(backupData));
+    } catch(e) {}
+  }
+
   function saveDrivingState() {
     localStorage.setItem('sudataxi_driving_state', JSON.stringify(drivingState));
   }
@@ -598,6 +629,12 @@
       try {
         const parsed = JSON.parse(saved);
         drivingState = parsed;
+        
+        // 이전 버전에 없던 상태 유지 시간 변수 초기화 방어코드
+        if (!drivingState.stateStartTime && drivingState.isDriving) {
+            drivingState.stateStartTime = Date.now();
+        }
+
         if (drivingState.isDriving) {
           const now = Date.now();
           if (drivingState.lastTickTime && now > drivingState.lastTickTime) {
@@ -625,12 +662,35 @@
     }
   }
 
+  function renderCurrentStateTime(nowDate) {
+    const statusEl = document.getElementById('driving-current-status');
+    if (!statusEl) return;
+    
+    if (!drivingState.isDriving) {
+        statusEl.innerHTML = '<span style="color: #8A8A8A;">운행 대기</span>';
+        return;
+    }
+    
+    let stateElapsed = 0;
+    if (drivingState.stateStartTime) {
+        stateElapsed = Math.floor((nowDate - drivingState.stateStartTime) / 1000);
+    }
+    
+    const timeStr = stateElapsed >= 3600 ? formatHHMMSS(stateElapsed) : formatMMSS(stateElapsed);
+    let statusText = '';
+    
+    if (drivingState.isBreak) statusText = '☕ 휴식중';
+    else if (drivingState.isPassengerBoarded) statusText = '🙋 손님탑승중';
+    else statusText = '🈳 빈차운행중';
+    
+    statusEl.innerHTML = `${statusText} <span style="color: #4DA8DA; font-weight: 900; margin-left: 2px;">[${timeStr}]</span>`;
+  }
+
   function updateDrivingUI() {
     const driveBtn = document.getElementById('btn-drive-toggle');
     const breakBtn = document.getElementById('btn-break-toggle');
     const boardBtn = document.getElementById('btn-board');
     const alightBtn = document.getElementById('btn-alight');
-    const statusEl = document.getElementById('driving-current-status');
 
     if (drivingState.isDriving) {
       driveBtn.innerText = '⏹️ 운행 종료';
@@ -648,7 +708,6 @@
         alightBtn.disabled = true;
         alightBtn.style.background = '#2A2A2A';
         alightBtn.style.color = '#8A8A8A';
-        if (statusEl) statusEl.innerText = '☕ 휴식 중';
       } else {
         breakBtn.innerText = '☕ 휴식 시작';
         breakBtn.style.background = '#2A2A2A';
@@ -661,7 +720,6 @@
           alightBtn.disabled = false;
           alightBtn.style.background = '#FF6B00';
           alightBtn.style.color = '#FFF';
-          if (statusEl) statusEl.innerText = '🙋 손님 탑승 중';
         } else {
           boardBtn.disabled = false;
           boardBtn.style.background = 'var(--theme-accent)';
@@ -669,7 +727,6 @@
           alightBtn.disabled = true;
           alightBtn.style.background = '#2A2A2A';
           alightBtn.style.color = '#8A8A8A';
-          if (statusEl) statusEl.innerText = '🈳 빈차 운행 중';
         }
       }
     } else {
@@ -685,8 +742,9 @@
       alightBtn.disabled = true;
       alightBtn.style.background = '#2A2A2A';
       alightBtn.style.color = '#8A8A8A';
-      if (statusEl) statusEl.innerText = '운행 대기';
     }
+    
+    renderCurrentStateTime(Date.now());
   }
   
   function setTimerPreset(min) {
@@ -737,7 +795,7 @@
   
   function startTimerInternal() {
     isTimerRunning = true;
-    startCarPlayAudioKeepAlive(`수다택시 K - ${timerPresetMin}분 대기중 (카플레이 연결됨)`);
+    startCarPlayAudioKeepAlive(`수다택시 K - ${timerPresetMin}분 대기중`);
     const btn = document.getElementById('timer-display-btn');
     btn.classList.add('running');
     btn.classList.remove('finished');
@@ -1196,7 +1254,6 @@
     return clusters;
   }
 
-  // 탭 이동 로직 (UI 분리 반영)
   function setTab(tab) {
     activeTab = tab;
     document.getElementById('btn-mode1').classList.toggle('active', tab === 1);
@@ -1386,7 +1443,6 @@
     preFilteredCandidates.sort((a, b) => b.preliminaryScore - a.preliminaryScore);
     const topCandidatesToRoute = preFilteredCandidates.slice(0, 10);
 
-    /* 🚗 개별 도로망 독립 연산 */
     const routedCandidatesPromises = topCandidatesToRoute.map(async (item) => {
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
       return {
@@ -1416,7 +1472,6 @@
       if (selectedCandidates.length === 3) break;
     }
 
-    // [수정] 모드2 복귀 시 동선이 꼬이지 않도록 출발지 기준 거리순 정렬 추가 (1->2->3 순차 동선)
     selectedCandidates.sort((a, b) => a.dist - b.dist);
 
     currentRouteData = [
@@ -1577,7 +1632,6 @@
     });
   }
 
-  // 실제 도로망(OSRM) 경로 실시간 호출 및 렌더링 적용
   async function openRouteMapModal() {
     if (typeof L === 'undefined') { showToast('지도 로딩 중입니다.'); return; }
     const modal = document.getElementById('map-modal');
@@ -1600,7 +1654,6 @@
           .addTo(leafletMap).bindPopup(`<b>${pt.name}</b>`);
       });
       
-      // 실제 도로망(OSRM) 경로 실시간 호출 및 렌더링
       if (markerCoords.length >= 2) {
         try {
           const coordsParam = currentRouteData.map(pt => `${pt.lng},${pt.lat}`).join(';');
@@ -1615,7 +1668,6 @@
             throw new Error('No route');
           }
         } catch (e) {
-          // 실패 시 예비(Fallback)로 곡선(Turf.js) 전환
           try {
             if (typeof turf !== 'undefined') {
               const turfCoords = markerCoords.map(pt => [pt[1], pt[0]]);
@@ -1661,6 +1713,7 @@
       }
       drivingState.isPassengerBoarded = true;
       drivingState.isBreak = false;
+      drivingState.stateStartTime = Date.now();
       updateDrivingUI();
       saveDrivingState();
       
@@ -1740,7 +1793,8 @@
     const data = { 
       call_logs: JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]'), 
       custom_hotspots: JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]'),
-      master_hotspots: getMasterHotspotsFromStorage()
+      master_hotspots: getMasterHotspotsFromStorage(),
+      driving_records: JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}')
     };
     const jsonStr = JSON.stringify(data, null, 2);
     const today = new Date();
@@ -1779,10 +1833,19 @@
         let importedLogs = json.call_logs || json.logs || json.sudataxi_logs || (Array.isArray(json) ? json : []);
         let importedHotspots = json.custom_hotspots || json.hotplaces || [];
         let importedMaster = json.master_hotspots || json.hotspots || null;
+        let importedRecords = json.driving_records || null;
         
         if (importedMaster && Array.isArray(importedMaster)) {
           localStorage.setItem('sudataxi_master_hotspots', JSON.stringify(importedMaster));
         }
+        
+        if (importedRecords) {
+           let existingRecords = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
+           Object.assign(existingRecords, importedRecords);
+           localStorage.setItem('sudataxi_driving_records', JSON.stringify(existingRecords));
+           if (activeTab === 4) renderDrivingLogStats();
+        }
+        
         let logMap = new Map();
         existingLogs.forEach(item => { logMap.set(item.id || `${item.timestamp || item.time}_${item.lat}_${item.lng}`, item); });
         importedLogs.forEach(item => { logMap.set(item.id || `${item.timestamp || item.time}_${item.lat}_${item.lng}`, item); });
@@ -1854,123 +1917,62 @@
 
   function toggleDriving() {
     drivingState.isDriving = !drivingState.isDriving;
-    const driveBtn = document.getElementById('btn-drive-toggle');
-    const breakBtn = document.getElementById('btn-break-toggle');
-    const boardBtn = document.getElementById('btn-board');
-    const alightBtn = document.getElementById('btn-alight');
-    const statusEl = document.getElementById('driving-current-status');
     if (drivingState.isDriving) {
       drivingState.isPassengerBoarded = false;
       drivingState.isBreak = false;
       drivingState.lastTickTime = Date.now();
-      driveBtn.innerText = '⏹️ 운행 종료';
-      driveBtn.style.background = '#EF4444';
-      driveBtn.style.color = '#FFF';
-      breakBtn.disabled = false;
-      breakBtn.style.background = '#2A2A2A';
-      breakBtn.style.color = '#FFF';
-      boardBtn.disabled = false;
-      boardBtn.style.background = 'var(--theme-accent)';
-      boardBtn.style.color = 'var(--theme-text-on-accent)';
-      alightBtn.disabled = true;
-      alightBtn.style.background = '#2A2A2A';
-      alightBtn.style.color = '#8A8A8A';
-      if (statusEl) statusEl.innerText = '🈳 빈차 운행 중';
+      drivingState.stateStartTime = Date.now();
       startDrivingTimer();
       showToast('🚗 운행이 시작되었습니다.');
     } else {
       drivingState.isPassengerBoarded = false;
       drivingState.isBreak = false;
-      driveBtn.innerText = '▶️ 운행 시작';
-      driveBtn.style.background = '#22C55E';
-      driveBtn.style.color = '#000';
-      breakBtn.disabled = true;
-      breakBtn.style.background = '#2A2A2A';
-      breakBtn.style.color = '#8A8A8A';
-      boardBtn.disabled = true;
-      boardBtn.style.background = '#2A2A2A';
-      boardBtn.style.color = '#8A8A8A';
-      alightBtn.disabled = true;
-      alightBtn.style.background = '#2A2A2A';
-      alightBtn.style.color = '#8A8A8A';
-      if (statusEl) statusEl.innerText = '운행 대기';
+      drivingState.stateStartTime = null;
       stopDrivingTimer();
       showToast('⏹️ 운행이 종료되었습니다.');
     }
+    updateDrivingUI();
     saveDrivingState();
   }
 
   function toggleBreak() {
     if (!drivingState.isDriving) return;
     drivingState.isBreak = !drivingState.isBreak;
-    const breakBtn = document.getElementById('btn-break-toggle');
-    const boardBtn = document.getElementById('btn-board');
-    const alightBtn = document.getElementById('btn-alight');
-    const statusEl = document.getElementById('driving-current-status');
+    drivingState.stateStartTime = Date.now();
+    
     if (drivingState.isBreak) {
-      breakBtn.innerText = '▶️ 휴식 종료';
-      breakBtn.style.background = '#C084FC';
-      breakBtn.style.color = '#000';
-      boardBtn.disabled = true;
-      boardBtn.style.background = '#2A2A2A';
-      boardBtn.style.color = '#8A8A8A';
-      alightBtn.disabled = true;
-      alightBtn.style.background = '#2A2A2A';
-      alightBtn.style.color = '#8A8A8A';
-      if (statusEl) statusEl.innerText = '☕ 휴식 중';
       showToast('☕ 휴식을 시작합니다.');
     } else {
-      breakBtn.innerText = '☕ 휴식 시작';
-      breakBtn.style.background = '#2A2A2A';
-      breakBtn.style.color = '#FFF';
-      if (drivingState.isPassengerBoarded) {
-        alightBtn.disabled = false;
-        alightBtn.style.background = '#FF6B00';
-        alightBtn.style.color = '#FFF';
-        if (statusEl) statusEl.innerText = '🙋 손님 탑승 중';
-      } else {
-        boardBtn.disabled = false;
-        boardBtn.style.background = 'var(--theme-accent)';
-        boardBtn.style.color = 'var(--theme-text-on-accent)';
-        if (statusEl) statusEl.innerText = '🈳 빈차 운행 중';
-      }
       showToast('🚗 운행을 재개합니다.');
     }
+    updateDrivingUI();
     saveDrivingState();
   }
 
   function handleBoarding() {
     if (!drivingState.isDriving || drivingState.isBreak) return;
     drivingState.isPassengerBoarded = true;
-    const boardBtn = document.getElementById('btn-board');
-    const alightBtn = document.getElementById('btn-alight');
-    const statusEl = document.getElementById('driving-current-status');
-    boardBtn.disabled = true;
-    boardBtn.style.background = '#2A2A2A';
-    boardBtn.style.color = '#8A8A8A';
-    alightBtn.disabled = false;
-    alightBtn.style.background = '#FF6B00';
-    alightBtn.style.color = '#FFF';
-    if (statusEl) statusEl.innerText = '🙋 손님 탑승 중';
+    drivingState.stateStartTime = Date.now();
+    
+    updateDrivingUI();
     showToast('🙋 승차 처리되었습니다.');
     saveDrivingState();
   }
 
   function handleAlighting() {
     if (!drivingState.isDriving || drivingState.isBreak || !drivingState.isPassengerBoarded) return;
+    
     drivingState.isPassengerBoarded = false;
-    const boardBtn = document.getElementById('btn-board');
-    const alightBtn = document.getElementById('btn-alight');
-    const statusEl = document.getElementById('driving-current-status');
-    boardBtn.disabled = false;
-    boardBtn.style.background = 'var(--theme-accent)';
-    boardBtn.style.color = 'var(--theme-text-on-accent)';
-    alightBtn.disabled = true;
-    alightBtn.style.background = '#2A2A2A';
-    alightBtn.style.color = '#8A8A8A';
-    if (statusEl) statusEl.innerText = '🈳 빈차 운행 중';
-    showToast('👋 하차 처리되었습니다.');
+    drivingState.stateStartTime = Date.now();
+    
+    updateDrivingUI();
+    showToast('👋 하차 완료!\n자동추천모드 이동 및 5분 타이머가 시작됩니다.');
     saveDrivingState();
+    
+    // 요구사항 4: 하차 시 자동추천 탭 이동 + 5분 타이머 자동 실행
+    setTab(1);
+    setTimerPreset(5);
+    startTimerInternal();
   }
 
   function startDrivingTimer() {
@@ -1995,6 +1997,8 @@
         saveTodayDrivingData(todayData);
         saveDrivingState();
         if (activeTab === 4) renderDrivingLogStats();
+        
+        renderCurrentStateTime(now);
       }
     }, 1000);
   }
@@ -2068,6 +2072,10 @@
     restoreTimerState();
     restoreDrivingState();
     
+    // 10분 자동 백업 인터벌 실행
+    executeAutoBackup(); // 최초 로드시 즉시 백업 1회 실행
+    setInterval(executeAutoBackup, 10 * 60 * 1000); 
+    
     document.getElementById('btn-mode1').addEventListener('click', () => setTab(1));
     document.getElementById('btn-mode3').addEventListener('click', () => setTab(3));
     const btnMode4 = document.getElementById('btn-mode4');
@@ -2089,7 +2097,6 @@
     document.getElementById('timer-btn-5m').addEventListener('click', () => setTimerPreset(5));
     document.getElementById('timer-btn-10m').addEventListener('click', () => setTimerPreset(10));
     
-    // 타이머 버튼 오터치 방지 및 롱프레스 완벽 분리 로직
     const timerBtn = document.getElementById('timer-display-btn');
     let touchTimer = null;
     let isLongPress = false;
