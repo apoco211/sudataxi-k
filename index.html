@@ -28,14 +28,15 @@
   <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
 
   <style>
+    /* =========================================
+       오리지널 야간 모드 색상 (절대 건드리지 않음)
+       ========================================= */
     :root {
-      /* Base Theme Colors (Night Mode Defaults) */
       --theme-accent: #FFC800;
       --theme-bg-dark: #2A2210;
       --theme-border: #3A2E0A;
       --theme-text-on-accent: #000000;
       
-      /* UI Component Variables */
       --main-bg: #121212;
       --main-text: #FFFFFF;
       --card-bg: #1E1E1E;
@@ -53,28 +54,6 @@
     body.mode-2 { --theme-accent: #FF6B00; --theme-bg-dark: #2A1A0A; --theme-border: #3A1F0A; --theme-text-on-accent: #FFFFFF; }
     body.mode-3 { --theme-accent: #22C55E; --theme-bg-dark: #0D2418; --theme-border: #164E2B; --theme-text-on-accent: #000000; }
 
-    /* 완벽한 주간 모드 오버라이드 (화이트/라이트그레이 톤) */
-    body.theme-day { 
-      --theme-accent: #D97706; 
-      --theme-bg-dark: #FEF3C7; 
-      --theme-border: #FDE68A;
-      --theme-text-on-accent: #FFFFFF;
-      
-      --main-bg: #F3F4F6;
-      --main-text: #1F2937;
-      --card-bg: #FFFFFF;
-      --card-border: #E5E7EB;
-      --stat-bg: #F9FAFB;
-      --stat-border: #E5E7EB;
-      --stat-label: #4B5563;
-      
-      --btn-idle-bg: #E5E7EB;
-      --btn-idle-text: #4B5563;
-      --btn-idle-border: #D1D5DB;
-    }
-    
-    body.theme-day.mode-2 { --theme-accent: #EA580C; --theme-bg-dark: #FFF7ED; --theme-border: #FFEDD5; }
-
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background-color: var(--main-bg); color: var(--main-text); max-width: 430px; margin: 0 auto; padding: 10px 10px 120px 10px; min-height: 100vh; transition: all 0.3s ease; }
     
@@ -90,7 +69,6 @@
     .build-ver-tag { font-size: 10px; color: var(--theme-accent); opacity: 0.85; font-weight: 800; margin: 0 2px; padding: 1px 4px; background: rgba(255,200,0,0.15); border-radius: 4px; display: inline-block; vertical-align: middle; }
     
     .mode-container { display: flex; gap: 4px; margin-bottom: 8px; }
-    /* 버튼 텍스트 한줄 고정을 위한 white-space: nowrap 추가 */
     .mode-pill { flex: 1; height: 30px; border-radius: 8px; background: var(--btn-idle-bg); color: var(--btn-idle-text); font-size: 11px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; white-space: nowrap; padding: 0 2px; }
     .mode-pill.active { background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; }
     
@@ -133,27 +111,37 @@
     .tag.near { background: #EFF6FF; color: #2563EB; border-color: #3B82F6; font-weight: 700; }
     .tag.usercallhistory { background: #FDF2F8; color: #DB2777; border-color: #F43F5E; font-weight: 900; }
     
-    /* 운행 일지 & 백업 섹션 스마트 CSS */
     .backup-section { margin-top: 12px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
     .backup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-    .backup-title { font-size: 12px; font-weight: 900; color: var(--theme-accent); }
+    .backup-title { font-size: 14px; font-weight: 900; color: var(--theme-accent); }
     .backup-count { font-size: 10px; color: var(--stat-label); font-weight: 600; }
     .backup-btn-group { display: flex; gap: 4px; }
     .backup-btn { flex: 1; height: 32px; background: var(--btn-idle-bg); color: var(--main-text); font-weight: 800; border: 1px solid var(--btn-idle-border); border-radius: 6px; cursor: pointer; font-size: 11px; }
     
-    /* 통계 박스 스마트 CSS */
-    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px; }
-    .stat-box { background: var(--stat-bg); border: 1px solid var(--stat-border); padding: 6px 8px; border-radius: 6px; color: var(--main-text); }
-    .stat-flex-row { display: flex; justify-content: space-between; margin-bottom: 3px; align-items: center; }
-    .stat-label-text { color: var(--stat-label); font-weight: 700; }
+    /* =========================================
+       운행일지 폰트 사이즈 확대 (위아래 2줄 배치)
+       ========================================= */
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .stat-box { background: var(--stat-bg); border: 1px solid var(--stat-border); padding: 8px 10px; border-radius: 8px; display: flex; flex-direction: column; gap: 4px; }
+    .stat-label-text { color: var(--stat-label); font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 4px; }
+    .stat-value { font-size: 15px; font-weight: 900; font-family: monospace; letter-spacing: -0.5px; }
+    .stat-sub-val { font-size: 11px; font-weight: 700; color: var(--stat-label); margin-top: -2px; }
     
-    .text-accent { color: var(--theme-accent); font-weight: 900; }
-    .text-green { color: #22C55E; font-weight: 900; }
-    .text-orange { color: #F97316; font-weight: 900; }
-    .text-purple { color: #A855F7; font-weight: 900; }
+    /* 평균 통계 박스 리스트 전용 스타일 */
+    .avg-stat-box { background: var(--stat-bg); border: 1px solid var(--stat-border); padding: 10px; border-radius: 8px; display: flex; flex-direction: column; gap: 6px; }
+    .avg-stat-header { display: flex; align-items: center; justify-content: space-between; width: 100%; border-bottom: 1px dashed var(--stat-border); padding-bottom: 4px; }
+    .avg-stat-title { font-size: 13px; font-weight: 900; color: var(--stat-label); display: flex; align-items: center; gap: 4px; }
+    .avg-stat-total-val { font-size: 15px; font-weight: 900; font-family: monospace; }
+    .avg-stat-details { display: flex; align-items: center; justify-content: space-between; padding-top: 2px; }
+    .avg-stat-sub { font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 4px; }
+    .avg-stat-sub-val { font-family: monospace; font-size: 13px; }
 
-    /* 제어 버튼 스마트 CSS 클래스 */
-    .drive-control-btn { flex: 1; height: 40px; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 13px; transition: all 0.2s; border: 1px solid transparent; }
+    .text-accent { color: var(--theme-accent); }
+    .text-green { color: #4ADE80; }
+    .text-orange { color: #F97316; }
+    .text-purple { color: #A855F7; }
+
+    .drive-control-btn { flex: 1; height: 44px; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 14px; transition: all 0.2s; border: 1px solid transparent; }
     .btn-green { background: #22C55E !important; color: #000 !important; border-color: #16A34A !important; }
     .btn-red { background: #EF4444 !important; color: #FFF !important; border-color: #DC2626 !important; }
     .btn-purple { background: #C084FC !important; color: #000 !important; border-color: #9333EA !important; }
@@ -191,8 +179,36 @@
     .custom-map-marker { width: 24px; height: 24px; border-radius: 50%; background: var(--theme-accent); color: #000000; font-weight: 900; font-size: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 6px rgba(0,0,0,0.8); border: 2px solid #FFFFFF; line-height: 1; text-align: center; }
     .custom-map-marker.current { background: #EF4444; color: #FFFFFF; font-size: 13px; }
     
-    /* 아코디언 테마 대응 */
     details { background: var(--card-bg); border: 1px solid var(--card-border); }
+
+    /* =========================================
+       주간 모드 전용 오버라이드
+       ========================================= */
+    body.theme-day { 
+      background-color: #F3F4F6; color: #1F2937;
+      --theme-accent: #D97706; 
+      --theme-bg-dark: #FEF3C7; 
+      --theme-border: #FDE68A;
+      --theme-text-on-accent: #FFFFFF;
+      --main-bg: #F3F4F6;
+      --main-text: #1F2937;
+      --card-bg: #FFFFFF;
+      --card-border: #E5E7EB;
+      --stat-bg: #F9FAFB;
+      --stat-border: #E5E7EB;
+      --stat-label: #4B5563;
+      --btn-idle-bg: #E5E7EB;
+      --btn-idle-text: #4B5563;
+      --btn-idle-border: #D1D5DB;
+    }
+    body.theme-day.mode-2 { --theme-accent: #EA580C; --theme-bg-dark: #FFF7ED; --theme-border: #FFEDD5; }
+    body.theme-day .bottom-bar { background: rgba(255,255,255,0.95); }
+    body.theme-day #call-map-view, body.theme-day #route-map { background: #E5E7EB !important; }
+    body.theme-day .map-modal-header { background: #F9FAFB; }
+    body.theme-day .text-accent { color: #D97706; }
+    body.theme-day .text-green { color: #16A34A; }
+    body.theme-day .text-orange { color: #EA580C; }
+    body.theme-day .text-purple { color: #9333EA; }
   </style>
 </head>
 <body class="mode-1">
@@ -206,7 +222,6 @@
     </div>
   </div>
   
-  <!-- 주간/야간 테마 변경 토글 -->
   <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 8px;">
     <div class="header" id="app-header-title" style="margin-bottom: 0; flex: 1;">📅 날짜 수신 대기 중...</div>
     <button id="btn-theme-toggle" onclick="toggleTheme()" class="btn-idle" style="border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 900; cursor: pointer; white-space: nowrap; flex-shrink: 0; border: 1px solid var(--theme-border); color: var(--theme-accent);">☀️ 주간</button>
@@ -239,7 +254,7 @@
   <div id="tab1-extras">
     <div class="backup-section">
       <div class="backup-header">
-        <span class="backup-title">📊 데이터 관리 & 백업</span>
+        <span class="backup-title" style="font-size:12px;">📊 데이터 관리 & 백업</span>
         <span class="backup-count" id="log-count-text">저장 기록: 0개</span>
       </div>
       <div class="backup-btn-group">
@@ -272,10 +287,10 @@
     </div>
 
     <details style="margin-top: 8px; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 1.4;">
-      <summary style="font-weight: 800; color: var(--theme-accent); cursor: pointer;">💡 [수다택시 K] 점수 산출 및 모드별 동작 가이드</summary>
+      <summary style="font-weight: 800; color: var(--theme-accent); cursor: pointer;">💡 [수다택시 K] 카카오 길찾기 API 연동 안내</summary>
       <div style="margin-top: 6px; color: var(--stat-label); display: flex; flex-direction: column; gap: 8px; font-size: 10px;">
         <div><strong style="color: var(--theme-accent);">1. 기본 점수 체계 (Base 0점 시작)</strong><br>• 승차기록 추천: +35점 | 나만의 핫플: +20점 | 카카오 실시간: +15점</div>
-        <div><strong style="color: #F97316;">2. 독립적 실시간 도로 거리 산출</strong><br>• 카카오 실시간 도로 거리 및 소요 시간 산출 보장</div>
+        <div><strong style="color: #F97316;">2. 실시간 트래픽 반영 엔진 교체</strong><br>• OSRM 완전 제거 및 카카오 모빌리티 실시간 길찾기 API 탑재 (CORS 에러 시 우회)</div>
       </div>
     </details>
   
@@ -283,11 +298,8 @@
       <summary style="font-weight: 800; color: #22C55E; cursor: pointer; font-size: 11px;">📜 최신 업데이트 히스토리 (터치)</summary>
       <div style="margin-top: 6px; color: var(--stat-label); display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed var(--stat-border); padding-bottom: 4px;">
-          <strong style="color: #22C55E;">v6.2.0 - 주간모드 완성 & 백그라운드 타이머</strong><br>
-          • ☀️ <strong>주간 모드 완벽 지원</strong>: 운행 일지 통계 등 모든 UI가 화사한 라이트 그레이 톤으로 변환되어 주간 시인성이 극대화되었습니다.<br>
-          • 🔔 <strong>백그라운드 푸시 알림(Service Worker)</strong>: 다른 앱을 사용 중이거나 화면이 꺼져 있어도 5분 뒤 시스템 푸시 알림과 진동이 정확히 울립니다.<br>
-          • 🔄 <strong>하차 시 자동화 로직</strong>: 하차 버튼 클릭 시 즉시 자동추천모드 탭으로 이동하며, 5분 타이머가 바로 실행됩니다.<br>
-          • ⏱️ <strong>실시간 상태 타이머</strong>: 상태 안내 텍스트 옆에 상태 진입 후 흐른 시간이 파란색 텍스트로 실시간 렌더링됩니다.
+          <strong style="color: #22C55E;">v6.2.4 - 운행 통계 퍼센트(%) 분석 추가</strong><br>
+          • 📊 <strong>탑승/공차 비율 퍼센트 표시</strong>: '오늘 운행 현황' 및 '평균 운행 통계'에서 총 주행 시간 대비 승차 시간과 공차 시간의 비율(%)이 실시간으로 계산되어 함께 표시됩니다.
         </div>
       </div>
     </details>
@@ -296,7 +308,7 @@
   <!-- 4번 탭 (운행 일지) -->
   <div id="tab4-extras" style="display: none;">
     <div class="backup-section" style="margin-top: 0;">
-      <div class="backup-title" style="font-size: 14px; margin-bottom: 8px;">🚘 실시간 운행 제어</div>
+      <div class="backup-title" style="margin-bottom: 10px;">🚘 실시간 운행 제어</div>
       <div style="display: flex; gap: 6px; margin-bottom: 8px;">
         <button id="btn-drive-toggle" class="drive-control-btn btn-green">▶️ 운행 시작</button>
         <button id="btn-break-toggle" class="drive-control-btn btn-idle" disabled>☕ 휴식 시작</button>
@@ -308,45 +320,65 @@
     </div>
     
     <div class="backup-section">
-      <div class="backup-title" style="margin-bottom: 6px;">⏱️ 오늘 운행 현황 (<span id="driving-current-status" style="color: var(--stat-label);">운행 대기</span>)</div>
+      <div class="backup-title" style="margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+        ⏱️ 오늘 운행 현황 <span id="driving-current-status" style="color: var(--stat-label); font-size: 13px; font-weight: 800;">(운행 대기)</span>
+      </div>
       <div class="stat-grid">
         <div class="stat-box">
-          <div class="stat-box-title"><span class="stat-label-text">🚗 Total Drive:</span> <strong id="stat-today-total" class="text-accent">00:00:00</strong></div>
+          <div class="stat-label-text">🚗 Total Drive:</div>
+          <div id="stat-today-total" class="stat-value text-accent">00:00:00</div>
         </div>
         <div class="stat-box">
-          <div class="stat-box-title"><span class="stat-label-text">🙋 Passenger:</span> <strong id="stat-today-board" class="text-green">00:00:00</strong></div>
+          <div class="stat-label-text">🙋 Passenger:</div>
+          <div id="stat-today-board" class="stat-value text-green">00:00:00</div>
+          <div id="stat-today-board-pct" class="stat-sub-val text-green">0.0%</div>
         </div>
         <div class="stat-box">
-          <div class="stat-box-title"><span class="stat-label-text">🈳 Empty Car:</span> <strong id="stat-today-empty" class="text-orange">00:00:00</strong></div>
+          <div class="stat-label-text">🈳 Empty Car:</div>
+          <div id="stat-today-empty" class="stat-value text-orange">00:00:00</div>
+          <div id="stat-today-empty-pct" class="stat-sub-val text-orange">0.0%</div>
         </div>
         <div class="stat-box">
-          <div class="stat-box-title"><span class="stat-label-text">☕ Break:</span> <strong id="stat-today-break" class="text-purple">00:00:00</strong></div>
+          <div class="stat-label-text">☕ Break:</div>
+          <div id="stat-today-break" class="stat-value text-purple">00:00:00</div>
         </div>
       </div>
     </div>
     
     <div class="backup-section">
-      <div class="backup-title" style="margin-bottom: 6px;">📊 평균 운행 통계</div>
-      <div style="display: flex; flex-direction: column; gap: 4px;">
-        <div class="stat-box">
-          <div class="stat-flex-row"><span class="stat-label-text">📅 Daily Avg (일 평균):</span> <strong id="stat-avg-daily-total" class="text-accent">00:00:00</strong></div>
-          <div class="stat-flex-row" style="color: var(--stat-label); font-size: 10px;">
-            <span>🙋 <span id="stat-avg-daily-board" class="text-green">00:00:00</span></span>
-            <span>🈳 <span id="stat-avg-daily-empty" class="text-orange">00:00:00</span></span>
+      <div class="backup-title" style="margin-bottom: 10px;">📊 평균 운행 통계</div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <!-- 일 평균 -->
+        <div class="avg-stat-box">
+          <div class="avg-stat-header">
+            <span class="avg-stat-title">📅 Daily Avg (일 평균):</span>
+            <span id="stat-avg-daily-total" class="avg-stat-total-val text-accent">00:00:00</span>
+          </div>
+          <div class="avg-stat-details">
+            <span class="avg-stat-sub">🙋 <span id="stat-avg-daily-board" class="avg-stat-sub-val text-green">00:00:00</span> (<span id="stat-avg-daily-board-pct">0.0%</span>)</span>
+            <span class="avg-stat-sub">🈳 <span id="stat-avg-daily-empty" class="avg-stat-sub-val text-orange">00:00:00</span> (<span id="stat-avg-daily-empty-pct">0.0%</span>)</span>
           </div>
         </div>
-        <div class="stat-box">
-          <div class="stat-flex-row"><span class="stat-label-text">🗓️ Weekly Avg (주 평균):</span> <strong id="stat-avg-weekly-total" class="text-accent">00:00:00</strong></div>
-          <div class="stat-flex-row" style="color: var(--stat-label); font-size: 10px;">
-            <span>🙋 <span id="stat-avg-weekly-board" class="text-green">00:00:00</span></span>
-            <span>🈳 <span id="stat-avg-weekly-empty" class="text-orange">00:00:00</span></span>
+        <!-- 주 평균 -->
+        <div class="avg-stat-box">
+          <div class="avg-stat-header">
+            <span class="avg-stat-title">🗓️ Weekly Avg (주 평균):</span>
+            <span id="stat-avg-weekly-total" class="avg-stat-total-val text-accent">00:00:00</span>
+          </div>
+          <div class="avg-stat-details">
+            <span class="avg-stat-sub">🙋 <span id="stat-avg-weekly-board" class="avg-stat-sub-val text-green">00:00:00</span> (<span id="stat-avg-weekly-board-pct">0.0%</span>)</span>
+            <span class="avg-stat-sub">🈳 <span id="stat-avg-weekly-empty" class="avg-stat-sub-val text-orange">00:00:00</span> (<span id="stat-avg-weekly-empty-pct">0.0%</span>)</span>
           </div>
         </div>
-        <div class="stat-box">
-          <div class="stat-flex-row"><span class="stat-label-text">📆 Monthly Avg (월 평균):</span> <strong id="stat-avg-monthly-total" class="text-accent">00:00:00</strong></div>
-          <div class="stat-flex-row" style="color: var(--stat-label); font-size: 10px;">
-            <span>🙋 <span id="stat-avg-monthly-board" class="text-green">00:00:00</span></span>
-            <span>🈳 <span id="stat-avg-monthly-empty" class="text-orange">00:00:00</span></span>
+        <!-- 월 평균 -->
+        <div class="avg-stat-box">
+          <div class="avg-stat-header">
+            <span class="avg-stat-title">📆 Monthly Avg (월 평균):</span>
+            <span id="stat-avg-monthly-total" class="avg-stat-total-val text-accent">00:00:00</span>
+          </div>
+          <div class="avg-stat-details">
+            <span class="avg-stat-sub">🙋 <span id="stat-avg-monthly-board" class="avg-stat-sub-val text-green">00:00:00</span> (<span id="stat-avg-monthly-board-pct">0.0%</span>)</span>
+            <span class="avg-stat-sub">🈳 <span id="stat-avg-monthly-empty" class="avg-stat-sub-val text-orange">00:00:00</span> (<span id="stat-avg-monthly-empty-pct">0.0%</span>)</span>
           </div>
         </div>
       </div>
@@ -378,7 +410,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v6.2.1";
+  const BUILD_VERSION = "v6.2.4";
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -401,9 +433,7 @@
   // 백그라운드 Service Worker 등록 (푸시 알림용)
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').then(reg => {
-        console.log('Service Worker Registered!', reg);
-      }).catch(err => console.error('Service Worker Registration Failed!', err));
+      navigator.serviceWorker.register('./sw.js').then(reg => {}).catch(err => {});
     });
   }
 
@@ -456,7 +486,6 @@
   
   function playTimerAlarm() {
     if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 500, 200, 500]);
-    // 로컬 시스템 타이머 트리거
     try {
         if ('Notification' in window && Notification.permission === 'granted') {
             new Notification('⏱️ [수다택시 K] 대기 완료!', { 
@@ -565,7 +594,7 @@
     if (!statusEl) return;
     
     if (!drivingState.isDriving) {
-        statusEl.innerHTML = '운행 대기';
+        statusEl.innerHTML = '(운행 대기)';
         return;
     }
     
@@ -581,7 +610,7 @@
     else if (drivingState.isPassengerBoarded) statusText = '🙋 손님탑승중';
     else statusText = '🈳 빈차운행중';
     
-    statusEl.innerHTML = `${statusText} <span style="color: #3B82F6; font-weight: 900; margin-left: 2px;">[${timeStr}]</span>`;
+    statusEl.innerHTML = `(${statusText} <span style="color: #3B82F6; font-weight: 900; margin-left: 2px;">[${timeStr}]</span>)`;
   }
 
   function updateDrivingUI() {
@@ -636,7 +665,6 @@
     if (isTimerRunning) {
       clearInterval(timerInterval);
       isTimerRunning = false;
-      // SW 알람 취소
       if (navigator.serviceWorker && navigator.serviceWorker.controller) {
           navigator.serviceWorker.controller.postMessage({ action: 'stopTimer' });
       }
@@ -685,12 +713,8 @@
     btn.classList.remove('finished');
     saveTimerState();
     
-    // Service Worker로 백그라운드 타이머 시작 명령 전달
     if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({
-            action: 'startTimer',
-            minutes: timerPresetMin
-        });
+        navigator.serviceWorker.controller.postMessage({ action: 'startTimer', minutes: timerPresetMin });
     }
     
     if (timerInterval) clearInterval(timerInterval);
@@ -963,6 +987,9 @@
     return new Date(0);
   }
 
+  /* 
+    ============= [카카오 모빌리티 실시간 길찾기 API 연동] =============
+  */
   async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const directDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng);
     const nowHour = new Date().getHours();
@@ -975,24 +1002,34 @@
     }
 
     try {
-      const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
+      const url = `https://apis-navi.kakaomobility.com/v1/directions?origin=${fromLng},${fromLat}&destination=${toLng},${toLat}&priority=RECOMMEND`;
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 1800);
-      const res = await fetch(osrmUrl, { signal: controller.signal });
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      
+      const res = await fetch(url, {
+        headers: { 'Authorization': `KakaoAK ${KAKAO_JS_KEY}` },
+        signal: controller.signal
+      });
       clearTimeout(timeoutId);
+
       if (res.ok) {
         const data = await res.json();
         if (data.routes && data.routes.length > 0) {
           const route = data.routes[0];
-          const coords = route.geometry.coordinates.map(pt => [pt[1], pt[0]]);
-          const distKm = parseFloat((route.distance / 1000).toFixed(1));
-          
-          const realDurationMin = Math.max(1, Math.round((distKm / baseSpeedKmh) * 60 + (distKm * 0.5)));
-          return {
-            distanceKm: distKm,
-            durationMin: realDurationMin,
-            geometryCoords: coords
-          };
+          const distKm = parseFloat((route.summary.distance / 1000).toFixed(1));
+          const durationMin = Math.max(1, Math.ceil(route.summary.duration / 60));
+
+          let coords = [];
+          if (route.sections) {
+              route.sections.forEach(section => {
+                  section.roads.forEach(road => {
+                      for (let i = 0; i < road.vertexes.length; i += 2) {
+                          coords.push([road.vertexes[i+1], road.vertexes[i]]); 
+                      }
+                  });
+              });
+          }
+          return { distanceKm: distKm, durationMin: durationMin, geometryCoords: coords.length > 0 ? coords : [[fromLat, fromLng], [toLat, toLng]] };
         }
       }
     } catch (e) {}
@@ -1152,7 +1189,6 @@
     return clusters;
   }
 
-  // 탭 이동 로직 
   function setTab(tab) {
     activeTab = tab;
     document.getElementById('btn-mode1').classList.toggle('active', tab === 1);
@@ -1526,6 +1562,7 @@
     });
   }
 
+  // 동선 지도: Turf.js 곡선 처리로 OSRM 완전 대체
   async function openRouteMapModal() {
     if (typeof L === 'undefined') { showToast('지도 로딩 중입니다.'); return; }
     const modal = document.getElementById('map-modal');
@@ -1550,31 +1587,17 @@
       
       if (markerCoords.length >= 2) {
         try {
-          const coordsParam = currentRouteData.map(pt => `${pt.lng},${pt.lat}`).join(';');
-          const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${coordsParam}?overview=full&geometries=geojson`;
-          const res = await fetch(osrmUrl);
-          if (!res.ok) throw new Error('OSRM fetch failed');
-          const data = await res.json();
-          if (data.routes && data.routes.length > 0) {
-            const roadCoords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-            L.polyline(roadCoords, { color: themeColor, weight: 5, opacity: 0.9, lineJoin: 'round', lineCap: 'round' }).addTo(leafletMap);
+          if (typeof turf !== 'undefined') {
+            const turfCoords = markerCoords.map(pt => [pt[1], pt[0]]);
+            const lineString = turf.lineString(turfCoords);
+            const curved = turf.bezierSpline(lineString, { resolution: 10000, sharpness: 0.85 });
+            const leafletCurvedCoords = curved.geometry.coordinates.map(c => [c[1], c[0]]);
+            L.polyline(leafletCurvedCoords, { color: themeColor, weight: 5, opacity: 0.9, lineJoin: 'round', lineCap: 'round' }).addTo(leafletMap);
           } else {
-            throw new Error('No route');
-          }
-        } catch (e) {
-          try {
-            if (typeof turf !== 'undefined') {
-              const turfCoords = markerCoords.map(pt => [pt[1], pt[0]]);
-              const lineString = turf.lineString(turfCoords);
-              const curved = turf.bezierSpline(lineString, { resolution: 10000, sharpness: 0.85 });
-              const leafletCurvedCoords = curved.geometry.coordinates.map(c => [c[1], c[0]]);
-              L.polyline(leafletCurvedCoords, { color: themeColor, weight: 5, opacity: 0.9, lineJoin: 'round', lineCap: 'round' }).addTo(leafletMap);
-            } else {
-              L.polyline(markerCoords, { color: themeColor, weight: 5, opacity: 0.9, lineJoin: 'round', lineCap: 'round' }).addTo(leafletMap);
-            }
-          } catch(err) {
             L.polyline(markerCoords, { color: themeColor, weight: 5, opacity: 0.9, lineJoin: 'round', lineCap: 'round' }).addTo(leafletMap);
           }
+        } catch(err) {
+          L.polyline(markerCoords, { color: themeColor, weight: 5, opacity: 0.9, lineJoin: 'round', lineCap: 'round' }).addTo(leafletMap);
         }
       }
       leafletMap.fitBounds(L.latLngBounds(markerCoords), { padding: [30, 30] });
@@ -1755,7 +1778,6 @@
     showToast('👋 하차 완료!\n자동추천모드 이동 및 5분 타이머가 시작됩니다.');
     saveDrivingState();
     
-    // 자동추천 탭 이동 + 5분 타이머 자동 실행
     setTab(1);
     setTimerPreset(5);
     startTimerInternal();
@@ -1798,10 +1820,24 @@
 
   function renderDrivingLogStats() {
     const today = getTodayDrivingData();
-    document.getElementById('stat-today-total').innerText = formatHHMMSS(today.totalDrive || 0);
-    document.getElementById('stat-today-board').innerText = formatHHMMSS(today.passengerBoard || 0);
-    document.getElementById('stat-today-empty').innerText = formatHHMMSS(today.emptyCar || 0);
+    const todayTotal = today.totalDrive || 0;
+    const todayBoard = today.passengerBoard || 0;
+    const todayEmpty = today.emptyCar || 0;
+
+    document.getElementById('stat-today-total').innerText = formatHHMMSS(todayTotal);
+    document.getElementById('stat-today-board').innerText = formatHHMMSS(todayBoard);
+    document.getElementById('stat-today-empty').innerText = formatHHMMSS(todayEmpty);
     document.getElementById('stat-today-break').innerText = formatHHMMSS(today.breakTime || 0);
+
+    // 오늘 퍼센트 계산
+    let todayBoardPct = 0;
+    let todayEmptyPct = 0;
+    if (todayTotal > 0) {
+      todayBoardPct = ((todayBoard / todayTotal) * 100).toFixed(1);
+      todayEmptyPct = ((todayEmpty / todayTotal) * 100).toFixed(1);
+    }
+    document.getElementById('stat-today-board-pct').innerText = `${todayBoardPct}%`;
+    document.getElementById('stat-today-empty-pct').innerText = `${todayEmptyPct}%`;
     
     const records = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
     const keys = Object.keys(records).sort();
@@ -1834,18 +1870,40 @@
         monthlyCount++;
       }
     });
+
+    const avgDailyTotal = Math.round(dailySum / Math.max(1, dailyCount));
+    const avgDailyBoard = Math.round(dailyBoard / Math.max(1, dailyCount));
+    const avgDailyEmpty = Math.round(dailyEmpty / Math.max(1, dailyCount));
+
+    const avgWeeklyTotal = Math.round(weeklySum / Math.max(1, weeklyCount));
+    const avgWeeklyBoard = Math.round(weeklyBoard / Math.max(1, weeklyCount));
+    const avgWeeklyEmpty = Math.round(weeklyEmpty / Math.max(1, weeklyCount));
+
+    const avgMonthlyTotal = Math.round(monthlySum / Math.max(1, monthlyCount));
+    const avgMonthlyBoard = Math.round(monthlyBoard / Math.max(1, monthlyCount));
+    const avgMonthlyEmpty = Math.round(monthlyEmpty / Math.max(1, monthlyCount));
     
-    document.getElementById('stat-avg-daily-total').innerText = formatHHMMSS(Math.round(dailySum / Math.max(1, dailyCount)));
-    document.getElementById('stat-avg-weekly-total').innerText = formatHHMMSS(Math.round(weeklySum / Math.max(1, weeklyCount)));
-    document.getElementById('stat-avg-monthly-total').innerText = formatHHMMSS(Math.round(monthlySum / Math.max(1, monthlyCount)));
+    document.getElementById('stat-avg-daily-total').innerText = formatHHMMSS(avgDailyTotal);
+    document.getElementById('stat-avg-weekly-total').innerText = formatHHMMSS(avgWeeklyTotal);
+    document.getElementById('stat-avg-monthly-total').innerText = formatHHMMSS(avgMonthlyTotal);
     
-    document.getElementById('stat-avg-daily-board').innerText = formatHHMMSS(Math.round(dailyBoard / Math.max(1, dailyCount)));
-    document.getElementById('stat-avg-weekly-board').innerText = formatHHMMSS(Math.round(weeklyBoard / Math.max(1, weeklyCount)));
-    document.getElementById('stat-avg-monthly-board').innerText = formatHHMMSS(Math.round(monthlyBoard / Math.max(1, monthlyCount)));
+    document.getElementById('stat-avg-daily-board').innerText = formatHHMMSS(avgDailyBoard);
+    document.getElementById('stat-avg-weekly-board').innerText = formatHHMMSS(avgWeeklyBoard);
+    document.getElementById('stat-avg-monthly-board').innerText = formatHHMMSS(avgMonthlyBoard);
     
-    document.getElementById('stat-avg-daily-empty').innerText = formatHHMMSS(Math.round(dailyEmpty / Math.max(1, dailyCount)));
-    document.getElementById('stat-avg-weekly-empty').innerText = formatHHMMSS(Math.round(weeklyEmpty / Math.max(1, weeklyCount)));
-    document.getElementById('stat-avg-monthly-empty').innerText = formatHHMMSS(Math.round(monthlyEmpty / Math.max(1, monthlyCount)));
+    document.getElementById('stat-avg-daily-empty').innerText = formatHHMMSS(avgDailyEmpty);
+    document.getElementById('stat-avg-weekly-empty').innerText = formatHHMMSS(avgWeeklyEmpty);
+    document.getElementById('stat-avg-monthly-empty').innerText = formatHHMMSS(avgMonthlyEmpty);
+
+    // 평균 퍼센트 계산 및 출력
+    document.getElementById('stat-avg-daily-board-pct').innerText = `${avgDailyTotal > 0 ? ((avgDailyBoard / avgDailyTotal) * 100).toFixed(1) : 0.0}%`;
+    document.getElementById('stat-avg-daily-empty-pct').innerText = `${avgDailyTotal > 0 ? ((avgDailyEmpty / avgDailyTotal) * 100).toFixed(1) : 0.0}%`;
+
+    document.getElementById('stat-avg-weekly-board-pct').innerText = `${avgWeeklyTotal > 0 ? ((avgWeeklyBoard / avgWeeklyTotal) * 100).toFixed(1) : 0.0}%`;
+    document.getElementById('stat-avg-weekly-empty-pct').innerText = `${avgWeeklyTotal > 0 ? ((avgWeeklyEmpty / avgWeeklyTotal) * 100).toFixed(1) : 0.0}%`;
+
+    document.getElementById('stat-avg-monthly-board-pct').innerText = `${avgMonthlyTotal > 0 ? ((avgMonthlyBoard / avgMonthlyTotal) * 100).toFixed(1) : 0.0}%`;
+    document.getElementById('stat-avg-monthly-empty-pct').innerText = `${avgMonthlyTotal > 0 ? ((avgMonthlyEmpty / avgMonthlyTotal) * 100).toFixed(1) : 0.0}%`;
   }
 
   function exportCallLogs() {
@@ -1956,7 +2014,6 @@
     restoreTimerState();
     restoreDrivingState();
     
-    // 10분 자동 백업 인터벌 실행
     executeAutoBackup();
     setInterval(executeAutoBackup, 10 * 60 * 1000); 
     
