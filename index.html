@@ -24,7 +24,9 @@
   <!-- 카카오 공식 JS SDK 및 지도/장소 API 연동 -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
   <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=7ee80d17f027cf99b9634ae13731a6a9&libraries=services"></script>
-  
+  <!-- 곡선 렌더링을 위한 turf.js 라이브러리 추가 -->
+  <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+
   <style>
     /* =========================================
        오리지널 야간 모드 색상 (절대 건드리지 않음)
@@ -55,6 +57,17 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background-color: var(--main-bg); color: var(--main-text); max-width: 430px; margin: 0 auto; padding: 10px 10px 120px 10px; min-height: 100vh; transition: all 0.3s ease; }
     
+    /* 상단 고정(Sticky) 영역 CSS 추가 */
+    .sticky-top-area {
+      position: sticky;
+      top: 0;
+      z-index: 150;
+      background-color: var(--main-bg);
+      margin: -10px -10px 8px -10px;
+      padding: 10px 10px 4px 10px;
+      transition: background-color 0.3s ease;
+    }
+
     .update-banner { background-color: #3A2E0A; border: 1px solid var(--theme-accent); border-radius: 8px; padding: 6px 8px; font-size: 11px; color: #FFD700; margin-bottom: 8px; display: none; }
     .banner-content { display: flex; flex-direction: column; gap: 4px; }
     .banner-btns { display: flex; gap: 4px; }
@@ -66,7 +79,7 @@
     .weekday-badge { font-size: 10px; padding: 2px 4px; border-radius: 4px; background: var(--btn-idle-bg); color: var(--btn-idle-text); font-weight: 700; display: inline-block; vertical-align: middle; }
     .build-ver-tag { font-size: 10px; color: var(--theme-accent); opacity: 0.85; font-weight: 800; margin: 0 2px; padding: 1px 4px; background: rgba(255,200,0,0.15); border-radius: 4px; display: inline-block; vertical-align: middle; }
     
-    .mode-container { display: flex; gap: 4px; margin-bottom: 8px; }
+    .mode-container { display: flex; gap: 4px; margin-bottom: 4px; }
     .mode-pill { flex: 1; height: 30px; border-radius: 8px; background: var(--btn-idle-bg); color: var(--btn-idle-text); font-size: 11px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; white-space: nowrap; padding: 0 2px; }
     .mode-pill.active { background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; }
     
@@ -93,11 +106,6 @@
     
     .place-info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
     .place-name { font-size: 13px; font-weight: 900; color: var(--main-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
-    
-    /* 타겟 목적지 텍스트 테마별 색상 지원 */
-    .target-place-name { color: #FFD700; }
-    body.theme-day .target-place-name { color: #EA580C !important; }
-
     .score-dist { font-size: 10px; font-weight: 800; color: var(--theme-accent); font-family: monospace; margin-top: 1px; display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; white-space: nowrap; }
     
     .level-badge { font-weight: 900; padding: 1px 3px; border-radius: 3px; font-size: 8.5px; display: inline-flex; align-items: center; gap: 1px; }
@@ -119,10 +127,10 @@
     .backup-title { font-size: 14px; font-weight: 900; color: var(--theme-accent); }
     .backup-count { font-size: 10px; color: var(--stat-label); font-weight: 600; }
     .backup-btn-group { display: flex; gap: 4px; }
-    .backup-btn { flex: 1; height: 32px; background: var(--btn-idle-bg); color: var(--main-text); font-weight: 800; border: 1px solid var(--btn-idle-border); border-radius: 6px; cursor: pointer; font-size: 11px; }
+    .backup-btn { height: 32px; background: var(--btn-idle-bg); color: var(--main-text); font-weight: 800; border: 1px solid var(--btn-idle-border); border-radius: 6px; cursor: pointer; font-size: 11px; }
     
     /* =========================================
-       운행일지 폰트 사이즈 및 퍼센트 래핑
+       운행일지 폰트 사이즈 확대 (위아래 2줄 배치)
        ========================================= */
     .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .stat-box { background: var(--stat-bg); border: 1px solid var(--stat-border); padding: 8px 10px; border-radius: 8px; display: flex; flex-direction: column; gap: 4px; }
@@ -136,11 +144,9 @@
     .avg-stat-title { font-size: 13px; font-weight: 900; color: var(--stat-label); display: flex; align-items: center; gap: 4px; }
     .avg-stat-total-val { font-size: 15px; font-weight: 900; font-family: monospace; }
     .avg-stat-details { display: flex; align-items: center; justify-content: space-between; padding-top: 2px; }
-    
-    /* 통계 텍스트가 줄바꿈되더라도 괄호가 분리되지 않게 보호하는 래퍼 클래스 */
-    .avg-stat-sub { font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
-    .avg-stat-sub-val { font-family: monospace; font-size: 12px; }
-    .stat-pct-wrap { display: inline-flex; align-items: center; white-space: nowrap; font-size: 10.5px; color: var(--stat-label); }
+    .avg-stat-sub { font-size: 10px; font-weight: 800; display: flex; align-items: center; gap: 2px; white-space: nowrap; letter-spacing: -0.5px; } 
+    .avg-stat-sub-val { font-family: monospace; font-size: 11px; }
+
 
     .text-accent { color: var(--theme-accent); }
     .text-green { color: #4ADE80; }
@@ -173,7 +179,7 @@
     
     @keyframes alertBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     .save-call-btn { flex: 1; height: 100%; background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; font-weight: 900; font-size: 12px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.15; word-break: keep-all; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
-
+    
     .map-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
     .map-modal-overlay.active { display: flex; }
     .map-modal-content { width: 100%; max-width: 430px; height: 75vh; background: var(--card-bg); border-top-left-radius: 16px; border-top-right-radius: 16px; border-top: 2px solid var(--theme-accent); display: flex; flex-direction: column; overflow: hidden; }
@@ -183,7 +189,7 @@
     #route-map { width: 100%; height: 100%; min-height: 350px; flex: 1; background: #121212; z-index: 1; }
     
     .custom-map-marker { width: 24px; height: 24px; border-radius: 50%; background: var(--theme-accent); color: #000000; font-weight: 900; font-size: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 6px rgba(0,0,0,0.8); border: 2px solid #FFFFFF; line-height: 1; text-align: center; }
-    .custom-map-marker.current { background: #EF4444; color: #FFFFFF; font-size: 13px; }
+    .custom-map-marker.current { background: #EF4444; color: #FFFFFF; font-size: 13px; z-index: 1000 !important; position: relative; }
     
     details { background: var(--card-bg); border: 1px solid var(--card-border); }
 
@@ -207,6 +213,7 @@
       --btn-idle-text: #4B5563;
       --btn-idle-border: #D1D5DB;
     }
+    body.theme-day .sticky-top-area { background-color: #F3F4F6; border-bottom: 1px solid #E5E7EB; }
     body.theme-day.mode-2 { --theme-accent: #EA580C; --theme-bg-dark: #FFF7ED; --theme-border: #FFEDD5; }
     body.theme-day .bottom-bar { background: rgba(255,255,255,0.95); }
     body.theme-day #call-map-view, body.theme-day #route-map { background: #E5E7EB !important; }
@@ -228,17 +235,21 @@
     </div>
   </div>
   
-  <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 8px;">
-    <div class="header" id="app-header-title" style="margin-bottom: 0; flex: 1;">📅 날짜 수신 대기 중...</div>
-    <button id="btn-theme-toggle" onclick="toggleTheme()" class="btn-idle" style="border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 900; cursor: pointer; white-space: nowrap; flex-shrink: 0; border: 1px solid var(--theme-border); color: var(--theme-accent);">☀️ 주간</button>
+  <!-- 상단 고정(Sticky) 래퍼 추가 -->
+  <div class="sticky-top-area">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 8px;">
+      <div class="header" id="app-header-title" style="margin-bottom: 0; flex: 1;">📅 날짜 수신 대기 중...</div>
+      <button id="btn-theme-toggle" onclick="toggleTheme()" class="btn-idle" style="border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 900; cursor: pointer; white-space: nowrap; flex-shrink: 0; border: 1px solid var(--theme-border); color: var(--theme-accent);">☀️ 주간</button>
+    </div>
+    
+    <div class="mode-container">
+      <button class="mode-pill active" id="btn-mode1">⚡ 자동추천모드</button>
+      <button class="mode-pill" id="btn-mode3">📊 콜 지도 시각화</button>
+      <button class="mode-pill" id="btn-mode4">🚘 운행 일지</button>
+    </div>
   </div>
-  
-  <div class="mode-container">
-    <button class="mode-pill active" id="btn-mode1">⚡ 자동추천모드</button>
-    <button class="mode-pill" id="btn-mode3">📊 콜 지도 시각화</button>
-    <button class="mode-pill" id="btn-mode4">🚘 운행 일지</button>
-  </div>
-  
+  <!-- 상단 고정 영역 끝 -->
+
   <div class="loc-bar">
     <span id="loc-text">📍 실시간 GPS 위치 수신 대기 중...</span>
     <button class="refresh-btn" id="btn-refresh">⟳</button>
@@ -264,8 +275,9 @@
         <span class="backup-count" id="log-count-text">저장 기록: 0개</span>
       </div>
       <div class="backup-btn-group">
-        <button class="backup-btn" id="btn-export">📦 전체 백업(운행일지 포함)</button>
-        <button class="backup-btn" id="btn-import-open">📥 복원</button>
+        <!-- 버튼 넓이 비율 조정 flex: 2.2 와 flex: 1 -->
+        <button class="backup-btn" id="btn-export" style="flex: 2.2;">📦 전체 백업(운행일지 포함)</button>
+        <button class="backup-btn" id="btn-import-open" style="flex: 1;">📥 복원</button>
         <input type="file" id="import-file-input" accept=".json,application/json" style="display: none;">
       </div>
       
@@ -304,10 +316,9 @@
       <summary style="font-weight: 800; color: #22C55E; cursor: pointer; font-size: 11px;">📜 최신 업데이트 히스토리 (터치)</summary>
       <div style="margin-top: 6px; color: var(--stat-label); display: flex; flex-direction: column; gap: 6px;">
         <div style="border-bottom: 1px dashed var(--stat-border); padding-bottom: 4px;">
-          <strong style="color: #22C55E;">v6.2.5 - 동선 지도 및 UI 개선</strong><br>
-          • 🗺️ <strong>실제 경로 도로망 지도 적용</strong>: 단순한 곡선 연결을 제거하고 카카오 내비 길찾기 엔진 기반의 실제 도로망 궤적을 렌더링합니다.<br>
-          • 📊 <strong>통계 괄호 잘림 수정</strong>: 운행 통계 영역에서 (퍼센트) 괄호가 줄바꿈으로 떨어지는 현상을 해결했습니다.<br>
-          • ☀️ <strong>주간 모드 시인성 개선</strong>: 밝은 테마에서 노란색 타겟 목적지 글씨가 잘 보이도록 색상을 조정했습니다.
+          <strong style="color: #22C55E;">v6.2.6 - 상단 탭 고정 및 UI 개선</strong><br>
+          • 📌 <strong>상단 고정 기능 추가</strong>: 스크롤을 내려도 자동추천/지도/운행일지 탭으로 바로 이동 가능하게 고정되었습니다.<br>
+          • 📊 <strong>탑승/공차 비율 퍼센트 표시</strong>: '오늘 운행 현황' 및 '평균 운행 통계'에서 총 주행 시간 대비 승차 시간과 공차 시간의 비율(%)이 실시간으로 계산되어 함께 표시됩니다.
         </div>
       </div>
     </details>
@@ -359,34 +370,34 @@
         <!-- 일 평균 -->
         <div class="avg-stat-box">
           <div class="avg-stat-header">
-            <span class="avg-stat-title">📅 Daily Avg (일 평균):</span>
+            <span class="avg-stat-title">📅 Daily Avg :</span>
             <span id="stat-avg-daily-total" class="avg-stat-total-val text-accent">00:00:00</span>
           </div>
           <div class="avg-stat-details">
-            <span class="avg-stat-sub">🙋 <span id="stat-avg-daily-board" class="avg-stat-sub-val text-green">00:00:00</span> <span class="stat-pct-wrap">(<span id="stat-avg-daily-board-pct">0.0%</span>)</span></span>
-            <span class="avg-stat-sub">🈳 <span id="stat-avg-daily-empty" class="avg-stat-sub-val text-orange">00:00:00</span> <span class="stat-pct-wrap">(<span id="stat-avg-daily-empty-pct">0.0%</span>)</span></span>
+            <span class="avg-stat-sub">🙋 <span id="stat-avg-daily-board" class="avg-stat-sub-val text-green">00:00:00</span> (<span id="stat-avg-daily-board-pct">0.0%</span>)</span>
+            <span class="avg-stat-sub">🈳 <span id="stat-avg-daily-empty" class="avg-stat-sub-val text-orange">00:00:00</span> (<span id="stat-avg-daily-empty-pct">0.0%</span>)</span>
           </div>
         </div>
         <!-- 주 평균 -->
         <div class="avg-stat-box">
           <div class="avg-stat-header">
-            <span class="avg-stat-title">🗓️ Weekly Avg (주 평균):</span>
+            <span class="avg-stat-title">🗓️ Weekly Avg :</span>
             <span id="stat-avg-weekly-total" class="avg-stat-total-val text-accent">00:00:00</span>
           </div>
           <div class="avg-stat-details">
-            <span class="avg-stat-sub">🙋 <span id="stat-avg-weekly-board" class="avg-stat-sub-val text-green">00:00:00</span> <span class="stat-pct-wrap">(<span id="stat-avg-weekly-board-pct">0.0%</span>)</span></span>
-            <span class="avg-stat-sub">🈳 <span id="stat-avg-weekly-empty" class="avg-stat-sub-val text-orange">00:00:00</span> <span class="stat-pct-wrap">(<span id="stat-avg-weekly-empty-pct">0.0%</span>)</span></span>
+            <span class="avg-stat-sub">🙋 <span id="stat-avg-weekly-board" class="avg-stat-sub-val text-green">00:00:00</span> (<span id="stat-avg-weekly-board-pct">0.0%</span>)</span>
+            <span class="avg-stat-sub">🈳 <span id="stat-avg-weekly-empty" class="avg-stat-sub-val text-orange">00:00:00</span> (<span id="stat-avg-weekly-empty-pct">0.0%</span>)</span>
           </div>
         </div>
         <!-- 월 평균 -->
         <div class="avg-stat-box">
           <div class="avg-stat-header">
-            <span class="avg-stat-title">📆 Monthly Avg (월 평균):</span>
+            <span class="avg-stat-title">📆 Monthly Avg :</span>
             <span id="stat-avg-monthly-total" class="avg-stat-total-val text-accent">00:00:00</span>
           </div>
           <div class="avg-stat-details">
-            <span class="avg-stat-sub">🙋 <span id="stat-avg-monthly-board" class="avg-stat-sub-val text-green">00:00:00</span> <span class="stat-pct-wrap">(<span id="stat-avg-monthly-board-pct">0.0%</span>)</span></span>
-            <span class="avg-stat-sub">🈳 <span id="stat-avg-monthly-empty" class="avg-stat-sub-val text-orange">00:00:00</span> <span class="stat-pct-wrap">(<span id="stat-avg-monthly-empty-pct">0.0%</span>)</span></span>
+            <span class="avg-stat-sub">🙋 <span id="stat-avg-monthly-board" class="avg-stat-sub-val text-green">00:00:00</span> (<span id="stat-avg-monthly-board-pct">0.0%</span>)</span>
+            <span class="avg-stat-sub">🈳 <span id="stat-avg-monthly-empty" class="avg-stat-sub-val text-orange">00:00:00</span> (<span id="stat-avg-monthly-empty-pct">0.0%</span>)</span>
           </div>
         </div>
       </div>
@@ -409,7 +420,7 @@
   <div class="map-modal-overlay" id="map-modal">
     <div class="map-modal-content">
       <div class="map-modal-header">
-        <span class="map-modal-title">🗺️ 실제 경로 도로 동선</span>
+        <span class="map-modal-title">🗺️ 도로 동선 지도</span>
         <button class="map-modal-close" id="map-modal-close">✕</button>
       </div>
       <div id="route-map"></div>
@@ -418,7 +429,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v6.2.5";
+  const BUILD_VERSION = "v6.2.6";
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -1483,7 +1494,7 @@
             <div class="card-title-group">
               <div class="num-badge target-badge">🎯</div>
               <div class="place-info">
-                <div class="place-name target-place-name">${targetBoundaryCardData.name}</div>
+                <div class="place-name" style="color: #FFD700;">${targetBoundaryCardData.name}</div>
                 <div class="score-dist" style="color: #FF6B00;">${targetBoundaryCardData.dist.toFixed(1)}km (${targetBoundaryCardData.estimatedTimeMin}분) · 복귀 최단 경계점</div>
               </div>
             </div>
@@ -1570,7 +1581,7 @@
     });
   }
 
-  // 동선 지도: 실제 도로 형태 렌더링으로 OSRM 곡선 완전 대체
+  // 동선 지도: Turf.js 곡선 처리로 OSRM 완전 대체
   async function openRouteMapModal() {
     if (typeof L === 'undefined') { showToast('지도 로딩 중입니다.'); return; }
     const modal = document.getElementById('map-modal');
@@ -1583,14 +1594,11 @@
       leafletMap.invalidateSize();
       leafletMap.eachLayer(l => { if (l instanceof L.Marker || l instanceof L.Polyline) leafletMap.removeLayer(l); });
       
-      const themeColor = currentMode === 1 ? '#FFC800' : '#3B82F6';
-      const targetColor = '#FF6B00';
+      const themeColor = currentMode === 1 ? '#FFC800' : '#FF6B00';
       const markerCoords = currentRouteData.map(pt => [pt.lat, pt.lng]);
       
       currentRouteData.forEach((pt, idx) => {
         let badgeNum = pt.isTargetBoundary ? '🎯' : idx;
-        
-        // 현재위치(0번) 마커가 겹쳐서 안보이지 않도록 핀 위치와 z-index 최상위 조정
         let html = pt.isCurrent ? '<div class="custom-map-marker current" style="z-index: 1000; position: relative;">📍</div>' : `<div class="custom-map-marker" ${pt.isTargetBoundary ? 'style="background:#FF6B00; color:#FFF;"' : ''}>${badgeNum}</div>`;
         let zIdx = pt.isCurrent ? 1000 : (pt.isTargetBoundary ? 900 : 100);
 
@@ -1602,7 +1610,7 @@
         // Kakao API에서 받아온 실제 도로 궤적(Geometry)을 지도에 그림
         if (pt.geometryCoords && pt.geometryCoords.length > 0) {
           L.polyline(pt.geometryCoords, { 
-            color: pt.isTargetBoundary ? targetColor : themeColor, 
+            color: pt.isTargetBoundary ? '#FF6B00' : themeColor, 
             weight: pt.isTargetBoundary ? 6 : 5, 
             opacity: pt.isTargetBoundary ? 0.9 : 0.65, 
             lineJoin: 'round', 
@@ -1787,8 +1795,7 @@
     drivingState.stateStartTime = Date.now();
     
     updateDrivingUI();
-    // 문법 오류를 수정하여 한 줄로 안전하게 처리
-    showToast('👋 하차 완료! 자동추천모드 이동 및 5분 대기 시작.');
+    showToast('👋 하차 완료!\n자동추천모드 이동 및 5분 타이머가 시작됩니다.');
     saveDrivingState();
     
     setTab(1);
