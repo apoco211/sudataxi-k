@@ -426,7 +426,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v6.3.3"; // Updated Version
+  const BUILD_VERSION = "v6.3.4"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -620,7 +620,6 @@
     if (!drivingState.isDriving || drivingState.isBreak || !drivingState.isPassengerBoarded) return;
     drivingState.isPassengerBoarded = false; drivingState.stateStartTime = Date.now();
     
-    // UI 업데이트 및 알림
     updateDrivingUI(); 
     showToast('👋 하차 완료!\n추천화면 이동 및 5분 단축어 실행!');
     
@@ -628,7 +627,6 @@
     setTab(1); 
     setTimerPreset(5); 
     
-    // 내부 타이머 시작과 동시에 iOS 5분 단축어 자동 실행
     try { window.location.href = `shortcuts://run-shortcut?name=수다택시5분`; } catch(e) {}
     startTimerInternal();
   }
@@ -784,10 +782,8 @@
     return Array.from(mergedMap.values());
   }
 
-  // ★ 버그 픽스: 카카오 API 실패/지연 시에도 안전하게 지역 식별을 수행하도록 GPS 좌표 기반 2중 검증 (Fallback) 추가
   async function checkIsInsideWisuRealtime(lat, lng) {
     return new Promise((resolve) => {
-      // 카카오 API 응답 실패 시 실행되는 2차 지역 식별(Fallback) 함수
       const fallbackResolve = () => {
         if (!currentRegionName) {
           if (lat >= 37.435) currentRegionName = "서울";
@@ -811,12 +807,10 @@
             });
             resolve(isWisu);
           } else {
-            // API가 OK를 주지 않은 경우
             fallbackResolve();
           }
         });
       } else {
-        // SDK가 비정상이거나 로드되지 않은 경우
         fallbackResolve();
       }
     });
@@ -835,6 +829,18 @@
     const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
+  
+  function getCrossTrackDistanceKm(lat1, lon1, lat2, lon2, lat3, lon3) {
+    const a = getStraightDistanceKm(lat1, lon1, lat3, lon3);
+    const b = getStraightDistanceKm(lat3, lon3, lat2, lon2);
+    const c = getStraightDistanceKm(lat1, lon1, lat2, lon2);
+    if (c === 0) return a;
+    const s = (a + b + c) / 2;
+    const areaSq = s * (s - a) * (s - b) * (s - c);
+    if (areaSq <= 0) return 0;
+    return (2 * Math.sqrt(areaSq)) / c;
+  }
+
   function getBearing(lat1, lon1, lat2, lon2) {
     const y = Math.sin((lon2 - lon1) * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180);
     const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) - Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos((lon2 - lon1) * Math.PI / 180);
@@ -851,7 +857,7 @@
   function formatMMSS(sec) { return `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2, '0')}`; }
   function formatHHMMSS(sec) { return `${String(Math.floor(sec/3600)).padStart(2,'0')}:${String(Math.floor((sec%3600)/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`; }
 
-  async function fetchRealtimeWeather(lat, lng) { return { isRainOrSnow: false, precip: 0 }; } // mock
+  async function fetchRealtimeWeather(lat, lng) { return { isRainOrSnow: false, precip: 0 }; } 
 
   function updateHeaderTitle(nowDate, isHoliday, holidayName) {
     const headerEl = document.getElementById('app-header-title');
@@ -930,11 +936,8 @@
     return bonus;
   }
 
-  // 지역 맞춤형 수익 극대화 전략 매핑
   function getDynamicStrategyText(nowHour, regionName) {
     let r = regionName || "";
-    
-    // 만일 API 통신 등 이유로 빈 값이 넘어왔을 때 GPS 기반 재검증 (안전장치)
     if (!r && currentPos) {
        if (currentPos.lat >= 37.435) r = "서울";
        else if (currentPos.lat <= 37.34 && currentPos.lng >= 126.93) r = "수원";
@@ -945,7 +948,6 @@
     let isSuwon = r.includes("수원") || r.includes("용인") || r.includes("화성");
     let isAnsan = r.includes("안산") || r.includes("시흥");
     let isSeoul = r.includes("서울");
-    // 위 조건이 모두 거짓이면 관내(안양/군포/의왕/과천)로 취급
 
     if (nowHour >= 16 && nowHour < 18) return { 
       title: "주간 방어 및 수락률 확보", 
@@ -1009,7 +1011,6 @@
       };
     }
 
-    // 02 ~ 16 평시
     let defaultPlaces = [];
     if (isSuwon) defaultPlaces = [{ name: "수원역 환승거점", lat: 37.2662, lng: 127.0001 }, { name: "영통역", lat: 37.2515, lng: 127.0714 }];
     else if (isAnsan) defaultPlaces = [{ name: "중앙역", lat: 37.3186, lng: 126.8385 }, { name: "고잔역", lat: 37.3168, lng: 126.8232 }];
@@ -1096,7 +1097,7 @@
     return { score: Math.max(0, score), logCount: matchCount + (item.clusterCount||0), isTimeMatch: isTimeMatch || item.isTimeMatch };
   }
 
-  function getCallLogsAsCandidates(nowHour) {
+  async function getCallLogsAsCandidates(nowHour) {
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     let clusters = [];
     logs.forEach(log => {
@@ -1105,8 +1106,25 @@
       let isTimeMatch = (hourDiff > 12 ? 24 - hourDiff : hourDiff) <= 1;
       let found = clusters.find(c => getStraightDistanceKm(c.lat, c.lng, logLat, logLng) <= 0.25);
       if (found) { found.clusterCount++; if(isTimeMatch) found.isTimeMatch = true; } 
-      else clusters.push({ id: 'log_'+Math.random(), name: `📍 탑승기록 (${logLat.toFixed(3)})`, lat: logLat, lng: logLng, type: 'nightlife', isUserCallLogCandidate: true, clusterCount: 1, isTimeMatch });
+      else clusters.push({ id: 'log_'+Math.random(), name: `📍 탑승기록`, lat: logLat, lng: logLng, type: 'nightlife', isUserCallLogCandidate: true, clusterCount: 1, isTimeMatch });
     });
+
+    if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
+      const geocoder = new kakao.maps.services.Geocoder();
+      await Promise.all(clusters.map(c => new Promise(resolve => {
+        geocoder.coord2RegionCode(c.lng, c.lat, (result, status) => {
+          if (status === kakao.maps.services.Status.OK && result && result.length > 0) {
+            const region = result.find(r => r.region_type === 'H') || result[0]; // 행정동 우선
+            c.name = `📍 탑승기록 (${region.region_3depth_name})`;
+          } else {
+            c.name = `📍 탑승기록 (${c.lat.toFixed(3)})`;
+          }
+          resolve();
+        });
+      })));
+    } else {
+      clusters.forEach(c => c.name = `📍 탑승기록 (${c.lat.toFixed(3)})`);
+    }
     return clusters;
   }
 
@@ -1248,10 +1266,9 @@
       currentPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
       const inWisu = await checkIsInsideWisuRealtime(currentPos.lat, currentPos.lng);
       currentMode = inWisu ? 1 : 2; document.body.className = `mode-${currentMode}` + (currentThemeMode === 'day' ? ' theme-day' : '');
-      // 카카오 API 또는 GPS Fallback으로 완성된 currentRegionName을 안전하게 렌더링
       if (locText) locText.innerText = `📍 ${currentRegionName || currentPos.lat.toFixed(4)} (${inWisu ? '관내 5km콜 우선' : '관외 복귀경로 경유지 우선'})`;
       if (activeTab === 1) calculateAndRender();
-      if (activeTab === 2) renderStrategyTab(); // 지역명 갱신 후 즉시 전략탭 리렌더링
+      if (activeTab === 2) renderStrategyTab();
     }, (err) => { showToast("📍 위치 권한 오류"); }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 3000 });
   }
 
@@ -1270,12 +1287,15 @@
     
     const weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng);
     const liveKakaoHotspots = await fetchLiveKakaoHotspots(currentPos.lat, currentPos.lng);
+    let allLiveHotspots = [...liveKakaoHotspots];
     const customHotspots = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
     const activeMasterHotspots = getMasterHotspotsFromStorage();
     const nowHour = new Date().getHours();
-    const userCallCandidates = getCallLogsAsCandidates(nowHour);
+    
+    const userCallCandidates = await getCallLogsAsCandidates(nowHour);
 
     let referenceHubs = []; let targetBoundaryCardData = null; let directTargetDist = 0; let targetBearing = null;
+    let closestBp = null;
 
     if (inWisu) {
       referenceHubs = (await Promise.all(MAJOR_HUBS.map(async (h) => {
@@ -1284,14 +1304,25 @@
         return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: pure.score };
       }))).sort((a,b) => a.dist - b.dist);
     } else {
-      let closestBp = WISU_BOUNDARY_POINTS.reduce((prev, curr) => (getStraightDistanceKm(currentPos.lat, currentPos.lng, curr.lat, curr.lng) < getStraightDistanceKm(currentPos.lat, currentPos.lng, prev.lat, prev.lng) ? curr : prev));
+      closestBp = WISU_BOUNDARY_POINTS.reduce((prev, curr) => (getStraightDistanceKm(currentPos.lat, currentPos.lng, curr.lat, curr.lng) < getStraightDistanceKm(currentPos.lat, currentPos.lng, prev.lat, prev.lng) ? curr : prev));
       let roadToBp = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, closestBp.lat, closestBp.lng);
       directTargetDist = roadToBp.distanceKm;
       targetBoundaryCardData = { ...closestBp, dist: directTargetDist, estimatedTimeMin: roadToBp.durationMin, score: 100, isTargetBoundary: true };
       targetBearing = getBearing(currentPos.lat, currentPos.lng, closestBp.lat, closestBp.lng);
+
+      if (directTargetDist > 5.0) {
+         const midLat = (currentPos.lat + closestBp.lat) / 2;
+         const midLng = (currentPos.lng + closestBp.lng) / 2;
+         const midKakaoHotspots = await fetchLiveKakaoHotspots(midLat, midLng);
+         midKakaoHotspots.forEach(mp => {
+           if (!allLiveHotspots.some(hp => hp.name === mp.name)) {
+             allLiveHotspots.push(mp);
+           }
+         });
+      }
     }
 
-    let rawPool = [...userCallCandidates, ...liveKakaoHotspots, ...customHotspots, ...activeMasterHotspots].filter(item => {
+    let rawPool = [...userCallCandidates, ...allLiveHotspots, ...customHotspots, ...activeMasterHotspots].filter(item => {
       if (!inWisu && !MAJOR_HUBS.some(h => item.name.includes(h.name.substring(0,2)))) return !item.isWisu;
       return true;
     });
@@ -1305,16 +1336,21 @@
       let preliminaryScore = pureRes.score;
 
       if (!inWisu && targetBoundaryCardData) {
+        const crossTrackDist = getCrossTrackDistanceKm(currentPos.lat, currentPos.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng, item.lat, item.lng);
+        if (crossTrackDist > 3.0) continue; 
+
+        let candBearing = getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng);
+        let deltaAngle = getAngleDelta(candBearing, targetBearing);
+        if (deltaAngle > 90) continue; 
+
         if (straightDist <= 2.5) {
            preliminaryScore += 45; 
-           let candBearing = getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng);
-           if (getAngleDelta(candBearing, targetBearing) > 90) preliminaryScore -= 10;
+           if (deltaAngle > 60) preliminaryScore -= 10;
         } else {
            const distToTarget = getStraightDistanceKm(item.lat, item.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng);
            const detourKm = (straightDist + distToTarget) - directTargetDist;
-           if (detourKm > Math.min(5.0, directTargetDist * 0.45 + 2.0)) continue;
+           if (detourKm > Math.min(5.0, directTargetDist * 0.45 + 2.0)) continue; 
            
-           let deltaAngle = getAngleDelta(getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng), targetBearing);
            if (deltaAngle <= 45) preliminaryScore += 25;
            else if (deltaAngle > 60) preliminaryScore -= 20;
         }
@@ -1458,6 +1494,13 @@
 
         if (pt.geometryCoords && pt.geometryCoords.length > 0) {
           L.polyline(pt.geometryCoords, { color: pt.isTargetBoundary ? '#FF6B00' : themeColor, weight: 5, opacity: 0.7, dashArray: pt.isTargetBoundary ? '8, 8' : null }).addTo(leafletMap);
+          
+          if (currentMode === 2 && !pt.isTargetBoundary && !pt.isCurrent && !pt.isRestroom) {
+             const targetPt = currentRouteData.find(p => p.isTargetBoundary);
+             if (targetPt) {
+                 L.polyline([[pt.lat, pt.lng], [targetPt.lat, targetPt.lng]], { color: '#9CA3AF', weight: 3, opacity: 0.6, dashArray: '5, 5' }).addTo(leafletMap);
+             }
+          }
         }
       });
       leafletMap.fitBounds(L.latLngBounds(markerCoords), { padding: [30, 30] });
@@ -1469,7 +1512,6 @@
 
   function addCustomHotspotPrompt() {
     if (!currentPos) { showToast('위치 탐색이 필요합니다.'); return; }
-    // 앱 굳어버림 방지 (prompt 미사용) -> 자동 부여
     const now = new Date();
     const name = `⭐ 지정 핫플 (${now.getHours()}시 ${String(now.getMinutes()).padStart(2,'0')}분)`;
     let custom = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
@@ -1590,7 +1632,6 @@
     const jsonStr = JSON.stringify(data, null, 2);
     const today = new Date();
     const dateStr = today.getFullYear() + String(today.getMonth() + 1).padStart(2, '0') + String(today.getDate()).padStart(2, '0');
-    // alert, prompt 방지. 자동 파일명 할당.
     const userFileName = `sudataxi_backup_${dateStr}_${today.getHours()}${today.getMinutes()}.json`;
     
     try {
