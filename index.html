@@ -138,7 +138,7 @@
     .text-purple { color: #A855F7; }
 
     .drive-control-btn { flex: 1; height: 44px; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 14px; transition: all 0.2s; border: 1px solid transparent; }
-    .btn-green { background: #22C55E !important; color: #000 !important; border-color: #16A34A !important; }
+    .btn-green { background: #22C55E !important; color: #00 !important; border-color: #16A34A !important; }
     .btn-red { background: #EF4444 !important; color: #FFF !important; border-color: #DC2626 !important; }
     .btn-purple { background: #C084FC !important; color: #000 !important; border-color: #9333EA !important; }
     .btn-orange { background: #F97316 !important; color: #FFF !important; border-color: #EA580C !important; }
@@ -218,6 +218,7 @@
   </style>
 </head>
 <body class="mode-1">
+
   <div id="hotspotUpdateBanner" class="update-banner">
     <div class="banner-content">
       <span>💡 <strong>[수다택시 K]</strong> 핫플 데이터를 검토한 지 2주가 지났어요!</span>
@@ -425,7 +426,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v6.3.0"; // Version update for new features
+  const BUILD_VERSION = "v6.3.1"; // Updated Version
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -901,59 +902,94 @@
     return bonus;
   }
 
-  // 업데이트된 수익 극대화 전략 매핑 (시간별 거점 및 네비 연결 타겟)
-  function getDynamicStrategyText(nowHour) {
+  // 지역 맞춤형 수익 극대화 전략 매핑 (currentRegionName 기반)
+  function getDynamicStrategyText(nowHour, regionName) {
+    let r = regionName || "";
+    let isSuwon = r.includes("수원") || r.includes("용인") || r.includes("화성");
+    let isAnsan = r.includes("안산") || r.includes("시흥");
+    let isSeoul = r.includes("서울");
+    let isWisu = !isSuwon && !isAnsan && !isSeoul; // 기본은 관내(안양/군포/의왕/과천) 처리
+
     if (nowHour >= 16 && nowHour < 18) return { 
       title: "주간 방어 및 수락률 확보", 
       desc: "콜 발생 빈도가 낮은 시간입니다. <b>수락률(AR) 방어</b>를 위해 단거리 콜도 기꺼이 수락하여 누적 수락률 60% 이상을 확보하세요.",
       places: [] 
     };
-    if (nowHour >= 18 && nowHour < 20) return { 
-      title: "퇴근 피크 타임", 
-      desc: "과천 지정타, 평촌 스마트스퀘어 등 <b>업무지구 밀집 지역</b>에 진입하여 서울/성남 방향 중장거리 콜을 유도하고 정체 할증을 노리세요.",
-      places: [
-        { name: "과천 지식정보타운", lat: 37.4144, lng: 126.9856 },
-        { name: "안양 평촌스마트스퀘어", lat: 37.3942, lng: 126.9638 }
-      ]
-    };
-    if (nowHour >= 20 && nowHour < 21) return { 
-      title: "식사/휴식 및 배터리 정비", 
-      desc: "야간 피크를 대비해 하드웨어를 정비하세요. E-pit 초급속 충전이나 배터리 스와핑을 활용하여 유휴시간을 최소화합니다.",
-      places: [
-        { name: "안양 농수산물시장 E-pit", lat: 37.3820, lng: 126.9749 },
-        { name: "피트인 안양 (배터리 교체)", lat: 37.3826, lng: 126.9388 }
-      ]
-    };
-    if (nowHour >= 21 && nowHour < 23) return { 
-      title: "야간 상권 / 학원가 회전", 
-      desc: "<b>범계역, 평촌 학원가, 산본 로데오</b> 일대에서 짧은 이동 거리로 콜 회전율(시간당 3~4콜)을 극대화하세요.",
-      places: [
-        { name: "범계역 로데오거리", lat: 37.3897, lng: 126.9502 },
-        { name: "평촌 학원가", lat: 37.3821, lng: 126.9582 },
-        { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331 }
-      ]
-    };
-    if (nowHour >= 23 || nowHour < 2) return { 
-      title: "심야 할증 및 장거리 피크", 
-      desc: "황금 시간대입니다. 높은 수락률을 무기로 <b>안양 북부나 과천 경계선</b>에서 서울/판교행 콜을 골라 <b>시외(20%)+심야(30%) 복합 할증</b>을 노리세요.",
-      places: [
-        { name: "선바위역 (과천-서울 경계)", lat: 37.4520, lng: 127.0050 },
-        { name: "석수역 (안양-서울 경계)", lat: 37.4355, lng: 126.9022 }
-      ]
-    };
+
+    if (nowHour >= 18 && nowHour < 20) {
+      let places = [];
+      if (isSuwon) places = [{ name: "삼성디지털시티 (영통)", lat: 37.2570, lng: 127.0540 }, { name: "광교테크노밸리", lat: 37.2928, lng: 127.0456 }];
+      else if (isAnsan) places = [{ name: "반월국가산업단지", lat: 37.3150, lng: 126.7770 }, { name: "고잔동 법조타운", lat: 37.3168, lng: 126.8232 }];
+      else if (isSeoul) places = [{ name: "강남역 상업지구", lat: 37.4981, lng: 127.0276 }, { name: "여의도역 환승거점", lat: 37.5216, lng: 126.9242 }];
+      else places = [{ name: "과천 지식정보타운", lat: 37.4144, lng: 126.9856 }, { name: "안양 평촌스마트스퀘어", lat: 37.3942, lng: 126.9638 }];
+      
+      return { 
+        title: "퇴근 피크 타임", 
+        desc: "현재 지역의 <b>주요 업무지구 및 환승 거점</b>에 진입하여 중장거리 콜을 유도하고 정체 할증을 노리세요.",
+        places: places
+      };
+    }
+
+    if (nowHour >= 20 && nowHour < 21) {
+      let places = [];
+      if (isSuwon) places = [{ name: "수원월드컵경기장 (휴식/충전)", lat: 37.2863, lng: 127.0368 }, { name: "광교호수공원 주차장", lat: 37.2801, lng: 127.0673 }];
+      else if (isAnsan) places = [{ name: "안산와스타디움", lat: 37.3178, lng: 126.8184 }, { name: "화랑유원지 주차장", lat: 37.3200, lng: 126.8144 }];
+      else if (isSeoul) places = [{ name: "반포한강공원 주차장", lat: 37.5100, lng: 126.9950 }];
+      else places = [{ name: "안양 농수산물시장 E-pit", lat: 37.3820, lng: 126.9749 }, { name: "피트인 안양 (배터리 교체)", lat: 37.3826, lng: 126.9388 }];
+      
+      return { 
+        title: "식사/휴식 및 배터리 정비", 
+        desc: "야간 피크를 대비해 하드웨어를 정비하세요. 주요 E-pit이나 대형 주차장을 활용하여 유휴시간을 최소화합니다.",
+        places: places
+      };
+    }
+
+    if (nowHour >= 21 && nowHour < 23) {
+      let places = [];
+      if (isSuwon) places = [{ name: "인계동 나혜석거리", lat: 37.2635, lng: 127.0322 }, { name: "수원역 로데오거리", lat: 37.2662, lng: 127.0001 }];
+      else if (isAnsan) places = [{ name: "중앙역 로데오거리", lat: 37.3186, lng: 126.8385 }, { name: "상록수역 먹자골목", lat: 37.3025, lng: 126.8654 }];
+      else if (isSeoul) places = [{ name: "사당역 먹자골목", lat: 37.4765, lng: 126.9816 }, { name: "강남역 번화가", lat: 37.4981, lng: 127.0276 }];
+      else places = [{ name: "범계역 로데오거리", lat: 37.3897, lng: 126.9502 }, { name: "평촌 학원가", lat: 37.3821, lng: 126.9582 }, { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331 }];
+      
+      return { 
+        title: "야간 상권 / 회전율 극대화", 
+        desc: "현재 지역의 <b>핵심 상권 및 로데오거리</b> 일대에서 짧은 이동 거리로 콜 회전율(시간당 3~4콜)을 극대화하세요.",
+        places: places
+      };
+    }
+
+    if (nowHour >= 23 || nowHour < 2) {
+      let places = [];
+      if (isSuwon) places = [{ name: "성대역 먹자골목", lat: 37.2995, lng: 126.9710 }, { name: "수원시청역", lat: 37.2608, lng: 127.0287 }];
+      else if (isAnsan) places = [{ name: "중앙역", lat: 37.3186, lng: 126.8385 }, { name: "상록수역", lat: 37.3025, lng: 126.8654 }];
+      else if (isSeoul) places = [{ name: "강남역", lat: 37.4981, lng: 127.0276 }, { name: "사당역", lat: 37.4765, lng: 126.9816 }];
+      else places = [{ name: "선바위역 (과천-서울 경계)", lat: 37.4520, lng: 127.0050 }, { name: "석수역 (안양-서울 경계)", lat: 37.4355, lng: 126.9022 }];
+      
+      return { 
+        title: "심야 할증 및 장거리 피크", 
+        desc: "황금 시간대입니다. 높은 수락률을 무기로 <b>인접 시 경계 및 주요 번화가</b>에서 외곽행 콜을 골라 복합 할증을 노리세요.",
+        places: places
+      };
+    }
+
+    // 02 ~ 16 평시
+    let defaultPlaces = [];
+    if (isSuwon) defaultPlaces = [{ name: "수원역 환승거점", lat: 37.2662, lng: 127.0001 }, { name: "영통역", lat: 37.2515, lng: 127.0714 }];
+    else if (isAnsan) defaultPlaces = [{ name: "중앙역", lat: 37.3186, lng: 126.8385 }, { name: "고잔역", lat: 37.3168, lng: 126.8232 }];
+    else if (isSeoul) defaultPlaces = [{ name: "여의도역", lat: 37.5216, lng: 126.9242 }, { name: "강남역", lat: 37.4981, lng: 127.0276 }];
+    else defaultPlaces = [{ name: "인덕원역 환승 거점", lat: 37.4048, lng: 126.9767 }, { name: "안양역 일번가", lat: 37.4013, lng: 126.9222 }];
+    
     return { 
       title: "주간 평시 / 새벽 연비 운행", 
       desc: "도심 내 단거리 및 역 주변 수요가 꾸준합니다. 상업지구와 환승역을 오가며 배터리 프리컨디셔닝 등 연비 위주의 운행을 하세요.",
-      places: [
-        { name: "인덕원역 환승 거점", lat: 37.4048, lng: 126.9767 },
-        { name: "안양역 일번가", lat: 37.4013, lng: 126.9222 }
-      ]
+      places: defaultPlaces
     };
   }
 
   async function renderStrategyTab() {
     const nowHour = new Date().getHours();
-    const strategy = getDynamicStrategyText(nowHour);
+    // 현재 지역명 전달 (위치가 아직 파악 안되었으면 관내 기본값 적용)
+    const strategy = getDynamicStrategyText(nowHour, currentRegionName);
     const titleEl = document.getElementById('strategy-time-title');
     const descEl = document.getElementById('strategy-text');
     if (titleEl) titleEl.innerText = `${nowHour}시 - ${strategy.title}`;
@@ -1075,7 +1111,6 @@
     
     const ps = new kakao.maps.services.Places();
     
-    // 비동기 병렬 검색용 헬퍼 함수
     const searchPlace = (query, isCategory = false) => new Promise(resolve => {
       const callback = (data, status) => resolve(status === kakao.maps.services.Status.OK ? data : []);
       const options = { x: currentPos.lng, y: currentPos.lat, radius: 3000 };
@@ -1083,7 +1118,6 @@
       else ps.keywordSearch(query, callback, options);
     });
 
-    // 4가지 키워드 동시 검색으로 병목 제거
     const [pub1, pub2, gas, sub] = await Promise.all([
       searchPlace('공중화장실'), searchPlace('개방화장실'),
       searchPlace('OL7', true), searchPlace('SW8', true)
@@ -1103,11 +1137,10 @@
       }
     });
 
-    // 기사님이 직접 저장한 커스텀 화장실 데이터 불러와서 포함
     let customRestrooms = JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]');
     customRestrooms.forEach(p => {
        const dist = getStraightDistanceKm(currentPos.lat, currentPos.lng, p.lat, p.lng);
-       if (dist <= 3.0) { // 반경 3km 내 데이터만 추출
+       if (dist <= 3.0) { 
           uniqueMap.set(p.id, {
             ...p, straightDist: dist, isRestroom: true, isCustomRestroom: true
           });
@@ -1115,16 +1148,13 @@
     });
 
     if (uniqueMap.size > 0) {
-      // 1. 직선거리로 먼저 정렬 후 5곳만 잘라내기 (내비 연산 속도 저하 방지)
       let restrooms = Array.from(uniqueMap.values()).sort((a, b) => a.straightDist - b.straightDist).slice(0, 5);
 
-      // 2. 카카오 API로 실도로거리 계산
       let scoredPool = await Promise.all(restrooms.map(async (item) => {
         let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
         return { ...item, dist: road.distanceKm, estimatedTimeMin: road.durationMin, geometryCoords: road.geometryCoords };
       }));
 
-      // 3. 실제 주행거리 기준으로 다시 정렬
       scoredPool.sort((a, b) => a.dist - b.dist);
       currentRouteData = [{ name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true }, ...scoredPool];
 
@@ -1132,7 +1162,6 @@
       if (mapBtn) mapBtn.style.display = 'flex';
       if (logEl) logEl.innerText = `방금 · 화장실 검색 완료 (다시 핫플을 찾으려면 위의 '콜 찾기' 버튼을 누르세요)`;
 
-      // 카드 생성 렌더링
       renderCards(scoredPool, null, null);
     } else {
       showToast("주변 반경 내 화장실을 찾지 못했습니다.");
@@ -1143,7 +1172,6 @@
   function saveCurrentRestroomLocation() {
     if (!currentPos) { showToast('위치 탐색이 필요합니다.'); return; }
     
-    // alert, prompt를 사용하지 않기 위해 현재 시간을 기반으로 자동 이름 부여
     const now = new Date();
     let minStr = String(now.getMinutes()).padStart(2, '0');
     const autoName = `⭐ 내 화장실 (${now.getHours()}시 ${minStr}분)`;
@@ -1186,6 +1214,7 @@
       currentMode = inWisu ? 1 : 2; document.body.className = `mode-${currentMode}` + (currentThemeMode === 'day' ? ' theme-day' : '');
       if (locText) locText.innerText = `📍 ${currentRegionName || currentPos.lat.toFixed(4)} (${inWisu ? '관내 5km콜 우선' : '관외 복귀경로 경유지 우선'})`;
       if (activeTab === 1) calculateAndRender();
+      if (activeTab === 2) renderStrategyTab(); // 지역 변경 시 탭 업데이트
     }, (err) => { showToast("📍 위치 권한 오류"); }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 3000 });
   }
 
@@ -1403,7 +1432,6 @@
 
   function addCustomHotspotPrompt() {
     if (!currentPos) { showToast('위치 탐색이 필요합니다.'); return; }
-    // 앱 굳어버림 방지 (prompt 미사용) -> 자동 부여
     const now = new Date();
     const name = `⭐ 지정 핫플 (${now.getHours()}시 ${String(now.getMinutes()).padStart(2,'0')}분)`;
     let custom = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
@@ -1524,7 +1552,6 @@
     const jsonStr = JSON.stringify(data, null, 2);
     const today = new Date();
     const dateStr = today.getFullYear() + String(today.getMonth() + 1).padStart(2, '0') + String(today.getDate()).padStart(2, '0');
-    // alert, prompt 방지. 자동 파일명 할당.
     const userFileName = `sudataxi_backup_${dateStr}_${today.getHours()}${today.getMinutes()}.json`;
     
     try {
