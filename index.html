@@ -21,16 +21,11 @@
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-  <!-- 카카오 공식 JS SDK 및 지도/장소 API 연동 -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
   <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=7ee80d17f027cf99b9634ae13731a6a9&libraries=services"></script>
-  <!-- 곡선 렌더링을 위한 turf.js 라이브러리 추가 -->
   <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
 
   <style>
-    /* =========================================
-       오리지널 야간 모드 색상 (절대 건드리지 않음)
-       ========================================= */
     :root {
       --theme-accent: #FFC800;
       --theme-bg-dark: #2A2210;
@@ -57,16 +52,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background-color: var(--main-bg); color: var(--main-text); max-width: 430px; margin: 0 auto; padding: 10px 10px 120px 10px; min-height: 100vh; transition: all 0.3s ease; }
     
-    .sticky-top-area {
-      position: sticky;
-      top: 0;
-      z-index: 150;
-      background-color: var(--main-bg);
-      margin: -10px -10px 8px -10px;
-      padding: 10px 10px 4px 10px;
-      transition: background-color 0.3s ease;
-    }
-
+    .sticky-top-area { position: sticky; top: 0; z-index: 150; background-color: var(--main-bg); margin: -10px -10px 8px -10px; padding: 10px 10px 4px 10px; transition: background-color 0.3s ease; }
     .update-banner { background-color: #3A2E0A; border: 1px solid var(--theme-accent); border-radius: 8px; padding: 6px 8px; font-size: 11px; color: #FFD700; margin-bottom: 8px; display: none; }
     .banner-content { display: flex; flex-direction: column; gap: 4px; }
     .banner-btns { display: flex; gap: 4px; }
@@ -167,16 +153,19 @@
     .recent-log-time { font-size: 10px; font-weight: 700; color: var(--main-text); white-space: nowrap; }
     
     .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 64px; background: rgba(var(--main-bg), 0.95); backdrop-filter: blur(10px); border-top: 2px solid var(--theme-accent); display: flex; align-items: center; gap: 6px; padding: 6px 10px; z-index: 100; max-width: 430px; margin: 0 auto; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); }
-    .timer-container { flex: 1; height: 100%; display: flex; flex-direction: column; gap: 3px; }
+    
+    /* 3 Column Bottom Bar Layout */
+    .timer-container { display: flex; flex-direction: column; gap: 3px; justify-content: stretch; height: 100%; }
     .timer-mode-selector { display: flex; gap: 3px; height: 16px; }
     .timer-mode-btn { flex: 1; background: var(--btn-idle-bg); color: var(--stat-label); font-size: 9px; font-weight: 800; border: 1px solid var(--btn-idle-border); border-radius: 4px; cursor: pointer; }
     .timer-mode-btn.active { background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; border-color: var(--theme-accent) !important; }
-    .timer-display-btn { flex: 1; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--main-text); font-size: 12px; font-weight: 900; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .timer-display-btn { flex: 1; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--main-text); font-size: 12px; font-weight: 900; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; min-height: 28px;}
     .timer-display-btn.running { background: var(--theme-bg-dark); color: var(--theme-accent); border-color: var(--theme-accent); }
     .timer-display-btn.finished { background: #FEE2E2; color: #DC2626; border-color: #EF4444; animation: alertBlink 1s infinite; }
     
     @keyframes alertBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     .save-call-btn { flex: 1; height: 100%; background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; font-weight: 900; font-size: 12px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.15; word-break: keep-all; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+    .save-restroom-btn { flex: 1; height: 100%; background: #3B82F6 !important; color: #FFFFFF !important; font-weight: 900; font-size: 12px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.15; word-break: keep-all; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
     
     .map-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
     .map-modal-overlay.active { display: flex; }
@@ -191,9 +180,6 @@
     
     details { background: var(--card-bg); border: 1px solid var(--card-border); }
 
-    /* =========================================
-       주간 모드 전용 오버라이드
-       ========================================= */
     body.theme-day { 
       background-color: #F3F4F6; color: #1F2937;
       --theme-accent: #D97706; 
@@ -270,7 +256,7 @@
         <span>🗺️ 동선 지도 보기</span>
       </button>
       <button class="restroom-btn" id="btn-restroom" style="flex: 1;">
-        <span>🚻 화장실</span>
+        <span>🚻 화장실 검색</span>
       </button>
     </div>
   </div>
@@ -310,6 +296,9 @@
       <div class="strategy-title">💡 <span id="strategy-time-title">시간대 분석 중...</span></div>
       <div class="strategy-content" id="strategy-text">실시간 전략 데이터를 불러오고 있습니다.</div>
     </div>
+    
+    <!-- 동적 생성되는 전략 타겟 리스트 영역 -->
+    <div id="strategy-cards-list" class="card-list" style="margin-bottom: 8px;"></div>
     
     <details style="margin-top: 8px; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 1.4;" open>
       <summary style="font-weight: 800; color: var(--theme-accent); cursor: pointer;">📌 복귀 경로 알고리즘 안내</summary>
@@ -408,14 +397,15 @@
   </div>
   
   <div class="bottom-bar">
-    <div class="timer-container">
+    <div class="timer-container" style="flex: 1;">
       <div class="timer-mode-selector">
-        <button class="timer-mode-btn active" id="timer-btn-5m">5분 대기</button>
-        <button class="timer-mode-btn" id="timer-btn-10m">10분 대기</button>
+        <button class="timer-mode-btn active" id="timer-btn-5m">5분</button>
+        <button class="timer-mode-btn" id="timer-btn-10m">10분</button>
       </div>
       <button class="timer-display-btn" id="timer-display-btn" title="길게 누르면 iOS 시스템 타이머 실행">⏱️ 05:00 시작</button>
     </div>
-    <button class="save-call-btn" id="btn-save-call">📍 고객 탑승<br>위치 저장</button>
+    <button class="save-call-btn" id="btn-save-call" style="flex: 1;">📍 고객 탑승<br>위치 저장</button>
+    <button class="save-restroom-btn" id="btn-save-restroom" style="flex: 1;">🚻 내 화장실<br>위치 저장</button>
   </div>
   
   <div class="toast-banner" id="toast-banner" style="position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 12px; padding: 6px 12px; border-radius: 12px; z-index: 300; display: none; box-shadow: 0 3px 12px rgba(0,0,0,0.6);"></div>
@@ -432,7 +422,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v6.2.9";
+  const BUILD_VERSION = "v6.2.10"; // Version update for new features
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -540,6 +530,7 @@
       localStorage.setItem('sudataxi_auto_backup', JSON.stringify({
         call_logs: JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]'),
         custom_hotspots: JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]'),
+        custom_restrooms: JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]'),
         driving_records: JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}'),
         timestamp: new Date().toISOString()
       }));
@@ -694,7 +685,7 @@
     }
     renderCurrentStateTime(Date.now());
   }
-  
+
   function setTimerPreset(min) {
     requestNotificationPermission();
     if (isTimerRunning) { clearInterval(timerInterval); isTimerRunning = false; if (navigator.serviceWorker && navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage({ action: 'stopTimer' }); }
@@ -907,21 +898,109 @@
     return bonus;
   }
 
+  // 업데이트된 수익 극대화 전략 매핑 (시간별 거점 및 네비 연결 타겟)
   function getDynamicStrategyText(nowHour) {
-    if (nowHour >= 6 && nowHour < 11) return { title: "출근 시간대 집중", desc: "주요 아파트 단지에서 <b>환승역(지하철역), 오피스 밀집 지역, 병원</b> 방향으로의 이동이 활발합니다. 거점역 주변에서 대기하는 것을 추천합니다." };
-    if (nowHour >= 11 && nowHour < 17) return { title: "주간 평시 운행", desc: "도심 내 업무 이동 및 병원, 쇼핑몰, 대형마트 수요가 꾸준합니다. 상업지구 인근에서 짧은 콜을 노리며 연비 운행을 추천합니다." };
-    if (nowHour >= 17 && nowHour < 21) return { title: "퇴근 시간대 집중", desc: "<b>오피스 타운 및 주요 환승역</b>에서 주거지로 향하는 수요가 가장 많은 시간입니다. 길이 막힐 수 있으므로 실시간 내비 탐색이 중요합니다." };
-    if (nowHour >= 21 || nowHour < 2) return { title: "심야 유흥/번화가", desc: "<b>먹자골목, 로데오거리, 술집 밀집 지역</b>의 수요가 폭발적으로 증가합니다. 복귀 시 해당 지역을 경유하는 동선을 강력히 추천합니다." };
-    return { title: "심야/새벽 시간대", desc: "장거리 콜이나 심야 퇴근 수요가 드문드문 발생합니다. 안전 운전에 유의하시고, 번화가 주요 거점 위주로 대기하세요." };
+    if (nowHour >= 16 && nowHour < 18) return { 
+      title: "주간 방어 및 수락률 확보", 
+      desc: "콜 발생 빈도가 낮은 시간입니다. <b>수락률(AR) 방어</b>를 위해 단거리 콜도 기꺼이 수락하여 누적 수락률 60% 이상을 확보하세요.",
+      places: [] 
+    };
+    if (nowHour >= 18 && nowHour < 20) return { 
+      title: "퇴근 피크 타임", 
+      desc: "과천 지정타, 평촌 스마트스퀘어 등 <b>업무지구 밀집 지역</b>에 진입하여 서울/성남 방향 중장거리 콜을 유도하고 정체 할증을 노리세요.",
+      places: [
+        { name: "과천 지식정보타운", lat: 37.4144, lng: 126.9856 },
+        { name: "안양 평촌스마트스퀘어", lat: 37.3942, lng: 126.9638 }
+      ]
+    };
+    if (nowHour >= 20 && nowHour < 21) return { 
+      title: "식사/휴식 및 배터리 정비", 
+      desc: "야간 피크를 대비해 하드웨어를 정비하세요. E-pit 초급속 충전이나 배터리 스와핑을 활용하여 유휴시간을 최소화합니다.",
+      places: [
+        { name: "안양 농수산물시장 E-pit", lat: 37.3820, lng: 126.9749 },
+        { name: "피트인 안양 (배터리 교체)", lat: 37.3826, lng: 126.9388 }
+      ]
+    };
+    if (nowHour >= 21 && nowHour < 23) return { 
+      title: "야간 상권 / 학원가 회전", 
+      desc: "<b>범계역, 평촌 학원가, 산본 로데오</b> 일대에서 짧은 이동 거리로 콜 회전율(시간당 3~4콜)을 극대화하세요.",
+      places: [
+        { name: "범계역 로데오거리", lat: 37.3897, lng: 126.9502 },
+        { name: "평촌 학원가", lat: 37.3821, lng: 126.9582 },
+        { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331 }
+      ]
+    };
+    if (nowHour >= 23 || nowHour < 2) return { 
+      title: "심야 할증 및 장거리 피크", 
+      desc: "황금 시간대입니다. 높은 수락률을 무기로 <b>안양 북부나 과천 경계선</b>에서 서울/판교행 콜을 골라 <b>시외(20%)+심야(30%) 복합 할증</b>을 노리세요.",
+      places: [
+        { name: "선바위역 (과천-서울 경계)", lat: 37.4520, lng: 127.0050 },
+        { name: "석수역 (안양-서울 경계)", lat: 37.4355, lng: 126.9022 }
+      ]
+    };
+    return { 
+      title: "주간 평시 / 새벽 연비 운행", 
+      desc: "도심 내 단거리 및 역 주변 수요가 꾸준합니다. 상업지구와 환승역을 오가며 배터리 프리컨디셔닝 등 연비 위주의 운행을 하세요.",
+      places: [
+        { name: "인덕원역 환승 거점", lat: 37.4048, lng: 126.9767 },
+        { name: "안양역 일번가", lat: 37.4013, lng: 126.9222 }
+      ]
+    };
   }
 
-  function renderStrategyTab() {
+  async function renderStrategyTab() {
     const nowHour = new Date().getHours();
     const strategy = getDynamicStrategyText(nowHour);
     const titleEl = document.getElementById('strategy-time-title');
     const descEl = document.getElementById('strategy-text');
     if (titleEl) titleEl.innerText = `${nowHour}시 - ${strategy.title}`;
     if (descEl) descEl.innerHTML = strategy.desc;
+
+    const cardsList = document.getElementById('strategy-cards-list');
+    if (cardsList) {
+      cardsList.innerHTML = '<div style="text-align:center; padding:10px; font-size:11px; color:var(--stat-label);">전략 타겟 거리를 계산 중입니다...</div>';
+      
+      if (strategy.places.length === 0 || !currentPos) {
+         cardsList.innerHTML = '<div style="text-align:center; padding:10px; font-size:11px; color:var(--stat-label);">현재 시간대에 추천되는 특정 거점이 없습니다.</div>';
+         return;
+      }
+
+      let scoredPool = await Promise.all(strategy.places.map(async (item) => {
+        let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
+        return { ...item, dist: road.distanceKm, estimatedTimeMin: road.durationMin, isStrategy: true };
+      }));
+
+      scoredPool.sort((a, b) => a.dist - b.dist);
+      
+      const fragment = document.createDocumentFragment();
+      scoredPool.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.border = '1.5px solid #22C55E';
+        card.style.boxShadow = '0 0 10px rgba(34, 197, 94, 0.15)';
+        
+        card.innerHTML = `
+          <div class="card-main-content">
+            <div class="card-compact-row">
+              <div class="card-title-group">
+                <div class="num-badge" style="background:#22C55E; color:#FFF;">${index+1}</div>
+                <div class="place-info">
+                  <div class="place-name" style="color:#22C55E;">${item.name}</div>
+                  <div class="score-dist">${item.dist.toFixed(1)}km (${item.estimatedTimeMin}분) · 타겟 거점</div>
+                </div>
+              </div>
+              <button type="button" class="right-navi-btn" style="background:#22C55E !important; color:#FFF !important; box-shadow: 0 1px 4px rgba(34, 197, 94, 0.4);" onclick="openKakaoNaviApp('${item.name.replace(/'/g, "\\'")}', ${item.lat}, ${item.lng})"><span>🚗내비</span></button>
+            </div>
+          </div>
+          <div class="tag-group">
+            <span class="tag near" style="background:#F0FDF4; color:#16A34A; border-color:#22C55E;">#시간대_운행전략추천</span>
+          </div>
+        `;
+        fragment.appendChild(card);
+      });
+      cardsList.innerHTML = '';
+      cardsList.appendChild(fragment);
+    }
   }
 
   async function calculatePureSpotScore(item, weatherData, nowHour) {
@@ -984,55 +1063,93 @@
     }
   }
 
-  // 🚻 화장실 검색 기능 (카드로 표시되도록 전면 개편)
   async function searchRestrooms() {
     if (!currentPos) { showToast("위치를 탐색해주세요."); return; }
-    showToast("🚻 주변 가장 가까운 화장실을 탐색 중입니다...");
+    showToast("🚻 화장실(개방/주유소/지하철) 탐색 중...");
     
     const logEl = document.getElementById('pipeline-log');
-    if (logEl) logEl.innerText = `🚻 주변 가장 가까운 화장실 탐색 중...`;
+    if (logEl) logEl.innerText = `🚻 주변 개방화장실 및 편의시설 탐색 중...`;
     
     const ps = new kakao.maps.services.Places();
     
-    ps.keywordSearch('화장실', async (data, status) => {
-      if (status === kakao.maps.services.Status.OK && data.length > 0) {
-        // 1. 직선거리로 5곳 추출
-        let restrooms = data.slice(0, 5).map(p => ({
-          id: 'restroom_' + p.id,
-          name: p.place_name,
-          lat: parseFloat(p.y),
-          lng: parseFloat(p.x),
+    // 비동기 병렬 검색용 헬퍼 함수
+    const searchPlace = (query, isCategory = false) => new Promise(resolve => {
+      const callback = (data, status) => resolve(status === kakao.maps.services.Status.OK ? data : []);
+      const options = { x: currentPos.lng, y: currentPos.lat, radius: 3000 };
+      if (isCategory) ps.categorySearch(query, callback, options);
+      else ps.keywordSearch(query, callback, options);
+    });
+
+    // 4가지 키워드 동시 검색으로 병목 제거
+    const [pub1, pub2, gas, sub] = await Promise.all([
+      searchPlace('공중화장실'), searchPlace('개방화장실'),
+      searchPlace('OL7', true), searchPlace('SW8', true)
+    ]);
+
+    const allResults = [...pub1, ...pub2, ...gas, ...sub];
+    let uniqueMap = new Map();
+    
+    allResults.forEach(p => {
+      if (!uniqueMap.has(p.id)) {
+        uniqueMap.set(p.id, {
+          id: 'restroom_' + p.id, name: p.place_name,
+          lat: parseFloat(p.y), lng: parseFloat(p.x),
           straightDist: getStraightDistanceKm(currentPos.lat, currentPos.lng, parseFloat(p.y), parseFloat(p.x)),
           isRestroom: true
-        })).sort((a,b) => a.straightDist - b.straightDist);
-
-        // 2. 카카오 API로 실거리 및 소요시간 연산 후 카드에 출력할 데이터 만들기
-        let scoredPool = await Promise.all(restrooms.map(async (item) => {
-          let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
-          return { ...item, dist: road.distanceKm, estimatedTimeMin: road.durationMin, geometryCoords: road.geometryCoords };
-        }));
-
-        // 3. 실제 주행거리 기준으로 다시 정렬
-        scoredPool.sort((a,b) => a.dist - b.dist);
-
-        currentRouteData = [{ name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true }, ...scoredPool];
-
-        const mapBtn = document.getElementById('btn-show-map');
-        if (mapBtn) mapBtn.style.display = 'flex';
-        if (logEl) logEl.innerText = `방금 · 화장실 검색 완료 (다시 핫플을 찾으려면 위의 '콜 찾기' 버튼을 누르세요)`;
-
-        // 4. 메인 화면 카드 리스트에 화장실 렌더링
-        renderCards(scoredPool, null, null);
-      } else {
-        showToast("주변 반경 내 화장실을 찾지 못했습니다.");
-        if (logEl) logEl.innerText = `방금 · 화장실 검색 실패`;
+        });
       }
-    }, {
-      x: currentPos.lng,
-      y: currentPos.lat,
-      radius: 3000,
-      sort: kakao.maps.services.SortBy.DISTANCE
     });
+
+    // 기사님이 직접 저장한 커스텀 화장실 데이터 불러와서 포함
+    let customRestrooms = JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]');
+    customRestrooms.forEach(p => {
+       const dist = getStraightDistanceKm(currentPos.lat, currentPos.lng, p.lat, p.lng);
+       if (dist <= 3.0) { // 반경 3km 내 데이터만 추출
+          uniqueMap.set(p.id, {
+            ...p, straightDist: dist, isRestroom: true, isCustomRestroom: true
+          });
+       }
+    });
+
+    if (uniqueMap.size > 0) {
+      // 1. 직선거리로 먼저 정렬 후 5곳만 잘라내기 (내비 연산 속도 저하 방지)
+      let restrooms = Array.from(uniqueMap.values()).sort((a, b) => a.straightDist - b.straightDist).slice(0, 5);
+
+      // 2. 카카오 API로 실도로거리 계산
+      let scoredPool = await Promise.all(restrooms.map(async (item) => {
+        let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
+        return { ...item, dist: road.distanceKm, estimatedTimeMin: road.durationMin, geometryCoords: road.geometryCoords };
+      }));
+
+      // 3. 실제 주행거리 기준으로 다시 정렬
+      scoredPool.sort((a, b) => a.dist - b.dist);
+      currentRouteData = [{ name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true }, ...scoredPool];
+
+      const mapBtn = document.getElementById('btn-show-map');
+      if (mapBtn) mapBtn.style.display = 'flex';
+      if (logEl) logEl.innerText = `방금 · 화장실 검색 완료 (다시 핫플을 찾으려면 위의 '콜 찾기' 버튼을 누르세요)`;
+
+      // 카드 생성 렌더링
+      renderCards(scoredPool, null, null);
+    } else {
+      showToast("주변 반경 내 화장실을 찾지 못했습니다.");
+      if (logEl) logEl.innerText = `방금 · 화장실 검색 실패`;
+    }
+  }
+
+  function saveCurrentRestroomLocation() {
+    if (!currentPos) { showToast('위치 탐색이 필요합니다.'); return; }
+    
+    // alert, prompt를 사용하지 않기 위해 현재 시간을 기반으로 자동 이름 부여
+    const now = new Date();
+    let minStr = String(now.getMinutes()).padStart(2, '0');
+    const autoName = `⭐ 내 화장실 (${now.getHours()}시 ${minStr}분)`;
+    
+    let custom = JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]');
+    custom.push({ id: 'my_restroom_' + Date.now(), name: autoName, lat: currentPos.lat, lng: currentPos.lng });
+    localStorage.setItem('sudataxi_custom_restrooms', JSON.stringify(custom));
+    
+    showToast(`🚻 ${autoName}\n저장 완료! (검색 시 우선 노출)`);
   }
 
   function executeSearch() {
@@ -1166,11 +1283,10 @@
       `;
       let btnColor = '';
 
-      // 화장실 검색 모드일 경우 카드 디자인을 직관적으로 변경
       if (item.isRestroom) {
         badgeHtml = `<div class="num-badge" style="background:#3B82F6; color:#FFF; font-size:12px;">🚻</div>`;
         scoreDistHtml = `${item.dist.toFixed(1)}km (${item.estimatedTimeMin}분) · 화장실 편의시설`;
-        tagsHtml = `<span class="tag near" style="background:#EFF6FF; color:#2563EB; border-color:#3B82F6; font-weight:800;">#공중/개방화장실</span>`;
+        tagsHtml = item.isCustomRestroom ? `<span class="tag near" style="background:#FDF2F8; color:#DB2777; border-color:#F43F5E; font-weight:800;">#내가저장한화장실</span>` : `<span class="tag near" style="background:#EFF6FF; color:#2563EB; border-color:#3B82F6; font-weight:800;">#공중/개방화장실</span>`;
         btnColor = `style="background:#3B82F6 !important; color:#FFF !important;"`;
       }
 
@@ -1261,17 +1377,17 @@
   function closeRouteMapModal() { document.getElementById('map-modal').classList.remove('active'); }
   function cleanQuery(str) { return (str||'').replace(/먹자골목|중심상가|상업지구|환승거점|사거리|로데오거리|로데오|환승센터|포차|맛고을|업무지구|메디컬타운/g, '').trim(); }
 
-  // 백업, 복원, 나만의 핫플 등 데이터 추가 로직
   function addCustomHotspotPrompt() {
     if (!currentPos) { showToast('위치 탐색이 필요합니다.'); return; }
-    const name = prompt('⭐ 콜 장소 이름 등록:');
-    if (!name || !name.trim()) return;
+    // 앱 굳어버림 방지 (prompt 미사용) -> 자동 부여
+    const now = new Date();
+    const name = `⭐ 지정 핫플 (${now.getHours()}시 ${String(now.getMinutes()).padStart(2,'0')}분)`;
     let custom = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
     custom.push({ id: 'custom_' + Date.now(), name: name.trim(), lat: currentPos.lat, lng: currentPos.lng, type: 'subway', isCustom: true, address: name.trim() });
     localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(custom));
     updateCustomHotspotUI();
     if (activeTab === 1) calculateAndRender();
-    showToast('등록 완료!');
+    showToast(`📍 ${name}\n등록 완료!`);
   }
 
   function deleteCustomHotspot(id) {
@@ -1288,7 +1404,7 @@
     if (custom.length === 0) { list.innerHTML = `<div style="font-size:9px; color:var(--stat-label); text-align:center;">등록된 장소가 없습니다.</div>`; return; }
     list.innerHTML = custom.map(item => `
       <div class="recent-log-item">
-        <span class="recent-log-time">⭐ ${item.name}</span>
+        <span class="recent-log-time">${item.name}</span>
         <button class="delete-custom-btn" data-id="${item.id}" style="background:#FEE2E2; color:#DC2626; border:1px solid #F87171; border-radius:4px; padding:2px 6px; font-size:9px; font-weight:700; cursor:pointer;">삭제</button>
       </div>
     `).join('');
@@ -1377,15 +1493,16 @@
     const data = { 
       call_logs: JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]'), 
       custom_hotspots: JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]'),
+      custom_restrooms: JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]'),
       master_hotspots: getMasterHotspotsFromStorage(),
       driving_records: JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}')
     };
     const jsonStr = JSON.stringify(data, null, 2);
     const today = new Date();
     const dateStr = today.getFullYear() + String(today.getMonth() + 1).padStart(2, '0') + String(today.getDate()).padStart(2, '0');
-    let userFileName = prompt('💾 저장할 백업 파일 이름을 입력하세요:', `sudataxi_backup_${dateStr}`);
-    if (userFileName === null) return;
-    if (!userFileName.endsWith('.json')) userFileName += '.json';
+    // alert, prompt 방지. 자동 파일명 할당.
+    const userFileName = `sudataxi_backup_${dateStr}_${today.getHours()}${today.getMinutes()}.json`;
+    
     try {
       const blob = new Blob([jsonStr], { type: 'application/json' });
       const blobUrl = URL.createObjectURL(blob); 
@@ -1405,8 +1522,11 @@
         const json = JSON.parse(evt.target.result);
         let existingLogs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
         let existingHotspots = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
+        let existingRestrooms = JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]');
+        
         let importedLogs = json.call_logs || json.logs || [];
         let importedHotspots = json.custom_hotspots || [];
+        let importedRestrooms = json.custom_restrooms || [];
         let importedMaster = json.master_hotspots || null;
         let importedRecords = json.driving_records || null;
         
@@ -1425,9 +1545,14 @@
         let hotspotMap = new Map();
         existingHotspots.forEach(item => { hotspotMap.set(item.id || `${item.name}_${item.lat}_${item.lng}`, item); });
         importedHotspots.forEach(item => { hotspotMap.set(item.id || `${item.name}_${item.lat}_${item.lng}`, item); });
+
+        let restroomMap = new Map();
+        existingRestrooms.forEach(item => { restroomMap.set(item.id || `${item.name}_${item.lat}_${item.lng}`, item); });
+        importedRestrooms.forEach(item => { restroomMap.set(item.id || `${item.name}_${item.lat}_${item.lng}`, item); });
         
         localStorage.setItem('sudataxi_call_logs', JSON.stringify(Array.from(logMap.values())));
         localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(Array.from(hotspotMap.values())));
+        localStorage.setItem('sudataxi_custom_restrooms', JSON.stringify(Array.from(restroomMap.values())));
         updateCallLogStats(); updateCustomHotspotUI(); showToast(`🎉 복원/병합 완료!`);
         if (activeTab === 3) renderCallMapView(); else calculateAndRender();
       } catch(err) { showToast('❌ 오류: 올바르지 않은 JSON 백업 데이터입니다.'); } 
@@ -1468,7 +1593,6 @@
     document.getElementById('btn-show-map').addEventListener('click', () => openRouteMapModal());
     document.getElementById('btn-restroom').addEventListener('click', () => searchRestrooms());
     document.getElementById('map-modal-close').addEventListener('click', () => closeRouteMapModal());
-    document.getElementById('btn-save-call').addEventListener('click', () => saveCurrentCallLocation());
     
     // 백업/복원 기능 연결
     document.getElementById('btn-export').addEventListener('click', exportCallLogs);
@@ -1481,6 +1605,10 @@
     document.getElementById('btn-break-toggle').addEventListener('click', toggleBreak);
     document.getElementById('btn-board').addEventListener('click', handleBoarding);
     document.getElementById('btn-alight').addEventListener('click', handleAlighting);
+
+    // 하단 3개 버튼 기능 (타이머 / 탑승위치 저장 / 나만의 화장실 저장)
+    document.getElementById('btn-save-call').addEventListener('click', () => saveCurrentCallLocation());
+    document.getElementById('btn-save-restroom').addEventListener('click', () => saveCurrentRestroomLocation());
 
     // 타이머 기능
     document.getElementById('timer-btn-5m').addEventListener('click', () => setTimerPreset(5));
