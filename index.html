@@ -286,6 +286,9 @@
         <button class="add-custom-btn" id="btn-add-custom">⭐ 현재 위치 '나만의 핫플' 등록</button>
         <div style="font-size: 10px; font-weight: 800; color: #A855F7; margin: 4px 0 2px 0;">📍 나만의 핫플 목록</div>
         <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 2px;"></div>
+        
+        <div style="font-size: 10px; font-weight: 800; color: #3B82F6; margin: 8px 0 2px 0;">🚻 나만의 화장실 목록</div>
+        <div id="custom-restrooms-list" style="display: flex; flex-direction: column; gap: 2px;"></div>
       </div>
     </div>
   </div>
@@ -422,7 +425,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v6.2.10"; // Version update for new features
+  const BUILD_VERSION = "v6.3.0"; // Version update for new features
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -1149,7 +1152,28 @@
     custom.push({ id: 'my_restroom_' + Date.now(), name: autoName, lat: currentPos.lat, lng: currentPos.lng });
     localStorage.setItem('sudataxi_custom_restrooms', JSON.stringify(custom));
     
+    updateCustomRestroomUI();
     showToast(`🚻 ${autoName}\n저장 완료! (검색 시 우선 노출)`);
+  }
+
+  function deleteCustomRestroom(id) {
+    let custom = JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]').filter(i => i.id !== id);
+    localStorage.setItem('sudataxi_custom_restrooms', JSON.stringify(custom));
+    updateCustomRestroomUI();
+  }
+
+  function updateCustomRestroomUI() {
+    const list = document.getElementById('custom-restrooms-list');
+    if (!list) return;
+    const custom = JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]');
+    if (custom.length === 0) { list.innerHTML = `<div style="font-size:9px; color:var(--stat-label); text-align:center;">등록된 장소가 없습니다.</div>`; return; }
+    list.innerHTML = custom.map(item => `
+      <div class="recent-log-item">
+        <span class="recent-log-time" style="color: #3B82F6;">${item.name}</span>
+        <button class="delete-restroom-btn" data-id="${item.id}" style="background:#FEE2E2; color:#DC2626; border:1px solid #F87171; border-radius:4px; padding:2px 6px; font-size:9px; font-weight:700; cursor:pointer;">삭제</button>
+      </div>
+    `).join('');
+    document.querySelectorAll('.delete-restroom-btn').forEach(btn => btn.addEventListener('click', (e) => deleteCustomRestroom(e.currentTarget.dataset.id)));
   }
 
   function executeSearch() {
@@ -1553,7 +1577,7 @@
         localStorage.setItem('sudataxi_call_logs', JSON.stringify(Array.from(logMap.values())));
         localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(Array.from(hotspotMap.values())));
         localStorage.setItem('sudataxi_custom_restrooms', JSON.stringify(Array.from(restroomMap.values())));
-        updateCallLogStats(); updateCustomHotspotUI(); showToast(`🎉 복원/병합 완료!`);
+        updateCallLogStats(); updateCustomHotspotUI(); updateCustomRestroomUI(); showToast(`🎉 복원/병합 완료!`);
         if (activeTab === 3) renderCallMapView(); else calculateAndRender();
       } catch(err) { showToast('❌ 오류: 올바르지 않은 JSON 백업 데이터입니다.'); } 
       finally { e.target.value = ''; }
@@ -1577,7 +1601,7 @@
 
   window.addEventListener('DOMContentLoaded', () => {
     initKakaoSdk(); applyThemeMode(currentThemeMode); checkIsPublicHolidayRealtime();
-    updateCallLogStats(); updateCustomHotspotUI();
+    updateCallLogStats(); updateCustomHotspotUI(); updateCustomRestroomUI();
     restoreTimerState(); restoreDrivingState(); 
     executeAutoBackup(); setInterval(executeAutoBackup, 10 * 60 * 1000); 
     
