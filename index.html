@@ -57,7 +57,6 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background-color: var(--main-bg); color: var(--main-text); max-width: 430px; margin: 0 auto; padding: 10px 10px 120px 10px; min-height: 100vh; transition: all 0.3s ease; }
     
-    /* 상단 고정(Sticky) 영역 CSS 추가 */
     .sticky-top-area {
       position: sticky;
       top: 0;
@@ -90,6 +89,7 @@
     .big-btn { width: 100%; height: 44px; background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; font-size: 15px; font-weight: 900; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
     .big-btn:active { opacity: 0.9; transform: scale(0.99); }
     .map-btn { width: 100%; height: 34px; background: var(--card-bg); color: var(--main-text); font-size: 12px; font-weight: 800; border: 1px solid var(--card-border); border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
+    .restroom-btn { width: 100%; height: 34px; background: #3B82F6 !important; color: #FFFFFF !important; font-size: 12px; font-weight: 800; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
     
     .pipeline-log { font-family: monospace; font-size: 10px; color: var(--stat-label); margin: 0 0 8px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     
@@ -108,6 +108,9 @@
     .place-name { font-size: 13px; font-weight: 900; color: var(--main-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
     .score-dist { font-size: 10px; font-weight: 800; color: var(--theme-accent); font-family: monospace; margin-top: 1px; display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; white-space: nowrap; }
     
+    .target-title-text { color: #FFD700; }
+    .target-score-text { color: #FF6B00; }
+
     .level-badge { font-weight: 900; padding: 1px 3px; border-radius: 3px; font-size: 8.5px; display: inline-flex; align-items: center; gap: 1px; }
     .level-high { background: rgba(74, 222, 128, 0.15); color: #22C55E; border: 1px solid #22C55E; }
     .level-mid { background: rgba(255, 200, 0, 0.15); color: #D97706; border: 1px solid #D97706; }
@@ -129,16 +132,12 @@
     .backup-btn-group { display: flex; gap: 4px; }
     .backup-btn { height: 32px; background: var(--btn-idle-bg); color: var(--main-text); font-weight: 800; border: 1px solid var(--btn-idle-border); border-radius: 6px; cursor: pointer; font-size: 11px; }
     
-    /* =========================================
-       운행일지 폰트 사이즈 확대 (위아래 2줄 배치)
-       ========================================= */
     .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .stat-box { background: var(--stat-bg); border: 1px solid var(--stat-border); padding: 8px 10px; border-radius: 8px; display: flex; flex-direction: column; gap: 4px; }
     .stat-label-text { color: var(--stat-label); font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 4px; }
     .stat-value { font-size: 15px; font-weight: 900; font-family: monospace; letter-spacing: -0.5px; }
     .stat-sub-val { font-size: 11px; font-weight: 700; color: var(--stat-label); margin-top: -2px; }
     
-    /* 평균 통계 박스 리스트 전용 스타일 */
     .avg-stat-box { background: var(--stat-bg); border: 1px solid var(--stat-border); padding: 10px; border-radius: 8px; display: flex; flex-direction: column; gap: 6px; }
     .avg-stat-header { display: flex; align-items: center; justify-content: space-between; width: 100%; border-bottom: 1px dashed var(--stat-border); padding-bottom: 4px; }
     .avg-stat-title { font-size: 13px; font-weight: 900; color: var(--stat-label); display: flex; align-items: center; gap: 4px; }
@@ -146,7 +145,6 @@
     .avg-stat-details { display: flex; align-items: center; justify-content: space-between; padding-top: 2px; }
     .avg-stat-sub { font-size: 10px; font-weight: 800; display: flex; align-items: center; gap: 2px; white-space: nowrap; letter-spacing: -0.5px; } 
     .avg-stat-sub-val { font-family: monospace; font-size: 11px; }
-
 
     .text-accent { color: var(--theme-accent); }
     .text-green { color: #4ADE80; }
@@ -222,6 +220,15 @@
     body.theme-day .text-green { color: #16A34A; }
     body.theme-day .text-orange { color: #EA580C; }
     body.theme-day .text-purple { color: #9333EA; }
+
+    body.theme-day .right-navi-btn { background: #2563EB !important; color: #FFFFFF !important; }
+    body.theme-day .target-title-text { color: #D97706 !important; }
+    body.theme-day .target-score-text { color: #B45309 !important; }
+    
+    .strategy-box { background: rgba(34, 197, 94, 0.1); border: 1.5px solid #22C55E; border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+    .strategy-title { font-size: 14px; font-weight: 900; color: #16A34A; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+    .strategy-content { font-size: 12px; font-weight: 700; color: var(--main-text); line-height: 1.5; }
+    body.theme-day .strategy-box { background: #F0FDF4; }
   </style>
 </head>
 <body class="mode-1">
@@ -235,20 +242,19 @@
     </div>
   </div>
   
-  <!-- 상단 고정(Sticky) 래퍼 추가 -->
   <div class="sticky-top-area">
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 8px;">
       <div class="header" id="app-header-title" style="margin-bottom: 0; flex: 1;">📅 날짜 수신 대기 중...</div>
       <button id="btn-theme-toggle" onclick="toggleTheme()" class="btn-idle" style="border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 900; cursor: pointer; white-space: nowrap; flex-shrink: 0; border: 1px solid var(--theme-border); color: var(--theme-accent);">☀️ 주간</button>
     </div>
     
-    <div class="mode-container">
-      <button class="mode-pill active" id="btn-mode1">⚡ 자동추천모드</button>
-      <button class="mode-pill" id="btn-mode3">📊 콜 지도 시각화</button>
+    <div class="mode-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+      <button class="mode-pill active" id="btn-mode1">⚡ 추천/콜찾기</button>
+      <button class="mode-pill" id="btn-mode2">🧠 운행 전략</button>
+      <button class="mode-pill" id="btn-mode3">📊 콜 지도</button>
       <button class="mode-pill" id="btn-mode4">🚘 운행 일지</button>
     </div>
   </div>
-  <!-- 상단 고정 영역 끝 -->
 
   <div class="loc-bar">
     <span id="loc-text">📍 실시간 GPS 위치 수신 대기 중...</span>
@@ -259,9 +265,14 @@
     <button class="big-btn" id="btn-search">
       <span>📍 주변 콜 많은 곳 찾기</span>
     </button>
-    <button class="map-btn" id="btn-show-map" style="display: none;">
-      <span>🗺️ 전체 도로 동선 지도 보기</span>
-    </button>
+    <div style="display: flex; gap: 6px;">
+      <button class="map-btn" id="btn-show-map" style="display: none; flex: 2;">
+        <span>🗺️ 동선 지도 보기</span>
+      </button>
+      <button class="restroom-btn" id="btn-restroom" style="flex: 1;">
+        <span>🚻 화장실</span>
+      </button>
+    </div>
   </div>
   
   <div class="pipeline-log" id="pipeline-log">대기 중 · 카카오 실시간 내비 연산 대기</div>
@@ -275,7 +286,6 @@
         <span class="backup-count" id="log-count-text">저장 기록: 0개</span>
       </div>
       <div class="backup-btn-group">
-        <!-- 버튼 넓이 비율 조정 flex: 2.2 와 flex: 1 -->
         <button class="backup-btn" id="btn-export" style="flex: 2.2;">📦 전체 백업(운행일지 포함)</button>
         <button class="backup-btn" id="btn-import-open" style="flex: 1;">📥 복원</button>
         <input type="file" id="import-file-input" accept=".json,application/json" style="display: none;">
@@ -294,6 +304,21 @@
     </div>
   </div>
 
+  <!-- 2번 탭 (운행 전략) -->
+  <div id="tab2-extras" style="display: none;">
+    <div class="strategy-box">
+      <div class="strategy-title">💡 <span id="strategy-time-title">시간대 분석 중...</span></div>
+      <div class="strategy-content" id="strategy-text">실시간 전략 데이터를 불러오고 있습니다.</div>
+    </div>
+    
+    <details style="margin-top: 8px; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 1.4;" open>
+      <summary style="font-weight: 800; color: var(--theme-accent); cursor: pointer;">📌 복귀 경로 알고리즘 안내</summary>
+      <div style="margin-top: 6px; color: var(--stat-label); display: flex; flex-direction: column; gap: 8px; font-size: 10px;">
+        <div>관외 지역(성남, 안산, 안양 등)에서 빈 차로 복귀 시, 반경 2.5km 내의 핫플레이스나 번화가를 <b>우선 경유지</b>로 강력 추천하여 손님을 태우고 복귀할 확률을 높여줍니다. (복귀 방향이 다소 어긋나더라도 탑승 확률을 우선시합니다)</div>
+      </div>
+    </details>
+  </div>
+
   <!-- 3번 탭 (콜 지도 시각화) -->
   <div id="tab3-extras" style="display: none;">
     <div id="heatmap-container" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;">
@@ -303,25 +328,6 @@
       </div>
       <div id="call-map-view" style="width: 100%; height: 320px; background: #1E1E1E; border-radius: 12px; border: 1.5px solid var(--theme-accent); overflow: hidden;"></div>
     </div>
-
-    <details style="margin-top: 8px; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 1.4;">
-      <summary style="font-weight: 800; color: var(--theme-accent); cursor: pointer;">💡 [수다택시 K] 카카오 길찾기 API 연동 안내</summary>
-      <div style="margin-top: 6px; color: var(--stat-label); display: flex; flex-direction: column; gap: 8px; font-size: 10px;">
-        <div><strong style="color: var(--theme-accent);">1. 기본 점수 체계 (Base 0점 시작)</strong><br>• 승차기록 추천: +35점 | 나만의 핫플: +20점 | 카카오 실시간: +15점</div>
-        <div><strong style="color: #F97316;">2. 실시간 트래픽 반영 엔진 교체</strong><br>• OSRM 완전 제거 및 카카오 모빌리티 실시간 길찾기 API 탑재 (CORS 에러 시 우회)</div>
-      </div>
-    </details>
-  
-    <details style="margin-top: 8px; border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.4;">
-      <summary style="font-weight: 800; color: #22C55E; cursor: pointer; font-size: 11px;">📜 최신 업데이트 히스토리 (터치)</summary>
-      <div style="margin-top: 6px; color: var(--stat-label); display: flex; flex-direction: column; gap: 6px;">
-        <div style="border-bottom: 1px dashed var(--stat-border); padding-bottom: 4px;">
-          <strong style="color: #22C55E;">v6.2.6 - 상단 탭 고정 및 UI 개선</strong><br>
-          • 📌 <strong>상단 고정 기능 추가</strong>: 스크롤을 내려도 자동추천/지도/운행일지 탭으로 바로 이동 가능하게 고정되었습니다.<br>
-          • 📊 <strong>탑승/공차 비율 퍼센트 표시</strong>: '오늘 운행 현황' 및 '평균 운행 통계'에서 총 주행 시간 대비 승차 시간과 공차 시간의 비율(%)이 실시간으로 계산되어 함께 표시됩니다.
-        </div>
-      </div>
-    </details>
   </div>
 
   <!-- 4번 탭 (운행 일지) -->
@@ -344,16 +350,16 @@
       </div>
       <div class="stat-grid">
         <div class="stat-box">
-          <div class="stat-label-text">🚗 Total Drive:</div>
+          <div class="stat-label-text">🚗 Total:</div>
           <div id="stat-today-total" class="stat-value text-accent">00:00:00</div>
         </div>
         <div class="stat-box">
-          <div class="stat-label-text">🙋 Passenger:</div>
+          <div class="stat-label-text">🙋 Board:</div>
           <div id="stat-today-board" class="stat-value text-green">00:00:00</div>
           <div id="stat-today-board-pct" class="stat-sub-val text-green">0.0%</div>
         </div>
         <div class="stat-box">
-          <div class="stat-label-text">🈳 Empty Car:</div>
+          <div class="stat-label-text">🈳 Empty:</div>
           <div id="stat-today-empty" class="stat-value text-orange">00:00:00</div>
           <div id="stat-today-empty-pct" class="stat-sub-val text-orange">0.0%</div>
         </div>
@@ -367,7 +373,6 @@
     <div class="backup-section">
       <div class="backup-title" style="margin-bottom: 10px;">📊 평균 운행 통계</div>
       <div style="display: flex; flex-direction: column; gap: 8px;">
-        <!-- 일 평균 -->
         <div class="avg-stat-box">
           <div class="avg-stat-header">
             <span class="avg-stat-title">📅 Daily Avg :</span>
@@ -378,7 +383,6 @@
             <span class="avg-stat-sub">🈳 <span id="stat-avg-daily-empty" class="avg-stat-sub-val text-orange">00:00:00</span> (<span id="stat-avg-daily-empty-pct">0.0%</span>)</span>
           </div>
         </div>
-        <!-- 주 평균 -->
         <div class="avg-stat-box">
           <div class="avg-stat-header">
             <span class="avg-stat-title">🗓️ Weekly Avg :</span>
@@ -389,7 +393,6 @@
             <span class="avg-stat-sub">🈳 <span id="stat-avg-weekly-empty" class="avg-stat-sub-val text-orange">00:00:00</span> (<span id="stat-avg-weekly-empty-pct">0.0%</span>)</span>
           </div>
         </div>
-        <!-- 월 평균 -->
         <div class="avg-stat-box">
           <div class="avg-stat-header">
             <span class="avg-stat-title">📆 Monthly Avg :</span>
@@ -420,7 +423,7 @@
   <div class="map-modal-overlay" id="map-modal">
     <div class="map-modal-content">
       <div class="map-modal-header">
-        <span class="map-modal-title">🗺️ 도로 동선 지도</span>
+        <span class="map-modal-title" id="map-modal-title">🗺️ 도로 동선 지도</span>
         <button class="map-modal-close" id="map-modal-close">✕</button>
       </div>
       <div id="route-map"></div>
@@ -429,7 +432,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v6.2.6";
+  const BUILD_VERSION = "v6.2.9";
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -449,11 +452,8 @@
   
   let currentThemeMode = localStorage.getItem('sudataxi_theme_mode') || 'night';
   
-  // 백그라운드 Service Worker 등록 (푸시 알림용)
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').then(reg => {}).catch(err => {});
-    });
+    window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(()=>{}); });
   }
 
   function applyThemeMode(theme) {
@@ -469,9 +469,7 @@
     }
   }
   
-  function toggleTheme() {
-    applyThemeMode(currentThemeMode === 'day' ? 'night' : 'day');
-  }
+  function toggleTheme() { applyThemeMode(currentThemeMode === 'day' ? 'night' : 'day'); }
 
   function initKakaoSdk() {
     if (window.Kakao && !window.Kakao.isInitialized()) {
@@ -507,22 +505,13 @@
     if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 500, 200, 500]);
     try {
         if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification('⏱️ [수다택시 K] 대기 완료!', { 
-                body: `${timerPresetMin}분 대기가 종료되었습니다. 추천지로 이동하세요!`, 
-                requireInteraction: true 
-            });
+            new Notification('⏱️ [수다택시 K] 대기 완료!', { body: `${timerPresetMin}분 대기가 종료되었습니다. 추천지로 이동하세요!` });
         }
     } catch(e) {}
   }
 
   function saveTimerState() {
-    const state = {
-      presetMin: timerPresetMin,
-      remainingSec: timerRemainingSec,
-      isRunning: isTimerRunning,
-      targetEndTime: isTimerRunning ? (Date.now() + timerRemainingSec * 1000) : null
-    };
-    localStorage.setItem('sudataxi_timer_state', JSON.stringify(state));
+    localStorage.setItem('sudataxi_timer_state', JSON.stringify({ presetMin: timerPresetMin, remainingSec: timerRemainingSec, isRunning: isTimerRunning, targetEndTime: isTimerRunning ? (Date.now() + timerRemainingSec * 1000) : null }));
   }
   
   function restoreTimerState() {
@@ -535,100 +524,143 @@
       document.getElementById('timer-btn-10m').classList.toggle('active', timerPresetMin === 10);
   
       if (state.isRunning && state.targetEndTime) {
-        const now = Date.now();
-        const leftSec = Math.round((state.targetEndTime - now) / 1000);
-        if (leftSec > 0) {
-          timerRemainingSec = leftSec;
-          startTimerInternal();
-        } else {
-          timerRemainingSec = 0;
-          const btn = document.getElementById('timer-display-btn');
-          btn.className = 'timer-display-btn finished';
-          btn.innerText = `⏱️ 00:00 이동 추천!`;
-          localStorage.removeItem('sudataxi_timer_state');
-        }
-      } else if (state.remainingSec && state.remainingSec > 0) {
+        const leftSec = Math.round((state.targetEndTime - Date.now()) / 1000);
+        if (leftSec > 0) { timerRemainingSec = leftSec; startTimerInternal(); } 
+        else { timerRemainingSec = 0; document.getElementById('timer-display-btn').className = 'timer-display-btn finished'; document.getElementById('timer-display-btn').innerText = `⏱️ 00:00 이동 추천!`; localStorage.removeItem('sudataxi_timer_state'); }
+      } else if (state.remainingSec > 0) {
         timerRemainingSec = state.remainingSec;
-        const btn = document.getElementById('timer-display-btn');
-        btn.className = 'timer-display-btn';
-        btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 재개`;
+        document.getElementById('timer-display-btn').className = 'timer-display-btn';
+        document.getElementById('timer-display-btn').innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 재개`;
       }
     } catch(e) {}
   }
 
-  // 10분 백업 기능
   function executeAutoBackup() {
     try {
-      const backupData = {
+      localStorage.setItem('sudataxi_auto_backup', JSON.stringify({
         call_logs: JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]'),
         custom_hotspots: JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]'),
         driving_records: JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}'),
         timestamp: new Date().toISOString()
-      };
-      localStorage.setItem('sudataxi_auto_backup', JSON.stringify(backupData));
+      }));
     } catch(e) {}
   }
 
-  function saveDrivingState() {
-    localStorage.setItem('sudataxi_driving_state', JSON.stringify(drivingState));
-  }
-
+  function saveDrivingState() { localStorage.setItem('sudataxi_driving_state', JSON.stringify(drivingState)); }
+  
   function restoreDrivingState() {
     const saved = localStorage.getItem('sudataxi_driving_state');
     if (saved) {
       try {
-        const parsed = JSON.parse(saved);
-        drivingState = parsed;
+        drivingState = JSON.parse(saved);
         if (!drivingState.stateStartTime && drivingState.isDriving) drivingState.stateStartTime = Date.now();
-        
         if (drivingState.isDriving) {
           const now = Date.now();
           if (drivingState.lastTickTime && now > drivingState.lastTickTime) {
             const elapsed = Math.floor((now - drivingState.lastTickTime) / 1000);
             const todayData = getTodayDrivingData();
-            if (drivingState.isBreak) {
-              todayData.breakTime = (todayData.breakTime || 0) + elapsed;
-            } else {
+            if (drivingState.isBreak) todayData.breakTime = (todayData.breakTime || 0) + elapsed;
+            else {
               todayData.totalDrive = (todayData.totalDrive || 0) + elapsed;
-              if (drivingState.isPassengerBoarded) {
-                todayData.passengerBoard = (todayData.passengerBoard || 0) + elapsed;
-              } else {
-                todayData.emptyCar = (todayData.emptyCar || 0) + elapsed;
-              }
+              if (drivingState.isPassengerBoarded) todayData.passengerBoard = (todayData.passengerBoard || 0) + elapsed;
+              else todayData.emptyCar = (todayData.emptyCar || 0) + elapsed;
             }
             saveTodayDrivingData(todayData);
           }
           drivingState.lastTickTime = Date.now();
           updateDrivingUI();
           startDrivingTimer();
-        } else {
-          updateDrivingUI();
-        }
+        } else { updateDrivingUI(); }
       } catch(e) {}
     }
+  }
+
+  function getTodayKey() {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  }
+
+  function getTodayDrivingData() {
+    const key = getTodayKey();
+    const records = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
+    if (!records[key]) records[key] = { totalDrive: 0, passengerBoard: 0, emptyCar: 0, breakTime: 0 };
+    return records[key];
+  }
+
+  function saveTodayDrivingData(data) {
+    const key = getTodayKey();
+    const records = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
+    records[key] = data;
+    localStorage.setItem('sudataxi_driving_records', JSON.stringify(records));
+  }
+
+  function toggleDriving() {
+    drivingState.isDriving = !drivingState.isDriving;
+    if (drivingState.isDriving) {
+      drivingState.isPassengerBoarded = false; drivingState.isBreak = false;
+      drivingState.lastTickTime = Date.now(); drivingState.stateStartTime = Date.now();
+      startDrivingTimer(); showToast('🚗 운행이 시작되었습니다.');
+    } else {
+      drivingState.isPassengerBoarded = false; drivingState.isBreak = false; drivingState.stateStartTime = null;
+      stopDrivingTimer(); showToast('⏹️ 운행이 종료되었습니다.');
+    }
+    updateDrivingUI(); saveDrivingState();
+  }
+
+  function toggleBreak() {
+    if (!drivingState.isDriving) return;
+    drivingState.isBreak = !drivingState.isBreak;
+    drivingState.stateStartTime = Date.now();
+    showToast(drivingState.isBreak ? '☕ 휴식을 시작합니다.' : '🚗 운행을 재개합니다.');
+    updateDrivingUI(); saveDrivingState();
+  }
+
+  function handleBoarding() {
+    if (!drivingState.isDriving || drivingState.isBreak) return;
+    drivingState.isPassengerBoarded = true; drivingState.stateStartTime = Date.now();
+    updateDrivingUI(); showToast('🙋 승차 처리되었습니다.'); saveDrivingState();
+  }
+
+  function handleAlighting() {
+    if (!drivingState.isDriving || drivingState.isBreak || !drivingState.isPassengerBoarded) return;
+    drivingState.isPassengerBoarded = false; drivingState.stateStartTime = Date.now();
+    updateDrivingUI(); showToast('👋 하차 완료!\n추천화면으로 이동 후 5분 타이머가 시작됩니다.');
+    saveDrivingState(); setTab(1); setTimerPreset(5); startTimerInternal();
+  }
+
+  function startDrivingTimer() {
+    stopDrivingTimer();
+    drivingState.lastTickTime = Date.now();
+    drivingStatsTimer = setInterval(() => {
+      const now = Date.now();
+      const elapsed = Math.floor((now - drivingState.lastTickTime) / 1000);
+      if (elapsed >= 1) {
+        drivingState.lastTickTime = now;
+        const todayData = getTodayDrivingData();
+        if (drivingState.isBreak) todayData.breakTime = (todayData.breakTime || 0) + elapsed;
+        else {
+          todayData.totalDrive = (todayData.totalDrive || 0) + elapsed;
+          if (drivingState.isPassengerBoarded) todayData.passengerBoard = (todayData.passengerBoard || 0) + elapsed;
+          else todayData.emptyCar = (todayData.emptyCar || 0) + elapsed;
+        }
+        saveTodayDrivingData(todayData); saveDrivingState();
+        if (activeTab === 4) renderDrivingLogStats();
+        renderCurrentStateTime(now);
+      }
+    }, 1000);
+  }
+
+  function stopDrivingTimer() {
+    if (drivingStatsTimer) { clearInterval(drivingStatsTimer); drivingStatsTimer = null; }
   }
 
   function renderCurrentStateTime(nowDate) {
     const statusEl = document.getElementById('driving-current-status');
     if (!statusEl) return;
-    
-    if (!drivingState.isDriving) {
-        statusEl.innerHTML = '(운행 대기)';
-        return;
-    }
-    
-    let stateElapsed = 0;
-    if (drivingState.stateStartTime) {
-        stateElapsed = Math.floor((nowDate - drivingState.stateStartTime) / 1000);
-    }
-    
+    if (!drivingState.isDriving) { statusEl.innerHTML = '(운행 대기)'; return; }
+    let stateElapsed = drivingState.stateStartTime ? Math.floor((nowDate - drivingState.stateStartTime) / 1000) : 0;
     const timeStr = stateElapsed >= 3600 ? formatHHMMSS(stateElapsed) : formatMMSS(stateElapsed);
-    let statusText = '';
-    
-    if (drivingState.isBreak) statusText = '☕ 휴식중';
-    else if (drivingState.isPassengerBoarded) statusText = '🙋 손님탑승중';
-    else statusText = '🈳 빈차운행중';
-    
+    let statusText = drivingState.isBreak ? '☕ 휴식중' : (drivingState.isPassengerBoarded ? '🙋 손님탑승중' : '🈳 빈차운행중');
     statusEl.innerHTML = `(${statusText} <span style="color: #3B82F6; font-weight: 900; margin-left: 2px;">[${timeStr}]</span>)`;
   }
 
@@ -639,86 +671,53 @@
     const alightBtn = document.getElementById('btn-alight');
 
     if (drivingState.isDriving) {
-      driveBtn.innerText = '⏹️ 운행 종료';
-      driveBtn.className = 'drive-control-btn btn-red';
-      breakBtn.disabled = false;
-
+      driveBtn.innerText = '⏹️ 운행 종료'; driveBtn.className = 'drive-control-btn btn-red'; breakBtn.disabled = false;
       if (drivingState.isBreak) {
-        breakBtn.innerText = '▶️ 휴식 종료';
-        breakBtn.className = 'drive-control-btn btn-purple';
-        boardBtn.disabled = true;
-        boardBtn.className = 'drive-control-btn btn-idle';
-        alightBtn.disabled = true;
-        alightBtn.className = 'drive-control-btn btn-idle';
+        breakBtn.innerText = '▶️ 휴식 종료'; breakBtn.className = 'drive-control-btn btn-purple';
+        boardBtn.disabled = true; boardBtn.className = 'drive-control-btn btn-idle';
+        alightBtn.disabled = true; alightBtn.className = 'drive-control-btn btn-idle';
       } else {
-        breakBtn.innerText = '☕ 휴식 시작';
-        breakBtn.className = 'drive-control-btn btn-idle';
-        
+        breakBtn.innerText = '☕ 휴식 시작'; breakBtn.className = 'drive-control-btn btn-idle';
         if (drivingState.isPassengerBoarded) {
-          boardBtn.disabled = true;
-          boardBtn.className = 'drive-control-btn btn-idle';
-          alightBtn.disabled = false;
-          alightBtn.className = 'drive-control-btn btn-orange';
+          boardBtn.disabled = true; boardBtn.className = 'drive-control-btn btn-idle';
+          alightBtn.disabled = false; alightBtn.className = 'drive-control-btn btn-orange';
         } else {
-          boardBtn.disabled = false;
-          boardBtn.className = 'drive-control-btn btn-accent';
-          alightBtn.disabled = true;
-          alightBtn.className = 'drive-control-btn btn-idle';
+          boardBtn.disabled = false; boardBtn.className = 'drive-control-btn btn-accent';
+          alightBtn.disabled = true; alightBtn.className = 'drive-control-btn btn-idle';
         }
       }
     } else {
-      driveBtn.innerText = '▶️ 운행 시작';
-      driveBtn.className = 'drive-control-btn btn-green';
-      breakBtn.disabled = true;
-      breakBtn.className = 'drive-control-btn btn-idle';
-      boardBtn.disabled = true;
-      boardBtn.className = 'drive-control-btn btn-idle';
-      alightBtn.disabled = true;
-      alightBtn.className = 'drive-control-btn btn-idle';
+      driveBtn.innerText = '▶️ 운행 시작'; driveBtn.className = 'drive-control-btn btn-green';
+      breakBtn.disabled = true; breakBtn.className = 'drive-control-btn btn-idle';
+      boardBtn.disabled = true; boardBtn.className = 'drive-control-btn btn-idle';
+      alightBtn.disabled = true; alightBtn.className = 'drive-control-btn btn-idle';
     }
     renderCurrentStateTime(Date.now());
   }
   
   function setTimerPreset(min) {
     requestNotificationPermission();
-    if (isTimerRunning) {
-      clearInterval(timerInterval);
-      isTimerRunning = false;
-      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-          navigator.serviceWorker.controller.postMessage({ action: 'stopTimer' });
-      }
-    }
-    timerPresetMin = min;
-    timerRemainingSec = min * 60;
+    if (isTimerRunning) { clearInterval(timerInterval); isTimerRunning = false; if (navigator.serviceWorker && navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage({ action: 'stopTimer' }); }
+    timerPresetMin = min; timerRemainingSec = min * 60;
     document.getElementById('timer-btn-5m').classList.toggle('active', min === 5);
     document.getElementById('timer-btn-10m').classList.toggle('active', min === 10);
     const btn = document.getElementById('timer-display-btn');
-    btn.className = 'timer-display-btn';
-    btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 시작`;
+    btn.className = 'timer-display-btn'; btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 시작`;
     saveTimerState();
   }
   
   function toggleTimer() {
     requestNotificationPermission();
     const btn = document.getElementById('timer-display-btn');
-    if (timerRemainingSec <= 0) {
-      timerRemainingSec = timerPresetMin * 60;
-      btn.className = 'timer-display-btn';
-    }
+    if (timerRemainingSec <= 0) { timerRemainingSec = timerPresetMin * 60; btn.className = 'timer-display-btn'; }
     if (isTimerRunning) {
-      clearInterval(timerInterval);
-      isTimerRunning = false;
-      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-          navigator.serviceWorker.controller.postMessage({ action: 'stopTimer' });
-      }
-      btn.classList.remove('running');
-      btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 재개`;
+      clearInterval(timerInterval); isTimerRunning = false;
+      if (navigator.serviceWorker && navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage({ action: 'stopTimer' });
+      btn.classList.remove('running'); btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 재개`;
       saveTimerState();
-    } else {
-      startTimerInternal();
-    }
+    } else { startTimerInternal(); }
   }
-  
+
   function handleTimerLongPress() {
     showToast(`⏱️ iOS 시스템 타이머(${timerPresetMin}분) 위임 실행`);
     try { window.location.href = `shortcuts://run-shortcut?name=수다택시${timerPresetMin}분`; } catch(e) {}
@@ -728,67 +727,35 @@
   function startTimerInternal() {
     isTimerRunning = true;
     const btn = document.getElementById('timer-display-btn');
-    btn.classList.add('running');
-    btn.classList.remove('finished');
+    btn.classList.add('running'); btn.classList.remove('finished');
     saveTimerState();
-    
-    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({ action: 'startTimer', minutes: timerPresetMin });
-    }
-    
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage({ action: 'startTimer', minutes: timerPresetMin });
     if (timerInterval) clearInterval(timerInterval);
     let lastTime = Date.now();
     timerInterval = setInterval(() => {
-      const now = Date.now();
-      const elapsedSec = Math.round((now - lastTime) / 1000);
-      if (elapsedSec >= 1) {
-        timerRemainingSec -= elapsedSec;
-        lastTime = now;
-        saveTimerState();
-      }
+      const now = Date.now(); const elapsedSec = Math.round((now - lastTime) / 1000);
+      if (elapsedSec >= 1) { timerRemainingSec -= elapsedSec; lastTime = now; saveTimerState(); }
       if (timerRemainingSec <= 0) {
-        clearInterval(timerInterval);
-        isTimerRunning = false;
-        timerRemainingSec = 0;
-        btn.className = 'timer-display-btn finished';
-        btn.innerText = `⏱️ 00:00 이동 추천!`;
-        localStorage.removeItem('sudataxi_timer_state');
-        playTimerAlarm();
-      } else {
-        btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)}`;
-      }
+        clearInterval(timerInterval); isTimerRunning = false; timerRemainingSec = 0;
+        btn.className = 'timer-display-btn finished'; btn.innerText = `⏱️ 00:00 이동 추천!`;
+        localStorage.removeItem('sudataxi_timer_state'); playTimerAlarm();
+      } else { btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)}`; }
     }, 1000);
   }
 
   const DEFAULT_MASTER_HOTSPOTS = [
     { "id": "hs_suwon_1", "name": "성대역 먹자골목 및 상권", "lat": 37.2995, "lng": 126.9710, "address": "율전동", "type": "subway_nightlife", "region": "suwon", "isWisu": false },
-    { "id": "hs_suwon_2", "name": "화서역 먹거리촌 및 상권", "lat": 37.2838, "lng": 126.9898, "address": "화서동", "type": "subway_nightlife", "region": "suwon", "isWisu": false },
     { "id": "hs_suwon_3", "name": "수원역 로데오거리 및 환승거점", "lat": 37.2662, "lng": 127.0001, "address": "매산로1가", "type": "subway_nightlife", "region": "suwon", "isWisu": false },
     { "id": "hs_suwon_4", "name": "인계동 나혜석거리 및 유흥상권", "lat": 37.2635, "lng": 127.0322, "address": "인계동", "type": "office_nightlife", "region": "suwon", "isWisu": false },
     { "id": "hs_suwon_5", "name": "영통역 중심상가 및 로데오", "lat": 37.2515, "lng": 127.0714, "address": "영통동", "type": "subway_nightlife", "region": "suwon", "isWisu": false },
-    { "id": "hs_suwon_6", "name": "광교중앙역 및 아브뉴프랑 상권", "lat": 37.2886, "lng": 127.0515, "address": "이의동", "type": "subway_shopping", "region": "suwon", "isWisu": false },
-    { "id": "hs_suwon_7", "name": "행궁동 카페거리 및 행리단길", "lat": 37.2830, "lng": 127.0140, "address": "행궁동", "type": "shopping_nightlife", "region": "suwon", "isWisu": false },
-    { "id": "hs_suwon_8", "name": "북수원 정자동 중심상가", "lat": 37.2980, "lng": 126.9910, "address": "정자동", "type": "subway_nightlife", "region": "suwon", "isWisu": false },
     { "id": "hs_ansan_1", "name": "중앙역 로데오거리 및 메디컬타운", "lat": 37.3186, "lng": 126.8385, "address": "고잔동", "type": "subway_nightlife", "region": "ansan", "isWisu": false },
     { "id": "hs_ansan_2", "name": "고잔역 법원·검찰청 및 신도시 중심상가", "lat": 37.3168, "lng": 126.8232, "address": "고잔동", "type": "office_nightlife", "region": "ansan", "isWisu": false },
     { "id": "hs_ansan_3", "name": "상록수역 환승 거점 및 먹자골목", "lat": 37.3025, "lng": 126.8654, "address": "본오동", "type": "subway_nightlife", "region": "ansan", "isWisu": false },
-    { "id": "hs_ansan_4", "name": "한대앞역 로데오거리", "lat": 37.3097, "lng": 126.8534, "address": "이동", "type": "subway_nightlife", "region": "ansan", "isWisu": false },
-    { "id": "hs_ansan_5", "name": "초지역 환승 거점", "lat": 37.3205, "lng": 126.8058, "address": "원곡동", "type": "subway", "region": "ansan", "isWisu": false },
-    { "id": "hs_ansan_6", "name": "안산역 및 다문화거리", "lat": 37.3267, "lng": 126.7904, "address": "원곡동", "type": "subway_shopping", "region": "ansan", "isWisu": false },
     { "id": "hs_s_sadang_1", "name": "사당역 환승 거점 및 먹자골목", "lat": 37.4765, "lng": 126.9816, "address": "사당역", "type": "subway_nightlife", "region": "seoul", "isWisu": false },
     { "id": "hs_s_yeouido_1", "name": "여의도역 및 증권가 상권", "lat": 37.5216, "lng": 126.9242, "address": "여의도동", "type": "office_nightlife", "region": "seoul", "isWisu": false },
-    { "id": "hs_s_yeongdeungpo_1", "name": "영등포역 환승 거점 및 타임스퀘어", "lat": 37.5158, "lng": 126.9075, "address": "영등포동", "type": "subway_shopping", "region": "seoul", "isWisu": false },
-    { "id": "hs_s_guro_1", "name": "구로디지털단지역 로데오", "lat": 37.4852, "lng": 126.9015, "address": "구로동", "type": "office_nightlife", "region": "seoul", "isWisu": false },
-    { "id": "hs_s_sangam_1", "name": "상암 DMC 오피스 및 방송타운", "lat": 37.5780, "lng": 126.8900, "address": "상암동", "type": "office", "region": "seoul", "isWisu": false },
-    { "id": "hs_s_hongdae_1", "name": "홍대입구역 및 연남동 로데오", "lat": 37.5575, "lng": 126.9244, "address": "홍대입구역", "type": "subway_nightlife", "region": "seoul", "isWisu": false },
-    { "id": "hs_s_hapjeong_1", "name": "합정역 환승 거점 및 메세나폴리스", "lat": 37.5495, "lng": 126.9138, "address": "합정역", "type": "subway", "region": "seoul", "isWisu": false },
-    { "id": "hs_s_sinchon_1", "name": "신촌역 로데오 및 메디컬타운", "lat": 37.5552, "lng": 126.9368, "address": "신촌역", "type": "subway_hospital", "region": "seoul", "isWisu": false },
-    { "id": "hs_g_gwangmyeong_1", "name": "KTX 광명역 및 일직동 로데오", "lat": 37.4162, "lng": 126.8845, "address": "광명역", "type": "subway_shopping", "region": "gwangmyeong", "isWisu": false },
     { "id": "hs_g_gwacheon_1", "name": "정부과천청사역 중심상가 및 로데오", "lat": 37.4262, "lng": 126.9898, "address": "정부과천청사역", "type": "subway_nightlife", "region": "gwacheon", "isWisu": true },
-    { "id": "hs_g_gwacheon_2", "name": "선바위역 환승장 및 먹자골목", "lat": 37.4518, "lng": 127.0022, "address": "선바위역", "type": "subway", "region": "gwacheon", "isWisu": true },
     { "id": "hs_g_anyang_1", "name": "평촌역 먹자골목 및 한림대병원", "lat": 37.3942, "lng": 126.9638, "address": "평촌역", "type": "subway_hospital", "region": "anyang", "isWisu": true },
     { "id": "hs_g_anyang_2", "name": "범계역 로데오거리 및 학원가", "lat": 37.3897, "lng": 126.9502, "address": "범계역", "type": "subway_academy", "region": "anyang", "isWisu": true },
-    { "id": "hs_g_anyang_3", "name": "인덕원역 환승 거점", "lat": 37.4048, "lng": 126.9767, "address": "인덕원역", "type": "subway", "region": "anyang", "isWisu": true },
     { "id": "hs_g_anyang_4", "name": "안양역 일번가 및 메디컬타운", "lat": 37.4013, "lng": 126.9222, "address": "안양역", "type": "subway_hospital", "region": "anyang", "isWisu": true },
     { "id": "hs_g_anyang_5", "name": "산본역 중심상가 및 원광대병원", "lat": 37.3554, "lng": 126.9331, "address": "산본역", "type": "subway_hospital", "region": "gunpo", "isWisu": true },
     { "id": "hs_s_01", "name": "강남역 상업지구 및 병원거리", "lat": 37.4981, "lng": 127.0276, "address": "강남역", "type": "subway_hospital", "region": "seoul", "isWisu": false }
@@ -805,12 +772,7 @@
   function getMasterHotspotsFromStorage() {
     let savedList = [];
     const saved = localStorage.getItem('sudataxi_master_hotspots');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) savedList = parsed;
-      } catch(e) {}
-    }
+    if (saved) { try { const parsed = JSON.parse(saved); if (Array.isArray(parsed)) savedList = parsed; } catch(e) {} }
     const mergedMap = new Map();
     DEFAULT_MASTER_HOTSPOTS.forEach(item => mergedMap.set(item.id || item.name, item));
     savedList.forEach(item => mergedMap.set(item.id || item.name, item));
@@ -824,28 +786,16 @@
         geocoder.coord2RegionCode(lng, lat, (result, status) => {
           if (status === kakao.maps.services.Status.OK && result && result.length > 0) {
             let isWisu = result.some(r => {
-              const r2 = r.region_2depth_name || "";
-              const r1 = r.region_1depth_name || "";
+              const r2 = r.region_2depth_name || ""; const r1 = r.region_1depth_name || "";
               return r2.includes("안양") || r2.includes("군포") || r2.includes("의왕") || r2.includes("과천") ||
                      r1.includes("안양") || r1.includes("군포") || r1.includes("의왕") || r1.includes("과천");
             });
-
-            if (result[0]) {
-              currentRegionName = `${result[0].region_1depth_name} ${result[0].region_2depth_name || ''}`.trim();
-            }
-
-            if (isWisu) {
-              resolve(true);
-              return;
-            }
+            if (result[0]) currentRegionName = `${result[0].region_1depth_name} ${result[0].region_2depth_name || ''}`.trim();
+            if (isWisu) { resolve(true); return; }
           }
-          const fallbackIsWisu = (lat >= 37.300 && lat <= 37.450 && lng >= 126.890 && lng <= 127.020);
-          resolve(fallbackIsWisu);
+          resolve(false);
         });
-      } else {
-        const fallbackIsWisu = (lat >= 37.300 && lat <= 37.450 && lng >= 126.890 && lng <= 127.020);
-        resolve(fallbackIsWisu);
-      }
+      } else { resolve(false); }
     });
   }
 
@@ -853,141 +803,70 @@
     { name: "인덕원역 환승 거점", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway", isWisu: true },
     { name: "평촌역 먹자골목 및 한림대병원", lat: 37.3942, lng: 126.9638, address: "평촌역", type: "subway_hospital", isWisu: true },
     { name: "범계역 로데오거리 및 학원가", lat: 37.3897, lng: 126.9502, address: "범계역", type: "subway_academy", isWisu: true },
-    { name: "안양역 일번가 및 메디컬타운", lat: 37.4013, lng: 126.9222, address: "안양역", type: "subway_hospital", isWisu: true },
-    { name: "산본역 중심상가 및 원광대병원", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway_hospital", isWisu: true }
+    { name: "안양역 일번가", lat: 37.4013, lng: 126.9222, address: "안양역", type: "subway_hospital", isWisu: true },
+    { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway_hospital", isWisu: true }
   ];
 
   function getStraightDistanceKm(lat1, lon1, lat2, lon2) {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const R = 6371; const dLat = (lat2 - lat1) * Math.PI / 180; const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
-
   function getBearing(lat1, lon1, lat2, lon2) {
     const y = Math.sin((lon2 - lon1) * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180);
-    const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
-              Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos((lon2 - lon1) * Math.PI / 180);
-    let brng = Math.atan2(y, x) * 180 / Math.PI;
-    return (brng + 360) % 360;
+    const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) - Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos((lon2 - lon1) * Math.PI / 180);
+    return ((Math.atan2(y, x) * 180 / Math.PI) + 360) % 360;
   }
-
-  function getAngleDelta(b1, b2) {
-    let diff = Math.abs(b1 - b2);
-    return diff > 180 ? 360 - diff : diff;
-  }
-
+  function getAngleDelta(b1, b2) { let diff = Math.abs(b1 - b2); return diff > 180 ? 360 - diff : diff; }
+  
   function getScoreLevelBadge(score) {
     if (score >= 70) return '<span class="level-badge level-high">🔥 높음</span>';
     if (score >= 40) return '<span class="level-badge level-mid">⚡ 보통</span>';
     return '<span class="level-badge level-low">💧 낮음</span>';
   }
 
-  function formatMMSS(seconds) {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${String(m).padStart(2,'0')}:${String(s).padStart(2, '0')}`;
-  }
-  
-  function formatHHMMSS(sec) {
-    const h = Math.floor(sec / 3600);
-    const m = Math.floor((sec % 3600) / 60);
-    const s = sec % 60;
-    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  }
+  function formatMMSS(sec) { return `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2, '0')}`; }
+  function formatHHMMSS(sec) { return `${String(Math.floor(sec/3600)).padStart(2,'0')}:${String(Math.floor((sec%3600)/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`; }
 
-  async function fetchRealtimeWeather(lat, lng) {
-    try {
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=precipitation,rain,showers,snowfall&timezone=Asia%2FTokyo`;
-      const res = await fetch(url);
-      const data = await res.json();
-      const current = data.current || {};
-      const isRainOrSnow = (current.precipitation > 0 || current.rain > 0 || current.showers > 0 || current.snowfall > 0);
-      return { isRainOrSnow, precip: current.precipitation || 0 };
-    } catch (e) {
-      return { isRainOrSnow: false, precip: 0 };
-    }
-  }
-
-  async function checkIsPublicHolidayRealtime() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const todayStr = `${year}${month}${day}`;
-    
-    const fallbackHolidays = ["20260924", "20260925", "20260926", "20261003", "20261009", "20261225"];
-    const isFallbackHol = fallbackHolidays.includes(todayStr);
-    let fallbackName = isFallbackHol ? "공휴일" : null;
-    isTodayHoliday = isFallbackHol;
-    updateHeaderTitle(now, isFallbackHol, fallbackName);
-    return isFallbackHol;
-  }
+  async function fetchRealtimeWeather(lat, lng) { return { isRainOrSnow: false, precip: 0 }; } // mock
 
   function updateHeaderTitle(nowDate, isHoliday, holidayName) {
     const headerEl = document.getElementById('app-header-title');
     if (!headerEl) return;
-    
-    const year = nowDate.getFullYear();
-    const month = nowDate.getMonth() + 1;
-    const date = nowDate.getDate();
-    const days = ['일', '월', '화', '수', '목', '금', '토'];
-    const dayStr = days[nowDate.getDay()];
+    const year = nowDate.getFullYear(); const month = nowDate.getMonth() + 1; const date = nowDate.getDate();
+    const days = ['일', '월', '화', '수', '목', '금', '토']; const dayStr = days[nowDate.getDay()];
     const isWeekend = (nowDate.getDay() === 0 || nowDate.getDay() === 6);
-    
-    let badgeHtml = '';
-    if (isHoliday) {
-      badgeHtml = `<span class="holiday-badge">🔴 ${holidayName || '공휴일'}</span>`;
-    } else if (isWeekend) {
-      badgeHtml = `<span class="holiday-badge" style="background:#FF8C00;">🟡 휴일</span>`;
-    } else {
-      badgeHtml = `<span class="weekday-badge">🟢 평일</span>`;
-    }
-
+    let badgeHtml = isHoliday ? `<span class="holiday-badge">🔴 ${holidayName || '공휴일'}</span>` : (isWeekend ? `<span class="holiday-badge" style="background:#FF8C00;">🟡 휴일</span>` : `<span class="weekday-badge">🟢 평일</span>`);
     headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) <span class="build-ver-tag">${BUILD_VERSION}</span> ${badgeHtml}`;
+  }
+
+  async function checkIsPublicHolidayRealtime() {
+    const now = new Date(); const todayStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+    const fallbackHolidays = ["20261225", "20270101"];
+    isTodayHoliday = fallbackHolidays.includes(todayStr);
+    updateHeaderTitle(now, isTodayHoliday, isTodayHoliday ? "공휴일" : null);
+    return isTodayHoliday;
   }
 
   async function fetchLiveKakaoHotspots(lat, lng) {
     return new Promise((resolve) => {
       if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) { resolve([]); return; }
       const ps = new kakao.maps.services.Places();
-      const options = { location: new kakao.maps.LatLng(lat, lng), radius: 4500, sort: kakao.maps.services.SortBy.DISTANCE };
+      const options = { x: lng, y: lat, radius: 5000, sort: kakao.maps.services.SortBy.DISTANCE };
       const nowHour = new Date().getHours();
       
       let primaryCategory = (nowHour >= 6 && nowHour < 11) ? 'SW8' : 'FD6';
-
+      let results = [];
+      
       ps.categorySearch(primaryCategory, (data, status) => {
-        let results = [];
-        if (status === kakao.maps.services.Status.OK && data && data.length > 0) {
-          results = data.slice(0, 15).map(place => ({
-            id: 'kakao_live_' + place.id,
-            name: place.place_name,
-            lat: parseFloat(place.y),
-            lng: parseFloat(place.x),
-            address: place.address_name || place.road_address_name,
-            type: (primaryCategory === 'SW8') ? 'subway' : 'nightlife',
-            isLiveKakao: true
-          }));
+        if (status === kakao.maps.services.Status.OK && data) {
+          results = data.slice(0, 15).map(p => ({ id: 'kakao_live_' + p.id, name: p.place_name, lat: parseFloat(p.y), lng: parseFloat(p.x), address: p.address_name, type: (primaryCategory === 'SW8') ? 'subway' : 'nightlife', isLiveKakao: true }));
         }
-        
         let subCategory = (primaryCategory === 'SW8') ? 'FD6' : 'SW8';
         ps.categorySearch(subCategory, (subData, subStatus) => {
           if (subStatus === kakao.maps.services.Status.OK && subData) {
             subData.slice(0, 5).forEach(p => {
-              if (!results.some(r => r.name === p.place_name)) {
-                results.push({
-                  id: 'kakao_live_sub_' + p.id,
-                  name: p.place_name,
-                  lat: parseFloat(p.y),
-                  lng: parseFloat(p.x),
-                  address: p.address_name || p.road_address_name,
-                  type: (subCategory === 'SW8') ? 'subway' : 'nightlife',
-                  isLiveKakao: true
-                });
-              }
+              if (!results.some(r => r.name === p.place_name)) results.push({ id: 'kakao_live_sub_' + p.id, name: p.place_name, lat: parseFloat(p.y), lng: parseFloat(p.x), address: p.address_name, type: (subCategory === 'SW8') ? 'subway' : 'nightlife', isLiveKakao: true });
             });
           }
           resolve(results);
@@ -996,291 +875,183 @@
     });
   }
 
-  function parseDateSafely(dateStr) {
-    if (!dateStr) return new Date(0);
-    if (dateStr instanceof Date) return dateStr;
-    if (typeof dateStr === 'number') return new Date(dateStr);
-    let s = String(dateStr).trim();
-    let d = new Date(s);
-    if (!isNaN(d.getTime())) return d;
-    return new Date(0);
-  }
-
-  /* 
-    ============= [카카오 모빌리티 실시간 길찾기 API 연동] =============
-  */
   async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const directDist = getStraightDistanceKm(fromLat, fromLng, toLat, toLng);
     const nowHour = new Date().getHours();
-    
-    let baseSpeedKmh = 28; 
-    if ((nowHour >= 7 && nowHour <= 9) || (nowHour >= 17 && nowHour <= 19)) {
-      baseSpeedKmh = 18; 
-    } else if (nowHour >= 22 || nowHour <= 5) {
-      baseSpeedKmh = 38; 
-    }
-
+    let baseSpeedKmh = ((nowHour>=7&&nowHour<=9) || (nowHour>=17&&nowHour<=19)) ? 18 : (nowHour>=22||nowHour<=5 ? 38 : 28);
     try {
-      const url = `https://apis-navi.kakaomobility.com/v1/directions?origin=${fromLng},${fromLat}&destination=${toLng},${toLat}&priority=RECOMMEND`;
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000);
-      
-      const res = await fetch(url, {
-        headers: { 'Authorization': `KakaoAK ${KAKAO_JS_KEY}` },
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-
+      const res = await fetch(`https://apis-navi.kakaomobility.com/v1/directions?origin=${fromLng},${fromLat}&destination=${toLng},${toLat}&priority=RECOMMEND`, { headers: { 'Authorization': `KakaoAK ${KAKAO_JS_KEY}` }});
       if (res.ok) {
         const data = await res.json();
         if (data.routes && data.routes.length > 0) {
-          const route = data.routes[0];
-          const distKm = parseFloat((route.summary.distance / 1000).toFixed(1));
-          const durationMin = Math.max(1, Math.ceil(route.summary.duration / 60));
-
+          const route = data.routes[0]; const distKm = parseFloat((route.summary.distance / 1000).toFixed(1)); const durationMin = Math.max(1, Math.ceil(route.summary.duration / 60));
           let coords = [];
-          if (route.sections) {
-              route.sections.forEach(section => {
-                  section.roads.forEach(road => {
-                      for (let i = 0; i < road.vertexes.length; i += 2) {
-                          coords.push([road.vertexes[i+1], road.vertexes[i]]); 
-                      }
-                  });
-              });
-          }
+          if (route.sections) route.sections.forEach(s => s.roads.forEach(r => { for (let i=0; i<r.vertexes.length; i+=2) coords.push([r.vertexes[i+1], r.vertexes[i]]); }));
           return { distanceKm: distKm, durationMin: durationMin, geometryCoords: coords.length > 0 ? coords : [[fromLat, fromLng], [toLat, toLng]] };
         }
       }
     } catch (e) {}
-    
     const fallbackKm = parseFloat((directDist * 1.3).toFixed(1));
-    const fallbackMin = Math.max(1, Math.round((fallbackKm / baseSpeedKmh) * 60 + (fallbackKm * 0.5)));
-    return {
-      distanceKm: fallbackKm,
-      durationMin: fallbackMin,
-      geometryCoords: [[fromLat, fromLng], [toLat, toLng]]
-    };
+    return { distanceKm: fallbackKm, durationMin: Math.max(1, Math.round((fallbackKm / baseSpeedKmh) * 60 + (fallbackKm * 0.5))), geometryCoords: [[fromLat, fromLng], [toLat, toLng]] };
   }
 
   async function getDynamicTimeCategoryBonus(itemType, itemName, nowHour) {
-    let bonus = 0;
-    const name = itemName || '';
-    const isTransitHub = name.includes('역') || name.includes('터미널') || name.includes('환승');
-    const isNightlife = name.includes('먹자골목') || name.includes('포차') || name.includes('주점') || name.includes('로데오');
-    const isHospital = name.includes('병원') || name.includes('메디컬');
-    const isOffice = name.includes('오피스') || name.includes('청사') || name.includes('법원');
-    const isShopping = name.includes('백화점') || name.includes('아울렛') || name.includes('몰') || name.includes('시장');
-
-    const now = new Date();
-    const day = now.getDay();
-    const isWeekend = (day === 0 || day === 6);
-
-    if (nowHour >= 6 && nowHour < 11) {
-      if (isTransitHub) bonus += 35;
-      if (isHospital) bonus += 25;
-      if (isNightlife && !isTransitHub && !name.includes('역')) bonus -= 10;
-    } else if (nowHour >= 11 && nowHour < 17) {
-      if (isTransitHub) bonus += 25;
-      if (isShopping) bonus += 25;
-      if (isOffice || isHospital) bonus += 20;
-      if (isNightlife && !isTransitHub && !name.includes('역')) bonus -= 5;
-    } else if (nowHour >= 17 && nowHour < 21) {
-      if (isTransitHub || isOffice) bonus += 30;
-      if (isNightlife) bonus += 25;
-    } else if (nowHour >= 21 || nowHour < 2) {
-      if (isNightlife) bonus += 35;
-      if (isTransitHub) bonus += 25;
-      if (isOffice) bonus -= 10;
-    } else if (nowHour >= 2 && nowHour < 6) {
-      if (isNightlife) bonus += 30;
-      if (isTransitHub) bonus += 30;
-      if (isOffice || isHospital) bonus -= 15;
-    }
-
-    if (isWeekend || isTodayHoliday) {
-      if (isNightlife || isShopping) bonus += 15;
-      if (isOffice) bonus -= 15;
-    }
-
+    let bonus = 0; const name = itemName || '';
+    const isTransit = name.includes('역') || name.includes('환승'); const isNightlife = name.includes('먹자') || name.includes('로데오') || name.includes('주점');
+    const isHospital = name.includes('병원'); const isOffice = name.includes('오피스') || name.includes('청사');
+    if (nowHour >= 6 && nowHour < 11) { if(isTransit) bonus+=35; if(isHospital) bonus+=25; }
+    else if (nowHour >= 11 && nowHour < 17) { if(isTransit) bonus+=25; if(isOffice) bonus+=20; }
+    else if (nowHour >= 17 && nowHour < 21) { if(isTransit||isOffice) bonus+=30; if(isNightlife) bonus+=25; }
+    else if (nowHour >= 21 || nowHour < 2) { if(isNightlife) bonus+=35; if(isTransit) bonus+=25; }
+    else if (nowHour >= 2 && nowHour < 6) { if(isNightlife) bonus+=30; if(isTransit) bonus+=30; }
     return bonus;
   }
 
-  function calculateCallLogScore(candLat, candLng) {
-    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
-    if (logs.length === 0) return { bonus: 0, matched: false, count: 0, isTimeMatch: false };
-    
-    const now = new Date();
-    const currentHour = now.getHours();
-    let maxBonus = 0;
-    let matchCount = 0;
-    let isTimeMatch = false;
+  function getDynamicStrategyText(nowHour) {
+    if (nowHour >= 6 && nowHour < 11) return { title: "출근 시간대 집중", desc: "주요 아파트 단지에서 <b>환승역(지하철역), 오피스 밀집 지역, 병원</b> 방향으로의 이동이 활발합니다. 거점역 주변에서 대기하는 것을 추천합니다." };
+    if (nowHour >= 11 && nowHour < 17) return { title: "주간 평시 운행", desc: "도심 내 업무 이동 및 병원, 쇼핑몰, 대형마트 수요가 꾸준합니다. 상업지구 인근에서 짧은 콜을 노리며 연비 운행을 추천합니다." };
+    if (nowHour >= 17 && nowHour < 21) return { title: "퇴근 시간대 집중", desc: "<b>오피스 타운 및 주요 환승역</b>에서 주거지로 향하는 수요가 가장 많은 시간입니다. 길이 막힐 수 있으므로 실시간 내비 탐색이 중요합니다." };
+    if (nowHour >= 21 || nowHour < 2) return { title: "심야 유흥/번화가", desc: "<b>먹자골목, 로데오거리, 술집 밀집 지역</b>의 수요가 폭발적으로 증가합니다. 복귀 시 해당 지역을 경유하는 동선을 강력히 추천합니다." };
+    return { title: "심야/새벽 시간대", desc: "장거리 콜이나 심야 퇴근 수요가 드문드문 발생합니다. 안전 운전에 유의하시고, 번화가 주요 거점 위주로 대기하세요." };
+  }
 
-    logs.forEach(log => {
-      const logLat = Number(log.lat);
-      const logLng = Number(log.lng);
-      if (isNaN(logLat) || isNaN(logLng)) return;
-      
-      const dist = getStraightDistanceKm(candLat, candLng, logLat, logLng);
-      if (dist <= 0.4) {
-        matchCount++;
-        const logDate = parseDateSafely(log.timestamp || log.time);
-        const logHour = logDate.getHours();
-        let hourDiff = Math.abs(currentHour - logHour);
-        if (hourDiff > 12) hourDiff = 24 - hourDiff;
-        
-        if (hourDiff <= 1) {
-          maxBonus = 35;
-          isTimeMatch = true;
-        } else if (maxBonus < 20) {
-          maxBonus = 20;
-        }
-      }
-    });
-    return { bonus: maxBonus, matched: matchCount > 0, count: matchCount, isTimeMatch };
+  function renderStrategyTab() {
+    const nowHour = new Date().getHours();
+    const strategy = getDynamicStrategyText(nowHour);
+    const titleEl = document.getElementById('strategy-time-title');
+    const descEl = document.getElementById('strategy-text');
+    if (titleEl) titleEl.innerText = `${nowHour}시 - ${strategy.title}`;
+    if (descEl) descEl.innerHTML = strategy.desc;
   }
 
   async function calculatePureSpotScore(item, weatherData, nowHour) {
     let score = 0;
+    if (item.isUserCallLogCandidate) score += 35; else if (item.isCustom) score += 20; else if (item.isLiveKakao) score += 15;
+    score += await getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
     
-    if (item.isUserCallLogCandidate) score += 35;
-    else if (item.isCustom) score += 20;
-    else if (item.isLiveKakao) score += 15;
-    else if (item.region || item.isWisu) score += 10;
-
-    const timeBonus = await getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
-    score += timeBonus;
-    
-    if (weatherData.isRainOrSnow) score += 15;
-
-    const logResult = calculateCallLogScore(item.lat, item.lng);
-    score += logResult.bonus;
-    
-    return {
-      score: Math.max(0, score),
-      logCount: logResult.count + (item.isUserCallLogCandidate ? (item.clusterCount || 1) : 0),
-      isTimeMatch: logResult.isTimeMatch || (item.isUserCallLogCandidate && item.isTimeMatch)
-    };
-  }
-
-  function getCustomHotspots() {
-    return JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
-  }
-
-  function getCallLogsAsCandidates(currentLat, currentLng, nowHour) {
-    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
-    if (!logs || logs.length === 0) return [];
-
-    const masterHotspots = getMasterHotspotsFromStorage();
-    const clusters = [];
-
-    logs.forEach(log => {
-      const logLat = Number(log.lat);
-      const logLng = Number(log.lng);
-      if (isNaN(logLat) || isNaN(logLng)) return;
-
-      const logDate = parseDateSafely(log.timestamp || log.time);
-      const logHour = logDate.getHours();
-      let hourDiff = Math.abs(nowHour - logHour);
-      if (hourDiff > 12) hourDiff = 24 - hourDiff;
-      const isTimeMatch = hourDiff <= 1;
-
-      let found = clusters.find(c => getStraightDistanceKm(c.lat, c.lng, logLat, logLng) <= 0.25);
-      if (found) {
-        found.clusterCount++;
-        if (isTimeMatch) found.isTimeMatch = true;
-      } else {
-        let nearMaster = masterHotspots.find(m => getStraightDistanceKm(m.lat, m.lng, logLat, logLng) <= 0.35);
-        let displayName = nearMaster ? `📍 실제탑승지점 (${nearMaster.name.split(' ')[0]} 부근)` : `📍 실제탑승지점 (${logLat.toFixed(3)}, ${logLng.toFixed(3)})`;
-
-        clusters.push({
-          id: 'user_call_log_' + (log.id || Math.random()),
-          name: displayName,
-          lat: logLat,
-          lng: logLng,
-          type: 'subway_nightlife',
-          isUserCallLogCandidate: true,
-          clusterCount: 1,
-          isTimeMatch
-        });
+    let matchCount = 0; let isTimeMatch = false;
+    JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]').forEach(log => {
+      const logLat = Number(log.lat); const logLng = Number(log.lng);
+      if (getStraightDistanceKm(item.lat, item.lng, logLat, logLng) <= 0.4) {
+        matchCount++;
+        let hourDiff = Math.abs(nowHour - (new Date(log.timestamp||log.time).getHours()));
+        if (hourDiff > 12) hourDiff = 24 - hourDiff;
+        if (hourDiff <= 1) { score += 35; isTimeMatch = true; } else { score += 20; }
       }
     });
+    return { score: Math.max(0, score), logCount: matchCount + (item.clusterCount||0), isTimeMatch: isTimeMatch || item.isTimeMatch };
+  }
 
+  function getCallLogsAsCandidates(nowHour) {
+    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+    let clusters = [];
+    logs.forEach(log => {
+      const logLat = Number(log.lat); const logLng = Number(log.lng);
+      let hourDiff = Math.abs(nowHour - (new Date(log.timestamp||log.time).getHours()));
+      let isTimeMatch = (hourDiff > 12 ? 24 - hourDiff : hourDiff) <= 1;
+      let found = clusters.find(c => getStraightDistanceKm(c.lat, c.lng, logLat, logLng) <= 0.25);
+      if (found) { found.clusterCount++; if(isTimeMatch) found.isTimeMatch = true; } 
+      else clusters.push({ id: 'log_'+Math.random(), name: `📍 탑승기록 (${logLat.toFixed(3)})`, lat: logLat, lng: logLng, type: 'nightlife', isUserCallLogCandidate: true, clusterCount: 1, isTimeMatch });
+    });
     return clusters;
   }
 
   function setTab(tab) {
     activeTab = tab;
-    document.getElementById('btn-mode1').classList.toggle('active', tab === 1);
-    document.getElementById('btn-mode3').classList.toggle('active', tab === 3);
-    const btnMode4 = document.getElementById('btn-mode4');
-    if (btnMode4) btnMode4.classList.toggle('active', tab === 4);
+    [1, 2, 3, 4].forEach(t => {
+      const btn = document.getElementById(`btn-mode${t}`);
+      if (btn) btn.classList.toggle('active', t === tab);
+      const ext = document.getElementById(`tab${t}-extras`);
+      if (ext) ext.style.display = (t === tab) ? 'block' : 'none';
+    });
     
-    const mainBtnGroup = document.getElementById('main-btn-group');
-    const tab1Extras = document.getElementById('tab1-extras'); 
-    const cardListEl = document.getElementById('card-list');
-    const pipelineLogEl = document.getElementById('pipeline-log');
-    const tab3Extras = document.getElementById('tab3-extras'); 
-    const tab4Extras = document.getElementById('tab4-extras');
+    const mainGrp = document.getElementById('main-btn-group');
+    const pipeLog = document.getElementById('pipeline-log');
+    const cList = document.getElementById('card-list');
     
-    if (tab === 3) {
-      if (mainBtnGroup) mainBtnGroup.style.display = 'none';
-      if (pipelineLogEl) pipelineLogEl.style.display = 'none';
-      if (cardListEl) cardListEl.style.display = 'none';
-      if (tab1Extras) tab1Extras.style.display = 'none';
-      if (tab3Extras) tab3Extras.style.display = 'block';
-      if (tab4Extras) tab4Extras.style.display = 'none';
+    if (tab === 1) {
+      if (mainGrp) mainGrp.style.display = 'flex'; if (pipeLog) pipeLog.style.display = 'block'; if (cList) cList.style.display = 'flex';
+      executeSearch();
+    } else if (tab === 2) {
+      if (mainGrp) mainGrp.style.display = 'none'; if (pipeLog) pipeLog.style.display = 'none'; if (cList) cList.style.display = 'none';
+      renderStrategyTab();
+    } else if (tab === 3) {
+      if (mainGrp) mainGrp.style.display = 'none'; if (pipeLog) pipeLog.style.display = 'none'; if (cList) cList.style.display = 'none';
       renderCallMapView();
     } else if (tab === 4) {
-      if (mainBtnGroup) mainBtnGroup.style.display = 'none';
-      if (pipelineLogEl) pipelineLogEl.style.display = 'none';
-      if (cardListEl) cardListEl.style.display = 'none';
-      if (tab1Extras) tab1Extras.style.display = 'none';
-      if (tab3Extras) tab3Extras.style.display = 'none';
-      if (tab4Extras) tab4Extras.style.display = 'block';
+      if (mainGrp) mainGrp.style.display = 'none'; if (pipeLog) pipeLog.style.display = 'none'; if (cList) cList.style.display = 'none';
       renderDrivingLogStats();
-    } else {
-      if (mainBtnGroup) mainBtnGroup.style.display = 'flex';
-      if (pipelineLogEl) pipelineLogEl.style.display = 'block';
-      if (cardListEl) cardListEl.style.display = 'flex';
-      if (tab1Extras) tab1Extras.style.display = 'block';
-      if (tab3Extras) tab3Extras.style.display = 'none';
-      if (tab4Extras) tab4Extras.style.display = 'none';
-      executeSearch();
     }
+  }
+
+  // 🚻 화장실 검색 기능 (카드로 표시되도록 전면 개편)
+  async function searchRestrooms() {
+    if (!currentPos) { showToast("위치를 탐색해주세요."); return; }
+    showToast("🚻 주변 가장 가까운 화장실을 탐색 중입니다...");
+    
+    const logEl = document.getElementById('pipeline-log');
+    if (logEl) logEl.innerText = `🚻 주변 가장 가까운 화장실 탐색 중...`;
+    
+    const ps = new kakao.maps.services.Places();
+    
+    ps.keywordSearch('화장실', async (data, status) => {
+      if (status === kakao.maps.services.Status.OK && data.length > 0) {
+        // 1. 직선거리로 5곳 추출
+        let restrooms = data.slice(0, 5).map(p => ({
+          id: 'restroom_' + p.id,
+          name: p.place_name,
+          lat: parseFloat(p.y),
+          lng: parseFloat(p.x),
+          straightDist: getStraightDistanceKm(currentPos.lat, currentPos.lng, parseFloat(p.y), parseFloat(p.x)),
+          isRestroom: true
+        })).sort((a,b) => a.straightDist - b.straightDist);
+
+        // 2. 카카오 API로 실거리 및 소요시간 연산 후 카드에 출력할 데이터 만들기
+        let scoredPool = await Promise.all(restrooms.map(async (item) => {
+          let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
+          return { ...item, dist: road.distanceKm, estimatedTimeMin: road.durationMin, geometryCoords: road.geometryCoords };
+        }));
+
+        // 3. 실제 주행거리 기준으로 다시 정렬
+        scoredPool.sort((a,b) => a.dist - b.dist);
+
+        currentRouteData = [{ name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true }, ...scoredPool];
+
+        const mapBtn = document.getElementById('btn-show-map');
+        if (mapBtn) mapBtn.style.display = 'flex';
+        if (logEl) logEl.innerText = `방금 · 화장실 검색 완료 (다시 핫플을 찾으려면 위의 '콜 찾기' 버튼을 누르세요)`;
+
+        // 4. 메인 화면 카드 리스트에 화장실 렌더링
+        renderCards(scoredPool, null, null);
+      } else {
+        showToast("주변 반경 내 화장실을 찾지 못했습니다.");
+        if (logEl) logEl.innerText = `방금 · 화장실 검색 실패`;
+      }
+    }, {
+      x: currentPos.lng,
+      y: currentPos.lat,
+      radius: 3000,
+      sort: kakao.maps.services.SortBy.DISTANCE
+    });
   }
 
   function executeSearch() {
     const locText = document.getElementById('loc-text');
     if (locText) locText.innerText = '📍 실시간 GPS 수신 중...';
-    if (!navigator.geolocation) {
-      if (locText) locText.innerText = `❌ GPS 미지원 기기입니다.`;
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        currentPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        const inWisu = await checkIsInsideWisuRealtime(currentPos.lat, currentPos.lng);
-        
-        currentMode = inWisu ? 1 : 2;
-        document.body.className = `mode-${currentMode}` + (currentThemeMode === 'day' ? ' theme-day' : '');
-        if (locText) locText.innerText = `📍 ${currentRegionName || currentPos.lat.toFixed(4)} (${inWisu ? '관내 반경 5km 추천' : '관외 복귀 경로 추천'})`;
-        if (activeTab !== 3) calculateAndRender();
-      },
-      (err) => {
-        if (locText) locText.innerText = `❌ GPS 수신 대기 (⟳ 클릭)`;
-        showToast("📍 위치 권한을 허용하신 후 ⟳ 새로고침을 누르세요.");
-      },
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 3000 }
-    );
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      currentPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      const inWisu = await checkIsInsideWisuRealtime(currentPos.lat, currentPos.lng);
+      currentMode = inWisu ? 1 : 2; document.body.className = `mode-${currentMode}` + (currentThemeMode === 'day' ? ' theme-day' : '');
+      if (locText) locText.innerText = `📍 ${currentRegionName || currentPos.lat.toFixed(4)} (${inWisu ? '관내 5km콜 우선' : '관외 복귀경로 경유지 우선'})`;
+      if (activeTab === 1) calculateAndRender();
+    }, (err) => { showToast("📍 위치 권한 오류"); }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 3000 });
   }
 
   function isDuplicatePlace(candName, candLat, candLng, existingList) {
     return existingList.some(item => {
-      const nameA = item.name.replace(/\s+/g, '').substring(0, 3);
-      const nameB = candName.replace(/\s+/g, '').substring(0, 3);
-      const sameName = nameA === nameB || nameA.includes(nameB) || nameB.includes(nameA);
-      const closeDist = getStraightDistanceKm(item.lat, item.lng, candLat, candLng) < 0.3; 
-      return sameName || closeDist;
+      const nameA = item.name.replace(/\s+/g, '').substring(0, 3); const nameB = candName.replace(/\s+/g, '').substring(0, 3);
+      return (nameA === nameB || nameA.includes(nameB) || nameB.includes(nameA)) || (getStraightDistanceKm(item.lat, item.lng, candLat, candLng) < 0.3);
     });
   }
 
@@ -1288,159 +1059,88 @@
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
     const inWisu = (currentMode === 1);
-    if (logEl) logEl.innerText = `⚡ [스마트 ${inWisu ? '관내 반경 5km' : '관외 복귀 경로'}] 연산 중...`;
+    if (logEl) logEl.innerText = `⚡ [스마트 ${inWisu ? '관내 추천' : '관외 경유지 탐색'}] 연산 중...`;
     
-    let weatherData = { isRainOrSnow: false };
-    try { weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng); } catch(e) {}
-    
+    const weatherData = await fetchRealtimeWeather(currentPos.lat, currentPos.lng);
     const liveKakaoHotspots = await fetchLiveKakaoHotspots(currentPos.lat, currentPos.lng);
-    const customHotspots = getCustomHotspots();
+    const customHotspots = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
     const activeMasterHotspots = getMasterHotspotsFromStorage();
     const nowHour = new Date().getHours();
-    
-    const userCallCandidates = getCallLogsAsCandidates(currentPos.lat, currentPos.lng, nowHour);
+    const userCallCandidates = getCallLogsAsCandidates(nowHour);
 
-    let referenceHubs = [];
-    let targetBoundaryCardData = null;
-    let directTargetDist = 0;
+    let referenceHubs = []; let targetBoundaryCardData = null; let directTargetDist = 0; let targetBearing = null;
 
     if (inWisu) {
-      const hubPromises = MAJOR_HUBS.map(async (h) => {
+      referenceHubs = (await Promise.all(MAJOR_HUBS.map(async (h) => {
         let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, h.lat, h.lng);
-        let pureRes = await calculatePureSpotScore({...h, isWisu: true}, weatherData, nowHour);
-        return {
-          ...h,
-          dist: Number(road.distanceKm),
-          estimatedTimeMin: road.durationMin,
-          score: pureRes.score
-        };
-      });
-      referenceHubs = await Promise.all(hubPromises);
-      referenceHubs.sort((a, b) => a.dist - b.dist);
+        let pure = await calculatePureSpotScore({...h, isWisu: true}, weatherData, nowHour);
+        return { ...h, dist: road.distanceKm, estimatedTimeMin: road.durationMin, score: pure.score };
+      }))).sort((a,b) => a.dist - b.dist);
     } else {
-      let minBoundaryDist = Infinity;
-      let closestBp = null;
-      for (let bp of WISU_BOUNDARY_POINTS) {
-        let dist = getStraightDistanceKm(currentPos.lat, currentPos.lng, bp.lat, bp.lng);
-        if (dist < minBoundaryDist) {
-          minBoundaryDist = dist;
-          closestBp = bp;
-        }
-      }
-      if (closestBp) {
-        let roadToBp = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, closestBp.lat, closestBp.lng);
-        directTargetDist = Number(roadToBp.distanceKm);
-        targetBoundaryCardData = {
-          ...closestBp,
-          dist: directTargetDist,
-          estimatedTimeMin: roadToBp.durationMin,
-          score: 100,
-          isTargetBoundary: true
-        };
-      }
+      let closestBp = WISU_BOUNDARY_POINTS.reduce((prev, curr) => (getStraightDistanceKm(currentPos.lat, currentPos.lng, curr.lat, curr.lng) < getStraightDistanceKm(currentPos.lat, currentPos.lng, prev.lat, prev.lng) ? curr : prev));
+      let roadToBp = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, closestBp.lat, closestBp.lng);
+      directTargetDist = roadToBp.distanceKm;
+      targetBoundaryCardData = { ...closestBp, dist: directTargetDist, estimatedTimeMin: roadToBp.durationMin, score: 100, isTargetBoundary: true };
+      targetBearing = getBearing(currentPos.lat, currentPos.lng, closestBp.lat, closestBp.lng);
     }
 
-    let targetBearing = (!inWisu && targetBoundaryCardData) ? getBearing(currentPos.lat, currentPos.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng) : null;
-
     let rawPool = [...userCallCandidates, ...liveKakaoHotspots, ...customHotspots, ...activeMasterHotspots].filter(item => {
-      if (!inWisu) {
-        const isWisuHub = MAJOR_HUBS.some(h => item.name.includes(h.name.substring(0,2)));
-        if (isWisuHub || item.isWisu === true) return false;
-      }
+      if (!inWisu && !MAJOR_HUBS.some(h => item.name.includes(h.name.substring(0,2)))) return !item.isWisu;
       return true;
     });
 
-    let preFilteredCandidates = [];
+    let preFiltered = [];
     for (let item of rawPool) {
       let straightDist = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
+      if (inWisu && straightDist > 6.0) continue;
       
-      if (inWisu && straightDist > 5.0) continue;
-      
-      if (!inWisu) {
-        const maxAllowedSearch = directTargetDist <= 3.0 ? 6.0 : Math.min(22.0, directTargetDist + 5.0);
-        if (straightDist > maxAllowedSearch) continue;
-      }
-
       let pureRes = await calculatePureSpotScore(item, weatherData, nowHour);
       let preliminaryScore = pureRes.score;
 
-      if (straightDist <= 2.0) {
-        preliminaryScore += 40;
-      }
-
       if (!inWisu && targetBoundaryCardData) {
-        const distFromCandToTarget = getStraightDistanceKm(item.lat, item.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng);
-        const detourKm = (straightDist + distFromCandToTarget) - directTargetDist;
-        const maxAllowedDetour = Math.min(3.5, directTargetDist * 0.35 + 1.5);
-        
-        if (straightDist > 2.0 && detourKm > maxAllowedDetour) continue;
+        if (straightDist <= 2.5) {
+           preliminaryScore += 45; 
+           let candBearing = getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng);
+           if (getAngleDelta(candBearing, targetBearing) > 90) preliminaryScore -= 10;
+        } else {
+           const distToTarget = getStraightDistanceKm(item.lat, item.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng);
+           const detourKm = (straightDist + distToTarget) - directTargetDist;
+           if (detourKm > Math.min(5.0, directTargetDist * 0.45 + 2.0)) continue;
+           
+           let deltaAngle = getAngleDelta(getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng), targetBearing);
+           if (deltaAngle <= 45) preliminaryScore += 25;
+           else if (deltaAngle > 60) preliminaryScore -= 20;
+        }
+      } else if (straightDist <= 2.0) { preliminaryScore += 40; }
 
-        let candBearing = getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng);
-        let deltaAngle = getAngleDelta(candBearing, targetBearing);
-        if (deltaAngle <= 30) preliminaryScore += 25;
-        else if (deltaAngle <= 45) preliminaryScore += 10;
-        else if (deltaAngle > 50 && straightDist > 2.0) preliminaryScore -= 30;
-      }
-
-      preFilteredCandidates.push({
-        ...item,
-        straightDist,
-        preliminaryScore,
-        logCount: pureRes.logCount,
-        isTimeMatch: pureRes.isTimeMatch,
-        isMasterDb: !item.isCustom && !item.isLiveKakao && !item.isUserCallLogCandidate && (item.region !== undefined || item.id?.startsWith('hs_'))
-      });
+      preFiltered.push({ ...item, straightDist, preliminaryScore, logCount: pureRes.logCount, isTimeMatch: pureRes.isTimeMatch, isMasterDb: (!item.isCustom && !item.isLiveKakao && !item.isUserCallLogCandidate) });
     }
 
-    preFilteredCandidates.sort((a, b) => b.preliminaryScore - a.preliminaryScore);
-    const topCandidatesToRoute = preFilteredCandidates.slice(0, 10);
-
-    const routedCandidatesPromises = topCandidatesToRoute.map(async (item) => {
+    preFiltered.sort((a, b) => b.preliminaryScore - a.preliminaryScore);
+    const topCandidates = preFiltered.slice(0, 10);
+    
+    let scoredPool = await Promise.all(topCandidates.map(async (item) => {
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
-      return {
-        ...item,
-        dist: Number(road.distanceKm),
-        estimatedTimeMin: road.durationMin,
-        geometryCoords: road.geometryCoords,
-        score: item.preliminaryScore,
-        isNearStep1: (road.distanceKm <= 2.0)
-      };
-    });
-
-    let scoredPool = await Promise.all(routedCandidatesPromises);
+      return { ...item, dist: road.distanceKm, estimatedTimeMin: road.durationMin, geometryCoords: road.geometryCoords, score: item.preliminaryScore, isNearStep1: (road.distanceKm <= 2.5) };
+    }));
 
     let selectedCandidates = [];
-
-    const nearPool = scoredPool.filter(item => item.dist <= 2.0).sort((a, b) => b.score - a.score);
-    if (nearPool.length > 0) {
-      selectedCandidates.push(nearPool[0]);
-    }
+    const nearPool = scoredPool.filter(item => item.dist <= 2.5).sort((a, b) => b.score - a.score);
+    if (nearPool.length > 0) selectedCandidates.push(nearPool[0]);
 
     scoredPool.sort((a, b) => b.score - a.score || a.dist - b.dist);
     for (let candidate of scoredPool) {
-      if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedCandidates)) {
-        selectedCandidates.push(candidate);
-      }
+      if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedCandidates)) selectedCandidates.push(candidate);
       if (selectedCandidates.length === 3) break;
     }
-
     selectedCandidates.sort((a, b) => a.dist - b.dist);
 
-    currentRouteData = [
-      { name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true },
-      ...selectedCandidates
-    ];
-    if (targetBoundaryCardData) {
-      currentRouteData.push(targetBoundaryCardData);
-    }
+    currentRouteData = [{ name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true }, ...selectedCandidates];
+    if (targetBoundaryCardData) currentRouteData.push(targetBoundaryCardData);
     
     const mapBtn = document.getElementById('btn-show-map');
     if (mapBtn) mapBtn.style.display = 'flex';
-    if (logEl) {
-      logEl.innerText = selectedCandidates.length > 0 
-        ? `방금 · [${inWisu ? '반경 5km 실시간' : '관외 복귀 경로'}] 독립 연산 완료`
-        : `방금 · 주변 검색 결과 없음`;
-    }
+    if (logEl) logEl.innerText = selectedCandidates.length > 0 ? `방금 · [${inWisu ? '관내 추천' : '관외 경유지 우선'}] 연산 완료` : `방금 · 주변 검색 결과 없음`;
     
     renderCards(selectedCandidates, referenceHubs, targetBoundaryCardData);
   }
@@ -1448,148 +1148,96 @@
   function renderCards(routeCards, referenceHubs, targetBoundaryCardData) {
     const listEl = document.getElementById('card-list');
     if (!listEl) return;
-    
     const fragment = document.createDocumentFragment();
     const inWisu = (currentMode === 1);
 
     routeCards.forEach((item, index) => {
-      const card = document.createElement('div');
+      const card = document.createElement('div'); 
       card.className = 'card';
-      const safeName = item.name.replace(/'/g, "\\'");
+      
+      let badgeHtml = `<div class="num-badge">${index + 1}</div>`;
+      let scoreDistHtml = `${item.dist.toFixed(1)}km (${item.estimatedTimeMin}분) · ${item.score}점 ${getScoreLevelBadge(item.score)}`;
+      let tagsHtml = `
+          ${item.isNearStep1 ? '<span class="tag near">#근접즉시승차</span>' : `<span class="tag near">#${inWisu ? '반경5km' : '경로핫플'}</span>`}
+          ${item.isUserCallLogCandidate ? '<span class="tag usercallhistory">🔥실제승차기록</span>' : ''}
+          ${item.isLiveKakao ? '<span class="tag">⚡실시간상권</span>' : ''}
+          ${item.isTimeMatch ? '<span class="tag">🔥시간대콜</span>' : ''}
+          ${item.logCount > 0 ? `<span class="tag">#콜${item.logCount}건</span>` : ''}
+      `;
+      let btnColor = '';
+
+      // 화장실 검색 모드일 경우 카드 디자인을 직관적으로 변경
+      if (item.isRestroom) {
+        badgeHtml = `<div class="num-badge" style="background:#3B82F6; color:#FFF; font-size:12px;">🚻</div>`;
+        scoreDistHtml = `${item.dist.toFixed(1)}km (${item.estimatedTimeMin}분) · 화장실 편의시설`;
+        tagsHtml = `<span class="tag near" style="background:#EFF6FF; color:#2563EB; border-color:#3B82F6; font-weight:800;">#공중/개방화장실</span>`;
+        btnColor = `style="background:#3B82F6 !important; color:#FFF !important;"`;
+      }
+
       card.innerHTML = `
         <div class="card-main-content">
           <div class="card-compact-row">
             <div class="card-title-group">
-              <div class="num-badge">${index + 1}</div>
+              ${badgeHtml}
               <div class="place-info">
                 <div class="place-name">${item.name}</div>
-                <div class="score-dist">${item.dist.toFixed(1)}km (${item.estimatedTimeMin}분) · ${item.score}점 ${getScoreLevelBadge(item.score)}</div>
+                <div class="score-dist">${scoreDistHtml}</div>
               </div>
             </div>
-            <button type="button" class="right-navi-btn" onclick="openKakaoNaviApp('${safeName}', ${item.lat}, ${item.lng})">
-              <span>🚗내비</span>
-            </button>
+            <button type="button" class="right-navi-btn" ${btnColor} onclick="openKakaoNaviApp('${item.name.replace(/'/g, "\\'")}', ${item.lat}, ${item.lng})"><span>🚗내비</span></button>
           </div>
         </div>
         <div class="tag-group">
-          ${item.isNearStep1 ? '<span class="tag near">#초근접(2km)</span>' : `<span class="tag near">#${inWisu ? '반경5km' : '경로핫플'}</span>`}
-          ${item.isUserCallLogCandidate ? '<span class="tag usercallhistory">🔥실제승차기록</span>' : ''}
-          ${item.isLiveKakao ? '<span class="tag">⚡실시간상권</span>' : ''}
-          ${item.isTimeMatch ? '<span class="tag">🔥시간대콜</span>' : ''}
-          ${item.isMasterDb ? '<span class="tag">#마스터DB</span>' : ''}
-          ${item.isCustom ? '<span class="tag custom">#나만의핫플</span>' : ''}
-          ${item.logCount > 0 ? `<span class="tag">#콜${item.logCount}건</span>` : ''}
+          ${tagsHtml}
         </div>
       `;
       fragment.appendChild(card);
     });
 
     if (!inWisu && targetBoundaryCardData) {
-      const targetCard = document.createElement('div');
-      targetCard.className = 'card target-destination-card';
-      const safeTargetName = targetBoundaryCardData.name.replace(/'/g, "\\'");
+      const targetCard = document.createElement('div'); targetCard.className = 'card target-destination-card';
       targetCard.innerHTML = `
         <div class="card-main-content">
           <div class="card-compact-row">
             <div class="card-title-group">
               <div class="num-badge target-badge">🎯</div>
               <div class="place-info">
-                <div class="place-name" style="color: #FFD700;">${targetBoundaryCardData.name}</div>
-                <div class="score-dist" style="color: #FF6B00;">${targetBoundaryCardData.dist.toFixed(1)}km (${targetBoundaryCardData.estimatedTimeMin}분) · 복귀 최단 경계점</div>
+                <div class="place-name target-title-text">${targetBoundaryCardData.name}</div>
+                <div class="score-dist target-score-text">${targetBoundaryCardData.dist.toFixed(1)}km (${targetBoundaryCardData.estimatedTimeMin}분) · 복귀 최단 경계점</div>
               </div>
             </div>
-            <button type="button" class="right-navi-btn" style="background:#FF6B00 !important; color:#FFF !important;" onclick="openKakaoNaviApp('${safeTargetName}', ${targetBoundaryCardData.lat}, ${targetBoundaryCardData.lng})">
-              <span>🎯복귀</span>
-            </button>
+            <button type="button" class="right-navi-btn" style="background:#FF6B00 !important; color:#FFF !important;" onclick="openKakaoNaviApp('${targetBoundaryCardData.name.replace(/'/g, "\\'")}', ${targetBoundaryCardData.lat}, ${targetBoundaryCardData.lng})"><span>🎯복귀</span></button>
           </div>
-        </div>
-        <div class="tag-group">
-          <span class="tag target">🎯최종복귀목적지</span>
-          <span class="tag near">#관내진입점</span>
         </div>
       `;
       fragment.appendChild(targetCard);
     }
-
-    if (inWisu && referenceHubs && referenceHubs.length > 0) {
-      const subSection = document.createElement('div');
-      subSection.className = 'sub-final-section';
-      subSection.innerHTML = `
-        <div class="sub-final-title" style="font-size: 10px; font-weight: 800; color: var(--theme-accent); margin-bottom: 2px; margin-top: 8px;">⭐ 거점역 실시간 상태 (참고용)</div>
-        <div style="display: flex; flex-direction: column; gap: 4px;">
-          ${referenceHubs.map(sub => {
-            const safeSubName = sub.name.replace(/'/g, "\\'");
-            return `
-            <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; padding: 5px 8px; display: flex; align-items: center; justify-content: space-between; gap: 6px;">
-              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center;">
-                <div style="font-size: 11px; font-weight: 800; color: var(--main-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${sub.name}</div>
-                <div style="font-size: 9px; font-weight: 700; color: var(--stat-label); font-family: monospace;">${sub.dist.toFixed(1)}km (${sub.estimatedTimeMin}분) · ${sub.score}점</div>
-              </div>
-              <button type="button" style="background: #FFE800; color: #000; font-weight: 900; height: 24px; padding: 0 8px; font-size: 10px; border-radius: 5px; cursor: pointer; border: none; white-space: nowrap; flex-shrink: 0;" onclick="openKakaoNaviApp('${safeSubName}', ${sub.lat},${sub.lng})">🚗 안내</button>
-            </div>
-          `}).join('')}
-        </div>
-      `;
-      fragment.appendChild(subSection);
-    }
-
-    listEl.innerHTML = '';
-    listEl.appendChild(fragment);
+    listEl.innerHTML = ''; listEl.appendChild(fragment);
   }
 
   function renderCallMapView() {
     if (typeof L === 'undefined') return;
     const centerPos = currentPos || { lat: 37.4048, lng: 126.9767 };
-    
     if (!callMapViewLeaflet) {
       callMapViewLeaflet = L.map('call-map-view', { zoomControl: false }).setView([centerPos.lat, centerPos.lng], 13);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '' }).addTo(callMapViewLeaflet);
-    } else {
-      callMapViewLeaflet.setView([centerPos.lat, centerPos.lng], 13);
-      callMapViewLeaflet.invalidateSize();
-    }
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(callMapViewLeaflet);
+    } else { callMapViewLeaflet.setView([centerPos.lat, centerPos.lng], 13); callMapViewLeaflet.invalidateSize(); }
     callMapViewLeaflet.eachLayer(l => { if (l instanceof L.Marker) callMapViewLeaflet.removeLayer(l); });
-    L.marker([centerPos.lat, centerPos.lng], {
-      icon: L.divIcon({ html: '<div class="custom-map-marker current">📍</div>', className: '', iconSize: [24, 24], iconAnchor: [12, 12] })
-    }).addTo(callMapViewLeaflet).bindPopup('<b>현재 위치</b>');
-    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
-    const currentHour = new Date().getHours();
-    if (logs.length === 0) return;
-    
-    logs.forEach(log => {
-      const logLat = Number(log.lat);
-      const logLng = Number(log.lng);
-      if (isNaN(logLat) || isNaN(logLng)) return;
-      const logDate = parseDateSafely(log.timestamp || log.time);
-      const logHour = logDate.getHours();
-      let hourDiff = Math.abs(currentHour - logHour);
-      if (hourDiff > 12) hourDiff = 24 - hourDiff;
-      const isActiveTime = hourDiff <= 1;
-      const markerClass = isActiveTime ? 'call-dot-marker active-time' : 'call-dot-marker other-time';
-      const markerSize = isActiveTime ? 16 : 10;
-      L.marker([logLat, logLng], {
-        icon: L.divIcon({
-          html: `<div class="${markerClass}" style="width:${markerSize}px; height:${markerSize}px; border-radius: 50%; box-shadow: 0 0 4px rgba(0,0,0,0.6); ${isActiveTime ? 'background: #22C55E; border: 1.5px solid #FFF;' : 'background: #64748B; border: 1px solid #FFF; opacity: 0.7;'}"></div>`,
-          className: '', iconSize: [markerSize, markerSize], iconAnchor: [markerSize/2, markerSize/2]
-        })
-      }).addTo(callMapViewLeaflet).bindPopup(`
-        <b>📍 탑승 기록</b><br>
-        시간: ${logDate.toLocaleTimeString()}<br>
-        날짜: ${logDate.toLocaleDateString()}<br>
-        ${isActiveTime ? '<span style="color:#22C55E; font-weight:900;">🔥 집중지점</span>' : ''}
-      `);
-    });
+    L.marker([centerPos.lat, centerPos.lng], { icon: L.divIcon({ html: '<div class="custom-map-marker current">📍</div>', className: '', iconSize: [24, 24] }) }).addTo(callMapViewLeaflet);
   }
 
-  // 동선 지도: Turf.js 곡선 처리로 OSRM 완전 대체
   async function openRouteMapModal() {
     if (typeof L === 'undefined') { showToast('지도 로딩 중입니다.'); return; }
-    const modal = document.getElementById('map-modal');
-    if (modal) modal.classList.add('active');
+    document.getElementById('map-modal').classList.add('active');
+    
+    if (!document.getElementById('map-modal-title').innerText.includes('화장실')) {
+        document.getElementById('map-modal-title').innerText = '🗺️ 도로 동선 지도';
+    }
+
     setTimeout(async () => {
       if (!leafletMap) {
         leafletMap = L.map('route-map', { zoomControl: false });
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '' }).addTo(leafletMap);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(leafletMap);
       }
       leafletMap.invalidateSize();
       leafletMap.eachLayer(l => { if (l instanceof L.Marker || l instanceof L.Polyline) leafletMap.removeLayer(l); });
@@ -1598,76 +1246,31 @@
       const markerCoords = currentRouteData.map(pt => [pt.lat, pt.lng]);
       
       currentRouteData.forEach((pt, idx) => {
-        let badgeNum = pt.isTargetBoundary ? '🎯' : idx;
-        let html = pt.isCurrent ? '<div class="custom-map-marker current" style="z-index: 1000; position: relative;">📍</div>' : `<div class="custom-map-marker" ${pt.isTargetBoundary ? 'style="background:#FF6B00; color:#FFF;"' : ''}>${badgeNum}</div>`;
-        let zIdx = pt.isCurrent ? 1000 : (pt.isTargetBoundary ? 900 : 100);
+        let badgeNum = pt.isTargetBoundary ? '🎯' : (pt.isRestroom ? '🚻' : idx);
+        let html = pt.isCurrent ? '<div class="custom-map-marker current" style="z-index: 1000; position: relative;">📍</div>' : `<div class="custom-map-marker" ${pt.isTargetBoundary ? 'style="background:#FF6B00; color:#FFF;"' : (pt.isRestroom ? 'style="background:#3B82F6; color:#FFF;"' : '')}>${badgeNum}</div>`;
+        L.marker([pt.lat, pt.lng], { icon: L.divIcon({ html, className: '', iconSize: [24, 24] }) }).addTo(leafletMap).bindPopup(`<b>${pt.name}</b>`);
 
-        L.marker([pt.lat, pt.lng], { 
-          icon: L.divIcon({ html, className: '', iconSize: [24, 24], iconAnchor: [12, 12] }),
-          zIndexOffset: zIdx
-        }).addTo(leafletMap).bindPopup(`<b>${pt.name}</b>`);
-
-        // Kakao API에서 받아온 실제 도로 궤적(Geometry)을 지도에 그림
         if (pt.geometryCoords && pt.geometryCoords.length > 0) {
-          L.polyline(pt.geometryCoords, { 
-            color: pt.isTargetBoundary ? '#FF6B00' : themeColor, 
-            weight: pt.isTargetBoundary ? 6 : 5, 
-            opacity: pt.isTargetBoundary ? 0.9 : 0.65, 
-            lineJoin: 'round', 
-            lineCap: 'round',
-            dashArray: pt.isTargetBoundary ? '8, 8' : null
-          }).addTo(leafletMap);
+          L.polyline(pt.geometryCoords, { color: pt.isTargetBoundary ? '#FF6B00' : themeColor, weight: 5, opacity: 0.7, dashArray: pt.isTargetBoundary ? '8, 8' : null }).addTo(leafletMap);
         }
       });
-      
       leafletMap.fitBounds(L.latLngBounds(markerCoords), { padding: [30, 30] });
     }, 200);
   }
 
-  function closeRouteMapModal() {
-    const modal = document.getElementById('map-modal');
-    if (modal) modal.classList.remove('active');
-  }
+  function closeRouteMapModal() { document.getElementById('map-modal').classList.remove('active'); }
+  function cleanQuery(str) { return (str||'').replace(/먹자골목|중심상가|상업지구|환승거점|사거리|로데오거리|로데오|환승센터|포차|맛고을|업무지구|메디컬타운/g, '').trim(); }
 
-  function cleanQuery(str) {
-    if (!str) return '';
-    return str.replace(/먹자골목|중심상가|상업지구|환승거점|사거리|로데오거리|로데오|환승센터|포차|맛고을|업무지구|메디컬타운/g, '').trim();
-  }
-
-  function saveCurrentCallLocation() {
-    const doSave = (pos) => {
-      let logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
-      logs.push({ id: 'log_' + Date.now(), timestamp: new Date().toISOString(), lat: pos.lat, lng: pos.lng, mode: currentMode });
-      localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
-      updateCallLogStats();
-      showToast('🎉 위치 저장 완료!');
-      
-      if (!drivingState.isDriving) { 
-        drivingState.isDriving = true;
-        drivingState.lastTickTime = Date.now();
-        startDrivingTimer();
-      }
-      drivingState.isPassengerBoarded = true;
-      drivingState.isBreak = false;
-      drivingState.stateStartTime = Date.now();
-      updateDrivingUI();
-      saveDrivingState();
-      
-      setTab(4);
-    };
-    if (currentPos) doSave(currentPos);
-    else showToast("위치 확인 후 저장 가능합니다.");
-  }
-
+  // 백업, 복원, 나만의 핫플 등 데이터 추가 로직
   function addCustomHotspotPrompt() {
-    if (!currentPos) { showToast('먼저 위치 검색을 진행해 주세요.'); return; }
-    const name = prompt('⭐ 나만의 콜 장소 이름:');
+    if (!currentPos) { showToast('위치 탐색이 필요합니다.'); return; }
+    const name = prompt('⭐ 콜 장소 이름 등록:');
     if (!name || !name.trim()) return;
     let custom = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
     custom.push({ id: 'custom_' + Date.now(), name: name.trim(), lat: currentPos.lat, lng: currentPos.lng, type: 'subway', isCustom: true, address: name.trim() });
     localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(custom));
     updateCustomHotspotUI();
-    if (activeTab !== 3) calculateAndRender();
+    if (activeTab === 1) calculateAndRender();
     showToast('등록 완료!');
   }
 
@@ -1675,26 +1278,21 @@
     let custom = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]').filter(i => i.id !== id);
     localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(custom));
     updateCustomHotspotUI();
-    if (activeTab !== 3) calculateAndRender();
+    if (activeTab === 1) calculateAndRender();
   }
 
   function updateCustomHotspotUI() {
     const list = document.getElementById('custom-hotspots-list');
     if (!list) return;
     const custom = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
-    if (custom.length === 0) {
-      list.innerHTML = `<div style="font-size:9px; color:var(--stat-label); text-align:center;">등록된 장소가 없습니다.</div>`;
-      return;
-    }
+    if (custom.length === 0) { list.innerHTML = `<div style="font-size:9px; color:var(--stat-label); text-align:center;">등록된 장소가 없습니다.</div>`; return; }
     list.innerHTML = custom.map(item => `
       <div class="recent-log-item">
         <span class="recent-log-time">⭐ ${item.name}</span>
         <button class="delete-custom-btn" data-id="${item.id}" style="background:#FEE2E2; color:#DC2626; border:1px solid #F87171; border-radius:4px; padding:2px 6px; font-size:9px; font-weight:700; cursor:pointer;">삭제</button>
       </div>
     `).join('');
-    document.querySelectorAll('.delete-custom-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => { deleteCustomHotspot(e.currentTarget.dataset.id); });
-    });
+    document.querySelectorAll('.delete-custom-btn').forEach(btn => btn.addEventListener('click', (e) => deleteCustomHotspot(e.currentTarget.dataset.id)));
   }
 
   function deleteCallLog(id, ts) {
@@ -1710,152 +1308,26 @@
     if (countText) countText.innerText = `저장 기록: ${logs.length}개`;
     const list = document.getElementById('recent-logs-list');
     if (!list) return;
-    if (logs.length === 0) {
-      list.innerHTML = `<div style="font-size:9px; color:var(--stat-label); text-align:center;">기록이 없습니다.</div>`;
-      return;
-    }
+    if (logs.length === 0) { list.innerHTML = `<div style="font-size:9px; color:var(--stat-label); text-align:center;">기록이 없습니다.</div>`; return; }
     list.innerHTML = logs.slice(-3).reverse().map(item => `
       <div class="recent-log-item">
         <span class="recent-log-time">📍 ${new Date(item.timestamp || item.time).toLocaleTimeString()} [M${item.mode || 1}]</span>
         <button class="delete-log-item-btn" data-id="${item.id}" data-ts="${item.timestamp || item.time}" style="background:#FEE2E2; color:#DC2626; border:1px solid #F87171; border-radius:4px; padding:2px 6px; font-size:9px; font-weight:700; cursor:pointer;">삭제</button>
       </div>
     `).join('');
-    document.querySelectorAll('.delete-log-item-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => { deleteCallLog(e.currentTarget.dataset.id, e.currentTarget.dataset.ts); });
-    });
-  }
-
-  function getTodayKey() {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-  }
-
-  function getTodayDrivingData() {
-    const key = getTodayKey();
-    const records = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
-    if (!records[key]) {
-      records[key] = { totalDrive: 0, passengerBoard: 0, emptyCar: 0, breakTime: 0 };
-    }
-    return records[key];
-  }
-
-  function saveTodayDrivingData(data) {
-    const key = getTodayKey();
-    const records = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
-    records[key] = data;
-    localStorage.setItem('sudataxi_driving_records', JSON.stringify(records));
-  }
-
-  function toggleDriving() {
-    drivingState.isDriving = !drivingState.isDriving;
-    if (drivingState.isDriving) {
-      drivingState.isPassengerBoarded = false;
-      drivingState.isBreak = false;
-      drivingState.lastTickTime = Date.now();
-      drivingState.stateStartTime = Date.now();
-      startDrivingTimer();
-      showToast('🚗 운행이 시작되었습니다.');
-    } else {
-      drivingState.isPassengerBoarded = false;
-      drivingState.isBreak = false;
-      drivingState.stateStartTime = null;
-      stopDrivingTimer();
-      showToast('⏹️ 운행이 종료되었습니다.');
-    }
-    updateDrivingUI();
-    saveDrivingState();
-  }
-
-  function toggleBreak() {
-    if (!drivingState.isDriving) return;
-    drivingState.isBreak = !drivingState.isBreak;
-    drivingState.stateStartTime = Date.now();
-    
-    if (drivingState.isBreak) {
-      showToast('☕ 휴식을 시작합니다.');
-    } else {
-      showToast('🚗 운행을 재개합니다.');
-    }
-    updateDrivingUI();
-    saveDrivingState();
-  }
-
-  function handleBoarding() {
-    if (!drivingState.isDriving || drivingState.isBreak) return;
-    drivingState.isPassengerBoarded = true;
-    drivingState.stateStartTime = Date.now();
-    updateDrivingUI();
-    showToast('🙋 승차 처리되었습니다.');
-    saveDrivingState();
-  }
-
-  function handleAlighting() {
-    if (!drivingState.isDriving || drivingState.isBreak || !drivingState.isPassengerBoarded) return;
-    drivingState.isPassengerBoarded = false;
-    drivingState.stateStartTime = Date.now();
-    
-    updateDrivingUI();
-    showToast('👋 하차 완료!\n자동추천모드 이동 및 5분 타이머가 시작됩니다.');
-    saveDrivingState();
-    
-    setTab(1);
-    setTimerPreset(5);
-    startTimerInternal();
-  }
-
-  function startDrivingTimer() {
-    stopDrivingTimer();
-    drivingState.lastTickTime = Date.now();
-    drivingStatsTimer = setInterval(() => {
-      const now = Date.now();
-      const elapsed = Math.floor((now - drivingState.lastTickTime) / 1000);
-      if (elapsed >= 1) {
-        drivingState.lastTickTime = now;
-        const todayData = getTodayDrivingData();
-        if (drivingState.isBreak) {
-          todayData.breakTime = (todayData.breakTime || 0) + elapsed;
-        } else {
-          todayData.totalDrive = (todayData.totalDrive || 0) + elapsed;
-          if (drivingState.isPassengerBoarded) {
-            todayData.passengerBoard = (todayData.passengerBoard || 0) + elapsed;
-          } else {
-            todayData.emptyCar = (todayData.emptyCar || 0) + elapsed;
-          }
-        }
-        saveTodayDrivingData(todayData);
-        saveDrivingState();
-        if (activeTab === 4) renderDrivingLogStats();
-        
-        renderCurrentStateTime(now);
-      }
-    }, 1000);
-  }
-
-  function stopDrivingTimer() {
-    if (drivingStatsTimer) {
-      clearInterval(drivingStatsTimer);
-      drivingStatsTimer = null;
-    }
+    document.querySelectorAll('.delete-log-item-btn').forEach(btn => btn.addEventListener('click', (e) => deleteCallLog(e.currentTarget.dataset.id, e.currentTarget.dataset.ts)));
   }
 
   function renderDrivingLogStats() {
     const today = getTodayDrivingData();
-    const todayTotal = today.totalDrive || 0;
-    const todayBoard = today.passengerBoard || 0;
-    const todayEmpty = today.emptyCar || 0;
-
+    const todayTotal = today.totalDrive || 0; const todayBoard = today.passengerBoard || 0; const todayEmpty = today.emptyCar || 0;
     document.getElementById('stat-today-total').innerText = formatHHMMSS(todayTotal);
     document.getElementById('stat-today-board').innerText = formatHHMMSS(todayBoard);
     document.getElementById('stat-today-empty').innerText = formatHHMMSS(todayEmpty);
     document.getElementById('stat-today-break').innerText = formatHHMMSS(today.breakTime || 0);
 
-    // 오늘 퍼센트 계산
-    let todayBoardPct = 0;
-    let todayEmptyPct = 0;
-    if (todayTotal > 0) {
-      todayBoardPct = ((todayBoard / todayTotal) * 100).toFixed(1);
-      todayEmptyPct = ((todayEmpty / todayTotal) * 100).toFixed(1);
-    }
+    let todayBoardPct = 0; let todayEmptyPct = 0;
+    if (todayTotal > 0) { todayBoardPct = ((todayBoard / todayTotal) * 100).toFixed(1); todayEmptyPct = ((todayEmpty / todayTotal) * 100).toFixed(1); }
     document.getElementById('stat-today-board-pct').innerText = `${todayBoardPct}%`;
     document.getElementById('stat-today-empty-pct').innerText = `${todayEmptyPct}%`;
     
@@ -1870,58 +1342,33 @@
     
     keys.forEach(k => {
       const rec = records[k];
-      const driveSec = rec.totalDrive || 0;
-      const boardSec = rec.passengerBoard || 0;
-      const emptySec = rec.emptyCar || 0;
-      
-      const dateParts = k.split('-');
-      const recDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+      const driveSec = rec.totalDrive || 0; const boardSec = rec.passengerBoard || 0; const emptySec = rec.emptyCar || 0;
+      const dateParts = k.split('-'); const recDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
       const diffDays = Math.floor((now - recDate) / (1000 * 60 * 60 * 24));
       
-      dailySum += driveSec; dailyBoard += boardSec; dailyEmpty += emptySec;
-      dailyCount++;
-      
-      if (diffDays <= 7) {
-        weeklySum += driveSec; weeklyBoard += boardSec; weeklyEmpty += emptySec;
-        weeklyCount++;
-      }
-      if (diffDays <= 30) {
-        monthlySum += driveSec; monthlyBoard += boardSec; monthlyEmpty += emptySec;
-        monthlyCount++;
-      }
+      dailySum += driveSec; dailyBoard += boardSec; dailyEmpty += emptySec; dailyCount++;
+      if (diffDays <= 7) { weeklySum += driveSec; weeklyBoard += boardSec; weeklyEmpty += emptySec; weeklyCount++; }
+      if (diffDays <= 30) { monthlySum += driveSec; monthlyBoard += boardSec; monthlyEmpty += emptySec; monthlyCount++; }
     });
 
-    const avgDailyTotal = Math.round(dailySum / Math.max(1, dailyCount));
-    const avgDailyBoard = Math.round(dailyBoard / Math.max(1, dailyCount));
-    const avgDailyEmpty = Math.round(dailyEmpty / Math.max(1, dailyCount));
-
-    const avgWeeklyTotal = Math.round(weeklySum / Math.max(1, weeklyCount));
-    const avgWeeklyBoard = Math.round(weeklyBoard / Math.max(1, weeklyCount));
-    const avgWeeklyEmpty = Math.round(weeklyEmpty / Math.max(1, weeklyCount));
-
-    const avgMonthlyTotal = Math.round(monthlySum / Math.max(1, monthlyCount));
-    const avgMonthlyBoard = Math.round(monthlyBoard / Math.max(1, monthlyCount));
-    const avgMonthlyEmpty = Math.round(monthlyEmpty / Math.max(1, monthlyCount));
+    const avgDailyTotal = Math.round(dailySum / Math.max(1, dailyCount)); const avgDailyBoard = Math.round(dailyBoard / Math.max(1, dailyCount)); const avgDailyEmpty = Math.round(dailyEmpty / Math.max(1, dailyCount));
+    const avgWeeklyTotal = Math.round(weeklySum / Math.max(1, weeklyCount)); const avgWeeklyBoard = Math.round(weeklyBoard / Math.max(1, weeklyCount)); const avgWeeklyEmpty = Math.round(weeklyEmpty / Math.max(1, weeklyCount));
+    const avgMonthlyTotal = Math.round(monthlySum / Math.max(1, monthlyCount)); const avgMonthlyBoard = Math.round(monthlyBoard / Math.max(1, monthlyCount)); const avgMonthlyEmpty = Math.round(monthlyEmpty / Math.max(1, monthlyCount));
     
     document.getElementById('stat-avg-daily-total').innerText = formatHHMMSS(avgDailyTotal);
     document.getElementById('stat-avg-weekly-total').innerText = formatHHMMSS(avgWeeklyTotal);
     document.getElementById('stat-avg-monthly-total').innerText = formatHHMMSS(avgMonthlyTotal);
-    
     document.getElementById('stat-avg-daily-board').innerText = formatHHMMSS(avgDailyBoard);
     document.getElementById('stat-avg-weekly-board').innerText = formatHHMMSS(avgWeeklyBoard);
     document.getElementById('stat-avg-monthly-board').innerText = formatHHMMSS(avgMonthlyBoard);
-    
     document.getElementById('stat-avg-daily-empty').innerText = formatHHMMSS(avgDailyEmpty);
     document.getElementById('stat-avg-weekly-empty').innerText = formatHHMMSS(avgWeeklyEmpty);
     document.getElementById('stat-avg-monthly-empty').innerText = formatHHMMSS(avgMonthlyEmpty);
 
-    // 평균 퍼센트 계산 및 출력
     document.getElementById('stat-avg-daily-board-pct').innerText = `${avgDailyTotal > 0 ? ((avgDailyBoard / avgDailyTotal) * 100).toFixed(1) : 0.0}%`;
     document.getElementById('stat-avg-daily-empty-pct').innerText = `${avgDailyTotal > 0 ? ((avgDailyEmpty / avgDailyTotal) * 100).toFixed(1) : 0.0}%`;
-
     document.getElementById('stat-avg-weekly-board-pct').innerText = `${avgWeeklyTotal > 0 ? ((avgWeeklyBoard / avgWeeklyTotal) * 100).toFixed(1) : 0.0}%`;
     document.getElementById('stat-avg-weekly-empty-pct').innerText = `${avgWeeklyTotal > 0 ? ((avgWeeklyEmpty / avgWeeklyTotal) * 100).toFixed(1) : 0.0}%`;
-
     document.getElementById('stat-avg-monthly-board-pct').innerText = `${avgMonthlyTotal > 0 ? ((avgMonthlyBoard / avgMonthlyTotal) * 100).toFixed(1) : 0.0}%`;
     document.getElementById('stat-avg-monthly-empty-pct').innerText = `${avgMonthlyTotal > 0 ? ((avgMonthlyEmpty / avgMonthlyTotal) * 100).toFixed(1) : 0.0}%`;
   }
@@ -1936,25 +1383,17 @@
     const jsonStr = JSON.stringify(data, null, 2);
     const today = new Date();
     const dateStr = today.getFullYear() + String(today.getMonth() + 1).padStart(2, '0') + String(today.getDate()).padStart(2, '0');
-    const defaultFileName = `sudataxi_backup_${dateStr}`;
-    let userFileName = prompt('💾 저장할 백업 파일 이름을 입력하세요:', defaultFileName);
-    
+    let userFileName = prompt('💾 저장할 백업 파일 이름을 입력하세요:', `sudataxi_backup_${dateStr}`);
     if (userFileName === null) return;
-    userFileName = userFileName.trim();
-    if (!userFileName) userFileName = defaultFileName;
     if (!userFileName.endsWith('.json')) userFileName += '.json';
     try {
       const blob = new Blob([jsonStr], { type: 'application/json' });
       const blobUrl = URL.createObjectURL(blob); 
-      const a = document.createElement('a');
-      a.href = blobUrl; a.download = userFileName;
+      const a = document.createElement('a'); a.href = blobUrl; a.download = userFileName;
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-      showToast(`📥 [${userFileName}] 다운로드 시작!`);
-    } catch(e) {
-      try { navigator.clipboard.writeText(jsonStr); showToast('📋 클립보드 복사 완료!'); } 
-      catch(err) { showToast('❌ 내보내기에 실패했습니다.'); }
-    }
+      showToast(`📥 [${userFileName}] 다운로드 완료!`);
+    } catch(e) { try { navigator.clipboard.writeText(jsonStr); showToast('📋 클립보드 복사 완료!'); } catch(err) { showToast('❌ 내보내기에 실패했습니다.'); } }
   }
 
   function importCallLogs(e) {
@@ -1966,16 +1405,12 @@
         const json = JSON.parse(evt.target.result);
         let existingLogs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
         let existingHotspots = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
-        
-        let importedLogs = json.call_logs || json.logs || json.sudataxi_logs || (Array.isArray(json) ? json : []);
-        let importedHotspots = json.custom_hotspots || json.hotplaces || [];
-        let importedMaster = json.master_hotspots || json.hotspots || null;
+        let importedLogs = json.call_logs || json.logs || [];
+        let importedHotspots = json.custom_hotspots || [];
+        let importedMaster = json.master_hotspots || null;
         let importedRecords = json.driving_records || null;
         
-        if (importedMaster && Array.isArray(importedMaster)) {
-          localStorage.setItem('sudataxi_master_hotspots', JSON.stringify(importedMaster));
-        }
-        
+        if (importedMaster && Array.isArray(importedMaster)) localStorage.setItem('sudataxi_master_hotspots', JSON.stringify(importedMaster));
         if (importedRecords) {
            let existingRecords = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
            Object.assign(existingRecords, importedRecords);
@@ -1993,9 +1428,7 @@
         
         localStorage.setItem('sudataxi_call_logs', JSON.stringify(Array.from(logMap.values())));
         localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(Array.from(hotspotMap.values())));
-        updateCallLogStats();
-        updateCustomHotspotUI();
-        showToast(`🎉 복원/병합 완료!`);
+        updateCallLogStats(); updateCustomHotspotUI(); showToast(`🎉 복원/병합 완료!`);
         if (activeTab === 3) renderCallMapView(); else calculateAndRender();
       } catch(err) { showToast('❌ 오류: 올바르지 않은 JSON 백업 데이터입니다.'); } 
       finally { e.target.value = ''; }
@@ -2004,80 +1437,61 @@
     reader.readAsText(file);
   }
 
-  function checkHotspotUpdateReminder() {
-    const LAST_UPDATE_KEY = 'suhda_last_hotspot_update';
-    const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
-    const lastUpdate = localStorage.getItem(LAST_UPDATE_KEY);
-    const now = new Date().getTime();
-    if (!lastUpdate) { localStorage.setItem(LAST_UPDATE_KEY, now); } 
-    else if (now - parseInt(lastUpdate, 10) > TWO_WEEKS_MS) {
-      const banner = document.getElementById('hotspotUpdateBanner');
-      if (banner) banner.style.display = 'block';
+  function saveCurrentCallLocation() {
+    if (currentPos) {
+      let logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+      logs.push({ id: 'log_' + Date.now(), timestamp: new Date().toISOString(), lat: currentPos.lat, lng: currentPos.lng, mode: currentMode });
+      localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
+      updateCallLogStats();
+      showToast('🎉 위치 저장 완료!');
+      if (!drivingState.isDriving) { drivingState.isDriving = true; drivingState.lastTickTime = Date.now(); startDrivingTimer(); }
+      drivingState.isPassengerBoarded = true; drivingState.isBreak = false; drivingState.stateStartTime = Date.now();
+      updateDrivingUI(); saveDrivingState(); setTab(4);
     }
   }
 
-  function requestHotspotUpdate() {
-    showToast("최신 핫플 데이터를 검토 중입니다!");
-    localStorage.setItem('suhda_last_hotspot_update', new Date().getTime());
-    document.getElementById('hotspotUpdateBanner').style.display = 'none';
-  }
-
-  function dismissBanner() { document.getElementById('hotspotUpdateBanner').style.display = 'none'; }
-
   window.addEventListener('DOMContentLoaded', () => {
-    initKakaoSdk();
-    applyThemeMode(currentThemeMode);
-    checkIsPublicHolidayRealtime();
-    updateCallLogStats();
-    updateCustomHotspotUI();
-    checkHotspotUpdateReminder();
-    restoreTimerState();
-    restoreDrivingState();
+    initKakaoSdk(); applyThemeMode(currentThemeMode); checkIsPublicHolidayRealtime();
+    updateCallLogStats(); updateCustomHotspotUI();
+    restoreTimerState(); restoreDrivingState(); 
+    executeAutoBackup(); setInterval(executeAutoBackup, 10 * 60 * 1000); 
     
-    executeAutoBackup();
-    setInterval(executeAutoBackup, 10 * 60 * 1000); 
-    
+    // 네비게이션 탭 설정
     document.getElementById('btn-mode1').addEventListener('click', () => setTab(1));
+    document.getElementById('btn-mode2').addEventListener('click', () => setTab(2));
     document.getElementById('btn-mode3').addEventListener('click', () => setTab(3));
-    const btnMode4 = document.getElementById('btn-mode4');
-    if (btnMode4) btnMode4.addEventListener('click', () => setTab(4));
+    if (document.getElementById('btn-mode4')) document.getElementById('btn-mode4').addEventListener('click', () => setTab(4));
     
+    // 버튼 기능 연결
     document.getElementById('btn-refresh').addEventListener('click', () => executeSearch());
     document.getElementById('btn-search').addEventListener('click', () => executeSearch());
     document.getElementById('btn-show-map').addEventListener('click', () => openRouteMapModal());
+    document.getElementById('btn-restroom').addEventListener('click', () => searchRestrooms());
     document.getElementById('map-modal-close').addEventListener('click', () => closeRouteMapModal());
-    document.getElementById('map-modal').addEventListener('click', (e) => { if(e.target === e.currentTarget) closeRouteMapModal(); });
-    
-    document.getElementById('btn-export').addEventListener('click', () => exportCallLogs());
-    document.getElementById('btn-import-open').addEventListener('click', () => document.getElementById('import-file-input').click());
-    document.getElementById('import-file-input').addEventListener('change', (e) => importCallLogs(e));
-    
-    document.getElementById('btn-add-custom').addEventListener('click', () => addCustomHotspotPrompt());
     document.getElementById('btn-save-call').addEventListener('click', () => saveCurrentCallLocation());
     
-    document.getElementById('timer-btn-5m').addEventListener('click', () => setTimerPreset(5));
-    document.getElementById('timer-btn-10m').addEventListener('click', () => setTimerPreset(10));
+    // 백업/복원 기능 연결
+    document.getElementById('btn-export').addEventListener('click', exportCallLogs);
+    document.getElementById('btn-import-open').addEventListener('click', () => document.getElementById('import-file-input').click());
+    document.getElementById('import-file-input').addEventListener('change', importCallLogs);
+    document.getElementById('btn-add-custom').addEventListener('click', addCustomHotspotPrompt);
     
-    const timerBtn = document.getElementById('timer-display-btn');
-    let touchTimer = null;
-    let isLongPress = false;
-    
-    timerBtn.addEventListener('contextmenu', (e) => { e.preventDefault(); handleTimerLongPress(); });
-    timerBtn.addEventListener('touchstart', (e) => {
-      isLongPress = false;
-      touchTimer = setTimeout(() => { isLongPress = true; handleTimerLongPress(); }, 800);
-    }, {passive: true});
-    timerBtn.addEventListener('touchend', () => { if (touchTimer) clearTimeout(touchTimer); });
-    timerBtn.addEventListener('touchcancel', () => { if (touchTimer) clearTimeout(touchTimer); });
-    timerBtn.addEventListener('click', (e) => {
-      if (isLongPress) { e.preventDefault(); isLongPress = false; return; }
-      toggleTimer();
-    });
-
+    // 운행 제어 버튼 연결
     document.getElementById('btn-drive-toggle').addEventListener('click', toggleDriving);
     document.getElementById('btn-break-toggle').addEventListener('click', toggleBreak);
     document.getElementById('btn-board').addEventListener('click', handleBoarding);
     document.getElementById('btn-alight').addEventListener('click', handleAlighting);
+
+    // 타이머 기능
+    document.getElementById('timer-btn-5m').addEventListener('click', () => setTimerPreset(5));
+    document.getElementById('timer-btn-10m').addEventListener('click', () => setTimerPreset(10));
+    const timerBtn = document.getElementById('timer-display-btn');
+    let touchTimer = null; let isLongPress = false;
+    timerBtn.addEventListener('contextmenu', (e) => { e.preventDefault(); handleTimerLongPress(); });
+    timerBtn.addEventListener('touchstart', (e) => { isLongPress = false; touchTimer = setTimeout(() => { isLongPress = true; handleTimerLongPress(); }, 800); }, {passive: true});
+    timerBtn.addEventListener('touchend', () => { if (touchTimer) clearTimeout(touchTimer); });
+    timerBtn.addEventListener('touchcancel', () => { if (touchTimer) clearTimeout(touchTimer); });
+    timerBtn.addEventListener('click', (e) => { if (isLongPress) { e.preventDefault(); isLongPress = false; return; } toggleTimer(); });
 
     executeSearch();
   });
