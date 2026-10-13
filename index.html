@@ -21,7 +21,7 @@
   </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>수다택시 K v7.0</title>
+  <title>수다택시 K v7.1</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -151,11 +151,70 @@
     
     .feedback-text { font-size: 11px; color: #A3A3A3; margin-top: 14px; line-height: 1.4; font-weight: 600; display: flex; align-items: flex-start; gap: 4px; word-break: keep-all; }
 
-    .revenue-box { background: var(--stat-bg); border: 1px solid var(--theme-accent); padding: 12px; border-radius: 8px; margin-bottom: 12px;}
-    .rev-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
-    .rev-label { font-size: 12px; font-weight: 800; color: var(--theme-accent); }
-    .rev-val { font-size: 18px; font-weight: 900; color: var(--main-text); }
-    .rev-sub { font-size: 10px; color: var(--stat-label); font-weight: 600; }
+    /* 오늘 실매출 입력 UI 스타일 (V7.1 반영) */
+    .revenue-box { 
+      background: var(--stat-bg); 
+      border: 1.5px solid var(--theme-accent); 
+      padding: 14px 16px; 
+      border-radius: 12px; 
+      margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(255, 200, 0, 0.05);
+    }
+    
+    .top-row { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 12px; 
+      gap: 6px; 
+      flex-wrap: nowrap;
+    }
+    .label { 
+      font-size: 15px; 
+      font-weight: 900; 
+      color: var(--theme-accent); 
+      white-space: nowrap; 
+      flex-shrink: 0; 
+    }
+    .input-group { 
+      display: flex; 
+      align-items: center; 
+      gap: 6px; 
+      flex: 1; 
+      justify-content: flex-end; 
+      min-width: 0;
+    }
+    .btn-mic {
+      background: #374151; border: none; border-radius: 50%; color: #FFF;
+      width: 32px; height: 32px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 14px; transition: all 0.2s;
+    }
+    .btn-mic:active { background: var(--theme-accent); transform: scale(0.95); }
+    .btn-mic.recording { background: #EF4444; animation: pulse 1s infinite; }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+    
+    .input-rev { 
+      background: #121212; border: 1px solid #4B5563; color: #FFF; font-size: 16px; font-weight: 900; 
+      padding: 6px; border-radius: 6px; width: 100%; max-width: 110px; text-align: right; font-family: monospace; 
+    }
+    .input-rev:focus { outline: none; border-color: var(--theme-accent); }
+    .input-unit { font-size: 14px; font-weight: 900; color: #FFF; flex-shrink: 0; }
+
+    .rev-stats-grid { 
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; 
+    }
+    .rev-stat-item { display: flex; flex-direction: column; gap: 4px; }
+    .rev-stat-title { font-size: 11px; color: var(--stat-label); font-weight: 700; white-space: nowrap; letter-spacing: -0.5px; }
+    .rev-stat-value { font-size: 14px; font-weight: 900; color: #FFF; font-family: monospace; }
+    
+    .rev-bottom-row { 
+      background: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.2); 
+      padding: 10px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; gap: 8px; 
+    }
+    .rev-bottom-label { display: flex; flex-direction: column; gap: 2px; }
+    .rev-bottom-main { font-size: 12px; color: #FFF; font-weight: 800; white-space: nowrap; }
+    .rev-bottom-sub { font-size: 9px; color: var(--stat-label); white-space: nowrap; }
+    .rev-bottom-val { font-size: 14px; font-weight: 900; color: #4ADE80; text-align: right; white-space: nowrap; letter-spacing: -0.5px; }
     
     .chart-wrapper { padding-top: 6px; }
     .chart-container { display: flex; align-items: flex-end; justify-content: space-between; height: 110px; padding: 0 4px; gap: 4px; margin-top: 8px; }
@@ -428,18 +487,38 @@
         </div>
       </div>
 
-      <!-- 예상 누적 매출 -->
+      <!-- 오늘 실매출 입력 UI (V7.1 업데이트) -->
       <div class="revenue-box">
-        <div class="rev-row">
-          <span class="rev-label">💰 오늘 예상 누적 매출</span>
-          <span class="rev-val" id="rev-today-val">0 원</span>
+        <div class="top-row">
+          <div class="label">💰 오늘 실매출</div>
+          <div class="input-group">
+            <button class="btn-mic" id="btn-mic" title="음성 입력">🎤</button>
+            <input type="number" id="input-rev" class="input-rev" value="0" placeholder="0">
+            <span class="input-unit">원</span>
+          </div>
         </div>
-        <div class="progress-track" style="height: 6px; margin-bottom: 6px;">
-          <div class="progress-fill" id="rev-today-fill" style="width: 0%; background: var(--theme-accent);"></div>
+
+        <div class="progress-track" style="margin-bottom: 12px; height: 8px;">
+          <div class="progress-fill" id="progress-fill" style="width: 0%; background: var(--theme-accent);"></div>
         </div>
-        <div class="rev-row" style="margin-bottom: 0;">
-          <span class="rev-sub">목표 300,000원 달성률: <b style="color:#FFF;" id="rev-today-pct">0%</b></span>
-          <span class="rev-sub">남은 목표액: <b id="rev-today-remain">300,000원</b></span>
+
+        <div class="rev-stats-grid">
+          <div class="rev-stat-item">
+            <span class="rev-stat-title">목표 30만원 달성률</span>
+            <span class="rev-stat-value" id="val-pct">0%</span>
+          </div>
+          <div class="rev-stat-item" style="text-align: right;">
+            <span class="rev-stat-title">남은 목표액</span>
+            <span class="rev-stat-value" id="val-remain">300,000 원</span>
+          </div>
+        </div>
+
+        <div class="rev-bottom-row">
+          <div class="rev-bottom-label">
+            <span class="rev-bottom-main">🕒 추가 운행 필요</span>
+            <span class="rev-bottom-sub">(시간당 2.5만 기준)</span>
+          </div>
+          <div class="rev-bottom-val" id="val-time">-</div>
         </div>
       </div>
     </div>
@@ -550,7 +629,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.0"; 
+  const BUILD_VERSION = "v7.1"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -1397,9 +1476,7 @@
           }
         });
       }
-    } catch(err) {
-      console.warn("카카오 실시간 검색 에러, 저장된 내 화장실만 노출합니다.", err);
-    }
+    } catch(err) {}
 
     if (uniqueMap.size > 0) {
       let customList = []; let apiList = [];
@@ -1967,16 +2044,6 @@
       feedbackText.innerText = "공차 비율이 높습니다. 콜이 많은 핵심 상권이나 환승역으로 이동을 권장합니다.";
     }
 
-    const estimatedRev = Math.floor(todayBoard / 60) * 700;
-    const targetRev = 300000;
-    const revPct = Math.min(100, (estimatedRev / targetRev) * 100);
-    const revRemain = Math.max(0, targetRev - estimatedRev);
-
-    document.getElementById('rev-today-val').innerText = `${estimatedRev.toLocaleString()} 원`;
-    document.getElementById('rev-today-fill').style.width = `${revPct}%`;
-    document.getElementById('rev-today-pct').innerText = `${Math.floor(revPct)}%`;
-    document.getElementById('rev-today-remain').innerText = `${revRemain.toLocaleString()}원`;
-
     const records = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
     const now = new Date();
     const workNow = getWorkDate(now);
@@ -2077,6 +2144,85 @@
     });
   }
 
+  // --- V7.1 실매출 입력 로직 추가 ---
+  const inputRev = document.getElementById('input-rev');
+  const fill = document.getElementById('progress-fill');
+  const valPct = document.getElementById('val-pct');
+  const valRemain = document.getElementById('val-remain');
+  const valTime = document.getElementById('val-time');
+  const btnMic = document.getElementById('btn-mic');
+
+  const TARGET = 300000;
+  const HOURLY_RATE = 25000;
+
+  function calculateDailyRevenue() {
+    let current = parseInt(inputRev.value) || 0;
+    let remain = Math.max(0, TARGET - current);
+    let pct = Math.min(100, (current / TARGET) * 100);
+    
+    fill.style.width = pct + '%';
+    valPct.innerText = pct.toFixed(1) + '%';
+    valRemain.innerText = remain.toLocaleString() + ' 원';
+    
+    if(remain === 0) {
+      valTime.innerText = "목표 달성 완료! 🎉";
+      valTime.style.color = "#FFC800";
+    } else {
+      let hrs = remain / HOURLY_RATE;
+      let h = Math.floor(hrs);
+      let m = Math.round((hrs - h) * 60);
+      
+      let tStr = "약 ";
+      if(h > 0) tStr += h + "시간 ";
+      if(m > 0) tStr += m + "분";
+      
+      valTime.innerText = tStr;
+      valTime.style.color = "#4ADE80";
+    }
+
+    // 로컬스토리지에 저장하여 껐다 켜도 유지되게 함
+    localStorage.setItem('sudataxi_daily_rev', current.toString());
+  }
+
+  inputRev.addEventListener('input', calculateDailyRevenue);
+
+  // 음성 인식 로직
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SpeechRecognition) {
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'ko-KR';
+    
+    btnMic.addEventListener('click', () => {
+      btnMic.classList.add('recording');
+      recognition.start();
+    });
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      const numbersOnly = transcript.replace(/[^0-9]/g, '');
+      if (numbersOnly) {
+        inputRev.value = numbersOnly;
+        calculateDailyRevenue();
+        showToast(`🎤 ${parseInt(numbersOnly).toLocaleString()}원 입력 완료`);
+      } else {
+        showToast("숫자를 인식하지 못했습니다.");
+      }
+    };
+
+    recognition.onend = () => btnMic.classList.remove('recording');
+    recognition.onerror = () => btnMic.classList.remove('recording');
+  }
+
+  function initDailyRevenue() {
+    const savedRev = localStorage.getItem('sudataxi_daily_rev');
+    if (savedRev) {
+      inputRev.value = savedRev;
+    }
+    calculateDailyRevenue();
+  }
+
+
+  // --- 월간 시뮬레이터 로직 ---
   function initSimulator() {
     const today = new Date();
     const currentDay = today.getDate();
@@ -2284,6 +2430,7 @@
 
     // Simulator Init & Events
     initSimulator();
+    initDailyRevenue(); // V7.1 실매출 입력 초기화 (저장된 값 불러오기)
     document.getElementById('btn-open-calendar').addEventListener('click', () => document.getElementById('calendar-modal').classList.add('active'));
     document.getElementById('btn-apply-calendar').addEventListener('click', () => document.getElementById('calendar-modal').classList.remove('active'));
     document.getElementById('input-sim-target').addEventListener('input', calculateSimulatorTargets);
