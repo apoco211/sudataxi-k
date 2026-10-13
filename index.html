@@ -232,7 +232,6 @@
   </style>
 </head>
 <body class="mode-1">
-  
   <div class="sticky-top-area">
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 8px;">
       <div class="header" id="app-header-title" style="margin-bottom: 0; flex: 1;">📅 날짜 수신 대기 중...</div>
@@ -426,7 +425,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v6.4.4"; 
+  const BUILD_VERSION = "v6.4.5"; // 업데이트 빌드
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -570,7 +569,6 @@
 
       return `${prefix} (호계동)`;
   }
-
 
   function requestNotificationPermission() {
     if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
@@ -1657,8 +1655,12 @@
     try {
       let custom = JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]');
       let logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+      let hotspots = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
       let needRest = false;
       let needLogs = false;
+      let needHotspots = false;
+
+      // 화장실 마이그레이션
       for (let i=0;i<custom.length;i++) {
         let it = custom[i];
         if (!it.lat || !it.lng) continue;
@@ -1679,6 +1681,8 @@
           }
         }
       }
+
+      // 탑승 기록 마이그레이션
       for (let i=0;i<logs.length;i++) {
         let it = logs[i];
         if (!it.lat || !it.lng) continue;
@@ -1696,9 +1700,38 @@
           }
         }
       }
+
+      // 🌟 [추가됨] 나만의 핫플 마이그레이션 (시간으로 저장된 구 데이터 변환)
+      for (let i=0;i<hotspots.length;i++) {
+        let it = hotspots[i];
+        if (!it.lat || !it.lng) continue;
+        let bad = false;
+        if (it.name.indexOf('시') !== -1 && it.name.indexOf('분') !== -1 && it.name.indexOf('⭐') !== -1) bad = true;
+        if (it.name.indexOf('37.') !== -1) bad = true;
+        if (bad) {
+          needHotspots = true;
+          try {
+            let nn = await getSmartLocationName(it.lat, it.lng, '⭐ 지정 핫플');
+            hotspots[i].name = nn;
+            hotspots[i].address = nn;
+            if (!hotspots[i].savedAt) hotspots[i].savedAt = new Date().toISOString();
+          } catch(e) {
+            hotspots[i].name = '⭐ 지정 핫플 (호계동)';
+            hotspots[i].address = '⭐ 지정 핫플 (호계동)';
+          }
+        }
+      }
+
       if (needRest) { localStorage.setItem('sudataxi_custom_restrooms', JSON.stringify(custom)); }
       if (needLogs) { localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs)); }
-      if (needRest || needLogs) { updateCustomRestroomUI(); updateCallLogStats(); if (typeof calculateAndRender === 'function') calculateAndRender(); }
+      if (needHotspots) { localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(hotspots)); }
+      
+      if (needRest || needLogs || needHotspots) { 
+        updateCustomRestroomUI(); 
+        updateCustomHotspotUI(); 
+        updateCallLogStats(); 
+        if (typeof calculateAndRender === 'function') calculateAndRender(); 
+      }
     } catch(e) {}
   }
 
@@ -1730,16 +1763,28 @@
     updateDrivingUI(); saveDrivingState(); setTab(4);
   }
 
-  function addCustomHotspotPrompt() {
+  // 🌟 [수정됨] 핫플 등록 시 시간이 아닌 스마트 장소명(동 이름)으로 기록하도록 async/await 적용
+  async function addCustomHotspotPrompt() {
     if (!currentPos) { showToast('위치 탐색이 필요합니다.'); return; }
-    const now = new Date();
-    const name = `⭐ 지정 핫플 (${now.getHours()}시 ${String(now.getMinutes()).padStart(2,'0')}분)`;
+    showToast('⭐ 주변 지명 탐색 중...');
+    
+    const smartName = await getSmartLocationName(currentPos.lat, currentPos.lng, '⭐ 지정 핫플');
     let custom = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
-    custom.push({ id: 'custom_' + Date.now(), name: name.trim(), lat: currentPos.lat, lng: currentPos.lng, type: 'subway', isCustom: true, address: name.trim() });
+    custom.push({ 
+      id: 'custom_' + Date.now(), 
+      name: smartName, 
+      lat: currentPos.lat, 
+      lng: currentPos.lng, 
+      type: 'subway', 
+      isCustom: true, 
+      address: smartName,
+      savedAt: new Date().toISOString()
+    });
+    
     localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(custom));
     updateCustomHotspotUI();
     if (activeTab === 1) calculateAndRender();
-    showToast(`📍 ${name}\n등록 완료!`);
+    showToast(`📍 ${smartName}\n등록 완료!`);
   }
 
   function deleteCustomHotspot(id) {
