@@ -1,30 +1,27 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head><style>
-@font-face {
-  font-family: "Optimistic";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Optimistic Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-}
-:where(html) {
-  font-family: "Optimistic", system-ui, sans-serif;
-}
-:where(code, pre, kbd, samp) {
-  font-family: "Optimistic Mono", ui-monospace, monospace;
-}
-</style>
+<head>
+  <style>
+    @font-face {
+      font-family: "Optimistic";
+      font-style: normal;
+      font-weight: 400 600;
+      font-display: swap;
+      src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Optimistic Mono";
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+    }
+    :where(html) { font-family: "Optimistic", system-ui, sans-serif; }
+    :where(code, pre, kbd, samp) { font-family: "Optimistic Mono", ui-monospace, monospace; }
+  </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>수다택시 K</title>
+  <title>수다택시 K v7.0</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -63,6 +60,10 @@
       --btn-idle-bg: #2A2A2A;
       --btn-idle-text: #8A8A8A;
       --btn-idle-border: #3A3A3A;
+      
+      --color-high: #22C55E; 
+      --color-mid: #F59E0B;  
+      --color-low: #EF4444; 
     }
 
     body.mode-1 { --theme-accent: #FFC800; --theme-bg-dark: #2A2210; --theme-border: #3A2E0A; --theme-text-on-accent: #000000; }
@@ -133,19 +134,69 @@
     .backup-btn-group { display: flex; gap: 4px; }
     .backup-btn { height: 32px; background: var(--btn-idle-bg); color: var(--main-text); font-weight: 800; border: 1px solid var(--btn-idle-border); border-radius: 6px; cursor: pointer; font-size: 11px; }
     
-    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
     .stat-box { background: var(--stat-bg); border: 1px solid var(--stat-border); padding: 8px 10px; border-radius: 8px; display: flex; flex-direction: column; gap: 4px; }
-    .stat-label-text { color: var(--stat-label); font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 4px; }
+    .stat-label-text { color: var(--stat-label); font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 4px; }
     .stat-value { font-size: 15px; font-weight: 900; font-family: monospace; letter-spacing: -0.5px; }
-    .stat-sub-val { font-size: 11px; font-weight: 700; color: var(--stat-label); margin-top: -2px; }
     
-    .avg-stat-box { background: var(--stat-bg); border: 1px solid var(--stat-border); padding: 10px; border-radius: 8px; display: flex; flex-direction: column; gap: 6px; }
-    .avg-stat-header { display: flex; align-items: center; justify-content: space-between; width: 100%; border-bottom: 1px dashed var(--stat-border); padding-bottom: 4px; }
-    .avg-stat-title { font-size: 13px; font-weight: 900; color: var(--stat-label); display: flex; align-items: center; gap: 4px; }
-    .avg-stat-total-val { font-size: 15px; font-weight: 900; font-family: monospace; }
-    .avg-stat-details { display: flex; align-items: center; justify-content: space-between; padding-top: 2px; }
-    .avg-stat-sub { font-size: 10px; font-weight: 800; display: flex; align-items: center; gap: 2px; white-space: nowrap; letter-spacing: -0.5px; } 
-    .avg-stat-sub-val { font-family: monospace; font-size: 11px; }
+    .kpi-container { background: rgba(34, 197, 94, 0.05); border: 1px solid rgba(34, 197, 94, 0.2); padding: 12px; border-radius: 8px; margin-bottom: 12px; }
+    .kpi-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 6px; }
+    .kpi-title { font-size: 12px; font-weight: 800; color: var(--main-text); }
+    .kpi-rate { font-size: 20px; font-weight: 900; color: var(--color-high); font-family: monospace; }
+    
+    .progress-track { width: 100%; height: 10px; background: #2A2A2A; border-radius: 5px; overflow: hidden; position: relative; }
+    .progress-fill { height: 100%; border-radius: 5px; transition: width 0.5s ease; }
+    .progress-target-line { position: absolute; left: 50%; top: -2px; bottom: -2px; width: 2px; background: #FFF; z-index: 10; box-shadow: 0 0 4px rgba(0,0,0,0.5); }
+    .progress-target-label { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); font-size: 9px; font-weight: 800; color: #8A8A8A; }
+    
+    .feedback-text { font-size: 11px; color: #A3A3A3; margin-top: 14px; line-height: 1.4; font-weight: 600; display: flex; align-items: flex-start; gap: 4px; word-break: keep-all; }
+
+    .revenue-box { background: var(--stat-bg); border: 1px solid var(--theme-accent); padding: 12px; border-radius: 8px; margin-bottom: 12px;}
+    .rev-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+    .rev-label { font-size: 12px; font-weight: 800; color: var(--theme-accent); }
+    .rev-val { font-size: 18px; font-weight: 900; color: var(--main-text); }
+    .rev-sub { font-size: 10px; color: var(--stat-label); font-weight: 600; }
+    
+    .chart-wrapper { padding-top: 6px; }
+    .chart-container { display: flex; align-items: flex-end; justify-content: space-between; height: 110px; padding: 0 4px; gap: 4px; margin-top: 8px; }
+    .chart-col { display: flex; flex-direction: column; align-items: center; flex: 1; gap: 4px; }
+    .chart-time-text { font-size: 9px; color: #A3A3A3; font-family: monospace; font-weight: 700; margin-bottom: -2px; }
+    .chart-bar-bg { width: 100%; max-width: 30px; height: 80px; background: #2A2A2A; border-radius: 4px; display: flex; align-items: flex-end; overflow: hidden; position: relative; }
+    .chart-bar-fill { width: 100%; border-radius: 4px; transition: height 0.5s ease; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding-top: 4px; }
+    .chart-bar-text { font-size: 9px; font-weight: 900; color: rgba(255,255,255,0.9); text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+    .chart-label { font-size: 10px; font-weight: 700; color: #8A8A8A; white-space: nowrap; }
+
+    .calc-input-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; background: #2A2A2A; padding: 8px 12px; border-radius: 8px; gap: 8px;}
+    .calc-input-group label { font-size: 12px; font-weight: 800; color: #D1D5DB; word-break: keep-all; flex: 1;}
+    .calc-input-wrapper { display: flex; align-items: center; gap: 4px; flex-shrink: 0;}
+    .calc-input { background: #121212; border: 1px solid #4B5563; color: #FFF; font-size: 14px; font-weight: 900; font-family: monospace; padding: 6px; border-radius: 4px; width: 90px; text-align: right; }
+    .calc-input:focus { outline: none; border-color: var(--theme-accent); }
+    
+    .btn-rest-day { width: 100%; padding: 10px; border-radius: 8px; background: #374151; color: #FFF; border: none; font-size: 12px; font-weight: 800; margin-bottom: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 8px;}
+    .btn-rest-day span:first-child { word-break: keep-all; text-align: left; line-height: 1.2; }
+    .btn-rest-day span:last-child { white-space: nowrap; flex-shrink: 0; background: #EF4444; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; }
+    .btn-rest-day:active { background: #4B5563; }
+    
+    .calc-result-box { background: rgba(255, 200, 0, 0.08); border: 1px solid rgba(255, 200, 0, 0.3); border-radius: 8px; padding: 12px; }
+    .calc-result-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px;}
+    .calc-result-label { font-size: 11px; font-weight: 700; color: #9CA3AF; word-break: keep-all; line-height: 1.3; }
+    .calc-result-val { font-size: 15px; font-weight: 900; color: #FFF; font-family: monospace; white-space: nowrap; text-align: right; flex-shrink: 0; }
+    .calc-result-val.highlight { color: var(--theme-accent); font-size: 18px; }
+    .calc-result-val.green { color: #4ADE80; font-size: 13px; }
+
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 16px; }
+    .modal-overlay.active { display: flex; }
+    .modal-content { background: var(--card-bg); width: 100%; max-width: 360px; border-radius: 12px; border: 1px solid var(--stat-border); overflow: hidden; }
+    .modal-header { padding: 16px; border-bottom: 1px solid var(--stat-border); display: flex; justify-content: space-between; align-items: center; }
+    .modal-title { font-size: 16px; font-weight: 900; color: var(--theme-accent); }
+    .calendar-wrapper { padding: 16px; }
+    .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 10px; color: #8A8A8A; font-weight: 800; margin-bottom: 8px; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; border-radius: 6px; background: #2A2A2A; color: #FFF; cursor: pointer; transition: all 0.2s; }
+    .cal-day.past { background: transparent; color: #4B5563; cursor: not-allowed; }
+    .cal-day.rest-day { background: #EF4444; color: #FFF; font-weight: 900; box-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
+    .modal-footer { padding: 12px 16px; border-top: 1px solid var(--stat-border); display: flex; justify-content: flex-end; }
+    .btn-apply { background: var(--theme-accent); color: #000; font-weight: 900; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; }
 
     .text-accent { color: var(--theme-accent); }
     .text-green { color: #4ADE80; }
@@ -232,6 +283,7 @@
   </style>
 </head>
 <body class="mode-1">
+  
   <div class="sticky-top-area">
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 8px;">
       <div class="header" id="app-header-title" style="margin-bottom: 0; flex: 1;">📅 날짜 수신 대기 중...</div>
@@ -242,7 +294,7 @@
       <button class="mode-pill active" id="btn-mode1">⚡ 추천/콜찾기</button>
       <button class="mode-pill" id="btn-mode2">🧠 운행 전략</button>
       <button class="mode-pill" id="btn-mode3">📊 콜 지도</button>
-      <button class="mode-pill" id="btn-mode4">🚘 운행 일지</button>
+      <button class="mode-pill" id="btn-mode4">🚘 대시보드</button>
     </div>
   </div>
 
@@ -342,58 +394,112 @@
       </div>
       <div class="stat-grid">
         <div class="stat-box">
-          <div class="stat-label-text">🚗 Total:</div>
+          <div class="stat-label-text">🚗 총 운행:</div>
           <div id="stat-today-total" class="stat-value text-accent">00:00:00</div>
         </div>
         <div class="stat-box">
-          <div class="stat-label-text">🙋 Board:</div>
-          <div id="stat-today-board" class="stat-value text-green">00:00:00</div>
-          <div id="stat-today-board-pct" class="stat-sub-val text-green">0.0%</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label-text">🈳 Empty:</div>
-          <div id="stat-today-empty" class="stat-value text-orange">00:00:00</div>
-          <div id="stat-today-empty-pct" class="stat-sub-val text-orange">0.0%</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label-text">☕ Break:</div>
+          <div class="stat-label-text">☕ 휴식 (제외):</div>
           <div id="stat-today-break" class="stat-value text-purple">00:00:00</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label-text">🙋 탑승 (수익):</div>
+          <div id="stat-today-board" class="stat-value text-green">00:00:00</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label-text">🈳 빈차 (공차):</div>
+          <div id="stat-today-empty" class="stat-value text-orange">00:00:00</div>
+        </div>
+      </div>
+
+      <!-- 생산성 지표 (KPI) -->
+      <div class="kpi-container">
+        <div class="kpi-header">
+          <span class="kpi-title">📈 생산성 지표 (탑승률)</span>
+          <span class="kpi-rate" id="kpi-today-rate">0.0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-target-line"></div>
+          <div class="progress-target-label">목표 50%</div>
+          <div class="progress-fill" id="kpi-today-fill" style="width: 0%; background: var(--color-low);"></div>
+        </div>
+        <div class="feedback-text">
+          <span style="font-size: 14px;" id="kpi-feedback-icon">⚠️</span> 
+          <span id="kpi-feedback-text">운행 데이터가 부족합니다.</span>
+        </div>
+      </div>
+
+      <!-- 예상 누적 매출 -->
+      <div class="revenue-box">
+        <div class="rev-row">
+          <span class="rev-label">💰 오늘 예상 누적 매출</span>
+          <span class="rev-val" id="rev-today-val">0 원</span>
+        </div>
+        <div class="progress-track" style="height: 6px; margin-bottom: 6px;">
+          <div class="progress-fill" id="rev-today-fill" style="width: 0%; background: var(--theme-accent);"></div>
+        </div>
+        <div class="rev-row" style="margin-bottom: 0;">
+          <span class="rev-sub">목표 300,000원 달성률: <b style="color:#FFF;" id="rev-today-pct">0%</b></span>
+          <span class="rev-sub">남은 목표액: <b id="rev-today-remain">300,000원</b></span>
         </div>
       </div>
     </div>
     
+    <!-- 주간/월간 차트 -->
     <div class="backup-section">
-      <div class="backup-title" style="margin-bottom: 10px;">📊 평균 운행 통계</div>
-      <div style="display: flex; flex-direction: column; gap: 8px;">
-        <div class="avg-stat-box">
-          <div class="avg-stat-header">
-            <span class="avg-stat-title">📅 Daily Avg :</span>
-            <span id="stat-avg-daily-total" class="avg-stat-total-val text-accent">00:00:00</span>
-          </div>
-          <div class="avg-stat-details">
-            <span class="avg-stat-sub">🙋 <span id="stat-avg-daily-board" class="avg-stat-sub-val text-green">00:00:00</span> (<span id="stat-avg-daily-board-pct">0.0%</span>)</span>
-            <span class="avg-stat-sub">🈳 <span id="stat-avg-daily-empty" class="avg-stat-sub-val text-orange">00:00:00</span> (<span id="stat-avg-daily-empty-pct">0.0%</span>)</span>
-          </div>
+      <div class="backup-title" style="margin-bottom: 4px;">📊 주간 퍼포먼스 (이번 주)</div>
+      <div style="font-size: 10px; color: var(--stat-label); text-align: center;">상단: 운행시간 / 막대: 예상매출 / 숫자: 탑승률(KPI)</div>
+      <div class="chart-wrapper">
+        <div class="chart-container" id="weekly-chart"></div>
+      </div>
+    </div>
+
+    <div class="backup-section">
+      <div class="backup-title" style="margin-bottom: 4px;">📅 월간 퍼포먼스 (이번 달)</div>
+      <div style="font-size: 10px; color: var(--stat-label); text-align: center;">주차별 평균 탑승률 및 매출 추이</div>
+      <div class="chart-wrapper">
+        <div class="chart-container" id="monthly-chart" style="padding: 0 20px;"></div>
+      </div>
+    </div>
+
+    <!-- 월간 목표 시뮬레이터 (계산기) -->
+    <div class="backup-section" style="border-color: rgba(255, 200, 0, 0.4);">
+      <div class="backup-title" style="margin-bottom: 12px;">🎯 월간 목표 달성 시뮬레이터</div>
+      
+      <div class="calc-input-group">
+        <label>이번 달 총 목표 매출</label>
+        <div class="calc-input-wrapper">
+          <input type="number" id="input-sim-target" class="calc-input" value="4000000" step="100000"> <span style="font-size: 12px; color:#A3A3A3;">원</span>
         </div>
-        <div class="avg-stat-box">
-          <div class="avg-stat-header">
-            <span class="avg-stat-title">🗓️ Weekly Avg :</span>
-            <span id="stat-avg-weekly-total" class="avg-stat-total-val text-accent">00:00:00</span>
-          </div>
-          <div class="avg-stat-details">
-            <span class="avg-stat-sub">🙋 <span id="stat-avg-weekly-board" class="avg-stat-sub-val text-green">00:00:00</span> (<span id="stat-avg-weekly-board-pct">0.0%</span>)</span>
-            <span class="avg-stat-sub">🈳 <span id="stat-avg-weekly-empty" class="avg-stat-sub-val text-orange">00:00:00</span> (<span id="stat-avg-weekly-empty-pct">0.0%</span>)</span>
-          </div>
+      </div>
+      <div class="calc-input-group">
+        <label>현재까지 실 매출</label>
+        <div class="calc-input-wrapper">
+          <input type="number" id="input-sim-current" class="calc-input" value="0" step="10000"> <span style="font-size: 12px; color:#A3A3A3;">원</span>
         </div>
-        <div class="avg-stat-box">
-          <div class="avg-stat-header">
-            <span class="avg-stat-title">📆 Monthly Avg :</span>
-            <span id="stat-avg-monthly-total" class="avg-stat-total-val text-accent">00:00:00</span>
-          </div>
-          <div class="avg-stat-details">
-            <span class="avg-stat-sub">🙋 <span id="stat-avg-monthly-board" class="avg-stat-sub-val text-green">00:00:00</span> (<span id="stat-avg-monthly-board-pct">0.0%</span>)</span>
-            <span class="avg-stat-sub">🈳 <span id="stat-avg-monthly-empty" class="avg-stat-sub-val text-orange">00:00:00</span> (<span id="stat-avg-monthly-empty-pct">0.0%</span>)</span>
-          </div>
+      </div>
+
+      <button class="btn-rest-day" id="btn-open-calendar">
+        <span>🗓️ 남은 휴무일 (말일까지)</span>
+        <span id="rest-day-count-badge">0일 선택됨</span>
+      </button>
+
+      <div class="calc-result-box">
+        <div class="calc-result-row">
+          <span class="calc-result-label">남은 실제 근무일</span>
+          <span class="calc-result-val"><span id="res-sim-days">0</span> 일</span>
+        </div>
+        <div class="calc-result-row">
+          <span class="calc-result-label">남은 목표 금액</span>
+          <span class="calc-result-val"><span id="res-sim-remain-money">0</span> 원</span>
+        </div>
+        <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 10px 0;"></div>
+        <div class="calc-result-row">
+          <span class="calc-result-label" style="color: #FFF;">📌 일일 목표 매출</span>
+          <span class="calc-result-val highlight"><span id="res-sim-daily-target">0</span> 원</span>
+        </div>
+        <div class="calc-result-row" style="margin-bottom: 0;">
+          <span class="calc-result-label" style="font-size: 10px;">🕒 필요 운행 시간 (시간당 2.5만)</span>
+          <span class="calc-result-val green"><span id="res-sim-daily-hours">-</span></span>
         </div>
       </div>
     </div>
@@ -422,10 +528,29 @@
       <div id="route-map"></div>
     </div>
   </div>
+
+  <!-- 휴무일 캘린더 모달 -->
+  <div class="modal-overlay" id="calendar-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-title">이번 달 휴무일 체크</span>
+        <button class="btn-apply" id="btn-apply-calendar" style="font-size:12px; padding: 6px 12px;">적용 및 닫기</button>
+      </div>
+      <div class="calendar-wrapper">
+        <div style="font-size: 11px; color: #A3A3A3; margin-bottom: 12px; text-align: center;">오늘 이후 쉴 날짜를 모두 터치하세요.</div>
+        <div class="calendar-weekdays">
+          <span style="color:#EF4444;">일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span style="color:#3B82F6;">토</span>
+        </div>
+        <div class="calendar-grid" id="calendar-grid">
+          <!-- JS로 생성됨 -->
+        </div>
+      </div>
+    </div>
+  </div>
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v6.4.5"; // 업데이트 빌드
+  const BUILD_VERSION = "v7.0"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -442,7 +567,7 @@
   let timerInterval = null;
   let isTimerRunning = false;
   let isTodayHoliday = false;
-  let isCallMapFilterActive = false; // false: 전체보기, true: 현재시간대만 보기
+  let isCallMapFilterActive = false;
   
   let currentThemeMode = localStorage.getItem('sudataxi_theme_mode') || 'night';
   
@@ -462,7 +587,6 @@
       if (btn) btn.innerText = '☀️ 주간';
     }
   }
-  
   function toggleTheme() { applyThemeMode(currentThemeMode === 'day' ? 'night' : 'day'); }
 
   function initKakaoSdk() {
@@ -494,12 +618,9 @@
   async function getSmartLocationName(lat, lng, prefix) {
       const activeMasterHotspots = getMasterHotspotsFromStorage();
       const customHotspots = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
-      let closestHp = null;
-      let minDist = 0.4;
-      let secondClosestHp = null;
-      let secondMinDist = 1.5;
-      let absoluteClosestHp = null;
-      let absoluteMinDist = Infinity;
+      let closestHp = null; let minDist = 0.4;
+      let secondClosestHp = null; let secondMinDist = 1.5;
+      let absoluteClosestHp = null; let absoluteMinDist = Infinity;
       
       const searchPool = [...activeMasterHotspots, ...customHotspots];
       searchPool.forEach(hp => {
@@ -531,21 +652,15 @@
                               let regionB = result.find(r => r.region_type === 'B');
                               let dong = (regionH && regionH.region_3depth_name) || (regionB && regionB.region_3depth_name) || (result[0] && result[0].region_3depth_name) || result[0].region_2depth_name;
                               resolve(dong || null);
-                          } else {
-                              resolve(null);
-                          }
+                          } else { resolve(null); }
                       }
                   });
               } catch(e) { fallback(); }
-          } else {
-              fallback();
-          }
+          } else { fallback(); }
         });
       } catch(e) { kakaoDong = null; }
 
-      if (kakaoDong) {
-        return `${prefix} (${kakaoDong})`;
-      }
+      if (kakaoDong) return `${prefix} (${kakaoDong})`;
 
       if (secondClosestHp) {
           if (secondClosestHp.address && secondClosestHp.address.includes('동')) {
@@ -1192,7 +1307,6 @@
       let found = clusters.find(c => getStraightDistanceKm(c.lat, c.lng, logLat, logLng) <= 0.25);
       if (found) { found.clusterCount++; if(isTimeMatch) found.isTimeMatch = true; } 
       else {
-        // 이전에 저장된 스마트 네이밍/지명이 있으면 그대로 활용
         let dispName = log.region ? `📍 탑승기록 (${log.region})` : `📍 탑승기록 (${logLat.toFixed(3)})`;
         clusters.push({ id: 'log_'+Math.random(), name: dispName, lat: logLat, lng: logLng, type: 'nightlife', isUserCallLogCandidate: true, clusterCount: 1, isTimeMatch, originalRegion: log.region });
       }
@@ -1237,7 +1351,6 @@
 
     let uniqueMap = new Map();
 
-    // 1. 내 화장실 먼저 로드 (통신 실패해도 무조건 노출 보장)
     let customRestrooms = JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]');
     customRestrooms.forEach(p => {
        const dist = getStraightDistanceKm(currentPos.lat, currentPos.lng, p.lat, p.lng);
@@ -1246,7 +1359,6 @@
        }
     });
 
-    // 2. 카카오 지도 API 검색 (3초 타임아웃 레이스)
     try {
       if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
         const ps = new kakao.maps.services.Places();
@@ -1265,7 +1377,6 @@
           } catch(e) { if (!isDone) { isDone = true; clearTimeout(tId); resolve([]); } }
         });
 
-        // 비동기 통신과 3초 타임아웃 방어벽
         const apiPromise = Promise.all([
           searchPlace('공중화장실'), searchPlace('개방화장실'),
           searchPlace('OL7', true), searchPlace('SW8', true)
@@ -1290,7 +1401,6 @@
       console.warn("카카오 실시간 검색 에러, 저장된 내 화장실만 노출합니다.", err);
     }
 
-    // 3. 수집된 결과 렌더링
     if (uniqueMap.size > 0) {
       let customList = []; let apiList = [];
       Array.from(uniqueMap.values()).forEach(item => {
@@ -1455,7 +1565,6 @@
     }
     selectedCandidates.sort((a, b) => a.dist - b.dist);
 
-    // 과거 탑승기록 중 이름이 좌표뿐인 옛날 기록들에 스마트 네이밍 적용 (렌더링 시 보정)
     for (let item of selectedCandidates) {
       if (item.isUserCallLogCandidate && (!item.originalRegion || item.originalRegion.indexOf('37.')===0 || (!item.name.includes('동)') && !item.name.includes('인근)') && !item.name.includes('역')))) {
          let smartName = await getSmartLocationName(item.lat, item.lng, '📍 탑승기록');
@@ -1556,10 +1665,8 @@
     
     callMapViewLeaflet.eachLayer(l => { if (l instanceof L.Marker) callMapViewLeaflet.removeLayer(l); });
     
-    // 현재 위치
     L.marker([centerPos.lat, centerPos.lng], { icon: L.divIcon({ html: '<div class="custom-map-marker current">📍</div>', className: '', iconSize: [24, 24] }), zIndexOffset: 1000 }).addTo(callMapViewLeaflet);
 
-    // 콜 마커들 렌더링 (±1시간 체크 및 필터링)
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     const nowHour = new Date().getHours();
 
@@ -1573,9 +1680,9 @@
        if (hourDiff > 12) hourDiff = 24 - hourDiff;
        const isTimeMatch = hourDiff <= 1;
 
-       if (isCallMapFilterActive && !isTimeMatch) return; // 필터 활성화시 제외
+       if (isCallMapFilterActive && !isTimeMatch) return;
 
-       const color = isTimeMatch ? '#22C55E' : '#64748B'; // 초록색(현재) 또는 회색(기타)
+       const color = isTimeMatch ? '#22C55E' : '#64748B';
        const iconHtml = `<div style="width:14px; height:14px; background:${color}; border:2px solid #FFF; border-radius:50%; box-shadow:0 0 4px rgba(0,0,0,0.5);"></div>`;
        
        const timeStr = logDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
@@ -1629,119 +1736,68 @@
   function closeRouteMapModal() { document.getElementById('map-modal').classList.remove('active'); }
   function cleanQuery(str) { return (str||'').replace(/먹자골목|중심상가|상업지구|환승거점|사거리|로데오거리|로데오|환승센터|포차|맛고을|업무지구|메디컬타운/g, '').trim(); }
 
-  async function saveCurrentRestroomLocation() {
-    if (!currentPos) { showToast('위치 탐색이 필요합니다.'); return; }
-    
-    let custom = JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]');
-    let isDuplicate = custom.some(p => getStraightDistanceKm(currentPos.lat, currentPos.lng, p.lat, p.lng) <= 0.2);
-    
-    if (isDuplicate) {
-        showToast('⚠️ 확인: 이미 200m 이내에 등록된 화장실이 있습니다.');
-        return;
-    }
-
-    const smartName = await getSmartLocationName(currentPos.lat, currentPos.lng, '🚻 화장실');
-    const finalName = smartName;
-    let regionShort = finalName.replace('🚻 화장실 (', '').replace(')', '').trim();
-    
-    custom.push({ id: 'my_restroom_' + Date.now(), name: finalName, lat: currentPos.lat, lng: currentPos.lng, region: regionShort, savedAt: new Date().toISOString() });
-    localStorage.setItem('sudataxi_custom_restrooms', JSON.stringify(custom));
-    
-    updateCustomRestroomUI();
-    showToast(`${finalName}\n저장 완료! (검색 시 우선 노출)`);
-  }
-
-  async function migrateCustomRestroomsIfNeeded() {
+  async function migrateOldDataIfNeeded() {
     try {
-      let custom = JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]');
+      let customRestrooms = JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]');
       let logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
-      let hotspots = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
-      let needRest = false;
-      let needLogs = false;
-      let needHotspots = false;
+      let customHotspots = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
+      
+      let needSave = false;
 
-      // 화장실 마이그레이션
-      for (let i=0;i<custom.length;i++) {
-        let it = custom[i];
+      for (let i=0;i<customRestrooms.length;i++) {
+        let it = customRestrooms[i];
         if (!it.lat || !it.lng) continue;
-        let bad = false;
-        if (it.name.indexOf('37.') !== -1) bad = true;
-        if (!it.region || it.region.indexOf('37.') === 0) bad = true;
-        if (it.name.indexOf('시') !== -1 && it.name.indexOf('분') !== -1 && it.name.length < 25) bad = true;
+        let bad = (!it.region || it.region.indexOf('37.') === 0 || (it.name.indexOf('시') !== -1 && it.name.indexOf('분') !== -1 && it.name.length < 25));
         if (bad) {
-          needRest = true;
+          needSave = true;
           try {
             let nn = await getSmartLocationName(it.lat, it.lng, '🚻 화장실');
-            custom[i].name = nn;
-            custom[i].region = nn.replace('🚻 화장실 (','').replace(')','').trim();
-            if (!custom[i].savedAt) custom[i].savedAt = new Date().toISOString();
-          } catch(e) {
-            custom[i].name = '🚻 화장실 (호계동)';
-            custom[i].region = '호계동';
-          }
+            customRestrooms[i].name = nn;
+            customRestrooms[i].region = nn.replace('🚻 화장실 (','').replace(')','').trim();
+          } catch(e) { customRestrooms[i].name = '🚻 화장실 (호계동)'; }
         }
       }
 
-      // 탑승 기록 마이그레이션
       for (let i=0;i<logs.length;i++) {
         let it = logs[i];
         if (!it.lat || !it.lng) continue;
-        let bad = false;
-        if (!it.region) bad = true;
-        if (it.region && it.region.indexOf('37.') === 0) bad = true;
-        if (it.region && it.region.indexOf('시') !== -1 && it.region.indexOf('분') !== -1) bad = true;
+        let bad = (!it.region || it.region.indexOf('37.') === 0 || (it.region.indexOf('시') !== -1 && it.region.indexOf('분') !== -1));
         if (bad) {
-          needLogs = true;
+          needSave = true;
           try {
             let nn = await getSmartLocationName(it.lat, it.lng, '📍 탑승기록');
             logs[i].region = nn.replace('📍 탑승기록 (','').replace(')','').trim();
-          } catch(e) {
-            logs[i].region = '호계동';
-          }
+          } catch(e) { logs[i].region = '호계동'; }
         }
       }
 
-      // 🌟 [추가됨] 나만의 핫플 마이그레이션 (시간으로 저장된 구 데이터 변환)
-      for (let i=0;i<hotspots.length;i++) {
-        let it = hotspots[i];
+      for (let i=0;i<customHotspots.length;i++) {
+        let it = customHotspots[i];
         if (!it.lat || !it.lng) continue;
-        let bad = false;
-        if (it.name.indexOf('시') !== -1 && it.name.indexOf('분') !== -1 && it.name.indexOf('⭐') !== -1) bad = true;
-        if (it.name.indexOf('37.') !== -1) bad = true;
+        let bad = (it.name.indexOf('시') !== -1 && it.name.indexOf('분') !== -1 && it.name.indexOf('⭐') !== -1);
         if (bad) {
-          needHotspots = true;
+          needSave = true;
           try {
             let nn = await getSmartLocationName(it.lat, it.lng, '⭐ 지정 핫플');
-            hotspots[i].name = nn;
-            hotspots[i].address = nn;
-            if (!hotspots[i].savedAt) hotspots[i].savedAt = new Date().toISOString();
-          } catch(e) {
-            hotspots[i].name = '⭐ 지정 핫플 (호계동)';
-            hotspots[i].address = '⭐ 지정 핫플 (호계동)';
-          }
+            customHotspots[i].name = nn;
+            customHotspots[i].address = nn;
+          } catch(e) { customHotspots[i].name = '⭐ 지정 핫플 (호계동)'; }
         }
       }
 
-      if (needRest) { localStorage.setItem('sudataxi_custom_restrooms', JSON.stringify(custom)); }
-      if (needLogs) { localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs)); }
-      if (needHotspots) { localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(hotspots)); }
-      
-      if (needRest || needLogs || needHotspots) { 
-        updateCustomRestroomUI(); 
-        updateCustomHotspotUI(); 
-        updateCallLogStats(); 
-        if (typeof calculateAndRender === 'function') calculateAndRender(); 
+      if (needSave) {
+        localStorage.setItem('sudataxi_custom_restrooms', JSON.stringify(customRestrooms));
+        localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
+        localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(customHotspots));
+        updateCustomRestroomUI(); updateCallLogStats(); updateCustomHotspotUI();
       }
     } catch(e) {}
   }
 
-
   async function saveCurrentCallLocation() {
     if (!currentPos) { showToast('위치 탐색이 필요합니다.'); return; }
     
-    // 스마트 네이밍 호출 (400m 인근 핫플 우선 -> 동 이름)
     let smartName = await getSmartLocationName(currentPos.lat, currentPos.lng, '📍 탑승기록');
-    // "📍 탑승기록 (평촌역 인근)" -> "평촌역 인근" 만 추출해서 지역 태그로 저장해둠
     let regionShort = smartName.replace('📍 탑승기록 (', '').replace(')', '').trim();
 
     let logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
@@ -1763,21 +1819,39 @@
     updateDrivingUI(); saveDrivingState(); setTab(4);
   }
 
-  // 🌟 [수정됨] 핫플 등록 시 시간이 아닌 스마트 장소명(동 이름)으로 기록하도록 async/await 적용
+  async function saveCurrentRestroomLocation() {
+    if (!currentPos) { showToast('위치 탐색이 필요합니다.'); return; }
+    
+    let custom = JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]');
+    let isDuplicate = custom.some(p => getStraightDistanceKm(currentPos.lat, currentPos.lng, p.lat, p.lng) <= 0.2);
+    
+    if (isDuplicate) { showToast('⚠️ 확인: 이미 200m 이내에 등록된 화장실이 있습니다.'); return; }
+
+    const smartName = await getSmartLocationName(currentPos.lat, currentPos.lng, '🚻 화장실');
+    let regionShort = smartName.replace('🚻 화장실 (', '').replace(')', '').trim();
+    
+    custom.push({ id: 'my_restroom_' + Date.now(), name: smartName, lat: currentPos.lat, lng: currentPos.lng, region: regionShort, savedAt: new Date().toISOString() });
+    localStorage.setItem('sudataxi_custom_restrooms', JSON.stringify(custom));
+    
+    updateCustomRestroomUI();
+    showToast(`${smartName}\n저장 완료!`);
+  }
+
   async function addCustomHotspotPrompt() {
     if (!currentPos) { showToast('위치 탐색이 필요합니다.'); return; }
     showToast('⭐ 주변 지명 탐색 중...');
     
     const smartName = await getSmartLocationName(currentPos.lat, currentPos.lng, '⭐ 지정 핫플');
     let custom = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
+    
     custom.push({ 
       id: 'custom_' + Date.now(), 
-      name: smartName, 
+      name: smartName.trim(), 
       lat: currentPos.lat, 
       lng: currentPos.lng, 
       type: 'subway', 
       isCustom: true, 
-      address: smartName,
+      address: smartName.trim(),
       savedAt: new Date().toISOString()
     });
     
@@ -1851,79 +1925,238 @@
     document.querySelectorAll('.delete-log-item-btn').forEach(btn => btn.addEventListener('click', (e) => deleteCallLog(e.currentTarget.dataset.id, e.currentTarget.dataset.ts)));
   }
 
+  function getBarColor(rate) {
+    if (rate >= 50) return '#22C55E';
+    if (rate >= 40) return '#F59E0B';
+    return '#EF4444';
+  }
+
   function renderDrivingLogStats() {
     const today = getTodayDrivingData();
-    const todayTotal = today.totalDrive || 0; const todayBoard = today.passengerBoard || 0; const todayEmpty = today.emptyCar || 0;
+    const todayTotal = today.totalDrive || 0; 
+    const todayBoard = today.passengerBoard || 0; 
+    const todayEmpty = today.emptyCar || 0;
+    
     document.getElementById('stat-today-total').innerText = formatHHMMSS(todayTotal);
     document.getElementById('stat-today-board').innerText = formatHHMMSS(todayBoard);
     document.getElementById('stat-today-empty').innerText = formatHHMMSS(todayEmpty);
     document.getElementById('stat-today-break').innerText = formatHHMMSS(today.breakTime || 0);
 
-    let todayBoardPct = 0; let todayEmptyPct = 0;
-    if (todayTotal > 0) { todayBoardPct = ((todayBoard / todayTotal) * 100).toFixed(1); todayEmptyPct = ((todayEmpty / todayTotal) * 100).toFixed(1); }
-    document.getElementById('stat-today-board-pct').innerText = `${todayBoardPct}%`;
-    document.getElementById('stat-today-empty-pct').innerText = `${todayEmptyPct}%`;
+    let todayBoardPct = 0;
+    if (todayTotal > 0) { todayBoardPct = ((todayBoard / todayTotal) * 100); }
     
+    document.getElementById('kpi-today-rate').innerText = `${todayBoardPct.toFixed(1)}%`;
+    document.getElementById('kpi-today-rate').style.color = getBarColor(todayBoardPct);
+    document.getElementById('kpi-today-fill').style.width = `${Math.min(todayBoardPct, 100)}%`;
+    document.getElementById('kpi-today-fill').style.background = getBarColor(todayBoardPct);
+
+    const feedbackIcon = document.getElementById('kpi-feedback-icon');
+    const feedbackText = document.getElementById('kpi-feedback-text');
+    
+    if (todayTotal < 1800) {
+      feedbackIcon.innerText = "ℹ️";
+      feedbackText.innerText = "아직 운행 데이터가 충분하지 않습니다.";
+    } else if (todayBoardPct >= 50) {
+      feedbackIcon.innerText = "🔥";
+      feedbackText.innerText = "고효율 운행 중입니다! 이 페이스라면 일찍 퇴근할 수 있습니다.";
+    } else if (todayBoardPct >= 40) {
+      feedbackIcon.innerText = "⚡";
+      feedbackText.innerText = "무난한 운행입니다. 상권과 주거지 위주로 조금 더 집중해 보세요.";
+    } else {
+      feedbackIcon.innerText = "⚠️";
+      feedbackText.innerText = "공차 비율이 높습니다. 콜이 많은 핵심 상권이나 환승역으로 이동을 권장합니다.";
+    }
+
+    const estimatedRev = Math.floor(todayBoard / 60) * 700;
+    const targetRev = 300000;
+    const revPct = Math.min(100, (estimatedRev / targetRev) * 100);
+    const revRemain = Math.max(0, targetRev - estimatedRev);
+
+    document.getElementById('rev-today-val').innerText = `${estimatedRev.toLocaleString()} 원`;
+    document.getElementById('rev-today-fill').style.width = `${revPct}%`;
+    document.getElementById('rev-today-pct').innerText = `${Math.floor(revPct)}%`;
+    document.getElementById('rev-today-remain').innerText = `${revRemain.toLocaleString()}원`;
+
     const records = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
-    const keys = Object.keys(records).sort();
-    if (keys.length === 0) return;
-    
     const now = new Date();
     const workNow = getWorkDate(now);
-    
-    const monthStart = new Date(workNow.getFullYear(), workNow.getMonth(), 1);
-    monthStart.setHours(0,0,0,0);
     
     const dayOfWeek = workNow.getDay();
     const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; 
     const weekStart = new Date(workNow.getFullYear(), workNow.getMonth(), workNow.getDate() - diffToMonday);
     weekStart.setHours(0,0,0,0);
-    
-    let dailySum = 0, dailyBoard = 0, dailyEmpty = 0, dailyCount = 0;
-    let weeklySum = 0, weeklyBoard = 0, weeklyEmpty = 0, weeklyCount = 0;
-    let monthlySum = 0, monthlyBoard = 0, monthlyEmpty = 0, monthlyCount = 0;
-    
-    keys.forEach(k => {
+
+    const monthStart = new Date(workNow.getFullYear(), workNow.getMonth(), 1);
+    monthStart.setHours(0,0,0,0);
+
+    let weeklyData = [
+      { label: '월', rev: 0, rate: 0, total: 0, count:0 }, { label: '화', rev: 0, rate: 0, total: 0, count:0 },
+      { label: '수', rev: 0, rate: 0, total: 0, count:0 }, { label: '목', rev: 0, rate: 0, total: 0, count:0 },
+      { label: '금', rev: 0, rate: 0, total: 0, count:0 }, { label: '토', rev: 0, rate: 0, total: 0, count:0 },
+      { label: '일', rev: 0, rate: 0, total: 0, count:0 }
+    ];
+
+    let monthlyData = [
+      { label: '1주차', rev: 0, rate: 0, total: 0, count:0 }, { label: '2주차', rev: 0, rate: 0, total: 0, count:0 },
+      { label: '3주차', rev: 0, rate: 0, total: 0, count:0 }, { label: '4주차', rev: 0, rate: 0, total: 0, count:0 },
+      { label: '5주차', rev: 0, rate: 0, total: 0, count:0 }
+    ];
+
+    Object.keys(records).forEach(k => {
       const rec = records[k];
       const driveSec = rec.totalDrive || 0; 
       if (driveSec <= 0) return; 
 
       const boardSec = rec.passengerBoard || 0; 
-      const emptySec = rec.emptyCar || 0;
-      
+      const estRev = Math.floor(boardSec / 60) * 700;
+      const rate = (boardSec / driveSec) * 100;
+
       const dateParts = k.split('-'); 
       const recDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
-      
-      dailySum += driveSec; dailyBoard += boardSec; dailyEmpty += emptySec; dailyCount++;
-      
-      if (recDate >= weekStart) { 
-        weeklySum += driveSec; weeklyBoard += boardSec; weeklyEmpty += emptySec; weeklyCount++; 
+
+      if (recDate >= weekStart) {
+        let wIdx = recDate.getDay() === 0 ? 6 : recDate.getDay() - 1;
+        weeklyData[wIdx].rev += estRev;
+        weeklyData[wIdx].total += driveSec;
+        weeklyData[wIdx].rate += rate;
+        weeklyData[wIdx].count++;
       }
-      if (recDate >= monthStart) { 
-        monthlySum += driveSec; monthlyBoard += boardSec; monthlyEmpty += emptySec; monthlyCount++; 
+
+      if (recDate >= monthStart && recDate.getMonth() === workNow.getMonth()) {
+        let weekNum = Math.floor((recDate.getDate() - 1) / 7);
+        if (weekNum > 4) weekNum = 4;
+        monthlyData[weekNum].rev += estRev;
+        monthlyData[weekNum].total += driveSec;
+        monthlyData[weekNum].rate += rate;
+        monthlyData[weekNum].count++;
       }
     });
 
-    const avgDailyTotal = Math.round(dailySum / Math.max(1, dailyCount)); const avgDailyBoard = Math.round(dailyBoard / Math.max(1, dailyCount)); const avgDailyEmpty = Math.round(dailyEmpty / Math.max(1, dailyCount));
-    const avgWeeklyTotal = Math.round(weeklySum / Math.max(1, weeklyCount)); const avgWeeklyBoard = Math.round(weeklyBoard / Math.max(1, Math.max(1, weeklyCount))); const avgWeeklyEmpty = Math.round(weeklyEmpty / Math.max(1, weeklyCount));
-    const avgMonthlyTotal = Math.round(monthlySum / Math.max(1, monthlyCount)); const avgMonthlyBoard = Math.round(monthlyBoard / Math.max(1, monthlyCount)); const avgMonthlyEmpty = Math.round(monthlyEmpty / Math.max(1, monthlyCount));
-    
-    document.getElementById('stat-avg-daily-total').innerText = formatHHMMSS(avgDailyTotal);
-    document.getElementById('stat-avg-weekly-total').innerText = formatHHMMSS(avgWeeklyTotal);
-    document.getElementById('stat-avg-monthly-total').innerText = formatHHMMSS(avgMonthlyTotal);
-    document.getElementById('stat-avg-daily-board').innerText = formatHHMMSS(avgDailyBoard);
-    document.getElementById('stat-avg-weekly-board').innerText = formatHHMMSS(avgWeeklyBoard);
-    document.getElementById('stat-avg-monthly-board').innerText = formatHHMMSS(avgMonthlyBoard);
-    document.getElementById('stat-avg-daily-empty').innerText = formatHHMMSS(avgDailyEmpty);
-    document.getElementById('stat-avg-weekly-empty').innerText = formatHHMMSS(avgWeeklyEmpty);
-    document.getElementById('stat-avg-monthly-empty').innerText = formatHHMMSS(avgMonthlyEmpty);
+    const weeklyChart = document.getElementById('weekly-chart');
+    weeklyChart.innerHTML = '';
+    weeklyData.forEach(d => {
+      let finalRate = d.count > 0 ? Math.round(d.rate / d.count) : 0;
+      let heightPct = Math.min((d.rev / 400000) * 100, 100); 
+      let color = d.rev > 0 ? getBarColor(finalRate) : '#2A2A2A';
+      let text = d.rev > 0 ? `${finalRate}%` : '';
+      let timeStr = d.total > 0 ? `${Math.floor(d.total/3600)}h` : '-';
 
-    document.getElementById('stat-avg-daily-board-pct').innerText = `${avgDailyTotal > 0 ? ((avgDailyBoard / avgDailyTotal) * 100).toFixed(1) : 0.0}%`;
-    document.getElementById('stat-avg-daily-empty-pct').innerText = `${avgDailyTotal > 0 ? ((avgDailyEmpty / avgDailyTotal) * 100).toFixed(1) : 0.0}%`;
-    document.getElementById('stat-avg-weekly-board-pct').innerText = `${avgWeeklyTotal > 0 ? ((avgWeeklyBoard / avgWeeklyTotal) * 100).toFixed(1) : 0.0}%`;
-    document.getElementById('stat-avg-weekly-empty-pct').innerText = `${avgWeeklyTotal > 0 ? ((avgWeeklyEmpty / avgWeeklyTotal) * 100).toFixed(1) : 0.0}%`;
-    document.getElementById('stat-avg-monthly-board-pct').innerText = `${avgMonthlyTotal > 0 ? ((avgMonthlyBoard / avgMonthlyTotal) * 100).toFixed(1) : 0.0}%`;
-    document.getElementById('stat-avg-monthly-empty-pct').innerText = `${avgMonthlyTotal > 0 ? ((avgMonthlyEmpty / avgMonthlyTotal) * 100).toFixed(1) : 0.0}%`;
+      weeklyChart.innerHTML += `
+        <div class="chart-col">
+          <div class="chart-time-text">${timeStr}</div>
+          <div class="chart-bar-bg">
+            <div class="chart-bar-fill" style="height: ${heightPct}%; background-color: ${color};">
+              <span class="chart-bar-text">${text}</span>
+            </div>
+          </div>
+          <span class="chart-label">${d.label}</span>
+        </div>
+      `;
+    });
+
+    const monthlyChart = document.getElementById('monthly-chart');
+    monthlyChart.innerHTML = '';
+    monthlyData.slice(0, 4).forEach(d => {
+      let finalRate = d.count > 0 ? Math.round(d.rate / d.count) : 0;
+      let heightPct = Math.min((d.rev / 1000000) * 100, 100); 
+      let color = d.rev > 0 ? getBarColor(finalRate) : '#2A2A2A';
+      let text = d.rev > 0 ? `${finalRate}%` : '';
+      let timeStr = d.count > 0 ? `${Math.floor((d.total/d.count)/3600)}h` : '-';
+
+      monthlyChart.innerHTML += `
+        <div class="chart-col">
+          <div class="chart-time-text">${timeStr}</div>
+          <div class="chart-bar-bg" style="max-width: 40px; height: 80px;">
+            <div class="chart-bar-fill" style="height: ${heightPct}%; background-color: ${color};">
+              <span class="chart-bar-text" style="font-size:11px;">${text}</span>
+            </div>
+          </div>
+          <span class="chart-label" style="margin-top: 4px;">${d.label}</span>
+        </div>
+      `;
+    });
+  }
+
+  function initSimulator() {
+    const today = new Date();
+    const currentDay = today.getDate();
+    const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    const firstDayOfWeek = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
+
+    const calGrid = document.getElementById('calendar-grid');
+    if (!calGrid) return;
+
+    calGrid.innerHTML = '';
+    for(let i=0; i<firstDayOfWeek; i++) {
+        calGrid.innerHTML += `<div></div>`;
+    }
+    
+    let simulatorData = JSON.parse(localStorage.getItem('sudataxi_sim_data') || '{"target":4000000, "current":0, "restDates":[]}');
+
+    for(let i=1; i<=daysInMonth; i++) {
+        const div = document.createElement('div');
+        div.className = 'cal-day';
+        div.innerText = i;
+        if (i < currentDay) {
+            div.classList.add('past');
+        } else {
+            if(simulatorData.restDates && simulatorData.restDates.includes(i)) {
+              div.classList.add('rest-day');
+            }
+            div.addEventListener('click', function() {
+                this.classList.toggle('rest-day');
+                calculateSimulatorTargets();
+            });
+        }
+        calGrid.appendChild(div);
+    }
+    
+    document.getElementById('input-sim-target').value = simulatorData.target || 4000000;
+    document.getElementById('input-sim-current').value = simulatorData.current || 0;
+    calculateSimulatorTargets();
+  }
+
+  function calculateSimulatorTargets() {
+    const target = parseInt(document.getElementById('input-sim-target').value) || 0;
+    const current = parseInt(document.getElementById('input-sim-current').value) || 0;
+    
+    const restElements = document.querySelectorAll('.cal-day.rest-day');
+    const selectedRestDays = restElements.length;
+    document.getElementById('rest-day-count-badge').innerText = `${selectedRestDays}일 선택됨`;
+
+    let activeRestDates = [];
+    restElements.forEach(el => activeRestDates.push(parseInt(el.innerText)));
+
+    localStorage.setItem('sudataxi_sim_data', JSON.stringify({
+      target: target, current: current, restDates: activeRestDates
+    }));
+
+    const today = new Date();
+    const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    const currentDay = today.getDate();
+    
+    const totalDaysLeft = (daysInMonth - currentDay) + 1; 
+    const workDaysLeft = Math.max(1, totalDaysLeft - selectedRestDays);
+    
+    const remainMoney = Math.max(0, target - current);
+    const dailyTarget = remainMoney / workDaysLeft;
+    
+    const hourlyRate = 25000;
+    const requiredHours = dailyTarget / hourlyRate;
+    const hr = Math.floor(requiredHours);
+    const min = Math.round((requiredHours - hr) * 60);
+
+    document.getElementById('res-sim-days').innerText = workDaysLeft;
+    document.getElementById('res-sim-remain-money').innerText = remainMoney.toLocaleString();
+    document.getElementById('res-sim-daily-target').innerText = Math.round(dailyTarget).toLocaleString();
+    
+    if (remainMoney === 0) {
+        document.getElementById('res-sim-daily-hours').innerText = "목표 달성 완료!";
+        document.getElementById('res-sim-daily-hours').style.color = "#FFC800";
+    } else {
+        document.getElementById('res-sim-daily-hours').innerText = `약 ${hr}시간 ${min}분`;
+        document.getElementById('res-sim-daily-hours').style.color = "#4ADE80";
+    }
   }
 
   function exportCallLogs() {
@@ -1990,7 +2223,7 @@
         localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(Array.from(hotspotMap.values())));
         localStorage.setItem('sudataxi_custom_restrooms', JSON.stringify(Array.from(restroomMap.values())));
         updateCallLogStats(); updateCustomHotspotUI(); updateCustomRestroomUI();
-    try { migrateCustomRestroomsIfNeeded(); } catch(e) {} showToast(`🎉 복원/병합 완료!`);
+        try { migrateOldDataIfNeeded(); } catch(e) {} showToast(`🎉 복원/병합 완료!`);
         if (activeTab === 3) renderCallMapView(); else calculateAndRender();
       } catch(err) { showToast('❌ 오류: 올바르지 않은 JSON 백업 데이터입니다.'); } 
       finally { e.target.value = ''; }
@@ -2002,17 +2235,15 @@
   window.addEventListener('DOMContentLoaded', () => {
     initKakaoSdk(); applyThemeMode(currentThemeMode); checkIsPublicHolidayRealtime();
     updateCallLogStats(); updateCustomHotspotUI(); updateCustomRestroomUI();
-    try { migrateCustomRestroomsIfNeeded(); } catch(e) {}
+    try { migrateOldDataIfNeeded(); } catch(e) {}
     restoreTimerState(); restoreDrivingState(); 
     executeAutoBackup(); setInterval(executeAutoBackup, 10 * 60 * 1000); 
     
-    // 네비게이션 탭 설정
     document.getElementById('btn-mode1').addEventListener('click', () => setTab(1));
     document.getElementById('btn-mode2').addEventListener('click', () => setTab(2));
     document.getElementById('btn-mode3').addEventListener('click', () => setTab(3));
     if (document.getElementById('btn-mode4')) document.getElementById('btn-mode4').addEventListener('click', () => setTab(4));
     
-    // 3번 탭 지도 마커 필터 토글 연결
     const toggleMapFilterBtn = document.getElementById('btn-toggle-call-map-filter');
     if (toggleMapFilterBtn) {
        toggleMapFilterBtn.addEventListener('click', (e) => {
@@ -2022,30 +2253,25 @@
        });
     }
 
-    // 버튼 기능 연결
     document.getElementById('btn-refresh').addEventListener('click', () => executeSearch());
     document.getElementById('btn-search').addEventListener('click', () => executeSearch());
     document.getElementById('btn-show-map').addEventListener('click', () => openRouteMapModal());
     document.getElementById('btn-restroom').addEventListener('click', () => searchRestrooms());
     document.getElementById('map-modal-close').addEventListener('click', () => closeRouteMapModal());
     
-    // 백업/복원 기능 연결
     document.getElementById('btn-export').addEventListener('click', exportCallLogs);
     document.getElementById('btn-import-open').addEventListener('click', () => document.getElementById('import-file-input').click());
     document.getElementById('import-file-input').addEventListener('change', importCallLogs);
     document.getElementById('btn-add-custom').addEventListener('click', addCustomHotspotPrompt);
     
-    // 운행 제어 버튼 연결
     document.getElementById('btn-drive-toggle').addEventListener('click', toggleDriving);
     document.getElementById('btn-break-toggle').addEventListener('click', toggleBreak);
     document.getElementById('btn-board').addEventListener('click', handleBoarding);
     document.getElementById('btn-alight').addEventListener('click', handleAlighting);
 
-    // 하단 3개 버튼 기능 (타이머 / 탑승위치 저장 / 나만의 화장실 저장)
     document.getElementById('btn-save-call').addEventListener('click', () => saveCurrentCallLocation());
     document.getElementById('btn-save-restroom').addEventListener('click', () => saveCurrentRestroomLocation());
 
-    // 타이머 기능
     document.getElementById('timer-btn-5m').addEventListener('click', () => setTimerPreset(5));
     document.getElementById('timer-btn-10m').addEventListener('click', () => setTimerPreset(10));
     const timerBtn = document.getElementById('timer-display-btn');
@@ -2056,8 +2282,15 @@
     timerBtn.addEventListener('touchcancel', () => { if (touchTimer) clearTimeout(touchTimer); });
     timerBtn.addEventListener('click', (e) => { if (isLongPress) { e.preventDefault(); isLongPress = false; return; } toggleTimer(); });
 
+    // Simulator Init & Events
+    initSimulator();
+    document.getElementById('btn-open-calendar').addEventListener('click', () => document.getElementById('calendar-modal').classList.add('active'));
+    document.getElementById('btn-apply-calendar').addEventListener('click', () => document.getElementById('calendar-modal').classList.remove('active'));
+    document.getElementById('input-sim-target').addEventListener('input', calculateSimulatorTargets);
+    document.getElementById('input-sim-current').addEventListener('input', calculateSimulatorTargets);
+
     executeSearch();
   });
 </script>
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+</body>
 </html>
