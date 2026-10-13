@@ -21,7 +21,7 @@
   </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>수다택시 K v7.1</title>
+  <title>수다택시 K v7.2</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -371,7 +371,7 @@
         <span>🗺️ 동선 지도 보기</span>
       </button>
       <button class="restroom-btn" id="btn-restroom" style="flex: 1;">
-        <span>🚻 화장실 검색</span>
+        <span>🚻 화장실 / ⛽ 주유소</span>
       </button>
     </div>
   </div>
@@ -629,7 +629,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.1"; 
+  const BUILD_VERSION = "v7.2"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -1064,13 +1064,41 @@
   async function checkIsInsideWisuRealtime(lat, lng) {
     return new Promise((resolve) => {
       const fallbackResolve = () => {
-        if (!currentRegionName) {
-          if (lat >= 37.435) currentRegionName = "서울";
-          else if (lat <= 37.34 && lng >= 126.93) currentRegionName = "수원";
-          else if (lat <= 37.35 && lng < 126.93) currentRegionName = "안산";
-          else currentRegionName = "안양";
+        // [업데이트 V7.2] 위도 37.34 컷팅 방식 폐기, 경계점 거리 기반 판단
+        let isWisu = false;
+        if (lat >= 37.435) { // 과천 북부/서울 경계선은 위도 유지
+            currentRegionName = "서울";
+        } else {
+             // 현재 위치에서 WISU_BOUNDARY_POINTS (관내 경계) 중 가장 가까운 곳 찾기
+            let closestWisuDist = Infinity;
+            WISU_BOUNDARY_POINTS.forEach(bp => {
+                let d = getStraightDistanceKm(lat, lng, bp.lat, bp.lng);
+                if (d < closestWisuDist) closestWisuDist = d;
+            });
+            
+            // 현재 위치에서 관외 주요 거점 (수원, 안산) 중 가장 가까운 곳 찾기
+            let closestOutsideDist = Infinity;
+            const outsideHubs = [
+                 { lat: 37.2995, lng: 126.9710 }, // 성대역(수원)
+                 { lat: 37.3025, lng: 126.8654 }, // 상록수역(안산)
+                 { lat: 37.3168, lng: 126.8232 }  // 고잔역(안산)
+            ];
+            outsideHubs.forEach(hp => {
+                let d = getStraightDistanceKm(lat, lng, hp.lat, hp.lng);
+                if (d < closestOutsideDist) closestOutsideDist = d;
+            });
+
+            // 관내 경계가 관외 거점보다 가깝거나, 관내 경계 반경 3.5km 이내면 관내로 판정
+            if (closestWisuDist < closestOutsideDist || closestWisuDist <= 3.5) {
+                 isWisu = true;
+                 if (lat > 37.39) currentRegionName = "안양/과천";
+                 else if (lng < 126.94) currentRegionName = "군포";
+                 else currentRegionName = "의왕/안양";
+            } else {
+                 if (lng >= 126.93) currentRegionName = "수원";
+                 else currentRegionName = "안산";
+            }
         }
-        let isWisu = currentRegionName.includes("안양") || currentRegionName.includes("군포") || currentRegionName.includes("의왕") || currentRegionName.includes("과천");
         resolve(isWisu);
       };
 
@@ -1425,8 +1453,8 @@
     if (!currentPos) { showToast("위치를 탐색해주세요."); return; }
     
     const logEl = document.getElementById('pipeline-log');
-    if (logEl) logEl.innerText = `🚻 주변 개방화장실 및 편의시설 탐색 중...`;
-    showToast("🚻 화장실(개방/주유소/지하철) 탐색 중...");
+    if (logEl) logEl.innerText = `🚻 주변 화장실 및 ⛽ 주유소 탐색 중...`;
+    showToast("🚻 화장실 / ⛽ 주유소 탐색 중...");
 
     let uniqueMap = new Map();
 
@@ -1458,11 +1486,15 @@
 
         const apiPromise = Promise.all([
           searchPlace('공중화장실'), searchPlace('개방화장실'),
-          searchPlace('OL7', true), searchPlace('SW8', true)
+          searchPlace('OL7', true), searchPlace('SW8', true) // OL7: 주유소
         ]);
         const timeoutPromise = new Promise(resolve => setTimeout(() => resolve([[],[],[],[]]), 3000));
         
         const [pub1, pub2, gas, sub] = await Promise.race([apiPromise, timeoutPromise]);
+        
+        // [V7.2] 주유소 데이터에 isGasStation 플래그 추가
+        gas.forEach(p => { p.isGasStation = true; });
+        
         const allResults = [...pub1, ...pub2, ...gas, ...sub];
         
         allResults.forEach(p => {
@@ -1471,7 +1503,8 @@
               id: 'restroom_' + p.id, name: p.place_name,
               lat: parseFloat(p.y), lng: parseFloat(p.x),
               straightDist: getStraightDistanceKm(currentPos.lat, currentPos.lng, parseFloat(p.y), parseFloat(p.x)),
-              isRestroom: true
+              isRestroom: !p.isGasStation, 
+              isGasStation: p.isGasStation
             });
           }
         });
@@ -1505,12 +1538,12 @@
 
       const mapBtn = document.getElementById('btn-show-map');
       if (mapBtn) mapBtn.style.display = 'none'; 
-      if (logEl) logEl.innerText = `방금 · 화장실 검색 완료 (다시 핫플 찾으려면 위 '콜 찾기' 버튼 터치)`;
+      if (logEl) logEl.innerText = `방금 · 화장실/주유소 검색 완료 (다시 핫플 찾으려면 위 '콜 찾기' 버튼 터치)`;
 
       renderCards(scoredPool, null, null);
     } else {
-      showToast("주변 반경 내 화장실을 찾지 못했습니다.");
-      if (logEl) logEl.innerText = `방금 · 검색된 화장실 없음`;
+      showToast("주변 반경 내 화장실/주유소를 찾지 못했습니다.");
+      if (logEl) logEl.innerText = `방금 · 검색된 결과 없음`;
     }
   }
 
@@ -1680,11 +1713,19 @@
       `;
       let btnColor = '';
 
-      if (item.isRestroom) {
-        badgeHtml = `<div class="num-badge" style="background:#3B82F6; color:#FFF; font-size:12px;">🚻</div>`;
-        scoreDistHtml = `${item.dist.toFixed(1)}km (${item.estimatedTimeMin}분) · 화장실 편의시설`;
-        tagsHtml = item.isCustomRestroom ? `<span class="tag near" style="background:#FDF2F8; color:#DB2777; border-color:#F43F5E; font-weight:800;">#내가저장한화장실</span>` : `<span class="tag near" style="background:#EFF6FF; color:#2563EB; border-color:#3B82F6; font-weight:800;">#공중/개방화장실</span>`;
-        btnColor = `style="background:#3B82F6 !important; color:#FFF !important;"`;
+      if (item.isRestroom || item.isGasStation) {
+        // [V7.2] 주유소와 화장실 UI 분리 렌더링
+        if (item.isGasStation) {
+            badgeHtml = `<div class="num-badge" style="background:#8B5CF6; color:#FFF; font-size:12px;">⛽</div>`;
+            scoreDistHtml = `${item.dist.toFixed(1)}km (${item.estimatedTimeMin}분) · 주유소 편의시설`;
+            tagsHtml = `<span class="tag near" style="background:#F5F3FF; color:#7C3AED; border-color:#8B5CF6; font-weight:800;">#주유소</span>`;
+            btnColor = `style="background:#8B5CF6 !important; color:#FFF !important;"`;
+        } else {
+            badgeHtml = `<div class="num-badge" style="background:#3B82F6; color:#FFF; font-size:12px;">🚻</div>`;
+            scoreDistHtml = `${item.dist.toFixed(1)}km (${item.estimatedTimeMin}분) · 화장실 편의시설`;
+            tagsHtml = item.isCustomRestroom ? `<span class="tag near" style="background:#FDF2F8; color:#DB2777; border-color:#F43F5E; font-weight:800;">#내가저장한화장실</span>` : `<span class="tag near" style="background:#EFF6FF; color:#2563EB; border-color:#3B82F6; font-weight:800;">#공중/개방화장실</span>`;
+            btnColor = `style="background:#3B82F6 !important; color:#FFF !important;"`;
+        }
       }
 
       card.innerHTML = `
@@ -1791,14 +1832,16 @@
       const markerCoords = currentRouteData.map(pt => [pt.lat, pt.lng]);
       
       currentRouteData.forEach((pt, idx) => {
-        let badgeNum = pt.isTargetBoundary ? '🎯' : (pt.isRestroom ? '🚻' : idx);
-        let html = pt.isCurrent ? '<div class="custom-map-marker current" style="z-index: 1000; position: relative;">📍</div>' : `<div class="custom-map-marker" ${pt.isTargetBoundary ? 'style="background:#FF6B00; color:#FFF;"' : (pt.isRestroom ? 'style="background:#3B82F6; color:#FFF;"' : '')}>${badgeNum}</div>`;
+        let badgeNum = pt.isTargetBoundary ? '🎯' : (pt.isGasStation ? '⛽' : (pt.isRestroom ? '🚻' : idx));
+        let badgeColor = pt.isTargetBoundary ? '#FF6B00' : (pt.isGasStation ? '#8B5CF6' : (pt.isRestroom ? '#3B82F6' : ''));
+        
+        let html = pt.isCurrent ? '<div class="custom-map-marker current" style="z-index: 1000; position: relative;">📍</div>' : `<div class="custom-map-marker" ${badgeColor ? `style="background:${badgeColor}; color:#FFF;"` : ''}>${badgeNum}</div>`;
         L.marker([pt.lat, pt.lng], { icon: L.divIcon({ html, className: '', iconSize: [24, 24] }) }).addTo(leafletMap).bindPopup(`<b>${pt.name}</b>`);
 
         if (pt.geometryCoords && pt.geometryCoords.length > 0) {
           L.polyline(pt.geometryCoords, { color: pt.isTargetBoundary ? '#FF6B00' : themeColor, weight: 5, opacity: 0.7, dashArray: pt.isTargetBoundary ? '8, 8' : null }).addTo(leafletMap);
           
-          if (currentMode === 2 && !pt.isTargetBoundary && !pt.isCurrent && !pt.isRestroom) {
+          if (currentMode === 2 && !pt.isTargetBoundary && !pt.isCurrent && !pt.isRestroom && !pt.isGasStation) {
              const targetPt = currentRouteData.find(p => p.isTargetBoundary);
              if (targetPt && targetPt.geometryCoords && targetPt.geometryCoords.length > 0) {
                  L.polyline([[pt.lat, pt.lng], [targetPt.lat, targetPt.lng]], { color: '#9CA3AF', weight: 3, opacity: 0.6, dashArray: '5, 5' }).addTo(leafletMap);
