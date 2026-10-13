@@ -1,6 +1,27 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
+<head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>수다택시 K</title>
@@ -405,7 +426,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v6.4.0"; 
+  const BUILD_VERSION = "v6.4.2"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -792,7 +813,7 @@
     { "id": "hs_s_yeouido_1", "name": "여의도역 및 증권가 상권", "lat": 37.5216, "lng": 126.9242, "address": "여의도동", "type": "office_nightlife", "region": "seoul", "isWisu": false },
     { "id": "hs_g_gwacheon_1", "name": "정부과천청사역 중심상가 및 로데오", "lat": 37.4262, "lng": 126.9898, "address": "정부과천청사역", "type": "subway_nightlife", "region": "gwacheon", "isWisu": true },
     { "id": "hs_g_anyang_1", "name": "평촌역 먹자골목 및 한림대병원", "lat": 37.3942, "lng": 126.9638, "address": "평촌역", "type": "subway_hospital", "region": "anyang", "isWisu": true },
-    { "id": "hs_g_anyang_2", "name": "범계역 로데오거리 및 학원가", "lat": 37.3897, "lng": 126.9502, "address": "범계역", "type": "subway_academy", "region": "anyang", "isWisu": true },
+    { "id": "hs_g_anyang_2", "name": "범계역 로데오거리 및 학원가", "lat": 37.3909306, "lng": 126.9495306, "address": "범계역", "type": "subway_academy", "region": "anyang", "isWisu": true },
     { "id": "hs_g_anyang_4", "name": "안양역 일번가 및 메디컬타운", "lat": 37.4013, "lng": 126.9222, "address": "안양역", "type": "subway_hospital", "region": "anyang", "isWisu": true },
     { "id": "hs_g_anyang_5", "name": "산본역 중심상가 및 원광대병원", "lat": 37.3554, "lng": 126.9331, "address": "산본역", "type": "subway_hospital", "region": "gunpo", "isWisu": true },
     { "id": "hs_s_01", "name": "강남역 상업지구 및 병원거리", "lat": 37.4981, "lng": 127.0276, "address": "강남역", "type": "subway_hospital", "region": "seoul", "isWisu": false }
@@ -853,7 +874,7 @@
   const MAJOR_HUBS = [
     { name: "인덕원역 환승 거점", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway", isWisu: true },
     { name: "평촌역 먹자골목 및 한림대병원", lat: 37.3942, lng: 126.9638, address: "평촌역", type: "subway_hospital", isWisu: true },
-    { name: "범계역 로데오거리 및 학원가", lat: 37.3897, lng: 126.9502, address: "범계역", type: "subway_academy", isWisu: true },
+    { name: "범계역 로데오거리 및 학원가", lat: 37.3909306, lng: 126.9495306, address: "범계역", type: "subway_academy", isWisu: true },
     { name: "안양역 일번가", lat: 37.4013, lng: 126.9222, address: "안양역", type: "subway_hospital", isWisu: true },
     { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway_hospital", isWisu: true }
   ];
@@ -1022,7 +1043,7 @@
       if (isSuwon) places = [{ name: "인계동 나혜석거리", lat: 37.2635, lng: 127.0322 }, { name: "수원역 로데오거리", lat: 37.2662, lng: 127.0001 }];
       else if (isAnsan) places = [{ name: "중앙역 로데오거리", lat: 37.3186, lng: 126.8385 }, { name: "상록수역 먹자골목", lat: 37.3025, lng: 126.8654 }];
       else if (isSeoul) places = [{ name: "사당역 먹자골목", lat: 37.4765, lng: 126.9816 }, { name: "강남역 번화가", lat: 37.4981, lng: 127.0276 }];
-      else places = [{ name: "범계역 로데오거리", lat: 37.3897, lng: 126.9502 }, { name: "평촌 학원가", lat: 37.3821, lng: 126.9582 }, { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331 }];
+      else places = [{ name: "범계역 로데오거리", lat: 37.3909, lng: 126.9495 }, { name: "평촌 학원가", lat: 37.3821, lng: 126.9582 }, { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331 }];
       
       return { 
         title: "야간 상권 / 회전율 극대화", 
@@ -1590,18 +1611,52 @@
         return;
     }
 
-    // 스마트 네이밍 비동기 호출
+    // 스마트 네이밍 - 다른 핫플카드처럼 장소명만 (시간 제외)
     const smartName = await getSmartLocationName(currentPos.lat, currentPos.lng, '🚻 화장실');
+    const finalName = smartName;
     
-    const now = new Date();
-    let minStr = String(now.getMinutes()).padStart(2, '0');
-    const autoName = `${smartName} - ${now.getHours()}시${minStr}분`;
+    // region 추출
+    let regionShort = finalName.replace('🚻 화장실 (', '').replace(')', '').trim();
     
-    custom.push({ id: 'my_restroom_' + Date.now(), name: autoName, lat: currentPos.lat, lng: currentPos.lng });
+    custom.push({ id: 'my_restroom_' + Date.now(), name: finalName, lat: currentPos.lat, lng: currentPos.lng, region: regionShort, savedAt: new Date().toISOString() });
     localStorage.setItem('sudataxi_custom_restrooms', JSON.stringify(custom));
     
     updateCustomRestroomUI();
-    showToast(`${autoName}\n저장 완료! (검색 시 우선 노출)`);
+    showToast(`${finalName}\n저장 완료! (검색 시 우선 노출)`);
+  }
+
+  async function migrateCustomRestroomsIfNeeded() {
+    try {
+      let custom = JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]');
+      if (custom.length === 0) return;
+      let needsUpdate = false;
+      const timePattern = /\d+\s*시\s*\d*\s*분/;
+      for (let i = 0; i < custom.length; i++) {
+        let item = custom[i];
+        if (!item.lat || !item.lng) continue;
+        let hasTime = timePattern.test(item.name) || /\(\s*\d+시/.test(item.name);
+        let isOldStyle = /내\s*화장실/.test(item.name) && hasTime;
+        let isTimeOnly = hasTime && !item.region;
+        if (isOldStyle || isTimeOnly) {
+          needsUpdate = true;
+          try {
+            let newSmartName = await getSmartLocationName(item.lat, item.lng, '🚻 화장실');
+            let regionShort = newSmartName.replace('🚻 화장실 (', '').replace(')', '').trim();
+            custom[i].name = newSmartName;
+            custom[i].region = regionShort;
+            if (!custom[i].savedAt) custom[i].savedAt = new Date().toISOString();
+          } catch(e) {
+            custom[i].name = `🚻 화장실 (${item.lat.toFixed(3)})`;
+            custom[i].region = `${item.lat.toFixed(3)}`;
+          }
+        }
+      }
+      if (needsUpdate) {
+        localStorage.setItem('sudataxi_custom_restrooms', JSON.stringify(custom));
+        console.log('🧹 내 화장실 구 데이터 자동 보정 완료');
+        updateCustomRestroomUI();
+      }
+    } catch(e) { console.warn('migrate error', e); }
   }
 
   async function saveCurrentCallLocation() {
@@ -1845,7 +1900,8 @@
         localStorage.setItem('sudataxi_call_logs', JSON.stringify(Array.from(logMap.values())));
         localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(Array.from(hotspotMap.values())));
         localStorage.setItem('sudataxi_custom_restrooms', JSON.stringify(Array.from(restroomMap.values())));
-        updateCallLogStats(); updateCustomHotspotUI(); updateCustomRestroomUI(); showToast(`🎉 복원/병합 완료!`);
+        updateCallLogStats(); updateCustomHotspotUI(); updateCustomRestroomUI();
+    try { migrateCustomRestroomsIfNeeded(); } catch(e) { console.warn(e); } showToast(`🎉 복원/병합 완료!`);
         if (activeTab === 3) renderCallMapView(); else calculateAndRender();
       } catch(err) { showToast('❌ 오류: 올바르지 않은 JSON 백업 데이터입니다.'); } 
       finally { e.target.value = ''; }
@@ -1857,6 +1913,7 @@
   window.addEventListener('DOMContentLoaded', () => {
     initKakaoSdk(); applyThemeMode(currentThemeMode); checkIsPublicHolidayRealtime();
     updateCallLogStats(); updateCustomHotspotUI(); updateCustomRestroomUI();
+    try { migrateCustomRestroomsIfNeeded(); } catch(e) { console.warn(e); }
     restoreTimerState(); restoreDrivingState(); 
     executeAutoBackup(); setInterval(executeAutoBackup, 10 * 60 * 1000); 
     
@@ -1913,5 +1970,5 @@
     executeSearch();
   });
 </script>
-</body>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
 </html>
