@@ -426,7 +426,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v6.3.5"; 
+  const BUILD_VERSION = "v6.3.7"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -830,7 +830,6 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
   
-  // 크로스 트랙(Cross-track) 이탈 거리 계산용 (Heron의 공식 활용)
   function getCrossTrackDistanceKm(lat1, lon1, lat2, lon2, lat3, lon3) {
     const a = getStraightDistanceKm(lat1, lon1, lat3, lon3);
     const b = getStraightDistanceKm(lat3, lon3, lat2, lon2);
@@ -1098,8 +1097,7 @@
     return { score: Math.max(0, score), logCount: matchCount + (item.clusterCount||0), isTimeMatch: isTimeMatch || item.isTimeMatch };
   }
 
-  // ★ 탑승기록 지역명 비동기 처리
-  async function getCallLogsAsCandidates(nowHour) {
+  function getCallLogsAsCandidates(nowHour) {
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     let clusters = [];
     logs.forEach(log => {
@@ -1108,35 +1106,9 @@
       let isTimeMatch = (hourDiff > 12 ? 24 - hourDiff : hourDiff) <= 1;
       let found = clusters.find(c => getStraightDistanceKm(c.lat, c.lng, logLat, logLng) <= 0.25);
       if (found) { found.clusterCount++; if(isTimeMatch) found.isTimeMatch = true; } 
-      else clusters.push({ id: 'log_'+Math.random(), name: `📍 탑승기록`, lat: logLat, lng: logLng, type: 'nightlife', isUserCallLogCandidate: true, clusterCount: 1, isTimeMatch });
+      else clusters.push({ id: 'log_'+Math.random(), name: `📍 탑승기록 (${logLat.toFixed(3)})`, lat: logLat, lng: logLng, type: 'nightlife', isUserCallLogCandidate: true, clusterCount: 1, isTimeMatch });
     });
-
-    if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
-      const geocoder = new kakao.maps.services.Geocoder();
-      await Promise.all(clusters.map(c => new Promise(resolve => {
-        let resolved = false;
-        const fallback = () => { if (!resolved) { resolved = true; c.name = `📍 탑승기록 (${c.lat.toFixed(3)})`; resolve(); } };
-        setTimeout(fallback, 1500); // 1.5초 타임아웃
-        
-        try {
-          geocoder.coord2RegionCode(c.lng, c.lat, (result, status) => {
-            if (!resolved) {
-              resolved = true;
-              if (status === kakao.maps.services.Status.OK && result && result.length > 0) {
-                const region = result.find(r => r.region_type === 'H') || result[0];
-                c.name = `📍 탑승기록 (${region.region_3depth_name})`;
-              } else {
-                c.name = `📍 탑승기록 (${c.lat.toFixed(3)})`;
-              }
-              resolve();
-            }
-          });
-        } catch(e) { fallback(); }
-      })));
-    } else {
-      clusters.forEach(c => c.name = `📍 탑승기록 (${c.lat.toFixed(3)})`);
-    }
-    return clusters;
+    return clusters; 
   }
 
   function setTab(tab) {
@@ -1303,7 +1275,7 @@
     const activeMasterHotspots = getMasterHotspotsFromStorage();
     const nowHour = new Date().getHours();
     
-    const userCallCandidates = await getCallLogsAsCandidates(nowHour);
+    const userCallCandidates = getCallLogsAsCandidates(nowHour); 
 
     let referenceHubs = []; let targetBoundaryCardData = null; let directTargetDist = 0; let targetBearing = null;
     let closestBp = null;
@@ -1319,7 +1291,6 @@
       let roadToBp = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, closestBp.lat, closestBp.lng);
       directTargetDist = roadToBp.distanceKm;
       
-      // ★ 해결: geometryCoords를 target 데이터에도 명확하게 탑재하여 선이 안그려지는 현상 방지
       targetBoundaryCardData = { 
         ...closestBp, 
         dist: directTargetDist, 
@@ -1357,12 +1328,10 @@
 
       if (!inWisu && targetBoundaryCardData) {
         const crossTrackDist = getCrossTrackDistanceKm(currentPos.lat, currentPos.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng, item.lat, item.lng);
-        // ★ 필터 완화: 좌우 이탈 허용 3.0km -> 3.5km로 완화하여 탈락 후보 감소 방지
         if (crossTrackDist > 3.5) continue; 
 
         let candBearing = getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng);
         let deltaAngle = getAngleDelta(candBearing, targetBearing);
-        // ★ 역방향 방지 각도 완화: 90도 -> 100도로 소폭 완화
         if (deltaAngle > 100) continue; 
 
         if (straightDist <= 2.5) {
@@ -1382,7 +1351,7 @@
     }
 
     preFiltered.sort((a, b) => b.preliminaryScore - a.preliminaryScore);
-    const topCandidates = preFiltered.slice(0, 10);
+    const topCandidates = preFiltered.slice(0, 15);
     
     let scoredPool = await Promise.all(topCandidates.map(async (item) => {
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
@@ -1396,9 +1365,36 @@
     scoredPool.sort((a, b) => b.score - a.score || a.dist - b.dist);
     for (let candidate of scoredPool) {
       if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedCandidates)) selectedCandidates.push(candidate);
-      if (selectedCandidates.length === 3) break;
+      if (selectedCandidates.length === 4) break;
     }
     selectedCandidates.sort((a, b) => a.dist - b.dist);
+
+    if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
+      const geocoder = new kakao.maps.services.Geocoder();
+      await Promise.all(selectedCandidates.map(item => new Promise(resolve => {
+        if (!item.isUserCallLogCandidate) return resolve();
+
+        let resolved = false;
+        const fallback = () => { if (!resolved) { resolved = true; item.name = `📍 탑승기록 (${item.lat.toFixed(3)})`; resolve(); } };
+        setTimeout(fallback, 2000);
+
+        try {
+          geocoder.coord2RegionCode(item.lng, item.lat, (result, status) => {
+            if (!resolved) {
+              resolved = true;
+              if (status === kakao.maps.services.Status.OK && result && result.length > 0) {
+                let region = result.find(r => r.region_type === 'H') || result[0];
+                let dong = region.region_3depth_name || region.region_2depth_name;
+                item.name = dong ? `📍 탑승기록 (${dong})` : `📍 탑승기록 (${item.lat.toFixed(3)})`;
+              } else {
+                item.name = `📍 탑승기록 (${item.lat.toFixed(3)})`;
+              }
+              resolve();
+            }
+          });
+        } catch(e) { fallback(); }
+      })));
+    }
 
     currentRouteData = [{ name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true }, ...selectedCandidates];
     if (targetBoundaryCardData) currentRouteData.push(targetBoundaryCardData);
@@ -1514,11 +1510,9 @@
         let html = pt.isCurrent ? '<div class="custom-map-marker current" style="z-index: 1000; position: relative;">📍</div>' : `<div class="custom-map-marker" ${pt.isTargetBoundary ? 'style="background:#FF6B00; color:#FFF;"' : (pt.isRestroom ? 'style="background:#3B82F6; color:#FFF;"' : '')}>${badgeNum}</div>`;
         L.marker([pt.lat, pt.lng], { icon: L.divIcon({ html, className: '', iconSize: [24, 24] }) }).addTo(leafletMap).bindPopup(`<b>${pt.name}</b>`);
 
-        // ★ 해결: Target Boundary에도 GeometryCoords가 할당되어 메인 실선이 그려집니다.
         if (pt.geometryCoords && pt.geometryCoords.length > 0) {
           L.polyline(pt.geometryCoords, { color: pt.isTargetBoundary ? '#FF6B00' : themeColor, weight: 5, opacity: 0.7, dashArray: pt.isTargetBoundary ? '8, 8' : null }).addTo(leafletMap);
           
-          // 모드2 복귀 시: 추천 핫플 ➡️ 최종 타겟으로 이어지는 점선 시각화
           if (currentMode === 2 && !pt.isTargetBoundary && !pt.isCurrent && !pt.isRestroom) {
              const targetPt = currentRouteData.find(p => p.isTargetBoundary);
              if (targetPt && targetPt.geometryCoords && targetPt.geometryCoords.length > 0) {
