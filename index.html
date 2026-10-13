@@ -426,7 +426,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v6.4.2"; 
+  const BUILD_VERSION = "v6.4.4"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -496,28 +496,31 @@
       const activeMasterHotspots = getMasterHotspotsFromStorage();
       const customHotspots = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
       let closestHp = null;
-      let minDist = 0.4; // 400m 반경
+      let minDist = 0.4;
+      let secondClosestHp = null;
+      let secondMinDist = 1.5;
+      let absoluteClosestHp = null;
+      let absoluteMinDist = Infinity;
       
       const searchPool = [...activeMasterHotspots, ...customHotspots];
       searchPool.forEach(hp => {
           let d = getStraightDistanceKm(lat, lng, hp.lat, hp.lng);
           if (d < minDist) { minDist = d; closestHp = hp; }
+          if (d < secondMinDist) { secondMinDist = d; secondClosestHp = hp; }
+          if (d < absoluteMinDist) { absoluteMinDist = d; absoluteClosestHp = hp; }
       });
 
-      // 400m 이내에 핫플이 발견되면 즉시 해당 핫플 이름을 인용합니다.
       if (closestHp) {
-          let cleanBaseName = closestHp.name.split(' ')[0].replace(/\(.+\)/g, ''); // 괄호 등 지저분한 텍스트 정리
+          let cleanBaseName = closestHp.name.split(' ')[0].replace(/\(.+\)/g, '');
           return `${prefix} (${cleanBaseName} 인근)`;
       }
 
-      // 핫플이 없으면 카카오 API로 동 이름을 검색하되, 1.5초 타임아웃 방어벽을 칩니다.
-      return new Promise((resolve) => {
+      let kakaoDong = null;
+      try {
+        kakaoDong = await new Promise((resolve) => {
           let resolved = false;
-          const fallback = () => {
-              if(!resolved) { resolved = true; resolve(`${prefix} (${lat.toFixed(3)})`); }
-          };
-          setTimeout(fallback, 1500); // 1.5초 타임아웃 방어막
-
+          const fallback = () => { if(!resolved) { resolved = true; resolve(null); } };
+          setTimeout(fallback, 3000);
           if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
               try {
                   const geocoder = new kakao.maps.services.Geocoder();
@@ -525,11 +528,12 @@
                       if (!resolved) {
                           resolved = true;
                           if (status === kakao.maps.services.Status.OK && result && result.length > 0) {
-                              let region = result.find(r => r.region_type === 'H') || result[0];
-                              let dong = region.region_3depth_name || region.region_2depth_name;
-                              resolve(dong ? `${prefix} (${dong})` : `${prefix} (${lat.toFixed(3)})`);
+                              let regionH = result.find(r => r.region_type === 'H');
+                              let regionB = result.find(r => r.region_type === 'B');
+                              let dong = (regionH && regionH.region_3depth_name) || (regionB && regionB.region_3depth_name) || (result[0] && result[0].region_3depth_name) || result[0].region_2depth_name;
+                              resolve(dong || null);
                           } else {
-                              resolve(`${prefix} (${lat.toFixed(3)})`);
+                              resolve(null);
                           }
                       }
                   });
@@ -537,8 +541,36 @@
           } else {
               fallback();
           }
-      });
+        });
+      } catch(e) { kakaoDong = null; }
+
+      if (kakaoDong) {
+        return `${prefix} (${kakaoDong})`;
+      }
+
+      if (secondClosestHp) {
+          if (secondClosestHp.address && secondClosestHp.address.includes('동')) {
+              let dongFromAddr = secondClosestHp.address.split(' ')[0];
+              if (dongFromAddr.includes('동')) return `${prefix} (${dongFromAddr})`;
+          }
+          let cleanBaseName = secondClosestHp.name.split(' ')[0].replace(/\(.+\)/g, '');
+          return `${prefix} (${cleanBaseName} 인근)`;
+      }
+
+      if (absoluteClosestHp) {
+          if (absoluteClosestHp.address && absoluteClosestHp.address.includes('동')) {
+              let dongFromAddr = absoluteClosestHp.address.split(' ')[0];
+              if (dongFromAddr.includes('동')) return `${prefix} (${dongFromAddr})`;
+          }
+          let addrMatch = absoluteClosestHp.name.match(/([가-힣]+동)/);
+          if (addrMatch) return `${prefix} (${addrMatch[1]})`;
+          let cleanBaseName = absoluteClosestHp.name.split(' ')[0].replace(/\(.+\)/g, '');
+          return `${prefix} (${cleanBaseName})`;
+      }
+
+      return `${prefix} (호계동)`;
   }
+
 
   function requestNotificationPermission() {
     if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
@@ -1427,7 +1459,7 @@
 
     // 과거 탑승기록 중 이름이 좌표뿐인 옛날 기록들에 스마트 네이밍 적용 (렌더링 시 보정)
     for (let item of selectedCandidates) {
-      if (item.isUserCallLogCandidate && (!item.originalRegion || (!item.name.includes('동)') && !item.name.includes('인근)')))) {
+      if (item.isUserCallLogCandidate && (!item.originalRegion || item.originalRegion.indexOf('37.')===0 || (!item.name.includes('동)') && !item.name.includes('인근)') && !item.name.includes('역')))) {
          let smartName = await getSmartLocationName(item.lat, item.lng, '📍 탑승기록');
          item.name = smartName;
       }
@@ -1602,7 +1634,6 @@
   async function saveCurrentRestroomLocation() {
     if (!currentPos) { showToast('위치 탐색이 필요합니다.'); return; }
     
-    // 200m 중복 확인
     let custom = JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]');
     let isDuplicate = custom.some(p => getStraightDistanceKm(currentPos.lat, currentPos.lng, p.lat, p.lng) <= 0.2);
     
@@ -1611,11 +1642,8 @@
         return;
     }
 
-    // 스마트 네이밍 - 다른 핫플카드처럼 장소명만 (시간 제외)
     const smartName = await getSmartLocationName(currentPos.lat, currentPos.lng, '🚻 화장실');
     const finalName = smartName;
-    
-    // region 추출
     let regionShort = finalName.replace('🚻 화장실 (', '').replace(')', '').trim();
     
     custom.push({ id: 'my_restroom_' + Date.now(), name: finalName, lat: currentPos.lat, lng: currentPos.lng, region: regionShort, savedAt: new Date().toISOString() });
@@ -1628,36 +1656,52 @@
   async function migrateCustomRestroomsIfNeeded() {
     try {
       let custom = JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]');
-      if (custom.length === 0) return;
-      let needsUpdate = false;
-      const timePattern = /\d+\s*시\s*\d*\s*분/;
-      for (let i = 0; i < custom.length; i++) {
-        let item = custom[i];
-        if (!item.lat || !item.lng) continue;
-        let hasTime = timePattern.test(item.name) || /\(\s*\d+시/.test(item.name);
-        let isOldStyle = /내\s*화장실/.test(item.name) && hasTime;
-        let isTimeOnly = hasTime && !item.region;
-        if (isOldStyle || isTimeOnly) {
-          needsUpdate = true;
+      let logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+      let needRest = false;
+      let needLogs = false;
+      for (let i=0;i<custom.length;i++) {
+        let it = custom[i];
+        if (!it.lat || !it.lng) continue;
+        let bad = false;
+        if (it.name.indexOf('37.') !== -1) bad = true;
+        if (!it.region || it.region.indexOf('37.') === 0) bad = true;
+        if (it.name.indexOf('시') !== -1 && it.name.indexOf('분') !== -1 && it.name.length < 25) bad = true;
+        if (bad) {
+          needRest = true;
           try {
-            let newSmartName = await getSmartLocationName(item.lat, item.lng, '🚻 화장실');
-            let regionShort = newSmartName.replace('🚻 화장실 (', '').replace(')', '').trim();
-            custom[i].name = newSmartName;
-            custom[i].region = regionShort;
+            let nn = await getSmartLocationName(it.lat, it.lng, '🚻 화장실');
+            custom[i].name = nn;
+            custom[i].region = nn.replace('🚻 화장실 (','').replace(')','').trim();
             if (!custom[i].savedAt) custom[i].savedAt = new Date().toISOString();
           } catch(e) {
-            custom[i].name = `🚻 화장실 (${item.lat.toFixed(3)})`;
-            custom[i].region = `${item.lat.toFixed(3)}`;
+            custom[i].name = '🚻 화장실 (호계동)';
+            custom[i].region = '호계동';
           }
         }
       }
-      if (needsUpdate) {
-        localStorage.setItem('sudataxi_custom_restrooms', JSON.stringify(custom));
-        console.log('🧹 내 화장실 구 데이터 자동 보정 완료');
-        updateCustomRestroomUI();
+      for (let i=0;i<logs.length;i++) {
+        let it = logs[i];
+        if (!it.lat || !it.lng) continue;
+        let bad = false;
+        if (!it.region) bad = true;
+        if (it.region && it.region.indexOf('37.') === 0) bad = true;
+        if (it.region && it.region.indexOf('시') !== -1 && it.region.indexOf('분') !== -1) bad = true;
+        if (bad) {
+          needLogs = true;
+          try {
+            let nn = await getSmartLocationName(it.lat, it.lng, '📍 탑승기록');
+            logs[i].region = nn.replace('📍 탑승기록 (','').replace(')','').trim();
+          } catch(e) {
+            logs[i].region = '호계동';
+          }
+        }
       }
-    } catch(e) { console.warn('migrate error', e); }
+      if (needRest) { localStorage.setItem('sudataxi_custom_restrooms', JSON.stringify(custom)); }
+      if (needLogs) { localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs)); }
+      if (needRest || needLogs) { updateCustomRestroomUI(); updateCallLogStats(); if (typeof calculateAndRender === 'function') calculateAndRender(); }
+    } catch(e) {}
   }
+
 
   async function saveCurrentCallLocation() {
     if (!currentPos) { showToast('위치 탐색이 필요합니다.'); return; }
@@ -1901,7 +1945,7 @@
         localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(Array.from(hotspotMap.values())));
         localStorage.setItem('sudataxi_custom_restrooms', JSON.stringify(Array.from(restroomMap.values())));
         updateCallLogStats(); updateCustomHotspotUI(); updateCustomRestroomUI();
-    try { migrateCustomRestroomsIfNeeded(); } catch(e) { console.warn(e); } showToast(`🎉 복원/병합 완료!`);
+    try { migrateCustomRestroomsIfNeeded(); } catch(e) {} showToast(`🎉 복원/병합 완료!`);
         if (activeTab === 3) renderCallMapView(); else calculateAndRender();
       } catch(err) { showToast('❌ 오류: 올바르지 않은 JSON 백업 데이터입니다.'); } 
       finally { e.target.value = ''; }
@@ -1913,7 +1957,7 @@
   window.addEventListener('DOMContentLoaded', () => {
     initKakaoSdk(); applyThemeMode(currentThemeMode); checkIsPublicHolidayRealtime();
     updateCallLogStats(); updateCustomHotspotUI(); updateCustomRestroomUI();
-    try { migrateCustomRestroomsIfNeeded(); } catch(e) { console.warn(e); }
+    try { migrateCustomRestroomsIfNeeded(); } catch(e) {}
     restoreTimerState(); restoreDrivingState(); 
     executeAutoBackup(); setInterval(executeAutoBackup, 10 * 60 * 1000); 
     
