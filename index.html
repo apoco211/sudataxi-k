@@ -426,7 +426,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v6.3.7"; 
+  const BUILD_VERSION = "v6.3.8"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -541,6 +541,12 @@
     } catch(e) {}
   }
 
+  function getWorkDate(dateObj) {
+    const d = new Date(dateObj);
+    if (d.getHours() < 3) d.setDate(d.getDate() - 1);
+    return d;
+  }
+
   function saveDrivingState() { localStorage.setItem('sudataxi_driving_state', JSON.stringify(drivingState)); }
   
   function restoreDrivingState() {
@@ -571,7 +577,7 @@
   }
 
   function getTodayKey() {
-    const now = new Date();
+    const now = getWorkDate(new Date());
     return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
   }
 
@@ -799,7 +805,7 @@
         const geocoder = new kakao.maps.services.Geocoder();
         geocoder.coord2RegionCode(lng, lat, (result, status) => {
           if (status === kakao.maps.services.Status.OK && result && result.length > 0) {
-            if (result[0]) currentRegionName = `${result[0].region_1depth_name} ${result[0].region_2depth_name || ''}`.trim();
+            if (result[0]) currentRegionName = `${result[0].region_1depth_name} ${result[0].region_2depth_name || ''} ${result[0].region_3depth_name || ''}`.trim();
             let isWisu = result.some(r => {
               const r2 = r.region_2depth_name || ""; const r1 = r.region_1depth_name || "";
               return r2.includes("안양") || r2.includes("군포") || r2.includes("의왕") || r2.includes("과천") ||
@@ -1185,18 +1191,33 @@
     });
 
     if (uniqueMap.size > 0) {
-      let restrooms = Array.from(uniqueMap.values()).sort((a, b) => a.straightDist - b.straightDist).slice(0, 5);
+      let customList = [];
+      let apiList = [];
+      Array.from(uniqueMap.values()).forEach(item => {
+          if (item.isCustomRestroom) customList.push(item);
+          else apiList.push(item);
+      });
+      
+      customList.sort((a, b) => a.straightDist - b.straightDist);
+      apiList.sort((a, b) => a.straightDist - b.straightDist);
+      
+      let restrooms = [...customList, ...apiList].slice(0, 3);
 
       let scoredPool = await Promise.all(restrooms.map(async (item) => {
         let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
         return { ...item, dist: road.distanceKm, estimatedTimeMin: road.durationMin, geometryCoords: road.geometryCoords };
       }));
 
-      scoredPool.sort((a, b) => a.dist - b.dist);
+      scoredPool.sort((a, b) => {
+          if (a.isCustomRestroom && !b.isCustomRestroom) return -1;
+          if (!a.isCustomRestroom && b.isCustomRestroom) return 1;
+          return a.dist - b.dist;
+      });
+      
       currentRouteData = [{ name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true }, ...scoredPool];
 
       const mapBtn = document.getElementById('btn-show-map');
-      if (mapBtn) mapBtn.style.display = 'flex';
+      if (mapBtn) mapBtn.style.display = 'none'; // 화장실 지도는 비활성화 요청됨
       if (logEl) logEl.innerText = `방금 · 화장실 검색 완료 (다시 핫플을 찾으려면 위의 '콜 찾기' 버튼을 누르세요)`;
 
       renderCards(scoredPool, null, null);
@@ -1328,22 +1349,22 @@
 
       if (!inWisu && targetBoundaryCardData) {
         const crossTrackDist = getCrossTrackDistanceKm(currentPos.lat, currentPos.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng, item.lat, item.lng);
-        if (crossTrackDist > 3.5) continue; 
-
         let candBearing = getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng);
         let deltaAngle = getAngleDelta(candBearing, targetBearing);
-        if (deltaAngle > 100) continue; 
-
-        if (straightDist <= 2.5) {
+        
+        if (straightDist <= 1.5) {
+           if (deltaAngle > 100) continue; 
            preliminaryScore += 45; 
-           if (deltaAngle > 60) preliminaryScore -= 10;
+           if (deltaAngle > 60) preliminaryScore -= 15;
         } else {
+           if (crossTrackDist > 2.5) continue; 
+           if (deltaAngle > 60) continue; 
+
            const distToTarget = getStraightDistanceKm(item.lat, item.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng);
            const detourKm = (straightDist + distToTarget) - directTargetDist;
-           if (detourKm > Math.min(5.0, directTargetDist * 0.45 + 2.0)) continue; 
+           if (detourKm > Math.min(3.0, directTargetDist * 0.3 + 1.0)) continue; 
            
            if (deltaAngle <= 45) preliminaryScore += 25;
-           else if (deltaAngle > 60) preliminaryScore -= 20;
         }
       } else if (straightDist <= 2.0) { preliminaryScore += 40; }
 
@@ -1577,7 +1598,7 @@
     if (logs.length === 0) { list.innerHTML = `<div style="font-size:9px; color:var(--stat-label); text-align:center;">기록이 없습니다.</div>`; return; }
     list.innerHTML = logs.slice(-3).reverse().map(item => `
       <div class="recent-log-item">
-        <span class="recent-log-time">📍 ${new Date(item.timestamp || item.time).toLocaleTimeString()} [M${item.mode || 1}]</span>
+        <span class="recent-log-time">📍 ${new Date(item.timestamp || item.time).toLocaleTimeString().slice(0,-3)} [M${item.mode || 1}] ${item.region ? `(${item.region})` : ''}</span>
         <button class="delete-log-item-btn" data-id="${item.id}" data-ts="${item.timestamp || item.time}" style="background:#FEE2E2; color:#DC2626; border:1px solid #F87171; border-radius:4px; padding:2px 6px; font-size:9px; font-weight:700; cursor:pointer;">삭제</button>
       </div>
     `).join('');
@@ -1602,19 +1623,39 @@
     if (keys.length === 0) return;
     
     const now = new Date();
+    const workNow = getWorkDate(now);
+    
+    const monthStart = new Date(workNow.getFullYear(), workNow.getMonth(), 1);
+    monthStart.setHours(0,0,0,0);
+    
+    const dayOfWeek = workNow.getDay();
+    const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; 
+    const weekStart = new Date(workNow.getFullYear(), workNow.getMonth(), workNow.getDate() - diffToMonday);
+    weekStart.setHours(0,0,0,0);
+    
     let dailySum = 0, dailyBoard = 0, dailyEmpty = 0, dailyCount = 0;
     let weeklySum = 0, weeklyBoard = 0, weeklyEmpty = 0, weeklyCount = 0;
     let monthlySum = 0, monthlyBoard = 0, monthlyEmpty = 0, monthlyCount = 0;
     
     keys.forEach(k => {
       const rec = records[k];
-      const driveSec = rec.totalDrive || 0; const boardSec = rec.passengerBoard || 0; const emptySec = rec.emptyCar || 0;
-      const dateParts = k.split('-'); const recDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
-      const diffDays = Math.floor((now - recDate) / (1000 * 60 * 60 * 24));
+      const driveSec = rec.totalDrive || 0; 
+      if (driveSec <= 0) return; 
+
+      const boardSec = rec.passengerBoard || 0; 
+      const emptySec = rec.emptyCar || 0;
+      
+      const dateParts = k.split('-'); 
+      const recDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
       
       dailySum += driveSec; dailyBoard += boardSec; dailyEmpty += emptySec; dailyCount++;
-      if (diffDays <= 7) { weeklySum += driveSec; weeklyBoard += boardSec; weeklyEmpty += emptySec; weeklyCount++; }
-      if (diffDays <= 30) { monthlySum += driveSec; monthlyBoard += boardSec; monthlyEmpty += emptySec; monthlyCount++; }
+      
+      if (recDate >= weekStart) { 
+        weeklySum += driveSec; weeklyBoard += boardSec; weeklyEmpty += emptySec; weeklyCount++; 
+      }
+      if (recDate >= monthStart) { 
+        monthlySum += driveSec; monthlyBoard += boardSec; monthlyEmpty += emptySec; monthlyCount++; 
+      }
     });
 
     const avgDailyTotal = Math.round(dailySum / Math.max(1, dailyCount)); const avgDailyBoard = Math.round(dailyBoard / Math.max(1, dailyCount)); const avgDailyEmpty = Math.round(dailyEmpty / Math.max(1, dailyCount));
@@ -1714,10 +1755,26 @@
   function saveCurrentCallLocation() {
     if (currentPos) {
       let logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
-      logs.push({ id: 'log_' + Date.now(), timestamp: new Date().toISOString(), lat: currentPos.lat, lng: currentPos.lng, mode: currentMode });
+      
+      let regionShort = "";
+      if (currentRegionName) {
+        let parts = currentRegionName.split(' ');
+        regionShort = parts[parts.length - 1]; 
+      }
+
+      logs.push({ 
+        id: 'log_' + Date.now(), 
+        timestamp: new Date().toISOString(), 
+        lat: currentPos.lat, 
+        lng: currentPos.lng, 
+        mode: currentMode,
+        region: regionShort
+      });
+      
       localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
       updateCallLogStats();
       showToast('🎉 위치 저장 완료!');
+      
       if (!drivingState.isDriving) { drivingState.isDriving = true; drivingState.lastTickTime = Date.now(); startDrivingTimer(); }
       drivingState.isPassengerBoarded = true; drivingState.isBreak = false; drivingState.stateStartTime = Date.now();
       updateDrivingUI(); saveDrivingState(); setTab(4);
