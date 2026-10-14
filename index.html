@@ -125,8 +125,10 @@
     .tag.target { background: #FFF7ED; color: #EA580C; border-color: #EA580C; font-weight: 800; }
     .tag.near { background: #EFF6FF; color: #2563EB; border-color: #3B82F6; font-weight: 700; }
     .tag.usercallhistory { background: #FDF2F8; color: #DB2777; border-color: #F43F5E; font-weight: 900; }
-    .tag.highvalue { background: #FCE7F3; color: #BE185D; border-color: #DB2777; font-weight: 900; } /* AI 추가: 고단가 태그 */
-    .tag.transit { background: #F3E8FF; color: #9333EA; border-color: #A855F7; font-weight: 900; } /* AI 추가: 막차 태그 */
+    .tag.highvalue { background: #FCE7F3; color: #BE185D; border-color: #DB2777; font-weight: 900; } 
+    .tag.transit { background: #F3E8FF; color: #9333EA; border-color: #A855F7; font-weight: 900; } 
+    .tag.seoul-crowded { background: #FFF1F2; color: #E11D48; border-color: #BE123C; font-weight: 900; }
+    .tag.traffic-jam { background: #FFFBEB; color: #D97706; border-color: #B45309; font-weight: 900; }
     
     .backup-section { margin-top: 12px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
     .backup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
@@ -152,7 +154,6 @@
     
     .feedback-text { font-size: 11px; color: #A3A3A3; margin-top: 14px; line-height: 1.4; font-weight: 600; display: flex; align-items: flex-start; gap: 4px; word-break: keep-all; }
 
-    /* 오늘 실매출 입력 UI 스타일 */
     .revenue-box { background: var(--stat-bg); border: 1.5px solid var(--theme-accent); padding: 14px 16px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(255, 200, 0, 0.05); }
     .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 6px; flex-wrap: nowrap; }
     .label { font-size: 15px; font-weight: 900; color: var(--theme-accent); white-space: nowrap; flex-shrink: 0; }
@@ -204,7 +205,6 @@
     .calc-result-val.highlight { color: var(--theme-accent); font-size: 18px; }
     .calc-result-val.green { color: #4ADE80; font-size: 13px; }
 
-    /* 모달 공통 */
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 16px; }
     .modal-overlay.active { display: flex; }
     .modal-content { background: var(--card-bg); width: 100%; max-width: 360px; border-radius: 12px; border: 1px solid var(--stat-border); overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
@@ -357,7 +357,7 @@
   
   <div class="btn-group-main" id="main-btn-group">
     <button class="big-btn" id="btn-search">
-      <span>📍 주변 콜 많은 곳 찾기</span>
+      <span>📍 주변 콜/동선 탐색 (AI 엔진)</span>
     </button>
     <div style="display: flex; gap: 6px;">
       <button class="map-btn" id="btn-show-map" style="display: none; flex: 2;">
@@ -369,10 +369,23 @@
     </div>
   </div>
   
-  <div class="pipeline-log" id="pipeline-log">대기 중 · 카카오 실시간 내비 연산 대기</div>
+  <div class="pipeline-log" id="pipeline-log">대기 중 · 데이터 결합 연산 준비</div>
   <div class="card-list" id="card-list"></div>
 
   <div id="tab1-extras">
+    <!-- 새롭게 추가된 공공데이터 상태 모니터링 패널 -->
+    <div class="backup-section" style="margin-bottom: 12px; border-color: var(--theme-accent);">
+      <div class="backup-header">
+        <span class="backup-title" style="font-size:12px;">📊 공공데이터 AI 엔진 상태</span>
+      </div>
+      <div style="font-size: 11px; color: var(--stat-label); line-height: 1.6; display: flex; flex-direction: column; gap: 2px;">
+        <span id="status-weather">🌤️ 기상청 날씨: 대기 중</span>
+        <span id="status-traffic">🚦 실시간 교통흐름: 대기 중</span>
+        <span id="status-seoul">🏙️ 서울/관외 인구혼잡도: 대기 중</span>
+        <span id="status-transit">🚌 광역버스/막차 가중치: 활성화</span>
+      </div>
+    </div>
+
     <div class="backup-section">
       <div class="backup-header">
         <span class="backup-title" style="font-size:12px;">📊 데이터 관리 & 백업</span>
@@ -609,7 +622,7 @@
       </div>
       <button class="timer-display-btn" id="timer-display-btn" title="길게 누르면 iOS 시스템 타이머 실행">⏱️ 05:00 시작</button>
     </div>
-    <button class="save-call-btn" id="btn-save-call" style="flex: 1;">📍 탑승 저장<br><span style="font-size: 9px; font-weight:normal;">(길게누르면 고단가)</span></button>
+    <button class="save-call-btn" id="btn-save-call" style="flex: 1;">📍 일반 탑승 저장<br><span style="font-size: 9px; font-weight:normal;">(길게누르면 고단가)</span></button>
     <button class="save-restroom-btn" id="btn-save-restroom" style="flex: 1;">🚻 내 화장실<br>위치 저장</button>
   </div>
   
@@ -625,7 +638,7 @@
     </div>
   </div>
 
-  <!-- 공통 확인(Confirm) 모달 (기본 alert 대체용) -->
+  <!-- 공통 확인(Confirm) 모달 -->
   <div id="custom-confirm" class="modal-overlay">
     <div class="modal-content" style="max-width: 320px;">
       <div class="modal-header"><span class="modal-title">확인</span></div>
@@ -678,6 +691,7 @@
   let isCallMapFilterActive = false;
   let weatherCache = null;
   let weatherFetchTime = 0;
+  let trafficCache = {};
   
   let currentThemeMode = localStorage.getItem('sudataxi_theme_mode') || 'night';
   
@@ -741,6 +755,48 @@
     closeConfirm();
   });
 
+  // --- [AI V7.8.2] 1. 서울 실시간 인구 혼잡도 API 연동 (CORS 프록시 우회 적용) ---
+  async function fetchSeoulCityData(placeName) {
+      try {
+          const supportedPlaces = ["강남역", "여의도", "홍대입구역", "신도림역", "사당역", "서울역", "건대입구역"];
+          let matchedPlace = supportedPlaces.find(p => placeName.includes(p.replace("역", "")));
+          if (!matchedPlace) return null;
+
+          document.getElementById('status-seoul').innerHTML = `🏙️ 서울시 혼잡도 API: ${matchedPlace} 데이터 수신중...`;
+          
+          // allorigins.win을 활용해 깃허브에서도 CORS 에러 없이 공공데이터 포털 호출
+          const targetUrl = encodeURIComponent(`http://openapi.seoul.go.kr:8088/sample/json/citydata/1/5/${matchedPlace}`);
+          const proxyUrl = `https://api.allorigins.win/get?url=${targetUrl}`;
+          
+          const res = await fetch(proxyUrl);
+          const proxyData = await res.json();
+          const data = JSON.parse(proxyData.contents);
+          
+          if(data && data.CITYDATA && data.CITYDATA.LIVE_PPLTN_STTS) {
+              const congestLvl = data.CITYDATA.LIVE_PPLTN_STTS[0].AREA_CONGEST_LVL;
+              let color = congestLvl === "붐빔" ? "#EF4444" : "#22C55E";
+              document.getElementById('status-seoul').innerHTML = `🏙️ 서울시 혼잡도 API: ${matchedPlace} <span style="color:${color}; font-weight:900;">[${congestLvl}]</span>`;
+              return congestLvl;
+          }
+          return null;
+      } catch(e) { 
+          document.getElementById('status-seoul').innerHTML = `🏙️ 서울시 혼잡도 API: 호출 에러`;
+          return null; 
+      }
+  }
+
+  // --- [AI V7.8.2] 2. 카카오 실시간 교통망(속도) 정체 분석 로직 ---
+  function getTrafficSurgeScore(distanceKm, durationMin) {
+      if (distanceKm === 0 || durationMin === 0) return { score: 0, status: "원활" };
+      const speedKmh = (distanceKm / (durationMin / 60));
+      
+      // 속도가 심각하게 느리면(정체) 택시 수요 폭발 가중치 부여
+      if (speedKmh < 12) return { score: 25, status: "극심한 정체" }; 
+      if (speedKmh < 20) return { score: 10, status: "서행" }; 
+      if (speedKmh > 45) return { score: -5, status: "원활" }; 
+      return { score: 0, status: "보통" };
+  }
+
   // --- [AI Upgraded] 기상청/글로벌 날씨 API 연동 ---
   async function fetchRealtimeWeatherUpgraded(lat, lng) {
     const now = Date.now();
@@ -759,7 +815,10 @@
           isRainOrSnow, precip, temp, isExtremeColdOrHeat, 
           weatherMultiplier: isRainOrSnow ? Math.min(1.8, 1.2 + (precip * 0.1)) : (isExtremeColdOrHeat ? 1.25 : 1.0) 
       };
-      weatherFetchTime = now; return weatherCache;
+      weatherFetchTime = now; 
+      
+      document.getElementById('status-weather').innerHTML = isRainOrSnow ? `🌧️ 기상청 날씨: 비/눈 감지 (가중치 x${weatherCache.weatherMultiplier.toFixed(1)})` : `🌤️ 기상청 날씨: 맑음`;
+      return weatherCache;
     } catch (e) { return { isRainOrSnow: false, precip: 0, temp: 20, isExtremeColdOrHeat: false, weatherMultiplier: 1.0 }; }
   }
 
@@ -770,7 +829,7 @@
     if (timeDecimal >= 23.6 || timeDecimal <= 0.8) {
       if (name.includes("역") || (item.type && item.type.includes("subway"))) {
         transitBonus += 45; 
-        if (name.includes("인덕원") || name.includes("사당") || name.includes("산본") || name.includes("수원역") || name.includes("강남")) transitBonus += 25;
+        if (name.includes("인덕원") || name.includes("사당") || name.includes("산본") || name.includes("수원역") || name.includes("강남") || name.includes("홍대")) transitBonus += 25;
       }
     }
     if (timeDecimal >= 7.0 && timeDecimal <= 8.5 && !isTodayHoliday) {
@@ -1386,7 +1445,7 @@
   function getAngleDelta(b1, b2) { let diff = Math.abs(b1 - b2); return diff > 180 ? 360 - diff : diff; }
   
   function getScoreLevelBadge(score) {
-    if (score >= 70) return '<span class="level-badge level-high">🔥 높음</span>';
+    if (score >= 70) return '<span class="level-badge level-high">🔥 극상</span>';
     if (score >= 40) return '<span class="level-badge level-mid">⚡ 보통</span>';
     return '<span class="level-badge level-low">💧 낮음</span>';
   }
@@ -1451,12 +1510,14 @@
           const route = data.routes[0]; const distKm = parseFloat((route.summary.distance / 1000).toFixed(1)); const durationMin = Math.max(1, Math.ceil(route.summary.duration / 60));
           let coords = [];
           if (route.sections) route.sections.forEach(s => s.roads.forEach(r => { for (let i=0; i<r.vertexes.length; i+=2) coords.push([r.vertexes[i+1], r.vertexes[i]]); }));
-          return { distanceKm: distKm, durationMin: durationMin, geometryCoords: coords.length > 0 ? coords : [[fromLat, fromLng], [toLat, toLng]] };
+          
+          let trafficScore = getTrafficSurgeScore(distKm, durationMin);
+          return { distanceKm: distKm, durationMin: durationMin, geometryCoords: coords.length > 0 ? coords : [[fromLat, fromLng], [toLat, toLng]], trafficScore: trafficScore.score, trafficStatus: trafficScore.status };
         }
       }
     } catch (e) {}
     const fallbackKm = parseFloat((directDist * 1.3).toFixed(1));
-    return { distanceKm: fallbackKm, durationMin: Math.max(1, Math.round((fallbackKm / baseSpeedKmh) * 60 + (fallbackKm * 0.5))), geometryCoords: [[fromLat, fromLng], [toLat, toLng]] };
+    return { distanceKm: fallbackKm, durationMin: Math.max(1, Math.round((fallbackKm / baseSpeedKmh) * 60 + (fallbackKm * 0.5))), geometryCoords: [[fromLat, fromLng], [toLat, toLng]], trafficScore: 0, trafficStatus: "보통" };
   }
 
   async function getDynamicTimeCategoryBonus(itemType, itemName, nowHour) {
@@ -1614,6 +1675,7 @@
     }
   }
 
+  // [AI V7.8.2] 점수 통합 산출 로직
   async function calculatePureSpotScore(item, weatherData, nowHour) {
     let score = 0;
     if (item.isHighValue) score += 65; 
@@ -1622,10 +1684,14 @@
     else if (item.isLiveKakao) score += 15;
     score += await getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
     
+    // 날씨 부스트
     if (weatherData && weatherData.isRainOrSnow) { 
         const isShelterSpot = (item.name.includes("병원") || item.name.includes("백화점") || item.name.includes("마트") || item.name.includes("역"));
         score = score * weatherData.weatherMultiplier + (isShelterSpot ? 45 : 10);
     }
+
+    // 막차 서지 보너스
+    score += getPublicTransitSurgeBonus(item, new Date());
 
     let matchCount = 0; let isTimeMatch = false;
     JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]').forEach(log => {
@@ -1795,7 +1861,7 @@
       currentPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
       const inWisu = await checkIsInsideWisuRealtime(currentPos.lat, currentPos.lng);
       currentMode = inWisu ? 1 : 2; document.body.className = `mode-${currentMode}` + (currentThemeMode === 'day' ? ' theme-day' : '');
-      if (locText) locText.innerText = `📍 ${currentRegionName || currentPos.lat.toFixed(4)} (${inWisu ? '관내 5km콜 우선' : '관외 복귀경로 경유지 우선'})`;
+      if (locText) locText.innerText = `📍 ${currentRegionName || currentPos.lat.toFixed(4)} (${inWisu ? '관내 수익 극대화' : '관외 경유지 우선 복귀'})`;
       if (activeTab === 1) calculateAndRender();
       if (activeTab === 2) renderStrategyTab();
     }, (err) => { showToast("📍 위치 권한 오류"); }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 3000 });
@@ -1814,6 +1880,7 @@
     const inWisu = (currentMode === 1);
     if (logEl) logEl.innerText = `⚡ [스마트 ${inWisu ? '관내 추천' : '관외 경유지 탐색'}] 연산 중...`;
     
+    // AI V7.8.2 날씨 정보 연동
     const weatherData = await fetchRealtimeWeatherUpgraded(currentPos.lat, currentPos.lng);
     const liveKakaoHotspots = await fetchLiveKakaoHotspots(currentPos.lat, currentPos.lng);
     let allLiveHotspots = [...liveKakaoHotspots];
@@ -1871,9 +1938,22 @@
       
       let pureRes = await calculatePureSpotScore(item, weatherData, nowHour);
       let preliminaryScore = pureRes.score;
-
+      
+      // 대중교통 가중치 합산
       const transitSurge = getPublicTransitSurgeBonus(item, new Date());
       preliminaryScore += transitSurge;
+
+      // 서울 공공데이터 연동 (관외에서 서울지역 스팟인 경우)
+      let isSeoulCrowded = false;
+      if (!inWisu && item.name.match(/강남|사당|홍대|신도림|건대/)) {
+          const congestion = await fetchSeoulCityData(item.name);
+          if (congestion === "붐빔") {
+              preliminaryScore += 45;
+              isSeoulCrowded = true;
+          } else if (congestion === "여유") {
+              preliminaryScore -= 30; 
+          }
+      }
 
       if (!inWisu && targetBoundaryCardData) {
         let candBearing = getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng);
@@ -1896,15 +1976,21 @@
         }
       } else if (straightDist <= 2.0) { preliminaryScore += 40; }
 
-      preFiltered.push({ ...item, straightDist, preliminaryScore, logCount: pureRes.logCount, isTimeMatch: pureRes.isTimeMatch, isWeatherBoosted: weatherData.isRainOrSnow, isTransitSurge: transitSurge >= 30, isMasterDb: (!item.isCustom && !item.isLiveKakao && !item.isUserCallLogCandidate) });
+      preFiltered.push({ ...item, straightDist, preliminaryScore, logCount: pureRes.logCount, isTimeMatch: pureRes.isTimeMatch, isWeatherBoosted: weatherData.isRainOrSnow, isTransitSurge: transitSurge >= 30, isSeoulCrowded: isSeoulCrowded, isMasterDb: (!item.isCustom && !item.isLiveKakao && !item.isUserCallLogCandidate) });
     }
 
     preFiltered.sort((a, b) => b.preliminaryScore - a.preliminaryScore);
     const topCandidates = preFiltered.slice(0, 15);
     
+    // 카카오 내비를 찔러서 실제 교통 속도 및 최종 EV 산출
     let scoredPool = await Promise.all(topCandidates.map(async (item) => {
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
-      return { ...item, dist: road.distanceKm, estimatedTimeMin: road.durationMin, geometryCoords: road.geometryCoords, score: item.preliminaryScore, isNearStep1: (road.distanceKm <= 2.5) };
+      
+      // 교통 정체(Traffic Jam) 서지 보너스 반영
+      let finalScore = item.preliminaryScore + road.trafficScore;
+      document.getElementById('status-traffic').innerHTML = `🚦 실시간 교통: 반경 ${road.distanceKm}km 내 ${road.trafficStatus}`;
+
+      return { ...item, dist: road.distanceKm, estimatedTimeMin: road.durationMin, geometryCoords: road.geometryCoords, score: finalScore, trafficStatus: road.trafficStatus, isNearStep1: (road.distanceKm <= 2.5) };
     }));
 
     let selectedCandidates = [];
@@ -1930,7 +2016,7 @@
     
     const mapBtn = document.getElementById('btn-show-map');
     if (mapBtn) mapBtn.style.display = 'flex';
-    if (logEl) logEl.innerText = selectedCandidates.length > 0 ? `방금 · [${inWisu ? '관내 추천' : '관외 경유지 우선'}] 연산 완료` : `방금 · 주변 적합한 경로 검색 결과 없음`;
+    if (logEl) logEl.innerText = selectedCandidates.length > 0 ? `방금 · [공공데이터 AI 결합] 연산 완료` : `방금 · 주변 적합한 경로 검색 결과 없음`;
     
     renderCards(selectedCandidates, referenceHubs, targetBoundaryCardData);
   }
@@ -1951,6 +2037,8 @@
           ${item.isNearStep1 ? '<span class="tag near">#근접즉시승차</span>' : `<span class="tag near">#${inWisu ? '반경5km' : '경로핫플'}</span>`}
           ${item.isHighValue ? '<span class="tag highvalue">🔥고단가콜 이력</span>' : (item.isUserCallLogCandidate ? '<span class="tag usercallhistory">🔥실제승차기록</span>' : '')}
           ${item.isTransitSurge ? '<span class="tag transit">🚌대중교통 서지</span>' : ''}
+          ${item.isSeoulCrowded ? '<span class="tag seoul-crowded">🚨인구포화 붐빔</span>' : ''}
+          ${item.trafficStatus === '극심한 정체' ? '<span class="tag traffic-jam">🚦도로정체 수요급증</span>' : ''}
           ${item.isWeatherBoosted ? '<span class="tag" style="color:#3B82F6;">🌧️우천가중치</span>' : ''}
           ${item.isLiveKakao ? '<span class="tag">⚡실시간상권</span>' : ''}
           ${item.isTimeMatch ? '<span class="tag">🔥시간대콜</span>' : ''}
