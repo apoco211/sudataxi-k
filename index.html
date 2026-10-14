@@ -1,272 +1,9 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <style>
-    @font-face {
-      font-family: "Optimistic";
-      font-style: normal;
-      font-weight: 400 600;
-      font-display: swap;
-      src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-      .golden-chart-container { display: flex; flex-direction: column; height: 120px; background: rgba(0,0,0,0.1); border: 1px solid var(--stat-border); border-radius: 8px; padding: 12px 6px 6px 6px; position: relative; }
-      body.theme-day .golden-chart-container { background: #F9FAFB; }
-      .golden-svg-wrapper { flex: 1; width: 100%; position: relative; overflow: visible; }
-      .golden-labels-wrapper { display: flex; justify-content: space-between; width: 100%; margin-top: 6px; }
-      .golden-time-label { font-size: 9px; font-weight: 700; color: var(--stat-label); text-align: center; font-family: monospace; flex: 1; }
-      .golden-time-label.peak { color: var(--theme-accent); font-weight: 900; }
-  function renderGoldenTimeInsights() {
-     const chartEl = document.getElementById('golden-time-chart');
-     if (!chartEl) return;
-  async function checkIsInsideWisuRealtime(lat, lng) {
-    return new Promise((resolve) => {
-      // [2순위] 통신 불안정 시 작동하는 똑똑해진 GPS 비상망 (Fallback)
-      const fallbackResolve = () => {
-        let isWisu = true;
-        let currentWisuRegion = "안양";
-        
-        // 관내 주요 거점과의 거리 비교
-        let minWisuDist = Infinity;
-        const wisuCenters = [
-            { name: "안양/과천", lat: 37.4048, lng: 126.9767 }, // 인덕원
-            { name: "안양/과천", lat: 37.3942, lng: 126.9638 }, // 평촌
-            { name: "의왕/안양", lat: 37.4013, lng: 126.9222 }, // 안양역
-            { name: "군포", lat: 37.3554, lng: 126.9331 }      // 산본역
-        ];
-        wisuCenters.forEach(pt => {
-            let d = getStraightDistanceKm(lat, lng, pt.lat, pt.lng);
-            if (d < minWisuDist) {
-                minWisuDist = d;
-                currentWisuRegion = pt.name;
-            }
-        });
-
-        // 관외 주요 거점과의 거리 비교
-        let minOutsideDist = Infinity;
-        let currentOutsideRegion = "관외지역";
-        const outsideCenters = [
-             { name: "수원", lat: 37.2662, lng: 127.0001 },
-             { name: "안산", lat: 37.3168, lng: 126.8232 },
-             { name: "서울", lat: 37.4765, lng: 126.9816 },
-             { name: "성남", lat: 37.3827, lng: 127.1189 }
-        ];
-        outsideCenters.forEach(pt => {
-            let d = getStraightDistanceKm(lat, lng, pt.lat, pt.lng);
-            if (d < minOutsideDist) {
-                minOutsideDist = d;
-                currentOutsideRegion = pt.name;
-            }
-        });
-
-        // 압도적으로 가까운 곳을 기준으로 지역 판정
-        if (lat >= 37.435) {
-            isWisu = false; currentRegionName = "서울";
-        } else if (minOutsideDist < minWisuDist) {
-            isWisu = false; currentRegionName = currentOutsideRegion;
-        } else {
-            isWisu = true; currentRegionName = currentWisuRegion;
-        }
-        resolve(isWisu);
-      };
-
-      // [1순위] 카카오 실시간 행정구역 API 요청 (최우선)
-      if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
-        const geocoder = new kakao.maps.services.Geocoder();
-        geocoder.coord2RegionCode(lng, lat, (result, status) => {
-          if (status === kakao.maps.services.Status.OK && result && result.length > 0) {
-            if (result[0]) currentRegionName = `${result[0].region_1depth_name} ${result[0].region_2depth_name || ''} ${result[0].region_3depth_name || ''}`.trim();
-
-            let isStrictOutside = result.some(r => {
-                const r2 = r.region_2depth_name || ""; 
-                return r2.includes("수원") || r2.includes("안산") || r2.includes("서울") || r2.includes("시흥") || r2.includes("용인") || r2.includes("화성") || r2.includes("성남") || r2.includes("광명");
-            });
-
-            if (isStrictOutside) {
-                resolve(false);
-            } else {
-                let isWisu = result.some(r => {
-                  const r2 = r.region_2depth_name || ""; const r1 = r.region_1depth_name || "";
-                  return r2.includes("안양") || r2.includes("군포") || r2.includes("의왕") || r2.includes("과천") ||
-                         r1.includes("안양") || r1.includes("군포") || r1.includes("의왕") || r1.includes("과천");
-                });
-                
-                // 만약 구분이 애매하면 최종적으로 비상망(GPS 거리 기반)에 검증을 맡김
-                if (isWisu) resolve(true);
-                else fallbackResolve(); 
-            }
-          } else {
-            fallbackResolve();
-          }
-        });
-      } else {
-        fallbackResolve();
-      }
-    });
-  }
-        // 관내 주요 거점과의 거리 비교
-        let minWisuDist = Infinity;
-        const wisuCenters = [
-            { name: "안양/과천", lat: 37.4048, lng: 126.9767 }, // 인덕원
-            { name: "안양/과천", lat: 37.3942, lng: 126.9638 }, // 평촌
-            { name: "의왕/안양", lat: 37.4013, lng: 126.9222 }, // 안양역
-            { name: "군포", lat: 37.3554, lng: 126.9331 }      // 산본역
-        ];
-        wisuCenters.forEach(pt => {
-            let d = getStraightDistanceKm(lat, lng, pt.lat, pt.lng);
-            if (d < minWisuDist) {
-                minWisuDist = d;
-                currentWisuRegion = pt.name;
-            }
-        });
-
-        // 관외 주요 거점과의 거리 비교
-        let minOutsideDist = Infinity;
-        let currentOutsideRegion = "관외지역";
-        const outsideCenters = [
-             { name: "수원", lat: 37.2662, lng: 127.0001 },
-             { name: "안산", lat: 37.3168, lng: 126.8232 },
-             { name: "서울", lat: 37.4765, lng: 126.9816 },
-             { name: "성남", lat: 37.3827, lng: 127.1189 }
-        ];
-        outsideCenters.forEach(pt => {
-            let d = getStraightDistanceKm(lat, lng, pt.lat, pt.lng);
-            if (d < minOutsideDist) {
-                minOutsideDist = d;
-                currentOutsideRegion = pt.name;
-            }
-        });
-
-        // 압도적으로 가까운 곳을 기준으로 지역 판정
-        if (lat >= 37.435) {
-            isWisu = false; currentRegionName = "서울";
-        } else if (minOutsideDist < minWisuDist) {
-            isWisu = false; currentRegionName = currentOutsideRegion;
-        } else {
-            isWisu = true; currentRegionName = currentWisuRegion;
-        }
-        resolve(isWisu);
-      };
-
-      // [1순위] 카카오 실시간 행정구역 API 요청 (최우선)
-      if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
-        const geocoder = new kakao.maps.services.Geocoder();
-        geocoder.coord2RegionCode(lng, lat, (result, status) => {
-          if (status === kakao.maps.services.Status.OK && result && result.length > 0) {
-            if (result[0]) currentRegionName = `${result[0].region_1depth_name} ${result[0].region_2depth_name || ''} ${result[0].region_3depth_name || ''}`.trim();
-
-            let isStrictOutside = result.some(r => {
-                const r2 = r.region_2depth_name || ""; 
-                return r2.includes("수원") || r2.includes("안산") || r2.includes("서울") || r2.includes("시흥") || r2.includes("용인") || r2.includes("화성") || r2.includes("성남") || r2.includes("광명");
-            });
-
-            if (isStrictOutside) {
-                resolve(false);
-            } else {
-                let isWisu = result.some(r => {
-                  const r2 = r.region_2depth_name || ""; const r1 = r.region_1depth_name || "";
-                  return r2.includes("안양") || r2.includes("군포") || r2.includes("의왕") || r2.includes("과천") ||
-                         r1.includes("안양") || r1.includes("군포") || r1.includes("의왕") || r1.includes("과천");
-                });
-                
-                // 만약 구분이 애매하면 최종적으로 비상망(GPS 거리 기반)에 검증을 맡김
-                if (isWisu) resolve(true);
-                else fallbackResolve(); 
-            }
-          } else {
-            fallbackResolve();
-          }
-        });
-      } else {
-        fallbackResolve();
-      }
-    });
-  }
-     logs.forEach(log => {
-         const d = new Date(log.timestamp || log.time);
-         const dayOfWeek = d.getDay();
-         const isWeekendLog = (dayOfWeek === 0 || dayOfWeek === 6);
-         
-         if (filter === 'weekday' && isWeekendLog) return;
-         if (filter === 'weekend' && !isWeekendLog) return;
-
-         const h = d.getHours();
-         const adjustedH = h < 3 ? h + 24 : h;
-         const bucketIdx = Math.floor((adjustedH - 3) / 2);
-         
-         if (bucketIdx >= 0 && bucketIdx < 12) {
-             buckets[bucketIdx]++;
-         }
-     });
-
-     const maxCalls = Math.max(...buckets, 1);
-     
-     // SVG 차트 좌표 계산
-     const svgWidth = 300;
-     const svgHeight = 70;
-     const topPad = 5; // 상단 여백 (꼭대기 잘림 방지)
-     const drawingHeight = svgHeight - topPad;
-     
-     const pts = buckets.map((val, i) => ({
-         x: i * (svgWidth / 11),
-         y: svgHeight - (val / maxCalls) * drawingHeight
-     }));
-
-     // 부드러운 곡선(Bézier Curve) 생성
-     let linePath = `M ${pts[0].x},${pts[0].y}`;
-     for (let i = 0; i < pts.length - 1; i++) {
-         const cp1x = pts[i].x + (pts[i+1].x - pts[i].x) / 2;
-         const cp2x = pts[i].x + (pts[i+1].x - pts[i].x) / 2;
-         linePath += ` C ${cp1x},${pts[i].y} ${cp2x},${pts[i+1].y} ${pts[i+1].x},${pts[i+1].y}`;
-     }
-     
-     // 바닥까지 채우는 면적 패스 생성
-     const fillPath = `${linePath} L ${pts[pts.length-1].x},${svgHeight} L ${pts[0].x},${svgHeight} Z`;
-
-     let circlesHtml = pts.map((pt, i) => 
-         `<circle cx="${pt.x}" cy="${pt.y}" r="2.5" fill="var(--theme-bg-dark)" stroke="var(--theme-accent)" stroke-width="1.5" />`
-     ).join('');
-
-     let labelsHtml = buckets.map((count, idx) => {
-         const isPeak = (count === maxCalls && count > 0);
-         return `<div class="golden-time-label ${isPeak ? 'peak' : ''}">${labels[idx]}</div>`;
-     }).join('');
-
-     chartEl.innerHTML = `
-         <div class="golden-svg-wrapper">
-             <svg viewBox="0 0 ${svgWidth} ${svgHeight}" preserveAspectRatio="none" style="width: 100%; height: 100%; overflow: visible;">
-                 <defs>
-                     <linearGradient id="goldenGradient" x1="0" y1="0" x2="0" y2="1">
-                         <stop offset="0%" stop-color="var(--theme-accent)" stop-opacity="0.45"/>
-                         <stop offset="100%" stop-color="var(--theme-accent)" stop-opacity="0.0"/>
-                     </linearGradient>
-                 </defs>
-                 <path d="${fillPath}" fill="url(#goldenGradient)" />
-                 <path d="${linePath}" fill="none" stroke="var(--theme-accent)" stroke-width="2.5" stroke-linecap="round" />
-                 ${circlesHtml}
-             </svg>
-         </div>
-         <div class="golden-labels-wrapper">
-             ${labelsHtml}
-         </div>
-     `;
-  }
-      .session-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: rgba(0,0,0,0.2); border-radius: 6px; margin-bottom: 4px; border: 1px solid var(--stat-border); }
-      body.theme-day .session-item { background: #FFFFFF; }
-      .session-time { font-size: 11px; font-weight: 700; color: var(--main-text); font-family: monospace; }
-      .session-duration { font-size: 11px; font-weight: 900; color: var(--theme-accent); margin-left: 6px; }
-      .session-del-btn { background: #FEE2E2; color: #DC2626; border: 1px solid #F87171; border-radius: 4px; padding: 2px 6px; font-size: 9px; font-weight: 700; cursor: pointer; }
-    @font-face {
-      font-family: "Optimistic Mono";
-      font-style: normal;
-      font-weight: 400;
-      font-display: swap;
-      src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-    }
-    :where(html) { font-family: "Optimistic", system-ui, sans-serif; }
-    :where(code, pre, kbd, samp) { font-family: "Optimistic Mono", ui-monospace, monospace; }
-  </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>수다택시 K v7.7.6</title>
+  <title>수다택시 K v7.7.8</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -288,6 +25,23 @@
   <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
 
   <style>
+    @font-face {
+      font-family: "Optimistic";
+      font-style: normal;
+      font-weight: 400 600;
+      font-display: swap;
+      src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Optimistic Mono";
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+    }
+    :where(html) { font-family: "Optimistic", system-ui, sans-serif; }
+    :where(code, pre, kbd, samp) { font-family: "Optimistic Mono", ui-monospace, monospace; }
+
     :root {
       --theme-accent: #FFC800;
       --theme-bg-dark: #2A2210;
@@ -917,7 +671,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.7.6"; 
+  const BUILD_VERSION = "v7.7.8"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -1458,40 +1212,49 @@
   async function checkIsInsideWisuRealtime(lat, lng) {
     return new Promise((resolve) => {
       const fallbackResolve = () => {
-        // [업데이트 V7.2] 위도 37.34 컷팅 방식 폐기, 경계점 거리 기반 판단
-        let isWisu = false;
-        if (lat >= 37.435) { // 과천 북부/서울 경계선은 위도 유지
-            currentRegionName = "서울";
-        } else {
-             // 현재 위치에서 WISU_BOUNDARY_POINTS (관내 경계) 중 가장 가까운 곳 찾기
-            let closestWisuDist = Infinity;
-            WISU_BOUNDARY_POINTS.forEach(bp => {
-                let d = getStraightDistanceKm(lat, lng, bp.lat, bp.lng);
-                if (d < closestWisuDist) closestWisuDist = d;
-            });
-            
-            // 현재 위치에서 관외 주요 거점 (수원, 안산) 중 가장 가까운 곳 찾기
-            let closestOutsideDist = Infinity;
-            const outsideHubs = [
-                 { lat: 37.2995, lng: 126.9710 }, // 성대역(수원)
-                 { lat: 37.3025, lng: 126.8654 }, // 상록수역(안산)
-                 { lat: 37.3168, lng: 126.8232 }  // 고잔역(안산)
-            ];
-            outsideHubs.forEach(hp => {
-                let d = getStraightDistanceKm(lat, lng, hp.lat, hp.lng);
-                if (d < closestOutsideDist) closestOutsideDist = d;
-            });
+        let isWisu = true;
+        let currentWisuRegion = "안양";
 
-            // [수정] 3.5km 컷은 너무 넓어 수원을 관내로 오인함. (1.0km 이내일 때만 관내로 좁힘)
-            if (closestWisuDist < closestOutsideDist && closestWisuDist <= 1.0) {
-                 isWisu = true;
-                 if (lat > 37.39) currentRegionName = "안양/과천";
-                 else if (lng < 126.94) currentRegionName = "군포";
-                 else currentRegionName = "의왕/안양";
-            } else {
-                 if (lng >= 126.93) currentRegionName = "수원";
-                 else currentRegionName = "안산";
+        // 관내 주요 거점
+        let minWisuDist = Infinity;
+        const wisuCenters = [
+            { name: "안양/과천", lat: 37.4048, lng: 126.9767 }, // 인덕원
+            { name: "안양/과천", lat: 37.3942, lng: 126.9638 }, // 평촌
+            { name: "의왕/안양", lat: 37.4013, lng: 126.9222 }, // 안양역
+            { name: "군포", lat: 37.3554, lng: 126.9331 }      // 산본역
+        ];
+        wisuCenters.forEach(pt => {
+            let d = getStraightDistanceKm(lat, lng, pt.lat, pt.lng);
+            if (d < minWisuDist) {
+                minWisuDist = d;
+                currentWisuRegion = pt.name;
             }
+        });
+
+        // 관외 주요 거점
+        let minOutsideDist = Infinity;
+        let currentOutsideRegion = "관외지역";
+        const outsideCenters = [
+             { name: "수원", lat: 37.2662, lng: 127.0001 },
+             { name: "안산", lat: 37.3168, lng: 126.8232 },
+             { name: "서울", lat: 37.4765, lng: 126.9816 },
+             { name: "성남", lat: 37.3827, lng: 127.1189 }
+        ];
+        outsideCenters.forEach(pt => {
+            let d = getStraightDistanceKm(lat, lng, pt.lat, pt.lng);
+            if (d < minOutsideDist) {
+                minOutsideDist = d;
+                currentOutsideRegion = pt.name;
+            }
+        });
+
+        // 압도적으로 가까운 곳을 기준으로 지역 판정
+        if (lat >= 37.435) {
+            isWisu = false; currentRegionName = "서울 (GPS 자체추정)";
+        } else if (minOutsideDist < minWisuDist) {
+            isWisu = false; currentRegionName = currentOutsideRegion + " (GPS 자체추정)";
+        } else {
+            isWisu = true; currentRegionName = currentWisuRegion + " (GPS 자체추정)";
         }
         resolve(isWisu);
       };
@@ -1502,7 +1265,6 @@
           if (status === kakao.maps.services.Status.OK && result && result.length > 0) {
             if (result[0]) currentRegionName = `${result[0].region_1depth_name} ${result[0].region_2depth_name || ''} ${result[0].region_3depth_name || ''}`.trim();
             
-            // [수정] 수원, 안산, 서울, 용인, 화성, 성남 등 명백한 관외 주소가 찍히면 무조건 관외(Mode 2)로 강제 판정
             let isStrictOutside = result.some(r => {
                 const r2 = r.region_2depth_name || ""; 
                 return r2.includes("수원") || r2.includes("안산") || r2.includes("서울") || r2.includes("시흥") || r2.includes("용인") || r2.includes("화성") || r2.includes("성남");
@@ -1516,7 +1278,10 @@
                   return r2.includes("안양") || r2.includes("군포") || r2.includes("의왕") || r2.includes("과천") ||
                          r1.includes("안양") || r1.includes("군포") || r1.includes("의왕") || r1.includes("과천");
                 });
-                resolve(isWisu);
+                
+                // 만약 구분이 애매하면 최종적으로 비상망(GPS 거리 기반)에 검증을 맡김
+                if (isWisu) resolve(true);
+                else fallbackResolve(); 
             }
           } else {
             fallbackResolve();
