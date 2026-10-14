@@ -114,7 +114,7 @@
   </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>수다택시 K v7.7.1</title>
+  <title>수다택시 K v7.7.2</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -549,13 +549,14 @@
     </div>
     
     <div class="backup-section">
-      <div class="backup-title" style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-        <div style="display: flex; align-items: center; gap: 6px;">
-          ⏱️ 오늘 운행 현황 <span id="driving-current-status" style="color: var(--stat-label); font-size: 13px; font-weight: 800;">(운행 대기)</span>
+      <div class="backup-title" style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 4px;">
+        <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap; flex: 1; min-width: 0;">
+          <span style="white-space: nowrap;">⏱️ 오늘 운행 현황</span>
+          <span id="driving-current-status" style="color: var(--stat-label); font-size: 13px; font-weight: 800; white-space: nowrap;">(운행 대기)</span>
         </div>
-        <div style="display: flex; gap: 4px;">
-          <button id="btn-restore-today" style="background:#E0E7FF; color:#4338CA; border:1px solid #818CF8; border-radius:4px; padding:2px 6px; font-size:9px; font-weight:700; cursor:pointer;" onclick="restoreTodayRecordFromBackup()">직전 복구</button>
-          <button id="btn-reset-today" style="background:#FEE2E2; color:#DC2626; border:1px solid #F87171; border-radius:4px; padding:2px 6px; font-size:9px; font-weight:700; cursor:pointer;">기록 리셋</button>
+        <div style="display: flex; flex-direction: column; gap: 4px; flex-shrink: 0;">
+          <button id="btn-restore-today" style="background:#E0E7FF; color:#4338CA; border:1px solid #818CF8; border-radius:4px; padding:3px 6px; font-size:10px; font-weight:800; cursor:pointer; width: 64px; text-align: center; line-height: 1.1;" onclick="restoreTodayRecordFromBackup()">직전 복구</button>
+          <button id="btn-reset-today" style="background:#FEE2E2; color:#DC2626; border:1px solid #F87171; border-radius:4px; padding:3px 6px; font-size:10px; font-weight:800; cursor:pointer; width: 64px; text-align: center; line-height: 1.1;">기록 리셋</button>
         </div>
       </div>
       <div id="driving-time-range" style="font-size: 11px; color: #A3A3A3; margin-top: -6px; margin-bottom: 6px; font-weight: 700; letter-spacing: -0.5px;">⏰ 운행 시간: 데이터 없음</div>
@@ -764,7 +765,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.7.1"; 
+  const BUILD_VERSION = "v7.7.2"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -2857,12 +2858,48 @@
     const resetBtn = document.getElementById('btn-reset-today');
     if (resetBtn) {
        resetBtn.addEventListener('click', () => {
-          if (confirm('오늘의 운행 기록(시간)을 초기화하시겠습니까?\n(매출 기록과 콜 로그는 유지됩니다)')) {
-             saveTodayDrivingData({ totalDrive: 0, passengerBoard: 0, emptyCar: 0, breakTime: 0, firstStartTime: null, lastEndTime: null });
-             drivingState.isDriving = false; drivingState.isBreak = false; drivingState.isPassengerBoarded = false;
-             saveDrivingState(); updateDrivingUI(); stopDrivingTimer();
-             showToast('기록이 초기화되었습니다.');
+          const todayData = getTodayDrivingData();
+          let target = null;
+          let isCurrent = false;
+
+          if (todayData.currentSession) {
+              target = todayData.currentSession;
+              isCurrent = true;
+          } else if (todayData.sessions && todayData.sessions.length > 0) {
+              target = todayData.sessions[todayData.sessions.length - 1];
+          }
+
+          if (!target) {
+              showToast('삭제할 직전 운행 기록이 없습니다.');
+              return;
+          }
+
+          if (confirm('방금 측정된 "마지막 운행 세션"만 부분 취소하시겠습니까?\\n(잘못 측정된 해당 시간만 오늘 총합에서 제외됩니다)')) {
+             todayData.totalDrive = Math.max(0, (todayData.totalDrive || 0) - (target.total || 0));
+             todayData.passengerBoard = Math.max(0, (todayData.passengerBoard || 0) - (target.board || 0));
+             todayData.emptyCar = Math.max(0, (todayData.emptyCar || 0) - (target.empty || 0));
+             todayData.breakTime = Math.max(0, (todayData.breakTime || 0) - (target.break || 0));
+             
+             if (isCurrent) {
+                 delete todayData.currentSession;
+                 // 현재 켜져있던 운행을 강제로 종료
+                 drivingState.isDriving = false; 
+                 drivingState.isBreak = false; 
+                 drivingState.isPassengerBoarded = false;
+                 saveDrivingState(); 
+                 updateDrivingUI(); 
+                 stopDrivingTimer();
+             } else {
+                 todayData.sessions.pop(); // 리스트에서 마지막 1개만 제거
+                 if (todayData.sessions.length === 0 && !todayData.currentSession) {
+                     todayData.firstStartTime = null;
+                     todayData.lastEndTime = null;
+                 }
+             }
+
+             saveTodayDrivingData(todayData);
              renderDrivingLogStats();
+             showToast('✅ 직전 운행 기록이 성공적으로 취소되었습니다.');
           }
        });
     }
