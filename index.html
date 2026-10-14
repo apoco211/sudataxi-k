@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>수다택시 K v7.8.0 AI Upgraded</title>
+  <title>수다택시 K v7.8.2 AI Upgraded</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -658,7 +658,7 @@
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.8.0 AI Upgraded"; 
+  const BUILD_VERSION = "v7.8.2 AI Upgraded"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -1276,33 +1276,46 @@
   async function checkIsInsideWisuRealtime(lat, lng) {
     return new Promise((resolve) => {
       const fallbackResolve = () => {
-        let isWisu = false;
-        if (lat >= 37.435) {
-            currentRegionName = "서울";
-        } else {
-            let closestWisuDist = Infinity;
-            WISU_BOUNDARY_POINTS.forEach(bp => {
-                let d = getStraightDistanceKm(lat, lng, bp.lat, bp.lng);
-                if (d < closestWisuDist) closestWisuDist = d;
-            });
-            let closestOutsideDist = Infinity;
-            const outsideHubs = [
-                 { lat: 37.2995, lng: 126.9710 }, { lat: 37.3025, lng: 126.8654 }, { lat: 37.3168, lng: 126.8232 }
-            ];
-            outsideHubs.forEach(hp => {
-                let d = getStraightDistanceKm(lat, lng, hp.lat, hp.lng);
-                if (d < closestOutsideDist) closestOutsideDist = d;
-            });
+        let isWisu = true;
+        let currentWisuRegion = "안양";
 
-            if (closestWisuDist < closestOutsideDist && closestWisuDist <= 1.0) {
-                 isWisu = true;
-                 if (lat > 37.39) currentRegionName = "안양/과천";
-                 else if (lng < 126.94) currentRegionName = "군포";
-                 else currentRegionName = "의왕/안양";
-            } else {
-                 if (lng >= 126.93) currentRegionName = "수원";
-                 else currentRegionName = "안산";
+        let minWisuDist = Infinity;
+        const wisuCenters = [
+            { name: "안양/과천", lat: 37.4048, lng: 126.9767 }, 
+            { name: "안양/과천", lat: 37.3942, lng: 126.9638 }, 
+            { name: "의왕/안양", lat: 37.4013, lng: 126.9222 }, 
+            { name: "군포", lat: 37.3554, lng: 126.9331 }      
+        ];
+        wisuCenters.forEach(pt => {
+            let d = getStraightDistanceKm(lat, lng, pt.lat, pt.lng);
+            if (d < minWisuDist) {
+                minWisuDist = d;
+                currentWisuRegion = pt.name;
             }
+        });
+
+        let minOutsideDist = Infinity;
+        let currentOutsideRegion = "관외지역";
+        const outsideCenters = [
+             { name: "수원", lat: 37.2662, lng: 127.0001 },
+             { name: "안산", lat: 37.3168, lng: 126.8232 },
+             { name: "서울", lat: 37.4765, lng: 126.9816 },
+             { name: "성남", lat: 37.3827, lng: 127.1189 }
+        ];
+        outsideCenters.forEach(pt => {
+            let d = getStraightDistanceKm(lat, lng, pt.lat, pt.lng);
+            if (d < minOutsideDist) {
+                minOutsideDist = d;
+                currentOutsideRegion = pt.name;
+            }
+        });
+
+        if (lat >= 37.435) {
+            isWisu = false; currentRegionName = "서울 (GPS 자체추정)";
+        } else if (minOutsideDist < minWisuDist) {
+            isWisu = false; currentRegionName = currentOutsideRegion + " (GPS 자체추정)";
+        } else {
+            isWisu = true; currentRegionName = currentWisuRegion + " (GPS 자체추정)";
         }
         resolve(isWisu);
       };
@@ -1315,7 +1328,7 @@
             
             let isStrictOutside = result.some(r => {
                 const r2 = r.region_2depth_name || ""; 
-                return r2.includes("수원") || r2.includes("안산") || r2.includes("서울") || r2.includes("시흥") || r2.includes("용인") || r2.includes("화성") || r2.includes("성남");
+                return r2.includes("수원") || r2.includes("안산") || r2.includes("서울") || r2.includes("시흥") || r2.includes("용인") || r2.includes("화성") || r2.includes("성남") || r2.includes("광명");
             });
 
             if (isStrictOutside) {
@@ -1326,7 +1339,9 @@
                   return r2.includes("안양") || r2.includes("군포") || r2.includes("의왕") || r2.includes("과천") ||
                          r1.includes("안양") || r1.includes("군포") || r1.includes("의왕") || r1.includes("과천");
                 });
-                resolve(isWisu);
+                
+                if (isWisu) resolve(true);
+                else fallbackResolve(); 
             }
           } else {
             fallbackResolve();
@@ -1378,12 +1393,6 @@
 
   function formatMMSS(sec) { return `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2, '0')}`; }
   function formatHHMMSS(sec) { return `${String(Math.floor(sec/3600)).padStart(2,'0')}:${String(Math.floor((sec%3600)/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`; }
-
-  function getBarColor(rate) {
-    if (rate >= 50) return '#22C55E';
-    if (rate >= 40) return '#F59E0B';
-    return '#EF4444';
-  }
 
   function updateHeaderTitle(nowDate, isHoliday, holidayName) {
     const headerEl = document.getElementById('app-header-title');
@@ -1605,21 +1614,19 @@
     }
   }
 
-  // --- [AI Upgraded] 날씨/고단가콜 스팟 점수 산출 ---
   async function calculatePureSpotScore(item, weatherData, nowHour) {
     let score = 0;
-    if (item.isHighValue) score += 65; // 고단가 이력 콜에 압도적 가중치
+    if (item.isHighValue) score += 65; 
     else if (item.isUserCallLogCandidate) score += 35; 
     else if (item.isCustom) score += 20; 
     else if (item.isLiveKakao) score += 15;
-    
     score += await getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
     
-    if (weatherData && weatherData.isRainOrSnow) {
+    if (weatherData && weatherData.isRainOrSnow) { 
         const isShelterSpot = (item.name.includes("병원") || item.name.includes("백화점") || item.name.includes("마트") || item.name.includes("역"));
         score = score * weatherData.weatherMultiplier + (isShelterSpot ? 45 : 10);
     }
-    
+
     let matchCount = 0; let isTimeMatch = false;
     JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]').forEach(log => {
       const logLat = Number(log.lat); const logLng = Number(log.lng);
@@ -1638,7 +1645,7 @@
     let clusters = [];
     logs.forEach(log => {
       const logLat = Number(log.lat); const logLng = Number(log.lng);
-      let isHigh = log.isHighValue === true;
+      let isHigh = log.isHighValue === true; 
       let hourDiff = Math.abs(nowHour - (new Date(log.timestamp||log.time).getHours()));
       let isTimeMatch = (hourDiff > 12 ? 24 - hourDiff : hourDiff) <= 1;
       let found = clusters.find(c => getStraightDistanceKm(c.lat, c.lng, logLat, logLng) <= 0.25);
@@ -1683,7 +1690,6 @@
       renderDrivingLogStats();
     }
   }
-
   async function searchRestrooms() {
     if (!currentPos) { showToast("위치를 탐색해주세요."); return; }
     
@@ -1802,7 +1808,6 @@
     });
   }
 
-  // --- [AI Upgraded] 관외 복귀 벡터 & 대중교통 연산 결합 ---
   async function calculateAndRender() {
     if (!currentPos) return;
     const logEl = document.getElementById('pipeline-log');
@@ -1833,7 +1838,12 @@
       directTargetDist = roadToBp.distanceKm;
       
       targetBoundaryCardData = { 
-        ...closestBp, dist: directTargetDist, estimatedTimeMin: roadToBp.durationMin, score: 100, isTargetBoundary: true, geometryCoords: roadToBp.geometryCoords
+        ...closestBp, 
+        dist: directTargetDist, 
+        estimatedTimeMin: roadToBp.durationMin, 
+        score: 100, 
+        isTargetBoundary: true,
+        geometryCoords: roadToBp.geometryCoords
       };
       targetBearing = getBearing(currentPos.lat, currentPos.lng, closestBp.lat, closestBp.lng);
 
@@ -1841,7 +1851,11 @@
          const midLat = (currentPos.lat + closestBp.lat) / 2;
          const midLng = (currentPos.lng + closestBp.lng) / 2;
          const midKakaoHotspots = await fetchLiveKakaoHotspots(midLat, midLng);
-         midKakaoHotspots.forEach(mp => { if (!allLiveHotspots.some(hp => hp.name === mp.name)) allLiveHotspots.push(mp); });
+         midKakaoHotspots.forEach(mp => {
+           if (!allLiveHotspots.some(hp => hp.name === mp.name)) {
+             allLiveHotspots.push(mp);
+           }
+         });
       }
     }
 
@@ -1858,7 +1872,6 @@
       let pureRes = await calculatePureSpotScore(item, weatherData, nowHour);
       let preliminaryScore = pureRes.score;
 
-      // 대중교통 가중치 (AI 추가)
       const transitSurge = getPublicTransitSurgeBonus(item, new Date());
       preliminaryScore += transitSurge;
 
@@ -1873,9 +1886,11 @@
         } else {
            if (crossTrackDist > 3.5) continue; 
            if (deltaAngle > 90) continue; 
+
            const distToTarget = getStraightDistanceKm(item.lat, item.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng);
            const detourKm = (straightDist + distToTarget) - directTargetDist;
            if (detourKm > Math.min(5.0, directTargetDist * 0.45 + 2.0)) continue; 
+           
            if (deltaAngle <= 45) preliminaryScore += 25;
            else if (deltaAngle > 60) preliminaryScore -= 20;
         }
@@ -2090,6 +2105,7 @@
       let customRestrooms = JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]');
       let logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
       let customHotspots = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
+      
       let needSave = false;
 
       for (let i=0;i<customRestrooms.length;i++) {
@@ -2142,7 +2158,6 @@
     } catch(e) {}
   }
 
-  // --- [AI Upgraded] 고단가 콜 분리 저장 로직 ---
   async function saveCurrentCallLocation(isHighValue = false) {
     if (!currentPos) { showToast('위치 탐색이 필요합니다.'); return; }
     
@@ -2157,7 +2172,7 @@
       lng: currentPos.lng, 
       mode: currentMode,
       region: regionShort,
-      isHighValue: isHighValue 
+      isHighValue: isHighValue
     });
     
     localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
@@ -2273,6 +2288,462 @@
       </div>
     `).join('');
     document.querySelectorAll('.delete-log-item-btn').forEach(btn => btn.addEventListener('click', (e) => deleteCallLog(e.currentTarget.dataset.id, e.currentTarget.dataset.ts)));
+  }
+
+  function getBarColor(rate) {
+    if (rate >= 50) return '#22C55E';
+    if (rate >= 40) return '#F59E0B';
+    return '#EF4444';
+  }
+
+  function renderDrivingLogStats() {
+    const today = getTodayDrivingData();
+    const todayTotal = today.totalDrive || 0; 
+    const todayBoard = today.passengerBoard || 0; 
+    const todayEmpty = today.emptyCar || 0;
+    
+    const timeRangeEl = document.getElementById('driving-time-range');
+    const sessionListEl = document.getElementById('driving-session-list');
+    
+    if (timeRangeEl) {
+      if (today.firstStartTime && todayTotal > 0) {
+         const startD = new Date(today.firstStartTime);
+         const endD = today.lastEndTime ? new Date(today.lastEndTime) : new Date();
+         const fTime = (d) => `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+         timeRangeEl.innerText = `⏰ 운행 시간: ${fTime(startD)} ~ ${fTime(endD)}`;
+      } else {
+         timeRangeEl.innerText = `⏰ 운행 시간: 데이터 없음`;
+      }
+    }
+
+    if (sessionListEl) {
+       sessionListEl.innerHTML = '';
+       let sessionHtml = '';
+       const fTime = (ts) => {
+           if (!ts) return '진행중';
+           const d = new Date(ts);
+           return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+       };
+       
+       let sessionsToRender = (today.sessions || []).slice();
+       if (today.currentSession) sessionsToRender.push(today.currentSession);
+       
+       sessionsToRender.forEach((s, idx) => {
+           if (!s.start) return;
+           const sTime = fTime(s.start);
+           const eTime = fTime(s.end);
+           const durationStr = formatHHMMSS(s.total || 0).substring(0, 5); 
+           
+           sessionHtml += `
+             <div class="session-item">
+               <div class="session-time">
+                 <span style="color:#8A8A8A; margin-right:4px;">${idx+1}.</span> ${sTime} ~ ${eTime} 
+                 <span class="session-duration">[${durationStr}]</span>
+               </div>
+               ${s.end ? `<button class="session-del-btn" onclick="deleteSession(${s.id})">❌취소</button>` : `<span style="font-size:9px; color:#22C55E; font-weight:900;">진행중</span>`}
+             </div>
+           `;
+       });
+       
+       if (sessionHtml) {
+           sessionListEl.innerHTML = sessionHtml + `<div style="text-align:right; font-size:11px; font-weight:900; color:var(--main-text); margin-top:4px;">[총 합산운행] ${formatHHMMSS(todayTotal).substring(0, 5)}</div>`;
+       }
+    }
+    
+    document.getElementById('stat-today-total').innerText = formatHHMMSS(todayTotal);
+    document.getElementById('stat-today-board').innerText = formatHHMMSS(todayBoard);
+    document.getElementById('stat-today-empty').innerText = formatHHMMSS(todayEmpty);
+    document.getElementById('stat-today-break').innerText = formatHHMMSS(today.breakTime || 0);
+
+    let todayBoardPct = 0;
+    if (todayTotal > 0) { todayBoardPct = ((todayBoard / todayTotal) * 100); }
+    
+    document.getElementById('kpi-today-rate').innerText = `${todayBoardPct.toFixed(1)}%`;
+    document.getElementById('kpi-today-rate').style.color = getBarColor(todayBoardPct);
+    document.getElementById('kpi-today-fill').style.width = `${Math.min(todayBoardPct, 100)}%`;
+    document.getElementById('kpi-today-fill').style.background = getBarColor(todayBoardPct);
+
+    const feedbackIcon = document.getElementById('kpi-feedback-icon');
+    const feedbackText = document.getElementById('kpi-feedback-text');
+    
+    if (todayTotal < 1800) {
+      feedbackIcon.innerText = "ℹ️";
+      feedbackText.innerText = "아직 운행 데이터가 충분하지 않습니다.";
+    } else if (todayBoardPct >= 50) {
+      feedbackIcon.innerText = "🔥";
+      feedbackText.innerText = "고효율 운행 중입니다! 이 페이스라면 일찍 퇴근할 수 있습니다.";
+    } else if (todayBoardPct >= 40) {
+      feedbackIcon.innerText = "⚡";
+      feedbackText.innerText = "무난한 운행입니다. 상권과 주거지 위주로 조금 더 집중해 보세요.";
+    } else {
+      feedbackIcon.innerText = "⚠️";
+      feedbackText.innerText = "공차 비율이 높습니다. 콜이 많은 핵심 상권이나 환승역으로 이동을 권장합니다.";
+    }
+
+    const records = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
+    const now = new Date();
+    const workNow = getWorkDate(now);
+    
+    const dayOfWeek = workNow.getDay();
+    const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; 
+    const weekStart = new Date(workNow.getFullYear(), workNow.getMonth(), workNow.getDate() - diffToMonday);
+    weekStart.setHours(0,0,0,0);
+
+    const monthStart = new Date(workNow.getFullYear(), workNow.getMonth(), 1);
+    monthStart.setHours(0,0,0,0);
+
+    let weeklyData = [
+      { label: '월', rev: 0, rate: 0, total: 0, count:0 }, { label: '화', rev: 0, rate: 0, total: 0, count:0 },
+      { label: '수', rev: 0, rate: 0, total: 0, count:0 }, { label: '목', rev: 0, rate: 0, total: 0, count:0 },
+      { label: '금', rev: 0, rate: 0, total: 0, count:0 }, { label: '토', rev: 0, rate: 0, total: 0, count:0 },
+      { label: '일', rev: 0, rate: 0, total: 0, count:0 }
+    ];
+
+    let monthlyData = [
+      { label: '1주차', rev: 0, rate: 0, total: 0, count:0 }, { label: '2주차', rev: 0, rate: 0, total: 0, count:0 },
+      { label: '3주차', rev: 0, rate: 0, total: 0, count:0 }, { label: '4주차', rev: 0, rate: 0, total: 0, count:0 },
+      { label: '5주차', rev: 0, rate: 0, total: 0, count:0 }
+    ];
+
+    Object.keys(records).forEach(k => {
+      const rec = records[k];
+      const driveSec = rec.totalDrive || 0; 
+      if (driveSec <= 0) return; 
+
+      const boardSec = rec.passengerBoard || 0; 
+      const estRev = Math.floor(boardSec / 60) * 700;
+      const rate = (boardSec / driveSec) * 100;
+
+      const dateParts = k.split('-'); 
+      const recDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+
+      if (recDate >= weekStart) {
+        let wIdx = recDate.getDay() === 0 ? 6 : recDate.getDay() - 1;
+        weeklyData[wIdx].rev += estRev;
+        weeklyData[wIdx].total += driveSec;
+        weeklyData[wIdx].rate += rate;
+        weeklyData[wIdx].count++;
+      }
+
+      if (recDate >= monthStart && recDate.getMonth() === workNow.getMonth()) {
+        let weekNum = Math.floor((recDate.getDate() - 1) / 7);
+        if (weekNum > 4) weekNum = 4;
+        monthlyData[weekNum].rev += estRev;
+        monthlyData[weekNum].total += driveSec;
+        monthlyData[weekNum].rate += rate;
+        monthlyData[weekNum].count++;
+      }
+    });
+
+    const weeklyChart = document.getElementById('weekly-chart');
+    if (weeklyChart) {
+      weeklyChart.innerHTML = '';
+      weeklyData.forEach(d => {
+        let finalRate = d.count > 0 ? Math.round(d.rate / d.count) : 0;
+        let heightPct = Math.min((d.rev / 400000) * 100, 100); 
+        let color = d.rev > 0 ? getBarColor(finalRate) : '#2A2A2A';
+        let text = d.rev > 0 ? `${finalRate}%` : '';
+        let timeStr = d.total > 0 ? `${Math.floor(d.total/3600)}h` : '-';
+
+        weeklyChart.innerHTML += `
+          <div class="chart-col">
+            <div class="chart-time-text">${timeStr}</div>
+            <div class="chart-bar-bg">
+              <div class="chart-bar-fill" style="height: ${heightPct}%; background-color: ${color};">
+                <span class="chart-bar-text">${text}</span>
+              </div>
+            </div>
+            <span class="chart-label">${d.label}</span>
+          </div>
+        `;
+      });
+    }
+
+    const monthlyChart = document.getElementById('monthly-chart');
+    if (monthlyChart) {
+      monthlyChart.innerHTML = '';
+      monthlyData.slice(0, 4).forEach(d => {
+        let finalRate = d.count > 0 ? Math.round(d.rate / d.count) : 0;
+        let heightPct = Math.min((d.rev / 1000000) * 100, 100); 
+        let color = d.rev > 0 ? getBarColor(finalRate) : '#2A2A2A';
+        let text = d.rev > 0 ? `${finalRate}%` : '';
+        let timeStr = d.count > 0 ? `${Math.floor((d.total/d.count)/3600)}h` : '-';
+
+        monthlyChart.innerHTML += `
+          <div class="chart-col">
+            <div class="chart-time-text">${timeStr}</div>
+            <div class="chart-bar-bg" style="max-width: 40px; height: 80px;">
+              <div class="chart-bar-fill" style="height: ${heightPct}%; background-color: ${color};">
+                <span class="chart-bar-text" style="font-size:11px;">${text}</span>
+              </div>
+            </div>
+            <span class="chart-label" style="margin-top: 4px;">${d.label}</span>
+          </div>
+        `;
+      });
+    }
+    
+    renderGoldenTimeInsights();
+  }
+
+  function renderGoldenTimeInsights() {
+     const chartEl = document.getElementById('golden-time-chart');
+     if (!chartEl) return;
+     
+     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+     if (logs.length === 0) {
+         chartEl.innerHTML = '<div style="width:100%; font-size:11px; color:var(--stat-label); text-align:center; padding: 40px 0;">탑승 기록이 없습니다.</div>';
+         return;
+     }
+
+     const buckets = Array.from({length: 12}, () => 0);
+     const labels = ['3', '5', '7', '9', '11', '13', '15', '17', '19', '21', '23', '1'];
+     const filter = window.goldenTimeFilter || 'weekday';
+
+     logs.forEach(log => {
+         const d = new Date(log.timestamp || log.time);
+         const dayOfWeek = d.getDay();
+         const isWeekendLog = (dayOfWeek === 0 || dayOfWeek === 6);
+         
+         if (filter === 'weekday' && isWeekendLog) return;
+         if (filter === 'weekend' && !isWeekendLog) return;
+
+         const h = d.getHours();
+         const adjustedH = h < 3 ? h + 24 : h;
+         const bucketIdx = Math.floor((adjustedH - 3) / 2);
+         
+         if (bucketIdx >= 0 && bucketIdx < 12) {
+             buckets[bucketIdx]++;
+         }
+     });
+
+     const maxCalls = Math.max(...buckets, 1);
+     
+     const svgWidth = 300;
+     const svgHeight = 70;
+     const topPad = 5; 
+     const drawingHeight = svgHeight - topPad;
+     
+     const pts = buckets.map((val, i) => ({
+         x: i * (svgWidth / 11),
+         y: svgHeight - (val / maxCalls) * drawingHeight
+     }));
+
+     let linePath = `M ${pts[0].x},${pts[0].y}`;
+     for (let i = 0; i < pts.length - 1; i++) {
+         const cp1x = pts[i].x + (pts[i+1].x - pts[i].x) / 2;
+         const cp2x = pts[i].x + (pts[i+1].x - pts[i].x) / 2;
+         linePath += ` C ${cp1x},${pts[i].y} ${cp2x},${pts[i+1].y} ${pts[i+1].x},${pts[i+1].y}`;
+     }
+     
+     const fillPath = `${linePath} L ${pts[pts.length-1].x},${svgHeight} L ${pts[0].x},${svgHeight} Z`;
+
+     let circlesHtml = pts.map((pt, i) => 
+         `<circle cx="${pt.x}" cy="${pt.y}" r="2.5" fill="var(--theme-bg-dark)" stroke="var(--theme-accent)" stroke-width="1.5" />`
+     ).join('');
+
+     let labelsHtml = buckets.map((count, idx) => {
+         const isPeak = (count === maxCalls && count > 0);
+         return `<div class="golden-time-label ${isPeak ? 'peak' : ''}">${labels[idx]}</div>`;
+     }).join('');
+
+     chartEl.innerHTML = `
+         <div class="golden-svg-wrapper">
+             <svg viewBox="0 0 ${svgWidth} ${svgHeight}" preserveAspectRatio="none" style="width: 100%; height: 100%; overflow: visible;">
+                 <defs>
+                     <linearGradient id="goldenGradient" x1="0" y1="0" x2="0" y2="1">
+                         <stop offset="0%" stop-color="var(--theme-accent)" stop-opacity="0.45"/>
+                         <stop offset="100%" stop-color="var(--theme-accent)" stop-opacity="0.0"/>
+                     </linearGradient>
+                 </defs>
+                 <path d="${fillPath}" fill="url(#goldenGradient)" />
+                 <path d="${linePath}" fill="none" stroke="var(--theme-accent)" stroke-width="2.5" stroke-linecap="round" />
+                 ${circlesHtml}
+             </svg>
+         </div>
+         <div class="golden-labels-wrapper">
+             ${labelsHtml}
+         </div>
+     `;
+  }
+
+  // --- V7.1 실매출 입력 로직 추가 ---
+  const inputRev = document.getElementById('input-rev');
+  const fill = document.getElementById('progress-fill');
+  const valPct = document.getElementById('val-pct');
+  const valRemain = document.getElementById('val-remain');
+  const valTime = document.getElementById('val-time');
+  const btnMic = document.getElementById('btn-mic');
+
+  const TARGET = 300000;
+  const HOURLY_RATE = 25000;
+
+  function calculateDailyRevenue() {
+    if(!inputRev) return;
+    let current = parseInt(inputRev.value) || 0;
+    let remain = Math.max(0, TARGET - current);
+    let pct = Math.min(100, (current / TARGET) * 100);
+    
+    if(fill) fill.style.width = pct + '%';
+    if(valPct) valPct.innerText = pct.toFixed(1) + '%';
+    if(valRemain) valRemain.innerText = remain.toLocaleString() + ' 원';
+    
+    if(valTime) {
+      if(remain === 0) {
+        valTime.innerText = "목표 달성 완료! 🎉";
+        valTime.style.color = "#FFC800";
+      } else {
+        let hrs = remain / HOURLY_RATE;
+        let h = Math.floor(hrs);
+        let m = Math.round((hrs - h) * 60);
+        
+        let tStr = "약 ";
+        if(h > 0) tStr += h + "시간 ";
+        if(m > 0) tStr += m + "분";
+        
+        valTime.innerText = tStr;
+        valTime.style.color = "#4ADE80";
+      }
+    }
+
+    localStorage.setItem('sudataxi_daily_rev', current.toString());
+  }
+
+  if(inputRev) inputRev.addEventListener('input', calculateDailyRevenue);
+
+  // 음성 인식 로직
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SpeechRecognition && btnMic) {
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'ko-KR';
+    
+    btnMic.addEventListener('click', () => {
+      btnMic.classList.add('recording');
+      recognition.start();
+    });
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      const numbersOnly = transcript.replace(/[^0-9]/g, '');
+      if (numbersOnly && inputRev) {
+        inputRev.value = numbersOnly;
+        calculateDailyRevenue();
+        showToast(`🎤 ${parseInt(numbersOnly).toLocaleString()}원 입력 완료`);
+      } else {
+        showToast("숫자를 인식하지 못했습니다.");
+      }
+    };
+
+    recognition.onend = () => btnMic.classList.remove('recording');
+    recognition.onerror = () => btnMic.classList.remove('recording');
+  }
+
+  function initDailyRevenue() {
+    if(!inputRev) return;
+    const savedRev = localStorage.getItem('sudataxi_daily_rev');
+    if (savedRev) {
+      inputRev.value = savedRev;
+    }
+    calculateDailyRevenue();
+  }
+
+
+  // --- 월간 시뮬레이터 로직 ---
+  function initSimulator() {
+    const today = new Date();
+    const currentDay = today.getDate();
+    const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    const firstDayOfWeek = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
+
+    const calGrid = document.getElementById('calendar-grid');
+    if (!calGrid) return;
+
+    calGrid.innerHTML = '';
+    for(let i=0; i<firstDayOfWeek; i++) {
+        calGrid.innerHTML += `<div></div>`;
+    }
+    
+    let simulatorData = JSON.parse(localStorage.getItem('sudataxi_sim_data') || '{"target":4000000, "current":0, "restDates":[]}');
+
+    for(let i=1; i<=daysInMonth; i++) {
+        const div = document.createElement('div');
+        div.className = 'cal-day';
+        div.innerText = i;
+        if (i < currentDay) {
+            div.classList.add('past');
+        } else {
+            if(simulatorData.restDates && simulatorData.restDates.includes(i)) {
+              div.classList.add('rest-day');
+            }
+            div.addEventListener('click', function() {
+                this.classList.toggle('rest-day');
+                calculateSimulatorTargets();
+            });
+        }
+        calGrid.appendChild(div);
+    }
+    
+    const inpTarget = document.getElementById('input-sim-target');
+    const inpCurr = document.getElementById('input-sim-current');
+    if(inpTarget) inpTarget.value = simulatorData.target || 4000000;
+    if(inpCurr) inpCurr.value = simulatorData.current || 0;
+    calculateSimulatorTargets();
+  }
+
+  function calculateSimulatorTargets() {
+    const targetEl = document.getElementById('input-sim-target');
+    const currEl = document.getElementById('input-sim-current');
+    if(!targetEl || !currEl) return;
+
+    const target = parseInt(targetEl.value) || 0;
+    const current = parseInt(currEl.value) || 0;
+    
+    const restElements = document.querySelectorAll('.cal-day.rest-day');
+    const selectedRestDays = restElements.length;
+    
+    const badge = document.getElementById('rest-day-count-badge');
+    if(badge) badge.innerText = `${selectedRestDays}일 선택됨`;
+
+    let activeRestDates = [];
+    restElements.forEach(el => activeRestDates.push(parseInt(el.innerText)));
+
+    localStorage.setItem('sudataxi_sim_data', JSON.stringify({
+      target: target, current: current, restDates: activeRestDates
+    }));
+
+    const today = new Date();
+    const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    const currentDay = today.getDate();
+    
+    const totalDaysLeft = (daysInMonth - currentDay) + 1; 
+    const workDaysLeft = Math.max(1, totalDaysLeft - selectedRestDays);
+    
+    const remainMoney = Math.max(0, target - current);
+    const dailyTarget = remainMoney / workDaysLeft;
+    
+    const hourlyRate = 25000;
+    const requiredHours = dailyTarget / hourlyRate;
+    const hr = Math.floor(requiredHours);
+    const min = Math.round((requiredHours - hr) * 60);
+
+    const resDays = document.getElementById('res-sim-days');
+    const resRemain = document.getElementById('res-sim-remain-money');
+    const resDaily = document.getElementById('res-sim-daily-target');
+    const resHours = document.getElementById('res-sim-daily-hours');
+
+    if(resDays) resDays.innerText = workDaysLeft;
+    if(resRemain) resRemain.innerText = remainMoney.toLocaleString();
+    if(resDaily) resDaily.innerText = Math.round(dailyTarget).toLocaleString();
+    
+    if (resHours) {
+        if (remainMoney === 0) {
+            resHours.innerText = "목표 달성 완료!";
+            resHours.style.color = "#FFC800";
+        } else {
+            resHours.innerText = `약 ${hr}시간 ${min}분`;
+            resHours.style.color = "#4ADE80";
+        }
+    }
   }
 
   function exportCallLogs() {
@@ -2424,12 +2895,13 @@
                  updateDrivingUI(); 
                  stopDrivingTimer();
              } else {
-                 todayData.sessions.pop();
+                 todayData.sessions.pop(); 
                  if (todayData.sessions.length === 0 && !todayData.currentSession) {
                      todayData.firstStartTime = null;
                      todayData.lastEndTime = null;
                  }
              }
+
              saveTodayDrivingData(todayData);
              renderDrivingLogStats();
              showToast('✅ 직전 운행 기록이 성공적으로 취소되었습니다.');
@@ -2437,7 +2909,7 @@
        });
     }
 
-    // --- [AI Upgraded] 고단가 콜 길게 누르기 이벤트 바인딩 ---
+    // --- 고단가 콜 길게 누르기 이벤트 바인딩 ---
     const saveCallBtn = document.getElementById('btn-save-call');
     let callPressTimer = null; let isCallLongPress = false; let hasTouch = false;
     
@@ -2475,14 +2947,19 @@
     timerBtn.addEventListener('touchcancel', () => { if (touchTimer) clearTimeout(touchTimer); });
     timerBtn.addEventListener('click', (e) => { if (isLongPress) { e.preventDefault(); isLongPress = false; return; } toggleTimer(); });
 
-    // --- 기능 초기화 (누락되었던 부분 100% 복원) ---
+    // Simulator Init & Events
     initSimulator();
     initDailyRevenue(); 
     
-    document.getElementById('btn-open-calendar').addEventListener('click', () => document.getElementById('calendar-modal').classList.add('active'));
-    document.getElementById('btn-apply-calendar').addEventListener('click', () => document.getElementById('calendar-modal').classList.remove('active'));
-    document.getElementById('input-sim-target').addEventListener('input', calculateSimulatorTargets);
-    document.getElementById('input-sim-current').addEventListener('input', calculateSimulatorTargets);
+    const btnOpenCal = document.getElementById('btn-open-calendar');
+    const btnApplyCal = document.getElementById('btn-apply-calendar');
+    if(btnOpenCal) btnOpenCal.addEventListener('click', () => document.getElementById('calendar-modal').classList.add('active'));
+    if(btnApplyCal) btnApplyCal.addEventListener('click', () => document.getElementById('calendar-modal').classList.remove('active'));
+    
+    const inpSimT = document.getElementById('input-sim-target');
+    const inpSimC = document.getElementById('input-sim-current');
+    if(inpSimT) inpSimT.addEventListener('input', calculateSimulatorTargets);
+    if(inpSimC) inpSimC.addEventListener('input', calculateSimulatorTargets);
 
     window.goldenTimeFilter = 'weekday';
 
