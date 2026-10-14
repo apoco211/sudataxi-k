@@ -939,13 +939,24 @@
 
   function executeAutoBackup() {
     try {
-      localStorage.setItem('sudataxi_auto_backup', JSON.stringify({
+      const currentRecords = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
+      const backupData = {
         call_logs: JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]'),
         custom_hotspots: JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]'),
         custom_restrooms: JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]'),
-        driving_records: JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}'),
+        driving_records: currentRecords,
         timestamp: new Date().toISOString()
-      }));
+      };
+      
+      // 1. 기본 10분 백업 (무조건 저장)
+      localStorage.setItem('sudataxi_auto_backup', JSON.stringify(backupData));
+      
+      // 2. [추가] 안전 백업: 운행 시간이 0(리셋)이 아닐 때만 별도 보관 (덮어쓰기 방지)
+      const todayKey = getTodayKey();
+      const todayData = currentRecords[todayKey];
+      if (todayData && (todayData.totalDrive || 0) > 0) {
+          localStorage.setItem('sudataxi_safe_backup', JSON.stringify(backupData));
+      }
     } catch(e) {}
   }
 
@@ -958,11 +969,15 @@
   function saveDrivingState() { localStorage.setItem('sudataxi_driving_state', JSON.stringify(drivingState)); }
 
   function restoreTodayRecordFromBackup() {
-    const backup = JSON.parse(localStorage.getItem('sudataxi_auto_backup') || '{}');
-    if (backup.driving_records) {
+    // 1순위: 리셋 전 데이터가 영구 보존된 '안전 백업', 2순위: 일반 10분 백업
+    let backup = JSON.parse(localStorage.getItem('sudataxi_safe_backup') || 'null');
+    if (!backup) backup = JSON.parse(localStorage.getItem('sudataxi_auto_backup') || '{}');
+    
+    if (backup && backup.driving_records) {
       const key = getTodayKey();
-      if (backup.driving_records[key]) {
-        if (confirm('자동 백업된 직전(최대 10분 전) 운행 기록으로 복구하시겠습니까?\\n(실수로 날아간 기록을 복원합니다)')) {
+      // 복원하려는 데이터에 실제 운행 시간이 1초라도 있어야만 유효한 백업으로 인정
+      if (backup.driving_records[key] && (backup.driving_records[key].totalDrive || 0) > 0) {
+        if (confirm('가장 최근에 기록된(리셋 전) 운행 데이터로 복구하시겠습니까?')) {
           const records = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
           records[key] = backup.driving_records[key];
           localStorage.setItem('sudataxi_driving_records', JSON.stringify(records));
@@ -972,7 +987,7 @@
         return;
       }
     }
-    showToast('❌ 복원할 백업 데이터가 없습니다.');
+    showToast('❌ 복원할 유효한 백업 데이터(운행 기록)가 없습니다.');
   }
 
   function deleteSession(id) {
