@@ -365,7 +365,7 @@
     </div>
   </div>
 
-  <div class="loc-bar">
+  <div class="loc-bar" id="loc-bar">
     <span id="loc-text">📍 실시간 GPS 위치 수신 대기 중...</span>
     <button class="refresh-btn" id="btn-refresh">⟳</button>
   </div>
@@ -1475,22 +1475,26 @@
     const mainGrp = document.getElementById('main-btn-group');
     const pipeLog = document.getElementById('pipeline-log');
     const cList = document.getElementById('card-list');
+    const locBar = document.getElementById('loc-bar') || document.querySelector('.loc-bar');
     
     if (tab === 1) {
       if (mainGrp) mainGrp.style.display = 'flex'; if (pipeLog) pipeLog.style.display = 'block'; if (cList) cList.style.display = 'flex';
+      if (locBar) locBar.style.display = 'flex';
       executeSearch();
     } else if (tab === 2) {
       if (mainGrp) mainGrp.style.display = 'none'; if (pipeLog) pipeLog.style.display = 'none'; if (cList) cList.style.display = 'none';
+      if (locBar) locBar.style.display = 'flex';
       renderStrategyTab();
     } else if (tab === 3) {
       if (mainGrp) mainGrp.style.display = 'none'; if (pipeLog) pipeLog.style.display = 'none'; if (cList) cList.style.display = 'none';
+      if (locBar) locBar.style.display = 'flex';
       renderCallMapView();
     } else if (tab === 4) {
       if (mainGrp) mainGrp.style.display = 'none'; if (pipeLog) pipeLog.style.display = 'none'; if (cList) cList.style.display = 'none';
+      if (locBar) locBar.style.display = 'none';
       renderDrivingLogStats();
     }
   }
-
   async function searchRestrooms() {
     if (!currentPos) { showToast("위치를 탐색해주세요."); return; }
     
