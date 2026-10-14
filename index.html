@@ -114,7 +114,7 @@
   </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>수다택시 K v7.7</title>
+  <title>수다택시 K v7.7.1</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -764,7 +764,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.7"; 
+  const BUILD_VERSION = "v7.7.1"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -1329,8 +1329,8 @@
                 if (d < closestOutsideDist) closestOutsideDist = d;
             });
 
-            // 관내 경계가 관외 거점보다 가깝거나, 관내 경계 반경 3.5km 이내면 관내로 판정
-            if (closestWisuDist < closestOutsideDist || closestWisuDist <= 3.5) {
+            // [수정] 3.5km 컷은 너무 넓어 수원을 관내로 오인함. (1.0km 이내일 때만 관내로 좁힘)
+            if (closestWisuDist < closestOutsideDist && closestWisuDist <= 1.0) {
                  isWisu = true;
                  if (lat > 37.39) currentRegionName = "안양/과천";
                  else if (lng < 126.94) currentRegionName = "군포";
@@ -1348,12 +1348,23 @@
         geocoder.coord2RegionCode(lng, lat, (result, status) => {
           if (status === kakao.maps.services.Status.OK && result && result.length > 0) {
             if (result[0]) currentRegionName = `${result[0].region_1depth_name} ${result[0].region_2depth_name || ''} ${result[0].region_3depth_name || ''}`.trim();
-            let isWisu = result.some(r => {
-              const r2 = r.region_2depth_name || ""; const r1 = r.region_1depth_name || "";
-              return r2.includes("안양") || r2.includes("군포") || r2.includes("의왕") || r2.includes("과천") ||
-                     r1.includes("안양") || r1.includes("군포") || r1.includes("의왕") || r1.includes("과천");
+            
+            // [수정] 수원, 안산, 서울, 용인, 화성, 성남 등 명백한 관외 주소가 찍히면 무조건 관외(Mode 2)로 강제 판정
+            let isStrictOutside = result.some(r => {
+                const r2 = r.region_2depth_name || ""; 
+                return r2.includes("수원") || r2.includes("안산") || r2.includes("서울") || r2.includes("시흥") || r2.includes("용인") || r2.includes("화성") || r2.includes("성남");
             });
-            resolve(isWisu);
+
+            if (isStrictOutside) {
+                resolve(false);
+            } else {
+                let isWisu = result.some(r => {
+                  const r2 = r.region_2depth_name || ""; const r1 = r.region_1depth_name || "";
+                  return r2.includes("안양") || r2.includes("군포") || r2.includes("의왕") || r2.includes("과천") ||
+                         r1.includes("안양") || r1.includes("군포") || r1.includes("의왕") || r1.includes("과천");
+                });
+                resolve(isWisu);
+            }
           } else {
             fallbackResolve();
           }
