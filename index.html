@@ -114,7 +114,7 @@
   </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>수다택시 K v7.7.2</title>
+  <title>수다택시 K v7.7.3</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -765,7 +765,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.7.2"; 
+  const BUILD_VERSION = "v7.7.3"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -1890,17 +1890,19 @@
       let preliminaryScore = pureRes.score;
 
       if (!inWisu && targetBoundaryCardData) {
-        const crossTrackDist = getCrossTrackDistanceKm(currentPos.lat, currentPos.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng, item.lat, item.lng);
-        if (crossTrackDist > 3.5) continue; 
-
         let candBearing = getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng);
         let deltaAngle = getAngleDelta(candBearing, targetBearing);
-        if (deltaAngle > 100) continue; 
+        const crossTrackDist = getCrossTrackDistanceKm(currentPos.lat, currentPos.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng, item.lat, item.lng);
 
+        // [핵심 수정] 반경 2.5km 이내의 근접 핫플은 역방향(뒤쪽)이더라도 절대 버리지 않고 무조건 포함!
         if (straightDist <= 2.5) {
-           preliminaryScore += 45; 
-           if (deltaAngle > 60) preliminaryScore -= 10;
+           preliminaryScore += 50; 
+           if (deltaAngle > 90) preliminaryScore -= 10; // 역방향이면 삭제하지 않고 점수만 살짝 깎음
         } else {
+           // 2.5km보다 먼 곳은, 복귀하는 방향에 맞는지 엄격히 검사
+           if (crossTrackDist > 3.5) continue; 
+           if (deltaAngle > 90) continue; // 완전히 역방향이면 버림
+
            const distToTarget = getStraightDistanceKm(item.lat, item.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng);
            const detourKm = (straightDist + distToTarget) - directTargetDist;
            if (detourKm > Math.min(5.0, directTargetDist * 0.45 + 2.0)) continue; 
