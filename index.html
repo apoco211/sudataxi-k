@@ -21,7 +21,7 @@
   </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>수다택시 K v7.5</title>
+  <title>수다택시 K v7.6</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -553,10 +553,29 @@
     </div>
 
     <!-- 요일/시간대별 콜 발생 통계 인사이트 -->
+    <style>
+      .golden-toggle-group { display: flex; gap: 2px; background: var(--btn-idle-bg); padding: 2px; border-radius: 6px; border: 1px solid var(--btn-idle-border); }
+      .golden-toggle-btn { background: transparent; color: var(--btn-idle-text); font-size: 9px; font-weight: 800; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; transition: all 0.2s; }
+      .golden-toggle-btn.active { background: var(--theme-accent); color: var(--theme-text-on-accent); box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+      .golden-chart-container { display: flex; justify-content: space-between; align-items: flex-end; height: 120px; background: rgba(0,0,0,0.1); border: 1px solid var(--stat-border); border-radius: 8px; padding: 6px 4px 0 4px; gap: 2px; overflow-x: auto; }
+      body.theme-day .golden-chart-container { background: #F9FAFB; }
+      .golden-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; min-width: 22px; height: 100%; gap: 4px; }
+      .golden-dot-area { display: flex; flex-wrap: wrap-reverse; justify-content: center; align-content: flex-start; gap: 2px; width: 100%; max-height: 95px; overflow: hidden; }
+      .golden-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--theme-accent); box-shadow: 0 0 2px rgba(0,0,0,0.3); }
+      body.theme-day .golden-dot { box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+      .golden-time-label { font-size: 9px; font-weight: 700; color: var(--stat-label); text-align: center; font-family: monospace; }
+      .golden-time-label.peak { color: var(--theme-accent); font-weight: 900; }
+    </style>
     <div class="backup-section">
-      <div class="backup-title" style="margin-bottom: 8px;">💡 나의 골든타임 분석</div>
-      <div style="font-size: 10px; color: var(--stat-label); margin-bottom: 8px;">내 누적 탑승 기록 기반으로 가장 콜이 많았던 시간대입니다.</div>
-      <div id="best-call-times-list" style="display: flex; flex-direction: column; gap: 6px;">
+      <div class="backup-title" style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+        <span>💡 나의 골든타임 분석</span>
+        <div class="golden-toggle-group">
+          <button class="golden-toggle-btn active" id="btn-golden-weekday" onclick="window.goldenTimeFilter='weekday'; document.getElementById('btn-golden-weekday').classList.add('active'); document.getElementById('btn-golden-weekend').classList.remove('active'); renderGoldenTimeInsights();">평일</button>
+          <button class="golden-toggle-btn" id="btn-golden-weekend" onclick="window.goldenTimeFilter='weekend'; document.getElementById('btn-golden-weekend').classList.add('active'); document.getElementById('btn-golden-weekday').classList.remove('active'); renderGoldenTimeInsights();">주말·휴일</button>
+        </div>
+      </div>
+      <div style="font-size: 10px; color: var(--stat-label); margin-bottom: 8px; text-align: center;">새벽 3시 ~ 익일 3시 (2시간 단위 누적 탑승)</div>
+      <div id="golden-time-chart" class="golden-chart-container">
         <!-- JS로 렌더링 -->
       </div>
     </div>
@@ -650,7 +669,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.5"; 
+  const BUILD_VERSION = "v7.6"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -2248,38 +2267,55 @@
   }
 
   function renderGoldenTimeInsights() {
-     const listEl = document.getElementById('best-call-times-list');
-     if (!listEl) return;
+     const chartEl = document.getElementById('golden-time-chart');
+     if (!chartEl) return;
      
      const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
-     if (logs.length < 5) {
-         listEl.innerHTML = '<div style="font-size:11px; color:var(--stat-label); text-align:center; padding: 10px;">데이터가 부족합니다. 탑승 기록을 더 쌓아주세요.</div>';
+     if (logs.length === 0) {
+         chartEl.innerHTML = '<div style="width:100%; font-size:11px; color:var(--stat-label); text-align:center; padding: 40px 0;">탑승 기록이 없습니다.</div>';
          return;
      }
 
-     const daysMap = ['일', '월', '화', '수', '목', '금', '토'];
-     let stats = {};
+     const buckets = Array.from({length: 12}, () => 0);
+     const labels = ['3', '5', '7', '9', '11', '13', '15', '17', '19', '21', '23', '1'];
+     const filter = window.goldenTimeFilter || 'weekday';
 
      logs.forEach(log => {
          const d = new Date(log.timestamp || log.time);
-         const dayStr = daysMap[d.getDay()];
-         const hourStr = `${d.getHours()}시`;
-         const key = `${dayStr}요일 ${hourStr}`;
-         if (!stats[key]) stats[key] = 0;
-         stats[key]++;
+         const dayOfWeek = d.getDay();
+         const isWeekendLog = (dayOfWeek === 0 || dayOfWeek === 6);
+         
+         if (filter === 'weekday' && isWeekendLog) return;
+         if (filter === 'weekend' && !isWeekendLog) return;
+
+         const h = d.getHours();
+         // 새벽 3시를 시작점으로 맞추기 위한 보정
+         const adjustedH = h < 3 ? h + 24 : h;
+         const bucketIdx = Math.floor((adjustedH - 3) / 2);
+         
+         if (bucketIdx >= 0 && bucketIdx < 12) {
+             buckets[bucketIdx]++;
+         }
      });
 
-     const sorted = Object.entries(stats).sort((a, b) => b[1] - a[1]).slice(0, 3);
+     const maxCalls = Math.max(...buckets, 1);
+     let html = '';
      
-     listEl.innerHTML = sorted.map((item, idx) => `
-       <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,200,0,0.1); border:1px solid rgba(255,200,0,0.2); padding:8px 10px; border-radius:6px;">
-         <div style="font-size:12px; font-weight:800; color:var(--main-text);">
-           <span style="display:inline-block; width:18px; height:18px; background:var(--theme-accent); color:#000; text-align:center; border-radius:50%; font-size:10px; line-height:18px; margin-right:4px;">${idx+1}</span>
-           ${item[0]}대
-         </div>
-         <div style="font-size:12px; font-weight:900; color:var(--theme-accent);">${item[1]}콜 발생</div>
-       </div>
-     `).join('');
+     buckets.forEach((count, idx) => {
+         const isPeak = (count === maxCalls && count > 0);
+         let dotsHtml = '';
+         for (let i = 0; i < count; i++) {
+             dotsHtml += `<div class="golden-dot"></div>`;
+         }
+         html += `
+           <div class="golden-col">
+             <div class="golden-dot-area">${dotsHtml}</div>
+             <div class="golden-time-label ${isPeak ? 'peak' : ''}">${labels[idx]}</div>
+           </div>
+         `;
+     });
+     
+     chartEl.innerHTML = html;
   }
 
   // --- V7.1 실매출 입력 로직 추가 ---
@@ -2592,6 +2628,9 @@
     document.getElementById('btn-apply-calendar').addEventListener('click', () => document.getElementById('calendar-modal').classList.remove('active'));
     document.getElementById('input-sim-target').addEventListener('input', calculateSimulatorTargets);
     document.getElementById('input-sim-current').addEventListener('input', calculateSimulatorTargets);
+
+    // Golden Time Filter Events
+    window.goldenTimeFilter = 'weekday';
 
     executeSearch();
   });
