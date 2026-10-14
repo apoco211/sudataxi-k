@@ -8,7 +8,100 @@
       font-weight: 400 600;
       font-display: swap;
       src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-    }
+      .golden-chart-container { display: flex; flex-direction: column; height: 120px; background: rgba(0,0,0,0.1); border: 1px solid var(--stat-border); border-radius: 8px; padding: 12px 6px 6px 6px; position: relative; }
+      body.theme-day .golden-chart-container { background: #F9FAFB; }
+      .golden-svg-wrapper { flex: 1; width: 100%; position: relative; overflow: visible; }
+      .golden-labels-wrapper { display: flex; justify-content: space-between; width: 100%; margin-top: 6px; }
+      .golden-time-label { font-size: 9px; font-weight: 700; color: var(--stat-label); text-align: center; font-family: monospace; flex: 1; }
+      .golden-time-label.peak { color: var(--theme-accent); font-weight: 900; }
+  function renderGoldenTimeInsights() {
+     const chartEl = document.getElementById('golden-time-chart');
+     if (!chartEl) return;
+     
+     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+     if (logs.length === 0) {
+         chartEl.innerHTML = '<div style="width:100%; font-size:11px; color:var(--stat-label); text-align:center; padding: 40px 0;">탑승 기록이 없습니다.</div>';
+         return;
+     }
+
+     const buckets = Array.from({length: 12}, () => 0);
+     const labels = ['3', '5', '7', '9', '11', '13', '15', '17', '19', '21', '23', '1'];
+     const filter = window.goldenTimeFilter || 'weekday';
+
+     logs.forEach(log => {
+         const d = new Date(log.timestamp || log.time);
+         const dayOfWeek = d.getDay();
+         const isWeekendLog = (dayOfWeek === 0 || dayOfWeek === 6);
+         
+         if (filter === 'weekday' && isWeekendLog) return;
+         if (filter === 'weekend' && !isWeekendLog) return;
+
+         const h = d.getHours();
+         const adjustedH = h < 3 ? h + 24 : h;
+         const bucketIdx = Math.floor((adjustedH - 3) / 2);
+         
+         if (bucketIdx >= 0 && bucketIdx < 12) {
+             buckets[bucketIdx]++;
+         }
+     });
+
+     const maxCalls = Math.max(...buckets, 1);
+     
+     // SVG 차트 좌표 계산
+     const svgWidth = 300;
+     const svgHeight = 70;
+     const topPad = 5; // 상단 여백 (꼭대기 잘림 방지)
+     const drawingHeight = svgHeight - topPad;
+     
+     const pts = buckets.map((val, i) => ({
+         x: i * (svgWidth / 11),
+         y: svgHeight - (val / maxCalls) * drawingHeight
+     }));
+
+     // 부드러운 곡선(Bézier Curve) 생성
+     let linePath = `M ${pts[0].x},${pts[0].y}`;
+     for (let i = 0; i < pts.length - 1; i++) {
+         const cp1x = pts[i].x + (pts[i+1].x - pts[i].x) / 2;
+         const cp2x = pts[i].x + (pts[i+1].x - pts[i].x) / 2;
+         linePath += ` C ${cp1x},${pts[i].y} ${cp2x},${pts[i+1].y} ${pts[i+1].x},${pts[i+1].y}`;
+     }
+     
+     // 바닥까지 채우는 면적 패스 생성
+     const fillPath = `${linePath} L ${pts[pts.length-1].x},${svgHeight} L ${pts[0].x},${svgHeight} Z`;
+
+     let circlesHtml = pts.map((pt, i) => 
+         `<circle cx="${pt.x}" cy="${pt.y}" r="2.5" fill="var(--theme-bg-dark)" stroke="var(--theme-accent)" stroke-width="1.5" />`
+     ).join('');
+
+     let labelsHtml = buckets.map((count, idx) => {
+         const isPeak = (count === maxCalls && count > 0);
+         return `<div class="golden-time-label ${isPeak ? 'peak' : ''}">${labels[idx]}</div>`;
+     }).join('');
+
+     chartEl.innerHTML = `
+         <div class="golden-svg-wrapper">
+             <svg viewBox="0 0 ${svgWidth} ${svgHeight}" preserveAspectRatio="none" style="width: 100%; height: 100%; overflow: visible;">
+                 <defs>
+                     <linearGradient id="goldenGradient" x1="0" y1="0" x2="0" y2="1">
+                         <stop offset="0%" stop-color="var(--theme-accent)" stop-opacity="0.45"/>
+                         <stop offset="100%" stop-color="var(--theme-accent)" stop-opacity="0.0"/>
+                     </linearGradient>
+                 </defs>
+                 <path d="${fillPath}" fill="url(#goldenGradient)" />
+                 <path d="${linePath}" fill="none" stroke="var(--theme-accent)" stroke-width="2.5" stroke-linecap="round" />
+                 ${circlesHtml}
+             </svg>
+         </div>
+         <div class="golden-labels-wrapper">
+             ${labelsHtml}
+         </div>
+     `;
+  }
+      .session-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: rgba(0,0,0,0.2); border-radius: 6px; margin-bottom: 4px; border: 1px solid var(--stat-border); }
+      body.theme-day .session-item { background: #FFFFFF; }
+      .session-time { font-size: 11px; font-weight: 700; color: var(--main-text); font-family: monospace; }
+      .session-duration { font-size: 11px; font-weight: 900; color: var(--theme-accent); margin-left: 6px; }
+      .session-del-btn { background: #FEE2E2; color: #DC2626; border: 1px solid #F87171; border-radius: 4px; padding: 2px 6px; font-size: 9px; font-weight: 700; cursor: pointer; }
     @font-face {
       font-family: "Optimistic Mono";
       font-style: normal;
@@ -21,7 +114,7 @@
   </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>수다택시 K v7.6</title>
+  <title>수다택시 K v7.7</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -460,9 +553,13 @@
         <div style="display: flex; align-items: center; gap: 6px;">
           ⏱️ 오늘 운행 현황 <span id="driving-current-status" style="color: var(--stat-label); font-size: 13px; font-weight: 800;">(운행 대기)</span>
         </div>
-        <button id="btn-reset-today" style="background:#FEE2E2; color:#DC2626; border:1px solid #F87171; border-radius:4px; padding:2px 6px; font-size:9px; font-weight:700; cursor:pointer;">기록 리셋</button>
+        <div style="display: flex; gap: 4px;">
+          <button id="btn-restore-today" style="background:#E0E7FF; color:#4338CA; border:1px solid #818CF8; border-radius:4px; padding:2px 6px; font-size:9px; font-weight:700; cursor:pointer;" onclick="restoreTodayRecordFromBackup()">직전 복구</button>
+          <button id="btn-reset-today" style="background:#FEE2E2; color:#DC2626; border:1px solid #F87171; border-radius:4px; padding:2px 6px; font-size:9px; font-weight:700; cursor:pointer;">기록 리셋</button>
+        </div>
       </div>
-      <div id="driving-time-range" style="font-size: 11px; color: #A3A3A3; margin-top: -6px; margin-bottom: 10px; font-weight: 700; letter-spacing: -0.5px;">⏰ 운행 시간: 데이터 없음</div>
+      <div id="driving-time-range" style="font-size: 11px; color: #A3A3A3; margin-top: -6px; margin-bottom: 6px; font-weight: 700; letter-spacing: -0.5px;">⏰ 운행 시간: 데이터 없음</div>
+      <div id="driving-session-list" style="display: flex; flex-direction: column; margin-bottom: 10px;"></div>
       <div class="stat-grid">
         <div class="stat-box">
           <div class="stat-label-text">🚗 총 운행:</div>
@@ -557,13 +654,11 @@
       .golden-toggle-group { display: flex; gap: 2px; background: var(--btn-idle-bg); padding: 2px; border-radius: 6px; border: 1px solid var(--btn-idle-border); }
       .golden-toggle-btn { background: transparent; color: var(--btn-idle-text); font-size: 9px; font-weight: 800; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; transition: all 0.2s; }
       .golden-toggle-btn.active { background: var(--theme-accent); color: var(--theme-text-on-accent); box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
-      .golden-chart-container { display: flex; justify-content: space-between; align-items: flex-end; height: 120px; background: rgba(0,0,0,0.1); border: 1px solid var(--stat-border); border-radius: 8px; padding: 6px 4px 0 4px; gap: 2px; overflow-x: auto; }
+      .golden-chart-container { display: flex; flex-direction: column; height: 120px; background: rgba(0,0,0,0.1); border: 1px solid var(--stat-border); border-radius: 8px; padding: 12px 6px 6px 6px; position: relative; }
       body.theme-day .golden-chart-container { background: #F9FAFB; }
-      .golden-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; min-width: 22px; height: 100%; gap: 4px; }
-      .golden-dot-area { display: flex; flex-wrap: wrap-reverse; justify-content: center; align-content: flex-start; gap: 2px; width: 100%; max-height: 95px; overflow: hidden; }
-      .golden-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--theme-accent); box-shadow: 0 0 2px rgba(0,0,0,0.3); }
-      body.theme-day .golden-dot { box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-      .golden-time-label { font-size: 9px; font-weight: 700; color: var(--stat-label); text-align: center; font-family: monospace; }
+      .golden-svg-wrapper { flex: 1; width: 100%; position: relative; overflow: visible; }
+      .golden-labels-wrapper { display: flex; justify-content: space-between; width: 100%; margin-top: 6px; }
+      .golden-time-label { font-size: 9px; font-weight: 700; color: var(--stat-label); text-align: center; font-family: monospace; flex: 1; }
       .golden-time-label.peak { color: var(--theme-accent); font-weight: 900; }
     </style>
     <div class="backup-section">
@@ -669,7 +764,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.6"; 
+  const BUILD_VERSION = "v7.7"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -861,6 +956,42 @@
   }
 
   function saveDrivingState() { localStorage.setItem('sudataxi_driving_state', JSON.stringify(drivingState)); }
+
+  function restoreTodayRecordFromBackup() {
+    const backup = JSON.parse(localStorage.getItem('sudataxi_auto_backup') || '{}');
+    if (backup.driving_records) {
+      const key = getTodayKey();
+      if (backup.driving_records[key]) {
+        if (confirm('자동 백업된 직전(최대 10분 전) 운행 기록으로 복구하시겠습니까?\\n(실수로 날아간 기록을 복원합니다)')) {
+          const records = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
+          records[key] = backup.driving_records[key];
+          localStorage.setItem('sudataxi_driving_records', JSON.stringify(records));
+          renderDrivingLogStats();
+          showToast('✅ 오늘의 운행 기록이 성공적으로 복구되었습니다.');
+        }
+        return;
+      }
+    }
+    showToast('❌ 복원할 백업 데이터가 없습니다.');
+  }
+
+  function deleteSession(id) {
+    const todayData = getTodayDrivingData();
+    if (!todayData.sessions) return;
+    const target = todayData.sessions.find(s => s.id === id);
+    if (target) {
+      if (confirm('이 운행 세션을 삭제하시겠습니까?\\n(해당 세션 동안 누적된 공차/탑승 시간이 총합에서 제외됩니다)')) {
+        todayData.totalDrive = Math.max(0, todayData.totalDrive - (target.total || 0));
+        todayData.passengerBoard = Math.max(0, todayData.passengerBoard - (target.board || 0));
+        todayData.emptyCar = Math.max(0, todayData.emptyCar - (target.empty || 0));
+        todayData.breakTime = Math.max(0, todayData.breakTime - (target.break || 0));
+        todayData.sessions = todayData.sessions.filter(s => s.id !== id);
+        saveTodayDrivingData(todayData);
+        renderDrivingLogStats();
+        showToast('❌ 해당 운행 세션이 취소되었습니다.');
+      }
+    }
+  }
   
   function restoreDrivingState() {
     const saved = localStorage.getItem('sudataxi_driving_state');
@@ -877,14 +1008,32 @@
               drivingState.isDriving = false;
               drivingState.isBreak = false;
               drivingState.isPassengerBoarded = false;
+              
+              const todayData = getTodayDrivingData();
+              if (todayData.currentSession) {
+                  todayData.currentSession.end = drivingState.lastTickTime;
+                  todayData.sessions = todayData.sessions || [];
+                  todayData.sessions.push(todayData.currentSession);
+                  delete todayData.currentSession;
+                  saveTodayDrivingData(todayData);
+              }
               showToast('⚠️ 장시간 앱 백그라운드 상태로 인해 운행이 자동 종료되었습니다.');
             } else {
               const todayData = getTodayDrivingData();
-              if (drivingState.isBreak) todayData.breakTime = (todayData.breakTime || 0) + elapsed;
-              else {
+              if (!todayData.currentSession) todayData.currentSession = { id: Date.now(), start: now, total: 0, break: 0, board: 0, empty: 0 };
+              if (drivingState.isBreak) {
+                  todayData.breakTime = (todayData.breakTime || 0) + elapsed;
+                  todayData.currentSession.break = (todayData.currentSession.break || 0) + elapsed;
+              } else {
                 todayData.totalDrive = (todayData.totalDrive || 0) + elapsed;
-                if (drivingState.isPassengerBoarded) todayData.passengerBoard = (todayData.passengerBoard || 0) + elapsed;
-                else todayData.emptyCar = (todayData.emptyCar || 0) + elapsed;
+                todayData.currentSession.total = (todayData.currentSession.total || 0) + elapsed;
+                if (drivingState.isPassengerBoarded) {
+                    todayData.passengerBoard = (todayData.passengerBoard || 0) + elapsed;
+                    todayData.currentSession.board = (todayData.currentSession.board || 0) + elapsed;
+                } else {
+                    todayData.emptyCar = (todayData.emptyCar || 0) + elapsed;
+                    todayData.currentSession.empty = (todayData.currentSession.empty || 0) + elapsed;
+                }
               }
               if (now - drivingState.lastTickTime > 0) todayData.lastEndTime = now;
               saveTodayDrivingData(todayData);
@@ -926,12 +1075,19 @@
       const todayData = getTodayDrivingData();
       if (!todayData.firstStartTime) todayData.firstStartTime = now;
       todayData.lastEndTime = now;
+      todayData.currentSession = { id: now, start: now, end: null, total: 0, break: 0, board: 0, empty: 0 };
       saveTodayDrivingData(todayData);
       startDrivingTimer(); showToast('🚗 운행이 시작되었습니다.');
     } else {
       drivingState.isPassengerBoarded = false; drivingState.isBreak = false; drivingState.stateStartTime = null;
       const todayData = getTodayDrivingData();
       todayData.lastEndTime = now;
+      if (todayData.currentSession) {
+          todayData.currentSession.end = now;
+          todayData.sessions = todayData.sessions || [];
+          todayData.sessions.push(todayData.currentSession);
+          delete todayData.currentSession;
+      }
       saveTodayDrivingData(todayData);
       stopDrivingTimer(); showToast('⏹️ 운행이 종료되었습니다.');
     }
@@ -978,11 +1134,20 @@
         drivingState.lastTickTime = now;
         const todayData = getTodayDrivingData();
         if (elapsed <= 3600) {
-          if (drivingState.isBreak) todayData.breakTime = (todayData.breakTime || 0) + elapsed;
-          else {
+          if (!todayData.currentSession) todayData.currentSession = { id: Date.now(), start: now, total: 0, break: 0, board: 0, empty: 0 };
+          if (drivingState.isBreak) {
+              todayData.breakTime = (todayData.breakTime || 0) + elapsed;
+              todayData.currentSession.break = (todayData.currentSession.break || 0) + elapsed;
+          } else {
             todayData.totalDrive = (todayData.totalDrive || 0) + elapsed;
-            if (drivingState.isPassengerBoarded) todayData.passengerBoard = (todayData.passengerBoard || 0) + elapsed;
-            else todayData.emptyCar = (todayData.emptyCar || 0) + elapsed;
+            todayData.currentSession.total = (todayData.currentSession.total || 0) + elapsed;
+            if (drivingState.isPassengerBoarded) {
+                todayData.passengerBoard = (todayData.passengerBoard || 0) + elapsed;
+                todayData.currentSession.board = (todayData.currentSession.board || 0) + elapsed;
+            } else {
+                todayData.emptyCar = (todayData.emptyCar || 0) + elapsed;
+                todayData.currentSession.empty = (todayData.currentSession.empty || 0) + elapsed;
+            }
           }
           todayData.lastEndTime = now;
           saveTodayDrivingData(todayData); saveDrivingState();
@@ -2123,6 +2288,8 @@
     const todayEmpty = today.emptyCar || 0;
     
     const timeRangeEl = document.getElementById('driving-time-range');
+    const sessionListEl = document.getElementById('driving-session-list');
+    
     if (timeRangeEl) {
       if (today.firstStartTime && todayTotal > 0) {
          const startD = new Date(today.firstStartTime);
@@ -2132,6 +2299,40 @@
       } else {
          timeRangeEl.innerText = `⏰ 운행 시간: 데이터 없음`;
       }
+    }
+
+    if (sessionListEl) {
+       sessionListEl.innerHTML = '';
+       let sessionHtml = '';
+       const fTime = (ts) => {
+           if (!ts) return '진행중';
+           const d = new Date(ts);
+           return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+       };
+       
+       let sessionsToRender = (today.sessions || []).slice();
+       if (today.currentSession) sessionsToRender.push(today.currentSession);
+       
+       sessionsToRender.forEach((s, idx) => {
+           if (!s.start) return;
+           const sTime = fTime(s.start);
+           const eTime = fTime(s.end);
+           const durationStr = formatHHMMSS(s.total || 0).substring(0, 5); 
+           
+           sessionHtml += `
+             <div class="session-item">
+               <div class="session-time">
+                 <span style="color:#8A8A8A; margin-right:4px;">${idx+1}.</span> ${sTime} ~ ${eTime} 
+                 <span class="session-duration">[${durationStr}]</span>
+               </div>
+               ${s.end ? `<button class="session-del-btn" onclick="deleteSession(${s.id})">❌취소</button>` : `<span style="font-size:9px; color:#22C55E; font-weight:900;">진행중</span>`}
+             </div>
+           `;
+       });
+       
+       if (sessionHtml) {
+           sessionListEl.innerHTML = sessionHtml + `<div style="text-align:right; font-size:11px; font-weight:900; color:var(--main-text); margin-top:4px;">[총 합산운행] ${formatHHMMSS(todayTotal).substring(0, 5)}</div>`;
+       }
     }
     
     document.getElementById('stat-today-total').innerText = formatHHMMSS(todayTotal);
@@ -2289,7 +2490,6 @@
          if (filter === 'weekend' && !isWeekendLog) return;
 
          const h = d.getHours();
-         // 새벽 3시를 시작점으로 맞추기 위한 보정
          const adjustedH = h < 3 ? h + 24 : h;
          const bucketIdx = Math.floor((adjustedH - 3) / 2);
          
@@ -2299,23 +2499,56 @@
      });
 
      const maxCalls = Math.max(...buckets, 1);
-     let html = '';
      
-     buckets.forEach((count, idx) => {
+     // SVG 차트 좌표 계산
+     const svgWidth = 300;
+     const svgHeight = 70;
+     const topPad = 5; // 상단 여백 (꼭대기 잘림 방지)
+     const drawingHeight = svgHeight - topPad;
+     
+     const pts = buckets.map((val, i) => ({
+         x: i * (svgWidth / 11),
+         y: svgHeight - (val / maxCalls) * drawingHeight
+     }));
+
+     // 부드러운 곡선(Bézier Curve) 생성
+     let linePath = `M ${pts[0].x},${pts[0].y}`;
+     for (let i = 0; i < pts.length - 1; i++) {
+         const cp1x = pts[i].x + (pts[i+1].x - pts[i].x) / 2;
+         const cp2x = pts[i].x + (pts[i+1].x - pts[i].x) / 2;
+         linePath += ` C ${cp1x},${pts[i].y} ${cp2x},${pts[i+1].y} ${pts[i+1].x},${pts[i+1].y}`;
+     }
+     
+     // 바닥까지 채우는 면적 패스 생성
+     const fillPath = `${linePath} L ${pts[pts.length-1].x},${svgHeight} L ${pts[0].x},${svgHeight} Z`;
+
+     let circlesHtml = pts.map((pt, i) => 
+         `<circle cx="${pt.x}" cy="${pt.y}" r="2.5" fill="var(--theme-bg-dark)" stroke="var(--theme-accent)" stroke-width="1.5" />`
+     ).join('');
+
+     let labelsHtml = buckets.map((count, idx) => {
          const isPeak = (count === maxCalls && count > 0);
-         let dotsHtml = '';
-         for (let i = 0; i < count; i++) {
-             dotsHtml += `<div class="golden-dot"></div>`;
-         }
-         html += `
-           <div class="golden-col">
-             <div class="golden-dot-area">${dotsHtml}</div>
-             <div class="golden-time-label ${isPeak ? 'peak' : ''}">${labels[idx]}</div>
-           </div>
-         `;
-     });
-     
-     chartEl.innerHTML = html;
+         return `<div class="golden-time-label ${isPeak ? 'peak' : ''}">${labels[idx]}</div>`;
+     }).join('');
+
+     chartEl.innerHTML = `
+         <div class="golden-svg-wrapper">
+             <svg viewBox="0 0 ${svgWidth} ${svgHeight}" preserveAspectRatio="none" style="width: 100%; height: 100%; overflow: visible;">
+                 <defs>
+                     <linearGradient id="goldenGradient" x1="0" y1="0" x2="0" y2="1">
+                         <stop offset="0%" stop-color="var(--theme-accent)" stop-opacity="0.45"/>
+                         <stop offset="100%" stop-color="var(--theme-accent)" stop-opacity="0.0"/>
+                     </linearGradient>
+                 </defs>
+                 <path d="${fillPath}" fill="url(#goldenGradient)" />
+                 <path d="${linePath}" fill="none" stroke="var(--theme-accent)" stroke-width="2.5" stroke-linecap="round" />
+                 ${circlesHtml}
+             </svg>
+         </div>
+         <div class="golden-labels-wrapper">
+             ${labelsHtml}
+         </div>
+     `;
   }
 
   // --- V7.1 실매출 입력 로직 추가 ---
