@@ -21,7 +21,7 @@
   </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>수다택시 K v7.4</title>
+  <title>수다택시 K v7.5</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -456,9 +456,13 @@
     </div>
     
     <div class="backup-section">
-      <div class="backup-title" style="margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
-        ⏱️ 오늘 운행 현황 <span id="driving-current-status" style="color: var(--stat-label); font-size: 13px; font-weight: 800;">(운행 대기)</span>
+      <div class="backup-title" style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          ⏱️ 오늘 운행 현황 <span id="driving-current-status" style="color: var(--stat-label); font-size: 13px; font-weight: 800;">(운행 대기)</span>
+        </div>
+        <button id="btn-reset-today" style="background:#FEE2E2; color:#DC2626; border:1px solid #F87171; border-radius:4px; padding:2px 6px; font-size:9px; font-weight:700; cursor:pointer;">기록 리셋</button>
       </div>
+      <div id="driving-time-range" style="font-size: 11px; color: #A3A3A3; margin-top: -6px; margin-bottom: 10px; font-weight: 700; letter-spacing: -0.5px;">⏰ 운행 시간: 데이터 없음</div>
       <div class="stat-grid">
         <div class="stat-box">
           <div class="stat-label-text">🚗 총 운행:</div>
@@ -545,6 +549,15 @@
       <div style="font-size: 10px; color: var(--stat-label); text-align: center;">주차별 평균 탑승률 및 매출 추이</div>
       <div class="chart-wrapper">
         <div class="chart-container" id="monthly-chart" style="padding: 0 20px;"></div>
+      </div>
+    </div>
+
+    <!-- 요일/시간대별 콜 발생 통계 인사이트 -->
+    <div class="backup-section">
+      <div class="backup-title" style="margin-bottom: 8px;">💡 나의 골든타임 분석</div>
+      <div style="font-size: 10px; color: var(--stat-label); margin-bottom: 8px;">내 누적 탑승 기록 기반으로 가장 콜이 많았던 시간대입니다.</div>
+      <div id="best-call-times-list" style="display: flex; flex-direction: column; gap: 6px;">
+        <!-- JS로 렌더링 -->
       </div>
     </div>
 
@@ -637,7 +650,7 @@
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.4"; 
+  const BUILD_VERSION = "v7.5"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -840,18 +853,27 @@
           const now = Date.now();
           if (drivingState.lastTickTime && now > drivingState.lastTickTime) {
             const elapsed = Math.floor((now - drivingState.lastTickTime) / 1000);
-            const todayData = getTodayDrivingData();
-            if (drivingState.isBreak) todayData.breakTime = (todayData.breakTime || 0) + elapsed;
-            else {
-              todayData.totalDrive = (todayData.totalDrive || 0) + elapsed;
-              if (drivingState.isPassengerBoarded) todayData.passengerBoard = (todayData.passengerBoard || 0) + elapsed;
-              else todayData.emptyCar = (todayData.emptyCar || 0) + elapsed;
+            // 앱이 꺼져있던 시간이 1시간(3600초) 이상이면 비정상 종료로 간주하고 누적 무시 및 운행 끄기
+            if (elapsed > 3600) {
+              drivingState.isDriving = false;
+              drivingState.isBreak = false;
+              drivingState.isPassengerBoarded = false;
+              showToast('⚠️ 장시간 앱 백그라운드 상태로 인해 운행이 자동 종료되었습니다.');
+            } else {
+              const todayData = getTodayDrivingData();
+              if (drivingState.isBreak) todayData.breakTime = (todayData.breakTime || 0) + elapsed;
+              else {
+                todayData.totalDrive = (todayData.totalDrive || 0) + elapsed;
+                if (drivingState.isPassengerBoarded) todayData.passengerBoard = (todayData.passengerBoard || 0) + elapsed;
+                else todayData.emptyCar = (todayData.emptyCar || 0) + elapsed;
+              }
+              if (now - drivingState.lastTickTime > 0) todayData.lastEndTime = now;
+              saveTodayDrivingData(todayData);
             }
-            saveTodayDrivingData(todayData);
           }
           drivingState.lastTickTime = Date.now();
+          if(drivingState.isDriving) startDrivingTimer();
           updateDrivingUI();
-          startDrivingTimer();
         } else { updateDrivingUI(); }
       } catch(e) {}
     }
@@ -865,7 +887,7 @@
   function getTodayDrivingData() {
     const key = getTodayKey();
     const records = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
-    if (!records[key]) records[key] = { totalDrive: 0, passengerBoard: 0, emptyCar: 0, breakTime: 0 };
+    if (!records[key]) records[key] = { totalDrive: 0, passengerBoard: 0, emptyCar: 0, breakTime: 0, firstStartTime: null, lastEndTime: null };
     return records[key];
   }
 
@@ -878,15 +900,24 @@
 
   function toggleDriving() {
     drivingState.isDriving = !drivingState.isDriving;
+    const now = Date.now();
     if (drivingState.isDriving) {
       drivingState.isPassengerBoarded = false; drivingState.isBreak = false;
-      drivingState.lastTickTime = Date.now(); drivingState.stateStartTime = Date.now();
+      drivingState.lastTickTime = now; drivingState.stateStartTime = now;
+      const todayData = getTodayDrivingData();
+      if (!todayData.firstStartTime) todayData.firstStartTime = now;
+      todayData.lastEndTime = now;
+      saveTodayDrivingData(todayData);
       startDrivingTimer(); showToast('🚗 운행이 시작되었습니다.');
     } else {
       drivingState.isPassengerBoarded = false; drivingState.isBreak = false; drivingState.stateStartTime = null;
+      const todayData = getTodayDrivingData();
+      todayData.lastEndTime = now;
+      saveTodayDrivingData(todayData);
       stopDrivingTimer(); showToast('⏹️ 운행이 종료되었습니다.');
     }
     updateDrivingUI(); saveDrivingState();
+    if (activeTab === 4) renderDrivingLogStats();
   }
 
   function toggleBreak() {
@@ -927,13 +958,16 @@
       if (elapsed >= 1) {
         drivingState.lastTickTime = now;
         const todayData = getTodayDrivingData();
-        if (drivingState.isBreak) todayData.breakTime = (todayData.breakTime || 0) + elapsed;
-        else {
-          todayData.totalDrive = (todayData.totalDrive || 0) + elapsed;
-          if (drivingState.isPassengerBoarded) todayData.passengerBoard = (todayData.passengerBoard || 0) + elapsed;
-          else todayData.emptyCar = (todayData.emptyCar || 0) + elapsed;
+        if (elapsed <= 3600) {
+          if (drivingState.isBreak) todayData.breakTime = (todayData.breakTime || 0) + elapsed;
+          else {
+            todayData.totalDrive = (todayData.totalDrive || 0) + elapsed;
+            if (drivingState.isPassengerBoarded) todayData.passengerBoard = (todayData.passengerBoard || 0) + elapsed;
+            else todayData.emptyCar = (todayData.emptyCar || 0) + elapsed;
+          }
+          todayData.lastEndTime = now;
+          saveTodayDrivingData(todayData); saveDrivingState();
         }
-        saveTodayDrivingData(todayData); saveDrivingState();
         if (activeTab === 4) renderDrivingLogStats();
         renderCurrentStateTime(now);
       }
@@ -1045,7 +1079,7 @@
     { "id": "hs_s_yeouido_1", "name": "여의도역 및 증권가 상권", "lat": 37.5216, "lng": 126.9242, "address": "여의도동", "type": "office_nightlife", "region": "seoul", "isWisu": false },
     { "id": "hs_g_gwacheon_1", "name": "정부과천청사역 중심상가 및 로데오", "lat": 37.4262, "lng": 126.9898, "address": "정부과천청사역", "type": "subway_nightlife", "region": "gwacheon", "isWisu": true },
     { "id": "hs_g_anyang_1", "name": "평촌역 먹자골목 및 한림대병원", "lat": 37.3942, "lng": 126.9638, "address": "평촌역", "type": "subway_hospital", "region": "anyang", "isWisu": true },
-    { "id": "hs_g_anyang_2", "name": "범계역 로데오거리 및 학원가", "lat": 37.3909306, "lng": 126.9495306, "address": "범계역", "type": "subway_academy", "region": "anyang", "isWisu": true },
+    { "id": "hs_g_anyang_2", "name": "범계역 로데오거리 및 학원가", "lat": 37.3897, "lng": 126.9502, "address": "범계역", "type": "subway_academy", "region": "anyang", "isWisu": true },
     { "id": "hs_g_anyang_4", "name": "안양역 일번가 및 메디컬타운", "lat": 37.4013, "lng": 126.9222, "address": "안양역", "type": "subway_hospital", "region": "anyang", "isWisu": true },
     { "id": "hs_g_anyang_5", "name": "산본역 중심상가 및 원광대병원", "lat": 37.3554, "lng": 126.9331, "address": "산본역", "type": "subway_hospital", "region": "gunpo", "isWisu": true },
     { "id": "hs_s_01", "name": "강남역 상업지구 및 병원거리", "lat": 37.4981, "lng": 127.0276, "address": "강남역", "type": "subway_hospital", "region": "seoul", "isWisu": false }
@@ -1134,7 +1168,7 @@
   const MAJOR_HUBS = [
     { name: "인덕원역 환승 거점", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway", isWisu: true },
     { name: "평촌역 먹자골목 및 한림대병원", lat: 37.3942, lng: 126.9638, address: "평촌역", type: "subway_hospital", isWisu: true },
-    { name: "범계역 로데오거리 및 학원가", lat: 37.3909306, lng: 126.9495306, address: "범계역", type: "subway_academy", isWisu: true },
+    { name: "범계역 로데오거리 및 학원가", lat: 37.3897, lng: 126.9502, address: "범계역", type: "subway_academy", isWisu: true },
     { name: "안양역 일번가", lat: 37.4013, lng: 126.9222, address: "안양역", type: "subway_hospital", isWisu: true },
     { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway_hospital", isWisu: true }
   ];
@@ -1303,7 +1337,7 @@
       if (isSuwon) places = [{ name: "인계동 나혜석거리", lat: 37.2635, lng: 127.0322 }, { name: "수원역 로데오거리", lat: 37.2662, lng: 127.0001 }];
       else if (isAnsan) places = [{ name: "중앙역 로데오거리", lat: 37.3186, lng: 126.8385 }, { name: "상록수역 먹자골목", lat: 37.3025, lng: 126.8654 }];
       else if (isSeoul) places = [{ name: "사당역 먹자골목", lat: 37.4765, lng: 126.9816 }, { name: "강남역 번화가", lat: 37.4981, lng: 127.0276 }];
-      else places = [{ name: "범계역 로데오거리", lat: 37.3909, lng: 126.9495 }, { name: "평촌 학원가", lat: 37.3821, lng: 126.9582 }, { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331 }];
+      else places = [{ name: "범계역 로데오거리", lat: 37.3897, lng: 126.9502 }, { name: "평촌 학원가", lat: 37.3821, lng: 126.9582 }, { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331 }];
       
       return { 
         title: "야간 상권 / 회전율 극대화", 
@@ -2065,6 +2099,18 @@
     const todayBoard = today.passengerBoard || 0; 
     const todayEmpty = today.emptyCar || 0;
     
+    const timeRangeEl = document.getElementById('driving-time-range');
+    if (timeRangeEl) {
+      if (today.firstStartTime && todayTotal > 0) {
+         const startD = new Date(today.firstStartTime);
+         const endD = today.lastEndTime ? new Date(today.lastEndTime) : new Date();
+         const fTime = (d) => `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+         timeRangeEl.innerText = `⏰ 운행 시간: ${fTime(startD)} ~ ${fTime(endD)}`;
+      } else {
+         timeRangeEl.innerText = `⏰ 운행 시간: 데이터 없음`;
+      }
+    }
+    
     document.getElementById('stat-today-total').innerText = formatHHMMSS(todayTotal);
     document.getElementById('stat-today-board').innerText = formatHHMMSS(todayBoard);
     document.getElementById('stat-today-empty').innerText = formatHHMMSS(todayEmpty);
@@ -2193,6 +2239,43 @@
         </div>
       `;
     });
+    
+    renderGoldenTimeInsights();
+  }
+
+  function renderGoldenTimeInsights() {
+     const listEl = document.getElementById('best-call-times-list');
+     if (!listEl) return;
+     
+     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+     if (logs.length < 5) {
+         listEl.innerHTML = '<div style="font-size:11px; color:var(--stat-label); text-align:center; padding: 10px;">데이터가 부족합니다. 탑승 기록을 더 쌓아주세요.</div>';
+         return;
+     }
+
+     const daysMap = ['일', '월', '화', '수', '목', '금', '토'];
+     let stats = {};
+
+     logs.forEach(log => {
+         const d = new Date(log.timestamp || log.time);
+         const dayStr = daysMap[d.getDay()];
+         const hourStr = `${d.getHours()}시`;
+         const key = `${dayStr}요일 ${hourStr}`;
+         if (!stats[key]) stats[key] = 0;
+         stats[key]++;
+     });
+
+     const sorted = Object.entries(stats).sort((a, b) => b[1] - a[1]).slice(0, 3);
+     
+     listEl.innerHTML = sorted.map((item, idx) => `
+       <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,200,0,0.1); border:1px solid rgba(255,200,0,0.2); padding:8px 10px; border-radius:6px;">
+         <div style="font-size:12px; font-weight:800; color:var(--main-text);">
+           <span style="display:inline-block; width:18px; height:18px; background:var(--theme-accent); color:#000; text-align:center; border-radius:50%; font-size:10px; line-height:18px; margin-right:4px;">${idx+1}</span>
+           ${item[0]}대
+         </div>
+         <div style="font-size:12px; font-weight:900; color:var(--theme-accent);">${item[1]}콜 발생</div>
+       </div>
+     `).join('');
   }
 
   // --- V7.1 실매출 입력 로직 추가 ---
@@ -2461,10 +2544,29 @@
     document.getElementById('import-file-input').addEventListener('change', importCallLogs);
     document.getElementById('btn-add-custom').addEventListener('click', addCustomHotspotPrompt);
     
+    // 범계역 위치 로데오거리 메인으로 보정
+    const b1 = DEFAULT_MASTER_HOTSPOTS.find(h => h.id === 'hs_g_anyang_2');
+    if(b1) { b1.lat = 37.3897; b1.lng = 126.9502; b1.name = "범계역 로데오거리"; }
+    const b2 = MAJOR_HUBS.find(h => h.name.includes("범계역"));
+    if(b2) { b2.lat = 37.3897; b2.lng = 126.9502; b2.name = "범계역 로데오거리"; }
+
     document.getElementById('btn-drive-toggle').addEventListener('click', toggleDriving);
     document.getElementById('btn-break-toggle').addEventListener('click', toggleBreak);
     document.getElementById('btn-board').addEventListener('click', handleBoarding);
     document.getElementById('btn-alight').addEventListener('click', handleAlighting);
+    
+    const resetBtn = document.getElementById('btn-reset-today');
+    if (resetBtn) {
+       resetBtn.addEventListener('click', () => {
+          if (confirm('오늘의 운행 기록(시간)을 초기화하시겠습니까?\n(매출 기록과 콜 로그는 유지됩니다)')) {
+             saveTodayDrivingData({ totalDrive: 0, passengerBoard: 0, emptyCar: 0, breakTime: 0, firstStartTime: null, lastEndTime: null });
+             drivingState.isDriving = false; drivingState.isBreak = false; drivingState.isPassengerBoarded = false;
+             saveDrivingState(); updateDrivingUI(); stopDrivingTimer();
+             showToast('기록이 초기화되었습니다.');
+             renderDrivingLogStats();
+          }
+       });
+    }
 
     document.getElementById('btn-save-call').addEventListener('click', () => saveCurrentCallLocation());
     document.getElementById('btn-save-restroom').addEventListener('click', () => saveCurrentRestroomLocation());
