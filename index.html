@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>수다택시 K v7.8.4 AI Upgraded</title>
+  <title>수다택시 K v7.8.5 AI Upgraded</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -299,7 +299,6 @@
     body.theme-day .target-title-text { color: #D97706 !important; }
     body.theme-day .target-score-text { color: #B45309 !important; }
     
-    /* 주간 모드 - 오늘 실매출 입력 UI 글씨/배경색 수정 */
     body.theme-day .input-rev { background: #FFFFFF; border-color: #D1D5DB; color: #1F2937; }
     body.theme-day .input-unit { color: #1F2937; }
     body.theme-day .rev-stat-value { color: #1F2937; }
@@ -312,10 +311,8 @@
     .strategy-content { font-size: 12px; font-weight: 700; color: var(--main-text); line-height: 1.5; }
     body.theme-day .strategy-box { background: #F0FDF4; }
 
-    /* AI 추가: 관외 공차 배회 경고 스타일 */
     .out-of-bounds-alert { box-shadow: inset 0 0 20px 5px #EA580C !important; transition: box-shadow 0.3s; }
 
-    /* 골든타임 분석 차트 요소 */
     .golden-toggle-group { display: flex; gap: 2px; background: var(--btn-idle-bg); padding: 2px; border-radius: 6px; border: 1px solid var(--btn-idle-border); }
     .golden-toggle-btn { background: transparent; color: var(--btn-idle-text); font-size: 9px; font-weight: 800; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; transition: all 0.2s; }
     .golden-toggle-btn.active { background: var(--theme-accent); color: var(--theme-text-on-accent); box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
@@ -326,7 +323,6 @@
     .golden-time-label { font-size: 9px; font-weight: 700; color: var(--stat-label); text-align: center; font-family: monospace; flex: 1; }
     .golden-time-label.peak { color: var(--theme-accent); font-weight: 900; }
 
-    /* 세션 리스트 요소 */
     .session-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: rgba(0,0,0,0.2); border-radius: 6px; margin-bottom: 4px; border: 1px solid var(--stat-border); }
     body.theme-day .session-item { background: #FFFFFF; }
     .session-time { font-size: 11px; font-weight: 700; color: var(--main-text); font-family: monospace; }
@@ -335,7 +331,6 @@
   </style>
 </head>
 <body class="mode-1">
-  
   <div class="sticky-top-area">
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 8px;">
       <div class="header" id="app-header-title" style="margin-bottom: 0; flex: 1;">📅 날짜 수신 대기 중...</div>
@@ -373,7 +368,6 @@
   <div class="card-list" id="card-list"></div>
 
   <div id="tab1-extras">
-    <!-- 새롭게 추가된 공공데이터 상태 모니터링 패널 -->
     <div class="backup-section" style="margin-bottom: 12px; border-color: var(--theme-accent);">
       <div class="backup-header">
         <span class="backup-title" style="font-size:12px;">📊 공공데이터 AI 엔진 상태</span>
@@ -420,9 +414,10 @@
     </div>
     <div id="strategy-cards-list" class="card-list" style="margin-bottom: 8px;"></div>
     <details style="margin-top: 8px; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 1.4;" open>
-      <summary style="font-weight: 800; color: var(--theme-accent); cursor: pointer;">📌 복귀 경로 알고리즘 안내</summary>
+      <summary style="font-weight: 800; color: var(--theme-accent); cursor: pointer;">📌 복귀 경로 및 수급 불균형 안내</summary>
       <div style="margin-top: 6px; color: var(--stat-label); display: flex; flex-direction: column; gap: 8px; font-size: 10px;">
-        <div>관외 지역(성남, 안산, 안양 등)에서 빈 차로 복귀 시, 반경 2.5km 내의 핫플레이스나 번화가를 <b>우선 경유지</b>로 강력 추천하여 손님을 태우고 복귀할 확률을 높여줍니다. (복귀 방향이 다소 어긋나더라도 탑승 확률을 우선시합니다)</div>
+        <div>관외 지역(성남, 안산, 안양 등)에서 빈 차로 복귀 시, 반경 2.5km 내의 핫플레이스나 번화가를 <b>우선 경유지</b>로 강력 추천하여 손님을 태우고 복귀할 확률을 높여줍니다.</div>
+        <div style="color:#FFF;"><b>🔥 수급 불균형 배수란?</b><br>해당 지역의 예상 콜 수요 대비, <span style="color:#EF4444;">교통 정체로 인해 진입 가능한 빈 차(공급)가 얼마나 부족한지</span>를 보여주는 지표입니다. 배수가 높을수록 콜을 즉시 잡을 확률이 비약적으로 상승합니다.</div>
       </div>
     </details>
   </div>
@@ -485,7 +480,6 @@
         </div>
       </div>
 
-      <!-- 생산성 지표 (KPI) -->
       <div class="kpi-container">
         <div class="kpi-header">
           <span class="kpi-title">📈 생산성 지표 (탑승률)</span>
@@ -502,7 +496,6 @@
         </div>
       </div>
 
-      <!-- 오늘 실매출 입력 UI -->
       <div class="revenue-box">
         <div class="top-row">
           <div class="label">💰 오늘 실매출</div>
@@ -538,7 +531,6 @@
       </div>
     </div>
     
-    <!-- 주간/월간 차트 -->
     <div class="backup-section">
       <div class="backup-title" style="margin-bottom: 4px;">📊 주간 퍼포먼스 (이번 주)</div>
       <div style="font-size: 10px; color: var(--stat-label); text-align: center;">상단: 운행시간 / 막대: 예상매출 / 숫자: 탑승률(KPI)</div>
@@ -555,7 +547,6 @@
       </div>
     </div>
 
-    <!-- 요일/시간대별 콜 발생 통계 인사이트 -->
     <div class="backup-section">
       <div class="backup-title" style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
         <span>💡 나의 골든타임 분석</span>
@@ -565,12 +556,9 @@
         </div>
       </div>
       <div style="font-size: 10px; color: var(--stat-label); margin-bottom: 8px; text-align: center;">새벽 3시 ~ 익일 3시 (2시간 단위 누적 탑승)</div>
-      <div id="golden-time-chart" class="golden-chart-container">
-        <!-- JS로 렌더링 -->
-      </div>
+      <div id="golden-time-chart" class="golden-chart-container"></div>
     </div>
 
-    <!-- 월간 목표 시뮬레이터 (계산기) -->
     <div class="backup-section" style="border-color: rgba(255, 200, 0, 0.4);">
       <div class="backup-title" style="margin-bottom: 12px;">🎯 월간 목표 달성 시뮬레이터</div>
       
@@ -638,7 +626,6 @@
     </div>
   </div>
 
-  <!-- 공통 확인(Confirm) 모달 -->
   <div id="custom-confirm" class="modal-overlay">
     <div class="modal-content" style="max-width: 320px;">
       <div class="modal-header"><span class="modal-title">확인</span></div>
@@ -650,7 +637,6 @@
     </div>
   </div>
 
-  <!-- 휴무일 캘린더 모달 -->
   <div class="modal-overlay" id="calendar-modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -662,16 +648,14 @@
         <div class="calendar-weekdays">
           <span style="color:#EF4444;">일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span style="color:#3B82F6;">토</span>
         </div>
-        <div class="calendar-grid" id="calendar-grid">
-          <!-- JS로 생성됨 -->
-        </div>
+        <div class="calendar-grid" id="calendar-grid"></div>
       </div>
     </div>
   </div>
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.8.4 AI Upgraded"; 
+  const BUILD_VERSION = "v7.8.5 AI Upgraded"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -739,7 +723,6 @@
     setTimeout(() => { t.style.display = 'none'; }, 2200);
   }
 
-  // --- 커스텀 Confirm 모달 ---
   let confirmCallback = null;
   function showCustomConfirm(msg, callback) {
     document.getElementById('confirm-msg').innerHTML = msg.replace(/\\n/g, '<br>');
@@ -755,7 +738,6 @@
     closeConfirm();
   });
 
-  // --- [AI V7.8.2] 1. 서울 실시간 인구 혼잡도 API 연동 (CORS 프록시 우회 적용) ---
   async function fetchSeoulCityData(placeName) {
       try {
           const supportedPlaces = ["강남역", "여의도", "홍대입구역", "신도림역", "사당역", "서울역", "건대입구역"];
@@ -764,7 +746,6 @@
 
           document.getElementById('status-seoul').innerHTML = `🏙️ 서울시 혼잡도 API: ${matchedPlace} 데이터 수신중...`;
           
-          // allorigins.win을 활용해 깃허브에서도 CORS 에러 없이 공공데이터 포털 호출
           const targetUrl = encodeURIComponent(`http://openapi.seoul.go.kr:8088/sample/json/citydata/1/5/${matchedPlace}`);
           const proxyUrl = `https://api.allorigins.win/get?url=${targetUrl}`;
           
@@ -785,19 +766,16 @@
       }
   }
 
-  // --- [AI V7.8.2] 2. 카카오 실시간 교통망(속도) 정체 분석 로직 ---
   function getTrafficSurgeScore(distanceKm, durationMin) {
       if (distanceKm === 0 || durationMin === 0) return { score: 0, status: "원활" };
       const speedKmh = (distanceKm / (durationMin / 60));
       
-      // 속도가 심각하게 느리면(정체) 택시 수요 폭발 가중치 부여
       if (speedKmh < 12) return { score: 25, status: "극심한 정체" }; 
       if (speedKmh < 20) return { score: 10, status: "서행" }; 
       if (speedKmh > 45) return { score: -5, status: "원활" }; 
       return { score: 0, status: "보통" };
   }
 
-  // --- [AI Upgraded] 기상청/글로벌 날씨 API 연동 ---
   async function fetchRealtimeWeatherUpgraded(lat, lng) {
     const now = Date.now();
     if (weatherCache && (now - weatherFetchTime < 15 * 60 * 1000)) return weatherCache; 
@@ -822,7 +800,6 @@
     } catch (e) { return { isRainOrSnow: false, precip: 0, temp: 20, isExtremeColdOrHeat: false, weatherMultiplier: 1.0 }; }
   }
 
-  // --- [AI Upgraded] 대중교통 막차 가중치 ---
   function getPublicTransitSurgeBonus(item, nowDate) {
     const hour = nowDate.getHours(); const min = nowDate.getMinutes(); const timeDecimal = hour + (min / 60);
     const name = item.name || ""; let transitBonus = 0;
@@ -921,7 +898,6 @@
     } catch(e) {}
   }
 
-  // --- [AI Upgraded] TTS 음성 브리핑 ---
   function playBriefing() {
      if(currentRouteData && currentRouteData.length > 1) {
          const target = currentRouteData[1];
@@ -1023,7 +999,7 @@
       });
     }
   }
-  
+
   function restoreDrivingState() {
     const saved = localStorage.getItem('sudataxi_driving_state');
     if (saved) {
@@ -1181,7 +1157,6 @@
                 todayData.emptyCar = (todayData.emptyCar || 0) + elapsed;
                 todayData.currentSession.empty = (todayData.currentSession.empty || 0) + elapsed;
                 
-                // --- [AI Upgraded] 관외 공차 배회 20분 초과 시 경고 ---
                 if (currentMode === 2) {
                      const sessionEmpty = todayData.currentSession.empty;
                      if (sessionEmpty > 1200 && sessionEmpty % 60 === 0) {
@@ -1291,7 +1266,7 @@
         btn.className = 'timer-display-btn finished'; btn.innerText = `⏱️ 00:00 이동 추천!`;
         localStorage.removeItem('sudataxi_timer_state'); 
         playTimerAlarm();
-        playBriefing(); // AI Upgraded: TTS 브리핑
+        playBriefing();
       } else { btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)}`; }
     }, 1000);
   }
@@ -1532,7 +1507,7 @@
     return bonus;
   }
 
-  function getDynamicStrategyText(nowHour, regionName) {
+  function getDynamicStrategyText(nowHour, nowMin, regionName) {
     let r = regionName || "";
     if (!r && currentPos) {
        if (currentPos.lat >= 37.435) r = "서울";
@@ -1545,13 +1520,25 @@
     let isAnsan = r.includes("안산") || r.includes("시흥");
     let isSeoul = r.includes("서울");
 
-    if (nowHour >= 16 && nowHour < 18) return { 
+    let isPrePositioning = false;
+    let prePositioningTag = "";
+
+    // 15~30분 전 선제이동 예측
+    if (nowHour === 17 && nowMin >= 30) {
+       isPrePositioning = true; prePositioningTag = "퇴근피크 30분전 선제이동";
+    } else if (nowHour === 20 && nowMin >= 30) {
+       isPrePositioning = true; prePositioningTag = "야간상권 선제이동";
+    } else if (nowHour === 23 && nowMin >= 30) {
+       isPrePositioning = true; prePositioningTag = "자정막차 30분전 선제이동";
+    }
+
+    if (nowHour >= 16 && (nowHour < 17 || (nowHour === 17 && nowMin < 30))) return { 
       title: "주간 방어 및 수락률 확보", 
       desc: "콜 발생 빈도가 낮은 시간입니다. <b>수락률(AR) 방어</b>를 위해 단거리 콜도 기꺼이 수락하여 누적 수락률 60% 이상을 확보하세요.",
-      places: [] 
+      places: [], isPrePositioning, prePositioningTag
     };
 
-    if (nowHour >= 18 && nowHour < 20) {
+    if ((nowHour === 17 && nowMin >= 30) || (nowHour >= 18 && nowHour < 20)) {
       let places = [];
       if (isSuwon) places = [{ name: "삼성디지털시티 (영통)", lat: 37.2570, lng: 127.0540 }, { name: "광교테크노밸리", lat: 37.2928, lng: 127.0456 }];
       else if (isAnsan) places = [{ name: "반월국가산업단지", lat: 37.3150, lng: 126.7770 }, { name: "고잔동 법조타운", lat: 37.3168, lng: 126.8232 }];
@@ -1559,13 +1546,13 @@
       else places = [{ name: "과천 지식정보타운", lat: 37.4144, lng: 126.9856 }, { name: "안양 평촌스마트스퀘어", lat: 37.3942, lng: 126.9638 }];
       
       return { 
-        title: "퇴근 피크 타임", 
-        desc: "현재 지역의 <b>주요 업무지구 및 환승 거점</b>에 진입하여 중장거리 콜을 유도하고 정체 할증을 노리세요.",
-        places: places
+        title: isPrePositioning ? "퇴근 피크타임 선제 포지셔닝" : "퇴근 피크 타임", 
+        desc: isPrePositioning ? "곧 퇴근 피크시간이 시작됩니다. 주요 <b>업무지구 및 환승 거점</b>으로 미리 이동하여 장거리 콜을 선점하세요." : "현재 지역의 <b>주요 업무지구 및 환승 거점</b>에 진입하여 중장거리 콜을 유도하고 정체 할증을 노리세요.",
+        places: places, isPrePositioning, prePositioningTag
       };
     }
 
-    if (nowHour >= 20 && nowHour < 21) {
+    if (nowHour >= 20 && (nowHour < 20 || (nowHour === 20 && nowMin < 30))) {
       let places = [];
       if (isSuwon) places = [{ name: "수원월드컵경기장 (휴식/충전)", lat: 37.2863, lng: 127.0368 }, { name: "광교호수공원 주차장", lat: 37.2801, lng: 127.0673 }];
       else if (isAnsan) places = [{ name: "안산와스타디움", lat: 37.3178, lng: 126.8184 }, { name: "화랑유원지 주차장", lat: 37.3200, lng: 126.8144 }];
@@ -1575,11 +1562,11 @@
       return { 
         title: "식사/휴식 및 배터리 정비", 
         desc: "야간 피크를 대비해 하드웨어를 정비하세요. 주요 E-pit이나 대형 주차장을 활용하여 유휴시간을 최소화합니다.",
-        places: places
+        places: places, isPrePositioning, prePositioningTag
       };
     }
 
-    if (nowHour >= 21 && nowHour < 23) {
+    if ((nowHour === 20 && nowMin >= 30) || (nowHour >= 21 && nowHour < 23) || (nowHour === 23 && nowMin < 30)) {
       let places = [];
       if (isSuwon) places = [{ name: "인계동 나혜석거리", lat: 37.2635, lng: 127.0322 }, { name: "수원역 로데오거리", lat: 37.2662, lng: 127.0001 }];
       else if (isAnsan) places = [{ name: "중앙역 로데오거리", lat: 37.3186, lng: 126.8385 }, { name: "상록수역 먹자골목", lat: 37.3025, lng: 126.8654 }];
@@ -1587,13 +1574,13 @@
       else places = [{ name: "범계역 로데오거리", lat: 37.3915, lng: 126.9510 }, { name: "평촌 학원가", lat: 37.3821, lng: 126.9582 }, { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331 }];
       
       return { 
-        title: "야간 상권 / 회전율 극대화", 
-        desc: "현재 지역의 <b>핵심 상권 및 로데오거리</b> 일대에서 짧은 이동 거리로 콜 회전율(시간당 3~4콜)을 극대화하세요.",
-        places: places
+        title: isPrePositioning ? "야간 수요 선제 포지셔닝" : "야간 상권 / 회전율 극대화", 
+        desc: isPrePositioning ? "잠시 뒤 야간 상권 수요가 폭발합니다. 핵심 로데오거리 일대로 이동하세요." : "현재 지역의 <b>핵심 상권 및 로데오거리</b> 일대에서 짧은 이동 거리로 콜 회전율(시간당 3~4콜)을 극대화하세요.",
+        places: places, isPrePositioning, prePositioningTag
       };
     }
 
-    if (nowHour >= 23 || nowHour < 2) {
+    if ((nowHour === 23 && nowMin >= 30) || (nowHour >= 24 || nowHour < 2)) {
       let places = [];
       if (isSuwon) places = [{ name: "성대역 먹자골목", lat: 37.2995, lng: 126.9710 }, { name: "수원시청역", lat: 37.2608, lng: 127.0287 }];
       else if (isAnsan) places = [{ name: "중앙역", lat: 37.3186, lng: 126.8385 }, { name: "상록수역", lat: 37.3025, lng: 126.8654 }];
@@ -1601,9 +1588,9 @@
       else places = [{ name: "선바위역 (과천-서울 경계)", lat: 37.4520, lng: 127.0050 }, { name: "석수역 (안양-서울 경계)", lat: 37.4355, lng: 126.9022 }];
       
       return { 
-        title: "심야 할증 및 장거리 피크", 
-        desc: "황금 시간대입니다. 높은 수락률을 무기로 <b>인접 시 경계 및 주요 번화가</b>에서 외곽행 콜을 골라 복합 할증을 노리세요.",
-        places: places
+        title: isPrePositioning ? "자정 대중교통 종료 선제대응" : "심야 할증 및 장거리 피크", 
+        desc: isPrePositioning ? "자정(0시)을 기점으로 대중교통이 완전히 끊깁니다. <b>인접 시 경계 및 주요 번화가</b>에 대기하여 복합 할증 콜을 선점하세요." : "황금 시간대입니다. 높은 수락률을 무기로 <b>인접 시 경계 및 주요 번화가</b>에서 외곽행 콜을 골라 복합 할증을 노리세요.",
+        places: places, isPrePositioning, prePositioningTag
       };
     }
 
@@ -1616,16 +1603,19 @@
     return { 
       title: "주간 평시 / 새벽 연비 운행", 
       desc: "도심 내 단거리 및 역 주변 수요가 꾸준합니다. 상업지구와 환승역을 오가며 배터리 프리컨디셔닝 등 연비 위주의 운행을 하세요.",
-      places: defaultPlaces
+      places: defaultPlaces, isPrePositioning, prePositioningTag
     };
   }
 
   async function renderStrategyTab() {
-    const nowHour = new Date().getHours();
-    const strategy = getDynamicStrategyText(nowHour, currentRegionName);
+    const nowDate = new Date();
+    const nowHour = nowDate.getHours();
+    const nowMin = nowDate.getMinutes();
+    
+    const strategy = getDynamicStrategyText(nowHour, nowMin, currentRegionName);
     const titleEl = document.getElementById('strategy-time-title');
     const descEl = document.getElementById('strategy-text');
-    if (titleEl) titleEl.innerText = `${nowHour}시 - ${strategy.title}`;
+    if (titleEl) titleEl.innerHTML = `${nowHour}:${String(nowMin).padStart(2,'0')} - ${strategy.title} ${strategy.isPrePositioning ? '⏳' : ''}`;
     if (descEl) descEl.innerHTML = strategy.desc;
 
     const cardsList = document.getElementById('strategy-cards-list');
@@ -1637,12 +1627,34 @@
          return;
       }
 
+      // [V7.8.5 AI Upgraded] 날씨와 수급 불균형 지수 연산을 위해 데이터 Fetch
+      const weatherData = await fetchRealtimeWeatherUpgraded(currentPos.lat, currentPos.lng);
+
       let scoredPool = await Promise.all(strategy.places.map(async (item) => {
         let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
-        return { ...item, dist: road.distanceKm, estimatedTimeMin: road.durationMin, isStrategy: true };
+        let pure = await calculatePureSpotScore({...item, isWisu: true}, weatherData, nowHour);
+        
+        // --- [AI V7.8.5] 수급 불균형 지수 (Imbalance Index) 산출 알고리즘 ---
+        let W_transit = getPublicTransitSurgeBonus(item, nowDate) > 0 ? 1.5 : 1.0;
+        let W_weather = weatherData ? weatherData.weatherMultiplier : 1.0;
+        
+        // 교통 상태를 통한 주변 빈 차(공차) 공급량 유추 (S_avail)
+        let S_avail = 1.0;
+        if (road.trafficStatus === "극심한 정체") S_avail = 0.4; // 묶인 차가 많아 공급 턱없이 부족
+        else if (road.trafficStatus === "서행") S_avail = 0.7;
+        else if (road.trafficStatus === "원활") S_avail = 1.2;
+        
+        let baseDemand = pure.score > 0 ? pure.score : 10; // 기본 수요값 보정
+        
+        // 공식: (수요 * 날씨가중치 * 막차가중치) / (공급) -> 배수로 변환하여 UI 표시
+        let imbalanceRatio = ((W_weather * W_transit) / S_avail).toFixed(1);
+        if (parseFloat(imbalanceRatio) < 1.0) imbalanceRatio = "1.0"; // 최소 1배수 시각적 보정
+        
+        return { ...item, dist: road.distanceKm, estimatedTimeMin: road.durationMin, isStrategy: true, imbalanceRatio: imbalanceRatio };
       }));
 
-      scoredPool.sort((a, b) => a.dist - b.dist);
+      // 수급 불균형이 높은 곳 우선 정렬, 같으면 거리순
+      scoredPool.sort((a, b) => parseFloat(b.imbalanceRatio) - parseFloat(a.imbalanceRatio) || a.dist - b.dist);
       
       const fragment = document.createDocumentFragment();
       scoredPool.forEach((item, index) => {
@@ -1658,13 +1670,15 @@
                 <div class="num-badge" style="background:#22C55E; color:#FFF;">${index+1}</div>
                 <div class="place-info">
                   <div class="place-name" style="color:#22C55E;">${item.name}</div>
-                  <div class="score-dist">${item.dist.toFixed(1)}km (${item.estimatedTimeMin}분) · 타겟 거점</div>
+                  <div class="score-dist">${item.dist.toFixed(1)}km (${item.estimatedTimeMin}분) · 전략 타겟 거점</div>
                 </div>
               </div>
               <button type="button" class="right-navi-btn" style="background:#22C55E !important; color:#FFF !important; box-shadow: 0 1px 4px rgba(34, 197, 94, 0.4);" onclick="openKakaoNaviApp('${item.name.replace(/'/g, "\\'")}', ${item.lat}, ${item.lng})"><span>🚗내비</span></button>
             </div>
           </div>
           <div class="tag-group">
+            <span class="tag" style="background:#FFF1F2; color:#E11D48; border-color:#BE123C; font-weight:900;">🔥수급불균형 ${item.imbalanceRatio}배</span>
+            ${strategy.isPrePositioning ? `<span class="tag" style="background:#F3E8FF; color:#9333EA; border-color:#A855F7; font-weight:900;">⏳${strategy.prePositioningTag}</span>` : ''}
             <span class="tag near" style="background:#F0FDF4; color:#16A34A; border-color:#22C55E;">#시간대_운행전략추천</span>
           </div>
         `;
@@ -1675,7 +1689,6 @@
     }
   }
 
-  // [AI V7.8.2] 점수 통합 산출 로직
   async function calculatePureSpotScore(item, weatherData, nowHour) {
     let score = 0;
     if (item.isHighValue) score += 65; 
@@ -1684,13 +1697,11 @@
     else if (item.isLiveKakao) score += 15;
     score += await getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
     
-    // 날씨 부스트
     if (weatherData && weatherData.isRainOrSnow) { 
         const isShelterSpot = (item.name.includes("병원") || item.name.includes("백화점") || item.name.includes("마트") || item.name.includes("역"));
         score = score * weatherData.weatherMultiplier + (isShelterSpot ? 45 : 10);
     }
 
-    // 막차 서지 보너스
     score += getPublicTransitSurgeBonus(item, new Date());
 
     let matchCount = 0; let isTimeMatch = false;
@@ -1756,6 +1767,7 @@
       renderDrivingLogStats();
     }
   }
+
   async function searchRestrooms() {
     if (!currentPos) { showToast("위치를 탐색해주세요."); return; }
     
@@ -1830,7 +1842,6 @@
       let combinedList = [...customList, ...apiList];
       let dedupedRestrooms = [];
       for (let item of combinedList) {
-          // 100m(0.1km) 이내에 이미 추가된 화장실이 있으면 중복으로 간주하고 제외 (커스텀 우선)
           if (!dedupedRestrooms.some(d => getStraightDistanceKm(item.lat, item.lng, d.lat, d.lng) <= 0.1)) {
               dedupedRestrooms.push(item);
           }
@@ -1889,7 +1900,6 @@
     const inWisu = (currentMode === 1);
     if (logEl) logEl.innerText = `⚡ [스마트 ${inWisu ? '관내 추천' : '관외 경유지 탐색'}] 연산 중...`;
     
-    // AI V7.8.2 날씨 정보 연동
     const weatherData = await fetchRealtimeWeatherUpgraded(currentPos.lat, currentPos.lng);
     const liveKakaoHotspots = await fetchLiveKakaoHotspots(currentPos.lat, currentPos.lng);
     let allLiveHotspots = [...liveKakaoHotspots];
@@ -1948,11 +1958,9 @@
       let pureRes = await calculatePureSpotScore(item, weatherData, nowHour);
       let preliminaryScore = pureRes.score;
       
-      // 대중교통 가중치 합산
       const transitSurge = getPublicTransitSurgeBonus(item, new Date());
       preliminaryScore += transitSurge;
 
-      // 서울 공공데이터 연동 (관외에서 서울지역 스팟인 경우)
       let isSeoulCrowded = false;
       if (!inWisu && item.name.match(/강남|사당|홍대|신도림|건대|여의도|서울역/)) {
           const congestion = await fetchSeoulCityData(item.name);
@@ -1970,7 +1978,7 @@
         const crossTrackDist = getCrossTrackDistanceKm(currentPos.lat, currentPos.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng, item.lat, item.lng);
 
         if (straightDist <= 2.5) {
-           preliminaryScore += 120; // 관외 모드 시 반경 2.5km 내 핫플은 복귀 경유지로 무조건 최우선 추천되도록 부스트 강화
+           preliminaryScore += 120; 
            if (deltaAngle > 90) preliminaryScore -= 10; 
         } else {
            if (crossTrackDist > 3.5) continue; 
@@ -1991,11 +1999,9 @@
     preFiltered.sort((a, b) => b.preliminaryScore - a.preliminaryScore);
     const topCandidates = preFiltered.slice(0, 15);
     
-    // 카카오 내비를 찔러서 실제 교통 속도 및 최종 EV 산출
     let scoredPool = await Promise.all(topCandidates.map(async (item) => {
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
       
-      // 교통 정체(Traffic Jam) 서지 보너스 반영
       let finalScore = item.preliminaryScore + road.trafficScore;
       document.getElementById('status-traffic').innerHTML = `🚦 실시간 교통: 반경 ${road.distanceKm}km 내 ${road.trafficStatus}`;
 
@@ -2180,7 +2186,6 @@
         L.marker([pt.lat, pt.lng], { icon: L.divIcon({ html, className: '', iconSize: [24, 24] }) }).addTo(leafletMap).bindPopup(`<b>${pt.name}</b>`);
 
         if (pt.geometryCoords && pt.geometryCoords.length > 0) {
-          // 관외 복귀 모드일 때, 목적지(Target)로 다이렉트 연결되는 라인은 얇고 연하게 처리하여 시각적 혼동 방지
           let polyWeight = pt.isTargetBoundary ? 2 : 6;
           let polyOpacity = pt.isTargetBoundary ? 0.3 : 0.8;
           let polyColor = pt.isTargetBoundary ? '#EF4444' : themeColor;
@@ -2189,7 +2194,6 @@
           
           if (currentMode === 2 && !pt.isTargetBoundary && !pt.isCurrent && !pt.isRestroom && !pt.isGasStation) {
              const targetPt = currentRouteData.find(p => p.isTargetBoundary);
-             // 추천된 핫플(경유지)에서 최종 복귀 목적지까지 이어지는 가상의 점선을 직관적인 파란색으로 명확하게 표시
              if (targetPt) {
                  L.polyline([[pt.lat, pt.lng], [targetPt.lat, targetPt.lng]], { color: '#3B82F6', weight: 3, opacity: 0.8, dashArray: '6, 6' }).addTo(leafletMap);
              }
@@ -2670,7 +2674,6 @@
      `;
   }
 
-  // --- V7.1 실매출 입력 로직 추가 ---
   const inputRev = document.getElementById('input-rev');
   const fill = document.getElementById('progress-fill');
   const valPct = document.getElementById('val-pct');
@@ -2714,7 +2717,6 @@
 
   if(inputRev) inputRev.addEventListener('input', calculateDailyRevenue);
 
-  // 음성 인식 로직
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (SpeechRecognition && btnMic) {
     const recognition = new SpeechRecognition();
@@ -2751,7 +2753,6 @@
   }
 
 
-  // --- 월간 시뮬레이터 로직 ---
   function initSimulator() {
     const today = new Date();
     const currentDay = today.getDate();
@@ -3012,7 +3013,6 @@
        });
     }
 
-    // --- 고단가 콜 길게 누르기 이벤트 바인딩 ---
     const saveCallBtn = document.getElementById('btn-save-call');
     let callPressTimer = null; let isCallLongPress = false; let hasTouch = false;
     
@@ -3050,7 +3050,6 @@
     timerBtn.addEventListener('touchcancel', () => { if (touchTimer) clearTimeout(touchTimer); });
     timerBtn.addEventListener('click', (e) => { if (isLongPress) { e.preventDefault(); isLongPress = false; return; } toggleTimer(); });
 
-    // Simulator Init & Events
     initSimulator();
     initDailyRevenue(); 
     
