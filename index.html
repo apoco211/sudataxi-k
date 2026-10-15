@@ -21,10 +21,36 @@
 :where(code, pre, kbd, samp) {
   font-family: "Optimistic Mono", ui-monospace, monospace;
 }
-</style>
+</style><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+
+    /* v7.9.17 swipe-up protection: bottom safe-area buffer */
+    .bottom-bar::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: env(safe-area-inset-bottom, 0px); background: inherit; pointer-events: none; z-index: -1; }
+    .bottom-bar { padding-bottom: max(6px, env(safe-area-inset-bottom, 0px)); }
+
+  </style>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>수다택시 K v7.9.16 AI Upgraded fix4</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>수다택시 K v7.9.17 SwipeFix</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -261,7 +287,7 @@
     .recent-log-item { display: flex; align-items: center; justify-content: space-between; background: var(--stat-bg); border: 1px solid var(--stat-border); border-radius: 6px; padding: 4px 6px; }
     .recent-log-time { font-size: 10px; font-weight: 700; color: var(--main-text); white-space: nowrap; }
     
-    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: calc(64px + env(safe-area-inset-bottom, 0px)); background: rgba(var(--main-bg), 0.95); backdrop-filter: blur(10px); border-top: 2px solid var(--theme-accent); display: flex; align-items: center; gap: 6px; padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px)) 10px; z-index: 100; max-width: 430px; margin: 0 auto; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); }
+    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: calc(64px + env(safe-area-inset-bottom, 0px)); background: rgba(var(--main-bg), 0.95); backdrop-filter: blur(10px); border-top: 2px solid var(--theme-accent); display: flex; align-items: center; gap: 6px; padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px)) 10px; z-index: 100; max-width: 430px; margin: 0 auto; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); touch-action: manipulation; -webkit-touch-callout: none;}
     
     .timer-container { display: flex; flex-direction: column; gap: 3px; justify-content: stretch; height: 100%; }
     .timer-mode-selector { display: flex; gap: 3px; height: 16px; }
@@ -272,9 +298,9 @@
     .timer-display-btn.finished { background: #FEE2E2; color: #DC2626; border-color: #EF4444; animation: alertBlink 1s infinite; }
     
     @keyframes alertBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-    .save-call-btn { flex: 1; height: 100%; background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; font-weight: 900; font-size: 11px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.15; word-break: keep-all; box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: all 0.2s; }
+    .save-call-btn { flex: 1; height: 100%; background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; font-weight: 900; font-size: 11px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.15; word-break: keep-all; box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: all 0.2s; touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;}
     .save-call-btn.active-longpress { transform: scale(0.95); background: #DB2777 !important; color: #FFF !important; }
-    .save-restroom-btn { flex: 1; height: 100%; background: #3B82F6 !important; color: #FFFFFF !important; font-weight: 900; font-size: 11px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.15; word-break: keep-all; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+    .save-restroom-btn { flex: 1; height: 100%; background: #3B82F6 !important; color: #FFFFFF !important; font-weight: 900; font-size: 11px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.15; word-break: keep-all; box-shadow: 0 2px 6px rgba(0,0,0,0.2); touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;}
     
     .map-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
     .map-modal-overlay.active { display: flex; }
@@ -308,7 +334,7 @@
     }
     body.theme-day .sticky-top-area { background-color: #F3F4F6; border-bottom: 1px solid #E5E7EB; }
     body.theme-day.mode-2 { --theme-accent: #EA580C; --theme-bg-dark: #FFF7ED; --theme-border: #FFEDD5; }
-    body.theme-day .bottom-bar { background: rgba(255,255,255,0.95); }
+    body.theme-day .bottom-bar { background: rgba(255,255,255,0.95); touch-action: manipulation; -webkit-touch-callout: none;}
     body.theme-day #call-map-view, body.theme-day #route-map { background: #E5E7EB !important; }
     body.theme-day .map-modal-header { background: #F9FAFB; }
     body.theme-day .text-accent { color: #D97706; }
@@ -739,7 +765,7 @@
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.9.16 AI Upgraded fix4"; 
+  const BUILD_VERSION = "v7.9.17 AI Upgraded fix4"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -3257,22 +3283,64 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
        });
     }
 
-    // --- 고단가 콜 길게 누르기 이벤트 바인딩 ---
+    // --- v7.9.17 고단가 콜 길게 누르기 + 아이폰 스와이프업 오작동 방지 패치 ---
     const saveCallBtn = document.getElementById('btn-save-call');
     let callPressTimer = null; let isCallLongPress = false; let hasTouch = false;
+    let callTouchStartY = 0, callTouchStartX = 0, callTouchStartTime = 0;
+    const SWIPE_THRESHOLD_Y = 50; // 위로 50px 이상 스와이프면 시스템 제스처로 간주
+    const TAP_MOVE_THRESHOLD = 30; // 탭으로 인정할 최대 움직임
+    const SWIPE_TIME_LIMIT = 500; // 500ms 이내 빠른 스와이프
+    
+    function isSystemSwipeUp(startY, endY, startX, endX, duration) {
+        const deltaY = startY - endY; // 위로 스와이프면 양수
+        const deltaX = Math.abs(endX - startX);
+        // 조건 1: 하단 150px에서 시작해서 위로 60px 이상 빠르게 스와이프
+        if (startY > window.innerHeight - 150 && deltaY > 60 && duration < 500) return true;
+        // 조건 2: 수직 위로 50px 이상 & 수직이 수평보다 크면 스와이프
+        if (deltaY > SWIPE_THRESHOLD_Y && deltaY > deltaX && duration < SWIPE_TIME_LIMIT) return true;
+        return false;
+    }
     
     saveCallBtn.addEventListener('touchstart', (e) => {
-        hasTouch = true; isCallLongPress = false; saveCallBtn.classList.add('active-longpress');
-        callPressTimer = setTimeout(() => { isCallLongPress = true; saveCallBtn.classList.remove('active-longpress'); saveCurrentCallLocation(true); }, 800);
+        hasTouch = true; isCallLongPress = false;
+        const t = e.touches[0];
+        callTouchStartY = t.clientY; callTouchStartX = t.clientX; callTouchStartTime = Date.now();
+        saveCallBtn.classList.add('active-longpress');
+        callPressTimer = setTimeout(() => { isCallLongPress = true; saveCallBtn.classList.remove('active-longpress'); saveCurrentCallLocation(true); }, 650);
+    }, {passive: true});
+    saveCallBtn.addEventListener('touchmove', (e) => {
+        const t = e.touches[0];
+        const moveY = Math.abs(t.clientY - callTouchStartY);
+        const moveX = Math.abs(t.clientX - callTouchStartX);
+        if (moveY > 15 || moveX > 15) { // 15px 이상 움직이면 longpress 취소
+            if (callPressTimer) clearTimeout(callPressTimer);
+            saveCallBtn.classList.remove('active-longpress');
+            isCallLongPress = false;
+        }
     }, {passive: true});
     saveCallBtn.addEventListener('touchend', (e) => {
-        if (callPressTimer) clearTimeout(callPressTimer); saveCallBtn.classList.remove('active-longpress');
+        if (callPressTimer) clearTimeout(callPressTimer);
+        saveCallBtn.classList.remove('active-longpress');
+        const t = e.changedTouches[0];
+        const endY = t.clientY, endX = t.clientX;
+        const duration = Date.now() - callTouchStartTime;
+        const deltaY = callTouchStartY - endY;
+        const deltaX = Math.abs(endX - callTouchStartX);
+        // 스와이프 제스처면 저장 무시 (아이폰 앱 종료 제스처 보호)
+        if (isSystemSwipeUp(callTouchStartY, endY, callTouchStartX, endX, duration)) {
+            // console.log('swipe-up ignored', deltaY, duration);
+            return;
+        }
+        // 움직임이 너무 크면 탭이 아닌 스크롤/스와이프로 간주
+        if (Math.abs(deltaY) > TAP_MOVE_THRESHOLD || deltaX > TAP_MOVE_THRESHOLD) {
+            return;
+        }
         if (!isCallLongPress) saveCurrentCallLocation(false);
     });
     saveCallBtn.addEventListener('mousedown', (e) => {
         if (hasTouch) return;
         isCallLongPress = false; saveCallBtn.classList.add('active-longpress');
-        callPressTimer = setTimeout(() => { isCallLongPress = true; saveCallBtn.classList.remove('active-longpress'); saveCurrentCallLocation(true); }, 800);
+        callPressTimer = setTimeout(() => { isCallLongPress = true; saveCallBtn.classList.remove('active-longpress'); saveCurrentCallLocation(true); }, 650);
     });
     saveCallBtn.addEventListener('mouseup', (e) => {
         if (hasTouch) return;
@@ -3283,7 +3351,32 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
         if (callPressTimer) clearTimeout(callPressTimer); saveCallBtn.classList.remove('active-longpress');
     });
 
-    document.getElementById('btn-save-restroom').addEventListener('click', () => saveCurrentRestroomLocation());
+        // v7.9.17 화장실 버튼도 스와이프 보호 적용
+    (function() {
+        const restBtn = document.getElementById('btn-save-restroom');
+        let restStartY = 0, restStartX = 0, restStartTime = 0;
+        let restHasTouch = false;
+        restBtn.addEventListener('touchstart', (e) => {
+            restHasTouch = true;
+            const t = e.touches[0];
+            restStartY = t.clientY; restStartX = t.clientX; restStartTime = Date.now();
+        }, {passive: true});
+        restBtn.addEventListener('touchend', (e) => {
+            const t = e.changedTouches[0];
+            const duration = Date.now() - restStartTime;
+            const deltaY = restStartY - t.clientY;
+            const deltaX = Math.abs(t.clientX - restStartX);
+            // 시스템 스와이프면 무시
+            if (restStartY > window.innerHeight - 150 && deltaY > 60 && duration < 500) return;
+            if (deltaY > 50 && deltaY > deltaX && duration < 500) return;
+            if (Math.abs(deltaY) > 30 || deltaX > 30) return;
+            saveCurrentRestroomLocation();
+        });
+        restBtn.addEventListener('click', (e) => {
+            if (restHasTouch) { restHasTouch = false; return; } // touch가 있으면 click 무시 (중복 방지)
+            saveCurrentRestroomLocation();
+        });
+    })();
 
     document.getElementById('timer-btn-5m').addEventListener('click', () => setTimerPreset(5));
     document.getElementById('timer-btn-10m').addEventListener('click', () => setTimerPreset(10));
@@ -3314,5 +3407,5 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     executeSearch();
   });
 </script>
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
 </html>
