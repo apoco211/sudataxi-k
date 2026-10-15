@@ -655,6 +655,88 @@ body { padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)) !important
 }
 </style>
 
+
+<style id="compact-fix">
+/* ===== COMPACT FIX - 위아래 여백 최소화 + 높이 동일 ===== */
+.bottom-bar {
+  min-height: 76px !important;
+  max-height: 76px !important;
+  height: 76px !important;
+  padding: 5px 8px calc(5px + env(safe-area-inset-bottom, 0px)) 8px !important;
+  gap: 6px !important;
+  border-radius: 16px !important;
+  border-width: 1px !important;
+  border-top-width: 2px !important;
+}
+
+.timer-container {
+  gap: 4px !important;
+  min-height: 62px !important;
+  max-height: 62px !important;
+  height: 62px !important;
+  flex: 1 !important;
+}
+
+.timer-mode-selector {
+  height: 26px !important;
+  min-height: 26px !important;
+  max-height: 26px !important;
+  gap: 5px !important;
+}
+
+.timer-mode-btn {
+  height: 26px !important;
+  min-height: 26px !important;
+  max-height: 26px !important;
+  font-size: 12px !important;
+  border-radius: 8px !important;
+}
+
+.timer-display-btn {
+  height: 32px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
+  flex: 0 0 32px !important;
+  font-size: 13px !important;
+  border-radius: 10px !important;
+  padding: 0 6px !important;
+}
+
+.save-call-btn {
+  min-height: 62px !important;
+  max-height: 62px !important;
+  height: 62px !important;
+  font-size: 10.5px !important;
+  border-radius: 12px !important;
+  padding: 4px !important;
+  line-height: 1.15 !important;
+}
+
+.save-restroom-btn {
+  min-height: 62px !important;
+  max-height: 62px !important;
+  height: 62px !important;
+  font-size: 10.5px !important;
+  border-radius: 12px !important;
+  padding: 4px !important;
+  line-height: 1.2 !important;
+}
+
+/* body 하단 패딩도 줄여서 여백 최소화 */
+body {
+  padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+@media (max-width: 375px) {
+  .bottom-bar { min-height: 70px !important; max-height: 70px !important; height: 70px !important; gap: 5px !important; padding: 4px 6px calc(4px + env(safe-area-inset-bottom)) 6px !important; }
+  .timer-container { min-height: 58px !important; max-height: 58px !important; height: 58px !important; gap: 3px !important; }
+  .timer-mode-selector { height: 24px !important; min-height: 24px !important; max-height: 24px !important; }
+  .timer-mode-btn { height: 24px !important; min-height: 24px !important; font-size: 11px !important; }
+  .timer-display-btn { height: 30px !important; min-height: 30px !important; max-height: 30px !important; flex: 0 0 30px !important; font-size: 12px !important; }
+  .save-call-btn, .save-restroom-btn { min-height: 58px !important; max-height: 58px !important; height: 58px !important; font-size: 9.5px !important; }
+}
+</style>
+
 </head>
 <body class="mode-1">
   
