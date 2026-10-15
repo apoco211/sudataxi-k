@@ -24,7 +24,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>수다택시 K v7.9.10 AI Upgraded</title>
+  <title>수다택시 K v7.9.12 AI Upgraded</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -91,7 +91,7 @@
     body.mode-3 { --theme-accent: #22C55E; --theme-bg-dark: #0D2418; --theme-border: #164E2B; --theme-text-on-accent: #000000; }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background-color: var(--main-bg); color: var(--main-text); max-width: 430px; margin: 0 auto; padding: 10px 10px 120px 10px; min-height: 100vh; transition: all 0.3s ease; }
+    body { background-color: var(--main-bg); color: var(--main-text); max-width: 430px; margin: 0 auto; padding: 10px 10px calc(120px + env(safe-area-inset-bottom, 0px)) 10px; min-height: 100vh; transition: all 0.3s ease; }
     
     .sticky-top-area { position: sticky; top: 0; z-index: 150; background-color: var(--main-bg); margin: -10px -10px 8px -10px; padding: 10px 10px 4px 10px; transition: background-color 0.3s ease; }
     
@@ -261,7 +261,7 @@
     .recent-log-item { display: flex; align-items: center; justify-content: space-between; background: var(--stat-bg); border: 1px solid var(--stat-border); border-radius: 6px; padding: 4px 6px; }
     .recent-log-time { font-size: 10px; font-weight: 700; color: var(--main-text); white-space: nowrap; }
     
-    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 64px; background: rgba(var(--main-bg), 0.95); backdrop-filter: blur(10px); border-top: 2px solid var(--theme-accent); display: flex; align-items: center; gap: 6px; padding: 6px 10px; z-index: 100; max-width: 430px; margin: 0 auto; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); }
+    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: calc(64px + env(safe-area-inset-bottom, 0px)); background: rgba(var(--main-bg), 0.95); backdrop-filter: blur(10px); border-top: 2px solid var(--theme-accent); display: flex; align-items: center; gap: 6px; padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px)) 10px; z-index: 100; max-width: 430px; margin: 0 auto; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); }
     
     .timer-container { display: flex; flex-direction: column; gap: 3px; justify-content: stretch; height: 100%; }
     .timer-mode-selector { display: flex; gap: 3px; height: 16px; }
@@ -272,7 +272,7 @@
     .timer-display-btn.finished { background: #FEE2E2; color: #DC2626; border-color: #EF4444; animation: alertBlink 1s infinite; }
     
     @keyframes alertBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-    .save-call-btn { flex: 1; height: 100%; background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; font-weight: 900; font-size: 11px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.15; word-break: keep-all; box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: all 0.2s; }
+    .save-call-btn { flex: 1; height: 100%; background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; font-weight: 900; font-size: 11px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.15; word-break: keep-all; box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: all 0.2s; touch-action: manipulation; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; user-select: none; }
     .save-call-btn.active-longpress { transform: scale(0.95); background: #DB2777 !important; color: #FFF !important; }
     .save-restroom-btn { flex: 1; height: 100%; background: #3B82F6 !important; color: #FFFFFF !important; font-weight: 900; font-size: 11px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.15; word-break: keep-all; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
     
@@ -692,7 +692,7 @@
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.9.10 AI Upgraded"; 
+  const BUILD_VERSION = "v7.9.12 AI Upgraded"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -1898,29 +1898,28 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
   }
   async function searchRestrooms() {
     if (!currentPos) { showToast("위치를 탐색해주세요."); return; }
-    
     const logEl = document.getElementById('pipeline-log');
     if (logEl) logEl.innerText = `🚻 주변 화장실 및 ⛽ 주유소 탐색 중...`;
     showToast("🚻 화장실 / ⛽ 주유소 탐색 중...");
 
-    let uniqueMap = new Map();
+    let customMap = new Map();
+    let restroomMap = new Map();
+    let gasMap = new Map();
 
     let customRestrooms = JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]');
     customRestrooms.forEach(p => {
        const dist = getStraightDistanceKm(currentPos.lat, currentPos.lng, p.lat, p.lng);
        if (dist <= 3.0) { 
-          uniqueMap.set(p.id, { ...p, straightDist: dist, isRestroom: true, isCustomRestroom: true });
+          customMap.set(p.id, { ...p, straightDist: dist, isRestroom: true, isCustomRestroom: true });
        }
     });
 
     try {
       if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
         const ps = new kakao.maps.services.Places();
-        
         const searchPlace = (query, isCategory = false) => new Promise(resolve => {
           let isDone = false;
-          const tId = setTimeout(() => { if (!isDone) { isDone = true; resolve([]); } }, 3000); 
-
+          const tId = setTimeout(() => { if (!isDone) { isDone = true; resolve([]); } }, 5000); 
           const callback = (data, status) => {
             if (!isDone) { isDone = true; clearTimeout(tId); resolve(status === kakao.maps.services.Status.OK ? data : []); }
           };
@@ -1931,75 +1930,86 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
           } catch(e) { if (!isDone) { isDone = true; clearTimeout(tId); resolve([]); } }
         });
 
-        const apiPromise = Promise.all([
-          searchPlace('공중화장실'), searchPlace('개방화장실'),
-          searchPlace('OL7', true), searchPlace('SW8', true) 
+        const [pub1, pub2, gasCat, gasKw, sub] = await Promise.all([
+          searchPlace('공중화장실'), 
+          searchPlace('개방화장실'),
+          searchPlace('OL7', true),
+          searchPlace('주유소'),
+          searchPlace('SW8', true)
         ]);
-        const timeoutPromise = new Promise(resolve => setTimeout(() => resolve([[],[],[],[]]), 3000));
         
-        const [pub1, pub2, gas, sub] = await Promise.race([apiPromise, timeoutPromise]);
-        
-        gas.forEach(p => { p.isGasStation = true; });
-        
-        const allResults = [...pub1, ...pub2, ...gas, ...sub];
-        
-        allResults.forEach(p => {
-          if (!uniqueMap.has(p.id)) {
-            uniqueMap.set(p.id, {
+        // 화장실
+        [...pub1, ...pub2].forEach(p => {
+          if (!restroomMap.has(p.id) && !customMap.has(p.id)) {
+            restroomMap.set(p.id, {
               id: 'restroom_' + p.id, name: p.place_name,
               lat: parseFloat(p.y), lng: parseFloat(p.x),
               straightDist: getStraightDistanceKm(currentPos.lat, currentPos.lng, parseFloat(p.y), parseFloat(p.x)),
-              isRestroom: !p.isGasStation, 
-              isGasStation: p.isGasStation
+              isRestroom: true, isGasStation: false
+            });
+          }
+        });
+
+        // 주유소 - 카테고리 + 키워드 합치기
+        const allGas = [...gasCat, ...gasKw];
+        allGas.forEach(p => {
+          const key = p.id || (p.place_name + p.y + p.x);
+          if (!gasMap.has(key) && !gasMap.has(p.id)) {
+            gasMap.set(p.id || key, {
+              id: 'gas_' + (p.id || key), name: p.place_name,
+              lat: parseFloat(p.y), lng: parseFloat(p.x),
+              straightDist: getStraightDistanceKm(currentPos.lat, currentPos.lng, parseFloat(p.y), parseFloat(p.x)),
+              isRestroom: false, isGasStation: true
             });
           }
         });
       }
     } catch(err) {}
 
-    if (uniqueMap.size > 0) {
-      let customList = []; let apiList = [];
-      Array.from(uniqueMap.values()).forEach(item => {
-          if (item.isCustomRestroom) customList.push(item);
-          else apiList.push(item);
-      });
-      
-      customList.sort((a, b) => a.straightDist - b.straightDist);
-      apiList.sort((a, b) => a.straightDist - b.straightDist);
-      
-      let combinedList = [...customList, ...apiList];
-      let dedupedRestrooms = [];
-      for (let item of combinedList) {
-          // 100m(0.1km) 이내에 이미 추가된 화장실이 있으면 중복으로 간주하고 제외 (커스텀 우선)
-          if (!dedupedRestrooms.some(d => getStraightDistanceKm(item.lat, item.lng, d.lat, d.lng) <= 0.1)) {
-              dedupedRestrooms.push(item);
-          }
-      }
-      
-      let restrooms = dedupedRestrooms.slice(0, 3);
+    // 합치기: 커스텀 화장실 1순위, 그 다음 화장실 2개, 주유소 2개 보장
+    let customList = Array.from(customMap.values()).sort((a,b)=>a.straightDist-b.straightDist);
+    let restroomList = Array.from(restroomMap.values()).sort((a,b)=>a.straightDist-b.straightDist);
+    let gasList = Array.from(gasMap.values()).sort((a,b)=>a.straightDist-b.straightDist);
 
-      let scoredPool = await Promise.all(restrooms.map(async (item) => {
-        let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
-        return { ...item, dist: road.distanceKm, estimatedTimeMin: road.durationMin, geometryCoords: road.geometryCoords };
-      }));
+    let dedupedRestrooms = [];
+    for (let item of customList) {
+      if (!dedupedRestrooms.some(d => getStraightDistanceKm(item.lat, item.lng, d.lat, d.lng) <= 0.1)) dedupedRestrooms.push(item);
+    }
+    for (let item of restroomList) {
+      if (dedupedRestrooms.length >= 2) break;
+      if (!dedupedRestrooms.some(d => getStraightDistanceKm(item.lat, item.lng, d.lat, d.lng) <= 0.1)) dedupedRestrooms.push(item);
+    }
 
-      scoredPool.sort((a, b) => {
-          if (a.isCustomRestroom && !b.isCustomRestroom) return -1;
-          if (!a.isCustomRestroom && b.isCustomRestroom) return 1;
-          return a.dist - b.dist;
-      });
-      
-      currentRouteData = [{ name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true }, ...scoredPool];
+    let dedupedGas = [];
+    for (let item of gasList) {
+      if (dedupedGas.length >= 2) break;
+      if (!dedupedGas.some(d => getStraightDistanceKm(item.lat, item.lng, d.lat, d.lng) <= 0.15)) dedupedGas.push(item);
+    }
 
-      const mapBtn = document.getElementById('btn-show-map');
-      if (mapBtn) mapBtn.style.display = 'none'; 
-      if (logEl) logEl.innerText = `방금 · 화장실/주유소 검색 완료 (다시 핫플 찾으려면 위 '콜 찾기' 버튼 터치)`;
-
-      renderCards(scoredPool, null, null);
-    } else {
+    let combined = [...dedupedRestrooms, ...dedupedGas];
+    if (combined.length === 0) {
       showToast("주변 반경 내 화장실/주유소를 찾지 못했습니다.");
       if (logEl) logEl.innerText = `방금 · 검색된 결과 없음`;
+      return;
     }
+
+    let scoredPool = await Promise.all(combined.map(async (item) => {
+      let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
+      return { ...item, dist: road.distanceKm, estimatedTimeMin: road.durationMin, geometryCoords: road.geometryCoords };
+    }));
+
+    scoredPool.sort((a, b) => {
+      if (a.isCustomRestroom && !b.isCustomRestroom) return -1;
+      if (!a.isCustomRestroom && b.isCustomRestroom) return 1;
+      if (a.isGasStation !== b.isGasStation) return a.isGasStation ? 1 : -1;
+      return a.dist - b.dist;
+    });
+    
+    currentRouteData = [{ name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true }, ...scoredPool];
+    const mapBtn = document.getElementById('btn-show-map');
+    if (mapBtn) mapBtn.style.display = 'none'; 
+    if (logEl) logEl.innerText = `방금 · 화장실 ${dedupedRestrooms.length}곳 / 주유소 ${dedupedGas.length}곳 검색 완료 (다시 핫플 찾으려면 위 '콜 찾기' 버튼 터치)`;
+    renderCards(scoredPool, null, null);
   }
 
   function executeSearch() {
@@ -2093,7 +2103,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       const transitSurge = getPublicTransitSurgeBonus(item, new Date());
       preliminaryScore += transitSurge;
 
-      // 서울 공공데이터 연동 - v7.9.10 필요한 지역만 호출 (반경 4.5km + 캐시)
+      // 서울 공공데이터 연동 - v7.9.12 필요한 지역만 호출 (반경 4.5km + 캐시)
       let isSeoulCrowded = false;
       if (!inWisu && item.name.match(/강남|사당|홍대|신도림|건대|여의도|서울역/)) {
           const distToSeoulItem = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
@@ -2855,7 +2865,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
 
   if(inputRev) inputRev.addEventListener('input', calculateDailyRevenue);
 
-  // 음성 인식 로직 v7.9.10 - 마이크 권한 1회 + 한글 금액 파서
+  // 음성 인식 로직 v7.9.12 - 마이크 권한 1회 + 한글 금액 파서
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (SpeechRecognition && btnMic) {
     let recognition = null; let isRecognizing = false;
@@ -3049,6 +3059,16 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
 
   window.addEventListener('DOMContentLoaded', () => {
     try { updateHeaderTitle(new Date(), false, null); } catch(e) {}
+    // iPhone swipe-up 오터치 방지
+    try {
+      const saveBtn = document.getElementById('btn-save-call');
+      if (saveBtn) {
+        let touchStartY = 0; let touchStartX = 0; let isSwiping = false;
+        saveBtn.addEventListener('touchstart', (e) => { if (e.touches && e.touches[0]) { touchStartY = e.touches[0].clientY; touchStartX = e.touches[0].clientX; isSwiping = false; } }, {passive: true});
+        saveBtn.addEventListener('touchmove', (e) => { if (e.touches && e.touches[0]) { const dy = Math.abs(e.touches[0].clientY - touchStartY); const dx = Math.abs(e.touches[0].clientX - touchStartX); if (dy > 12 || dx > 12) isSwiping = true; } }, {passive: true});
+        saveBtn.addEventListener('touchend', (e) => { if (isSwiping) { e.preventDefault(); e.stopPropagation(); isSwiping = false; return; } if (e.changedTouches && e.changedTouches[0]) { const dy = touchStartY - e.changedTouches[0].clientY; if (dy > 20) { e.preventDefault(); e.stopPropagation(); return; } } }, {passive: false});
+      }
+    } catch(e) {}
     initKakaoSdk(); applyThemeMode(currentThemeMode); checkIsPublicHolidayRealtime();
     updateCallLogStats(); updateCustomHotspotUI(); updateCustomRestroomUI();
     try { migrateOldDataIfNeeded(); } catch(e) {}
