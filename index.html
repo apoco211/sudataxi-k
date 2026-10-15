@@ -43,15 +43,15 @@
   font-family: "Optimistic Mono", ui-monospace, monospace;
 }
 
-    /* v7.9.21 Balanced - notch optimization */
+    /* v7.9.21 Final Balanced - top+10 bottom+10 */
     .sticky-top-area {
-      padding-top: env(safe-area-inset-top, 0px);
-      top: 0;
+      padding-top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
+      top: 0 !important;
     }
-    /* bottom bar - keep original height but ensure safe area only once */
     .bottom-bar {
-      height: calc(64px + env(safe-area-inset-bottom, 0px));
-      padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+      height: calc(64px + env(safe-area-inset-bottom, 0px) + 10px) !important;
+      padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px) + 10px) !important;
+      bottom: 0 !important;
     }
     .bottom-bar::after {
       content: '';
@@ -59,7 +59,7 @@
       bottom: 0;
       left: 0;
       right: 0;
-      height: env(safe-area-inset-bottom, 0px);
+      height: calc(env(safe-area-inset-bottom, 0px) + 10px);
       background: inherit;
       pointer-events: none;
       z-index: -1;
@@ -3364,7 +3364,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
        });
     }
 
-    // --- v7.9.21 Balanced - 고단가 콜 스와이프 방지 ---
+    // --- v7.9.21 Balanced top+10 bottom+10 ---
     const saveCallBtn = document.getElementById('btn-save-call');
     let callPressTimer = null; let isCallLongPress = false; let hasTouch = false;
     let callStartY = 0, callStartX = 0, callStartTime = 0;
