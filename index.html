@@ -246,7 +246,7 @@
     .text-orange { color: #F97316; }
     .text-purple { color: #A855F7; }
 
-    .drive-control-btn { touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none;  flex: 1; height: 44px; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 14px; transition: all 0.2s; border: 1px solid transparent; }
+    .drive-control-btn { touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none;  flex: 1; height: 44px; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 14px; transition: all 0.2s; border: 1px solid transparent; }
     .btn-green { background: #22C55E !important; color: #000 !important; border-color: #16A34A !important; }
     .btn-red { background: #EF4444 !important; color: #FFF !important; border-color: #DC2626 !important; }
     .btn-purple { background: #C084FC !important; color: #000 !important; border-color: #9333EA !important; }
@@ -1219,27 +1219,64 @@
     document.body.classList.remove('out-of-bounds-alert');
   }
 
-  function handleBoarding() {
-    if (!drivingState.isDriving || drivingState.isBreak) return;
-    if (drivingState.isPassengerBoarded) { showToast('이미 승차 상태입니다.'); return; }
-    drivingState.isPassengerBoarded = true; drivingState.stateStartTime = Date.now();
-    updateDrivingUI(); showToast('🙋 승차 처리되었습니다.'); saveDrivingState();
+  let _boardingLockUntil = 0;
+  let _lastBoardingAction = 0;
+  function handleBoarding(e) {
+    try { if (e) { e.preventDefault(); e.stopPropagation(); } } catch(err) {}
+    const now = Date.now();
+    if (now < _boardingLockUntil) return;
+    if (now - _lastBoardingAction < 800) return;
+    _lastBoardingAction = now;
+    _boardingLockUntil = now + 1500;
+
+    if (!drivingState.isDriving || drivingState.isBreak) { _boardingLockUntil = 0; return; }
+    if (drivingState.isPassengerBoarded) { showToast('이미 승차 중입니다.'); _boardingLockUntil = 0; return; }
+
+    const boardBtn = document.getElementById('btn-board');
+    if (boardBtn) { boardBtn.disabled = true; boardBtn.style.pointerEvents = 'none'; }
+
+    drivingState.isPassengerBoarded = true; 
+    drivingState.stateStartTime = Date.now();
+    updateDrivingUI(); 
+    saveDrivingState();
+    showToast('🙋 승차 처리되었습니다.');
     document.body.classList.remove('out-of-bounds-alert');
+
+    setTimeout(() => { 
+      _boardingLockUntil = 0; 
+      const b = document.getElementById('btn-board');
+      if (b) b.style.pointerEvents = '';
+    }, 1200);
   }
 
-  function handleAlighting() {
-    if (!drivingState.isDriving || drivingState.isBreak || !drivingState.isPassengerBoarded) return;
+  let _alightingLockUntil = 0;
+  function handleAlighting(e) {
+    try { if (e) { e.preventDefault(); e.stopPropagation(); } } catch(err) {}
+    const now = Date.now();
+    if (now < _alightingLockUntil) return;
+    _alightingLockUntil = now + 1500;
+    if (!drivingState.isDriving || drivingState.isBreak || !drivingState.isPassengerBoarded) { _alightingLockUntil = 0; return; }
+
+    const alightBtn = document.getElementById('btn-alight');
+    if (alightBtn) { alightBtn.disabled = true; alightBtn.style.pointerEvents = 'none'; }
+
     drivingState.isPassengerBoarded = false; drivingState.stateStartTime = Date.now();
     
     updateDrivingUI(); 
+    saveDrivingState();
     showToast('👋 하차 완료!\n추천화면 이동 및 5분 단축어 실행!');
     
-    saveDrivingState(); 
     setTab(1); 
     setTimerPreset(5); 
     
     try { window.location.href = `shortcuts://run-shortcut?name=수다택시5분`; } catch(e) {}
     startTimerInternal();
+
+    setTimeout(() => { 
+      _alightingLockUntil = 0; 
+      const a = document.getElementById('btn-alight');
+      if (a) a.style.pointerEvents = '';
+    }, 1200);
   }
 
   function startDrivingTimer() {
@@ -1961,7 +1998,6 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     }
   }
 
-  // v7.9.16 범칙금 카메라 관리 - 버튼 작동 fix 포함
   function openPenaltyModal() {
     const modal = document.getElementById('penalty-modal');
     if (modal) modal.classList.add('active');
@@ -2037,93 +2073,57 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const place = placeEl ? placeEl.value.trim() : '';
     const photoInput = document.getElementById('penalty-photo');
     if (!violation || !amount || !place) { showToast("위반/금액/장소를 모두 입력하세요"); return; }
-
     let lat = null; let lng = null; let address = place;
     try {
       const geo = await geocodeAddress(place);
       if (geo) { lat = geo.lat; lng = geo.lng; }
-      else {
-        if (currentPos) { lat = currentPos.lat + (Math.random()-0.5)*0.002; lng = currentPos.lng + (Math.random()-0.5)*0.002; }
-      }
-    } catch(e) {
-      if (currentPos) { lat = currentPos.lat; lng = currentPos.lng; }
-    }
-
+      else { if (currentPos) { lat = currentPos.lat + (Math.random()-0.5)*0.002; lng = currentPos.lng + (Math.random()-0.5)*0.002; } }
+    } catch(e) { if (currentPos) { lat = currentPos.lat; lng = currentPos.lng; } }
     let photoData = null;
     if (photoInput && photoInput.files && photoInput.files[0]) {
       const file = photoInput.files[0];
       if (file.size > 2*1024*1024) { showToast("사진 2MB 이하만 가능"); return; }
-      photoData = await new Promise(res => {
-        const reader = new FileReader();
-        reader.onload = e => res(e.target.result);
-        reader.readAsDataURL(file);
-      });
+      photoData = await new Promise(res => { const reader = new FileReader(); reader.onload = e => res(e.target.result); reader.readAsDataURL(file); });
     }
-
-    const newItem = {
-      id: 'penalty_' + Date.now(),
-      violation: violation,
-      amount: amount,
-      place: place,
-      address: address,
-      lat: lat,
-      lng: lng,
-      photo: photoData,
-      createdAt: new Date().toISOString()
-    };
-
-    const list = getPenaltyList();
-    list.push(newItem);
-    savePenaltyList(list);
-    renderPenaltyList();
+    const newItem = { id: 'penalty_' + Date.now(), violation, amount, place, address, lat, lng, photo: photoData, createdAt: new Date().toISOString() };
+    const list = getPenaltyList(); list.push(newItem); savePenaltyList(list); renderPenaltyList();
     if (typeof callMapViewLeaflet !== 'undefined' && callMapViewLeaflet) renderCallMapView();
-
-    if (violationEl) violationEl.value = '';
-    if (amountEl) amountEl.value = '';
-    if (placeEl) placeEl.value = '';
-    if (photoInput) photoInput.value = '';
-    closePenaltyModal();
-    showToast("📷 범칙금 장소 저장됨");
+    if (violationEl) violationEl.value = ''; if (amountEl) amountEl.value = ''; if (placeEl) placeEl.value = ''; if (photoInput) photoInput.value = '';
+    closePenaltyModal(); showToast("📷 범칙금 장소 저장됨");
   }
   function getNearbyPenaltyWarnings(maxDistKm = 2.0) {
     if (!currentPos) return [];
-    const list = getPenaltyList();
-    let warnings = [];
-    list.forEach(item => {
-      if (item.lat && item.lng) {
-        const d = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
-        if (d <= maxDistKm) warnings.push({ ...item, dist: d });
-      }
-    });
-    warnings.sort((a,b)=>a.dist-b.dist);
-    return warnings;
+    const list = getPenaltyList(); let warnings = [];
+    list.forEach(item => { if (item.lat && item.lng) { const d = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng); if (d <= maxDistKm) warnings.push({ ...item, dist: d }); } });
+    warnings.sort((a,b)=>a.dist-b.dist); return warnings;
   }
 
 
   async function searchRestrooms() {
     if (!currentPos) { showToast("위치를 탐색해주세요."); return; }
+    
     const logEl = document.getElementById('pipeline-log');
     if (logEl) logEl.innerText = `🚻 주변 화장실 및 ⛽ 주유소 탐색 중...`;
     showToast("🚻 화장실 / ⛽ 주유소 탐색 중...");
 
-    let customMap = new Map();
-    let restroomMap = new Map();
-    let gasMap = new Map();
+    let uniqueMap = new Map();
 
     let customRestrooms = JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]');
     customRestrooms.forEach(p => {
        const dist = getStraightDistanceKm(currentPos.lat, currentPos.lng, p.lat, p.lng);
        if (dist <= 3.0) { 
-          customMap.set(p.id, { ...p, straightDist: dist, isRestroom: true, isCustomRestroom: true });
+          uniqueMap.set(p.id, { ...p, straightDist: dist, isRestroom: true, isCustomRestroom: true });
        }
     });
 
     try {
       if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
         const ps = new kakao.maps.services.Places();
+        
         const searchPlace = (query, isCategory = false) => new Promise(resolve => {
           let isDone = false;
-          const tId = setTimeout(() => { if (!isDone) { isDone = true; resolve([]); } }, 5000); 
+          const tId = setTimeout(() => { if (!isDone) { isDone = true; resolve([]); } }, 3000); 
+
           const callback = (data, status) => {
             if (!isDone) { isDone = true; clearTimeout(tId); resolve(status === kakao.maps.services.Status.OK ? data : []); }
           };
@@ -2134,83 +2134,75 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
           } catch(e) { if (!isDone) { isDone = true; clearTimeout(tId); resolve([]); } }
         });
 
-        const [pub1, pub2, gasCat, gasKw, sub] = await Promise.all([
-          searchPlace('공중화장실'), 
-          searchPlace('개방화장실'),
-          searchPlace('OL7', true),
-          searchPlace('주유소'),
-          searchPlace('SW8', true)
+        const apiPromise = Promise.all([
+          searchPlace('공중화장실'), searchPlace('개방화장실'),
+          searchPlace('OL7', true), searchPlace('SW8', true) 
         ]);
+        const timeoutPromise = new Promise(resolve => setTimeout(() => resolve([[],[],[],[]]), 3000));
         
-        [...pub1, ...pub2].forEach(p => {
-          if (!restroomMap.has(p.id) && !customMap.has(p.id)) {
-            restroomMap.set(p.id, {
+        const [pub1, pub2, gas, sub] = await Promise.race([apiPromise, timeoutPromise]);
+        
+        gas.forEach(p => { p.isGasStation = true; });
+        
+        const allResults = [...pub1, ...pub2, ...gas, ...sub];
+        
+        allResults.forEach(p => {
+          if (!uniqueMap.has(p.id)) {
+            uniqueMap.set(p.id, {
               id: 'restroom_' + p.id, name: p.place_name,
               lat: parseFloat(p.y), lng: parseFloat(p.x),
               straightDist: getStraightDistanceKm(currentPos.lat, currentPos.lng, parseFloat(p.y), parseFloat(p.x)),
-              isRestroom: true, isGasStation: false
-            });
-          }
-        });
-
-        const allGas = [...gasCat, ...gasKw];
-        allGas.forEach(p => {
-          const key = p.id || (p.place_name + p.y + p.x);
-          if (!gasMap.has(key) && !gasMap.has(p.id)) {
-            gasMap.set(p.id || key, {
-              id: 'gas_' + (p.id || key), name: p.place_name,
-              lat: parseFloat(p.y), lng: parseFloat(p.x),
-              straightDist: getStraightDistanceKm(currentPos.lat, currentPos.lng, parseFloat(p.y), parseFloat(p.x)),
-              isRestroom: false, isGasStation: true
+              isRestroom: !p.isGasStation, 
+              isGasStation: p.isGasStation
             });
           }
         });
       }
     } catch(err) {}
 
-    let customList = Array.from(customMap.values()).sort((a,b)=>a.straightDist-b.straightDist);
-    let restroomList = Array.from(restroomMap.values()).sort((a,b)=>a.straightDist-b.straightDist);
-    let gasList = Array.from(gasMap.values()).sort((a,b)=>a.straightDist-b.straightDist);
+    if (uniqueMap.size > 0) {
+      let customList = []; let apiList = [];
+      Array.from(uniqueMap.values()).forEach(item => {
+          if (item.isCustomRestroom) customList.push(item);
+          else apiList.push(item);
+      });
+      
+      customList.sort((a, b) => a.straightDist - b.straightDist);
+      apiList.sort((a, b) => a.straightDist - b.straightDist);
+      
+      let combinedList = [...customList, ...apiList];
+      let dedupedRestrooms = [];
+      for (let item of combinedList) {
+          // 100m(0.1km) 이내에 이미 추가된 화장실이 있으면 중복으로 간주하고 제외 (커스텀 우선)
+          if (!dedupedRestrooms.some(d => getStraightDistanceKm(item.lat, item.lng, d.lat, d.lng) <= 0.1)) {
+              dedupedRestrooms.push(item);
+          }
+      }
+      
+      let restrooms = dedupedRestrooms.slice(0, 3);
 
-    let dedupedRestrooms = [];
-    for (let item of customList) {
-      if (!dedupedRestrooms.some(d => getStraightDistanceKm(item.lat, item.lng, d.lat, d.lng) <= 0.1)) dedupedRestrooms.push(item);
-    }
-    for (let item of restroomList) {
-      if (dedupedRestrooms.length >= 2) break;
-      if (!dedupedRestrooms.some(d => getStraightDistanceKm(item.lat, item.lng, d.lat, d.lng) <= 0.1)) dedupedRestrooms.push(item);
-    }
+      let scoredPool = await Promise.all(restrooms.map(async (item) => {
+        let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
+        return { ...item, dist: road.distanceKm, estimatedTimeMin: road.durationMin, geometryCoords: road.geometryCoords };
+      }));
 
-    let dedupedGas = [];
-    for (let item of gasList) {
-      if (dedupedGas.length >= 2) break;
-      if (!dedupedGas.some(d => getStraightDistanceKm(item.lat, item.lng, d.lat, d.lng) <= 0.15)) dedupedGas.push(item);
-    }
+      scoredPool.sort((a, b) => {
+          if (a.isCustomRestroom && !b.isCustomRestroom) return -1;
+          if (!a.isCustomRestroom && b.isCustomRestroom) return 1;
+          return a.dist - b.dist;
+      });
+      
+      currentRouteData = [{ name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true }, ...scoredPool];
 
-    let combined = [...dedupedRestrooms, ...dedupedGas];
-    if (combined.length === 0) {
+      const mapBtn = document.getElementById('btn-show-map');
+      if (mapBtn) mapBtn.style.display = 'none'; 
+      if (logEl) logEl.innerText = `방금 · 화장실/주유소 검색 완료 (다시 핫플 찾으려면 위 '콜 찾기' 버튼 터치)`;
+
+      renderCards(scoredPool, null, null);
+    } else {
       showToast("주변 반경 내 화장실/주유소를 찾지 못했습니다.");
       if (logEl) logEl.innerText = `방금 · 검색된 결과 없음`;
-      return;
     }
-
-    let scoredPool = await Promise.all(combined.map(async (item) => {
-      let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
-      return { ...item, dist: road.distanceKm, estimatedTimeMin: road.durationMin, geometryCoords: road.geometryCoords };
-    }));
-
-    scoredPool.sort((a, b) => {
-      if (a.isCustomRestroom && !b.isCustomRestroom) return -1;
-      if (!a.isCustomRestroom && b.isCustomRestroom) return 1;
-      if (a.isGasStation !== b.isGasStation) return a.isGasStation ? 1 : -1;
-      return a.dist - b.dist;
-    });
-    
-    currentRouteData = [{ name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true }, ...scoredPool];
-    const mapBtn = document.getElementById('btn-show-map');
-    if (mapBtn) mapBtn.style.display = 'none'; 
-    if (logEl) logEl.innerText = `방금 · 화장실 ${dedupedRestrooms.length}곳 / 주유소 ${dedupedGas.length}곳 검색 완료 (다시 핫플 찾으려면 위 '콜 찾기' 버튼 터치)`;
-    renderCards(scoredPool, null, null);
   }
 
   function executeSearch() {
@@ -2304,7 +2296,6 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       const transitSurge = getPublicTransitSurgeBonus(item, new Date());
       preliminaryScore += transitSurge;
 
-      // 서울 공공데이터 연동 - v7.9.16 필요한 지역만 호출 (반경 4.5km + 캐시)
       let isSeoulCrowded = false;
       if (!inWisu && item.name.match(/강남|사당|홍대|신도림|건대|여의도|서울역/)) {
           const distToSeoulItem = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
@@ -2388,9 +2379,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const originalRouteCards = routeCards ? [...routeCards] : [];
     let combinedForRender = [];
     if (penaltyWarnings.length > 0) {
-      penaltyWarnings.forEach(p => {
-        combinedForRender.push({ _isPenaltyWarning: true, penalty: p });
-      });
+      penaltyWarnings.forEach(p => { combinedForRender.push({ _isPenaltyWarning: true, penalty: p }); });
     }
     combinedForRender = [...combinedForRender, ...originalRouteCards];
     routeCards = combinedForRender;
@@ -2495,55 +2484,28 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
   function renderCallMapView() {
     if (typeof L === 'undefined') return;
     const centerPos = currentPos || { lat: 37.4048, lng: 126.9767 };
-    
     if (!callMapViewLeaflet) {
       callMapViewLeaflet = L.map('call-map-view', { zoomControl: false }).setView([centerPos.lat, centerPos.lng], 13);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(callMapViewLeaflet);
-    } else { 
-      callMapViewLeaflet.setView([centerPos.lat, centerPos.lng], 13); 
-      callMapViewLeaflet.invalidateSize(); 
-    }
-    
+    } else { callMapViewLeaflet.setView([centerPos.lat, centerPos.lng], 13); callMapViewLeaflet.invalidateSize(); }
     callMapViewLeaflet.eachLayer(l => { if (l instanceof L.Marker) callMapViewLeaflet.removeLayer(l); });
-    
     L.marker([centerPos.lat, centerPos.lng], { icon: L.divIcon({ html: '<div class="custom-map-marker current">📍</div>', className: '', iconSize: [24, 24] }), zIndexOffset: 1000 }).addTo(callMapViewLeaflet);
-
     const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
     const nowHour = new Date().getHours();
-
     logs.forEach(log => {
-       const logLat = Number(log.lat);
-       const logLng = Number(log.lng);
-       const logDate = new Date(log.timestamp || log.time);
-       const logHour = logDate.getHours();
-       
-       let hourDiff = Math.abs(nowHour - logHour);
-       if (hourDiff > 12) hourDiff = 24 - hourDiff;
-       const isTimeMatch = hourDiff <= 1;
-
+       const logLat = Number(log.lat); const logLng = Number(log.lng);
+       const logDate = new Date(log.timestamp || log.time); const logHour = logDate.getHours();
+       let hourDiff = Math.abs(nowHour - logHour); if (hourDiff > 12) hourDiff = 24 - hourDiff; const isTimeMatch = hourDiff <= 1;
        if (isCallMapFilterActive && !isTimeMatch) return;
-
        const color = isTimeMatch ? '#22C55E' : '#64748B';
        const iconHtml = `<div style="width:14px; height:14px; background:${color}; border:2px solid #FFF; border-radius:50%; box-shadow:0 0 4px rgba(0,0,0,0.5);"></div>`;
-       
        const timeStr = logDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
        const popupText = `<b>${timeStr}</b><br>${log.region || '저장된 위치'}${log.isHighValue ? '<br>🔥고단가' : ''}`;
-
-       L.marker([logLat, logLng], { icon: L.divIcon({ html: iconHtml, className: '', iconSize: [14, 14] }) })
-        .addTo(callMapViewLeaflet)
-        .bindPopup(popupText);
+       L.marker([logLat, logLng], { icon: L.divIcon({ html: iconHtml, className: '', iconSize: [14, 14] }) }).addTo(callMapViewLeaflet).bindPopup(popupText);
     });
-
     try {
       const penalties = getPenaltyList();
-      penalties.forEach(p => {
-        if (p.lat && p.lng) {
-          const iconHtml = `<div class="penalty-dot" title="${p.violation} / ${p.amount}"></div>`;
-          L.marker([p.lat, p.lng], { icon: L.divIcon({ html: iconHtml, className: '', iconSize: [14,14] }) })
-            .addTo(callMapViewLeaflet)
-            .bindPopup(`<b>📷 ${p.violation}</b><br>${p.amount}<br>${p.place}`);
-        }
-      });
+      penalties.forEach(p => { if (p.lat && p.lng) { const iconHtml = `<div class="penalty-dot" title="${p.violation} / ${p.amount}"></div>`; L.marker([p.lat, p.lng], { icon: L.divIcon({ html: iconHtml, className: '', iconSize: [14,14] }) }).addTo(callMapViewLeaflet).bindPopup(`<b>📷 ${p.violation}</b><br>${p.amount}<br>${p.place}`); } });
       renderPenaltyList();
     } catch(e) {}
   }
@@ -2805,29 +2767,19 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const timeRangeEl = document.getElementById('driving-time-range');
     const sessionListEl = document.getElementById('driving-session-list');
     
-    if (timeRangeEl) {
-      timeRangeEl.style.display = 'none';
-    }
+    if (timeRangeEl) { timeRangeEl.style.display = 'none'; }
 
     if (sessionListEl) {
        sessionListEl.innerHTML = '';
        let sessionHtml = '';
-       const fTime = (ts) => {
-           if (!ts) return '진행중';
-           const d = new Date(ts);
-           return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-       };
-       
+       const fTime = (ts) => { if (!ts) return '진행중'; const d = new Date(ts); return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
        let sessionsToRender = (today.sessions || []).slice();
        if (today.currentSession) sessionsToRender.push(today.currentSession);
-       
        sessionsToRender.forEach((s, idx) => {
            if (!s.start) return;
-           const sTime = fTime(s.start);
-           const eTime = fTime(s.end);
+           const sTime = fTime(s.start); const eTime = fTime(s.end);
            const sittingSec = (s.total || 0) + (s.break || 0);
            const durationStr = formatHHMMSS(sittingSec).substring(0, 5); 
-           
            sessionHtml += `
              <div class="session-item">
                <div class="session-time">
@@ -2838,12 +2790,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
              </div>
            `;
        });
-       
-       if (sessionHtml) {
-           sessionListEl.innerHTML = sessionHtml;
-       } else {
-           sessionListEl.innerHTML = '<div style="font-size:11px; color:#8A8A8A; text-align:center; padding:8px;">운행 기록 없음</div>';
-       }
+       if (sessionHtml) { sessionListEl.innerHTML = sessionHtml; } else { sessionListEl.innerHTML = '<div style="font-size:11px; color:#8A8A8A; text-align:center; padding:8px;">운행 기록 없음</div>'; }
     }
     
     document.getElementById('stat-today-total').innerText = formatHHMMSS(todaySittingTotal);
@@ -3108,8 +3055,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
 
   if(inputRev) inputRev.addEventListener('input', calculateDailyRevenue);
 
-  // 음성 인식 로직 v7.9.16 - 마이크 권한 1회 + 한글 금액 파서
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (SpeechRecognition && btnMic) {
     let recognition = null; let isRecognizing = false;
     function parseSmallKorean(str){ if(!str) return 0; const numMap={'일':1,'이':2,'삼':3,'사':4,'오':5,'육':6,'칠':7,'팔':8,'구':9,'하나':1,'둘':2,'셋':3,'넷':4}; let total=0; let num=0; str=str.replace(/\s+/g,''); for(let i=0;i<str.length;i++){ const ch=str[i]; if(numMap[ch]!==undefined) num=numMap[ch]; else if(ch==='십'){ if(num===0) num=1; total+=num*10; num=0;} else if(ch==='백'){ if(num===0) num=1; total+=num*100; num=0;} else if(ch==='천'){ if(num===0) num=1; total+=num*1000; num=0;} else if(/[0-9]/.test(ch)){ let numStr=''; while(i<str.length && /[0-9]/.test(str[i])){ numStr+=str[i]; i++; } i--; num=parseInt(numStr);} } total+=num; return total; }
@@ -3310,13 +3256,6 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
         saveBtn.addEventListener('touchmove', (e) => { if (e.touches && e.touches[0]) { const dy = Math.abs(e.touches[0].clientY - touchStartY); const dx = Math.abs(e.touches[0].clientX - touchStartX); if (dy > 12 || dx > 12) isSwiping = true; } }, {passive: true});
         saveBtn.addEventListener('touchend', (e) => { if (isSwiping) { e.preventDefault(); e.stopPropagation(); isSwiping = false; return; } if (e.changedTouches && e.changedTouches[0]) { const dy = touchStartY - e.changedTouches[0].clientY; if (dy > 20) { e.preventDefault(); e.stopPropagation(); return; } } }, {passive: false});
       }
-      const boardBtn = document.getElementById('btn-board');
-      if (boardBtn) {
-        let bStartY = 0; let bSwiping = false;
-        boardBtn.addEventListener('touchstart', (e) => { if (e.touches && e.touches[0]) { bStartY = e.touches[0].clientY; bSwiping = false; } }, {passive: true});
-        boardBtn.addEventListener('touchmove', (e) => { if (e.touches && e.touches[0]) { if (Math.abs(e.touches[0].clientY - bStartY) > 12) bSwiping = true; } }, {passive: true});
-        boardBtn.addEventListener('touchend', (e) => { if (bSwiping) { e.preventDefault(); e.stopPropagation(); bSwiping = false; return; } }, {passive: false});
-      }
     } catch(e) {}
     initKakaoSdk(); applyThemeMode(currentThemeMode); checkIsPublicHolidayRealtime();
     updateCallLogStats();
@@ -3371,8 +3310,20 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
 
     document.getElementById('btn-drive-toggle').addEventListener('click', toggleDriving);
     document.getElementById('btn-break-toggle').addEventListener('click', toggleBreak);
-    document.getElementById('btn-board').addEventListener('click', handleBoarding);
-    document.getElementById('btn-alight').addEventListener('click', handleAlighting);
+    const boardEl = document.getElementById('btn-board');
+    const alightEl = document.getElementById('btn-alight');
+    if (boardEl) {
+      let boardHasTouch = false;
+      boardEl.addEventListener('touchstart', (e) => { boardHasTouch = true; }, {passive: true});
+      boardEl.addEventListener('touchend', (e) => { e.preventDefault(); handleBoarding(e); }, {passive: false});
+      boardEl.addEventListener('click', (e) => { if (boardHasTouch) { boardHasTouch = false; return; } handleBoarding(e); });
+    }
+    if (alightEl) {
+      let alightHasTouch = false;
+      alightEl.addEventListener('touchstart', (e) => { alightHasTouch = true; }, {passive: true});
+      alightEl.addEventListener('touchend', (e) => { e.preventDefault(); handleAlighting(e); }, {passive: false});
+      alightEl.addEventListener('click', (e) => { if (alightHasTouch) { alightHasTouch = false; return; } handleAlighting(e); });
+    }
     
     const resetBtn = document.getElementById('btn-reset-today');
     if (resetBtn) {
