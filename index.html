@@ -52,21 +52,29 @@
     .penalty-ocr-preview { margin-top: 6px; font-size: 9px; color: #666; background: #F5F5F5; border: 1px dashed #CCC; border-radius: 6px; padding: 6px 8px; max-height: 80px; overflow-y: auto; white-space: pre-wrap; }
 
 
-    /* v7.9.21 Final - top notch fix */
-    .sticky-top-area {
-      padding-top: env(safe-area-inset-top, 12px);
-      top: 0;
-    }
-    body {
-      padding-top: 0;
-    }
-    #app-header-title {
-      padding-top: 4px;
-    }
-
-
     .bottom-bar {
       padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+    }
+
+
+    /* v7.9.21 Top Fix v2 - iPhone notch */
+    .sticky-top-area {
+      padding-top: calc(env(safe-area-inset-top, 0px) + 14px) !important;
+      top: 0 !important;
+    }
+    body {
+      padding-top: 0 !important;
+    }
+    #app-header-title {
+      margin-top: 2px;
+      line-height: 1.2;
+    }
+    /* Ensure bottom bar doesn't cover */
+    .bottom-bar {
+      padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+    .bottom-bar::after {
+      height: env(safe-area-inset-bottom, 0px);
     }
 
 </style>
