@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>수다택시 K v7.8.3 AI Upgraded</title>
+  <title>수다택시 K v7.8.4 AI Upgraded</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -671,7 +671,7 @@
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.8.3 AI Upgraded"; 
+  const BUILD_VERSION = "v7.8.4 AI Upgraded"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -1954,7 +1954,7 @@
 
       // 서울 공공데이터 연동 (관외에서 서울지역 스팟인 경우)
       let isSeoulCrowded = false;
-      if (!inWisu && item.name.match(/강남|사당|홍대|신도림|건대/)) {
+      if (!inWisu && item.name.match(/강남|사당|홍대|신도림|건대|여의도|서울역/)) {
           const congestion = await fetchSeoulCityData(item.name);
           if (congestion === "붐빔") {
               preliminaryScore += 45;
@@ -1970,7 +1970,7 @@
         const crossTrackDist = getCrossTrackDistanceKm(currentPos.lat, currentPos.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng, item.lat, item.lng);
 
         if (straightDist <= 2.5) {
-           preliminaryScore += 50; 
+           preliminaryScore += 120; // 관외 모드 시 반경 2.5km 내 핫플은 복귀 경유지로 무조건 최우선 추천되도록 부스트 강화
            if (deltaAngle > 90) preliminaryScore -= 10; 
         } else {
            if (crossTrackDist > 3.5) continue; 
@@ -2180,12 +2180,18 @@
         L.marker([pt.lat, pt.lng], { icon: L.divIcon({ html, className: '', iconSize: [24, 24] }) }).addTo(leafletMap).bindPopup(`<b>${pt.name}</b>`);
 
         if (pt.geometryCoords && pt.geometryCoords.length > 0) {
-          L.polyline(pt.geometryCoords, { color: pt.isTargetBoundary ? '#FF6B00' : themeColor, weight: 5, opacity: 0.7, dashArray: pt.isTargetBoundary ? '8, 8' : null }).addTo(leafletMap);
+          // 관외 복귀 모드일 때, 목적지(Target)로 다이렉트 연결되는 라인은 얇고 연하게 처리하여 시각적 혼동 방지
+          let polyWeight = pt.isTargetBoundary ? 2 : 6;
+          let polyOpacity = pt.isTargetBoundary ? 0.3 : 0.8;
+          let polyColor = pt.isTargetBoundary ? '#EF4444' : themeColor;
+          
+          L.polyline(pt.geometryCoords, { color: polyColor, weight: polyWeight, opacity: polyOpacity, dashArray: pt.isTargetBoundary ? '5, 5' : null }).addTo(leafletMap);
           
           if (currentMode === 2 && !pt.isTargetBoundary && !pt.isCurrent && !pt.isRestroom && !pt.isGasStation) {
              const targetPt = currentRouteData.find(p => p.isTargetBoundary);
-             if (targetPt && targetPt.geometryCoords && targetPt.geometryCoords.length > 0) {
-                 L.polyline([[pt.lat, pt.lng], [targetPt.lat, targetPt.lng]], { color: '#9CA3AF', weight: 3, opacity: 0.6, dashArray: '5, 5' }).addTo(leafletMap);
+             // 추천된 핫플(경유지)에서 최종 복귀 목적지까지 이어지는 가상의 점선을 직관적인 파란색으로 명확하게 표시
+             if (targetPt) {
+                 L.polyline([[pt.lat, pt.lng], [targetPt.lat, targetPt.lng]], { color: '#3B82F6', weight: 3, opacity: 0.8, dashArray: '6, 6' }).addTo(leafletMap);
              }
           }
         }
