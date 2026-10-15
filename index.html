@@ -43,14 +43,33 @@
   font-family: "Optimistic Mono", ui-monospace, monospace;
 }
 
-    /* v7.9.21 Final Balanced - top+10 bottom+10 */
+    /* v7.9.21 iPhone Standard - top 44+10, bottom 34+10 */
+    :root {
+      --safe-top: env(safe-area-inset-top, 44px);
+      --safe-bottom: env(safe-area-inset-bottom, 34px);
+    }
+    html {
+      padding-top: env(safe-area-inset-top, 0px);
+    }
+    body {
+      padding-top: 0;
+    }
     .sticky-top-area {
-      padding-top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
+      padding-top: calc(env(safe-area-inset-top, 44px) + 10px) !important;
       top: 0 !important;
+      background: var(--main-bg, #111);
+      z-index: 10;
+    }
+    /* iPhone 14/15 Pro Dynamic Island 대응: 최소 54px 확보 */
+    @supports (padding-top: env(safe-area-inset-top)) {
+      .sticky-top-area {
+        padding-top: calc(max(env(safe-area-inset-top), 44px) + 10px) !important;
+      }
     }
     .bottom-bar {
-      height: calc(64px + env(safe-area-inset-bottom, 0px) + 10px) !important;
-      padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px) + 10px) !important;
+      height: calc(64px + env(safe-area-inset-bottom, 34px) + 10px) !important;
+      padding-bottom: calc(env(safe-area-inset-bottom, 34px) + 10px) !important;
+      padding-top: 6px !important;
       bottom: 0 !important;
     }
     .bottom-bar::after {
@@ -59,10 +78,14 @@
       bottom: 0;
       left: 0;
       right: 0;
-      height: calc(env(safe-area-inset-bottom, 0px) + 10px);
+      height: calc(env(safe-area-inset-bottom, 34px) + 10px);
       background: inherit;
       pointer-events: none;
       z-index: -1;
+    }
+    /* 콘텐츠가 하단바에 가리지 않게 */
+    .container, .main-content {
+      padding-bottom: calc(80px + env(safe-area-inset-bottom, 34px));
     }
     /* OCR */
     .penalty-ocr-btn { width: 100%; background: #FFC800; color: #000; border: 2px solid #000; border-radius: 8px; padding: 10px; font-size: 12px; font-weight: 900; cursor: pointer; margin-top: 6px; }
@@ -3364,7 +3387,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
        });
     }
 
-    // --- v7.9.21 Balanced top+10 bottom+10 ---
+    // --- v7.9.21 iPhone Standard swipe guard ---
     const saveCallBtn = document.getElementById('btn-save-call');
     let callPressTimer = null; let isCallLongPress = false; let hasTouch = false;
     let callStartY = 0, callStartX = 0, callStartTime = 0;
