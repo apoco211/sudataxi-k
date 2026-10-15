@@ -51,6 +51,24 @@
     .penalty-ocr-status { margin-top: 8px; font-size: 11px; font-weight: 800; color: #000; background: #FFF7CC; border: 1px solid #FFC800; border-radius: 6px; padding: 6px 8px; }
     .penalty-ocr-preview { margin-top: 6px; font-size: 9px; color: #666; background: #F5F5F5; border: 1px dashed #CCC; border-radius: 6px; padding: 6px 8px; max-height: 80px; overflow-y: auto; white-space: pre-wrap; }
 
+
+    /* v7.9.21 Final - top notch fix */
+    .sticky-top-area {
+      padding-top: env(safe-area-inset-top, 12px);
+      top: 0;
+    }
+    body {
+      padding-top: 0;
+    }
+    #app-header-title {
+      padding-top: 4px;
+    }
+
+
+    .bottom-bar {
+      padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+    }
+
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
