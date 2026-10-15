@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>수다택시 K v7.8.2 AI Upgraded</title>
+  <title>수다택시 K v7.8.3 AI Upgraded</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -83,7 +83,7 @@
     .mode-pill { flex: 1; height: 30px; border-radius: 8px; background: var(--btn-idle-bg); color: var(--btn-idle-text); font-size: 11px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; white-space: nowrap; padding: 0 2px; }
     .mode-pill.active { background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; }
     
-    .loc-bar { background: var(--theme-bg-dark); height: 34px; border: 1px solid var(--theme-border); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 0 8px; font-size: 11px; color: var(--theme-accent); margin-bottom: 8px; }
+    .loc-bar { background: var(--theme-bg-dark); height: 26px; border: 1px solid var(--theme-border); border-radius: 6px; display: flex; align-items: center; justify-content: space-between; padding: 0 6px; font-size: 10px; color: var(--theme-accent); margin-bottom: 6px; }
     .refresh-btn { background: none; border: none; color: var(--theme-accent); font-size: 14px; cursor: pointer; }
     
     .btn-group-main { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
@@ -671,7 +671,7 @@
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.8.2 AI Upgraded"; 
+  const BUILD_VERSION = "v7.8.3 AI Upgraded"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -1308,7 +1308,7 @@
     { "id": "hs_s_yeouido_1", "name": "여의도역 및 증권가 상권", "lat": 37.5216, "lng": 126.9242, "address": "여의도동", "type": "office_nightlife", "region": "seoul", "isWisu": false },
     { "id": "hs_g_gwacheon_1", "name": "정부과천청사역 중심상가 및 로데오", "lat": 37.4262, "lng": 126.9898, "address": "정부과천청사역", "type": "subway_nightlife", "region": "gwacheon", "isWisu": true },
     { "id": "hs_g_anyang_1", "name": "평촌역 먹자골목 및 한림대병원", "lat": 37.3942, "lng": 126.9638, "address": "평촌역", "type": "subway_hospital", "region": "anyang", "isWisu": true },
-    { "id": "hs_g_anyang_2", "name": "범계역 로데오거리 및 학원가", "lat": 37.3897, "lng": 126.9502, "address": "범계역", "type": "subway_academy", "region": "anyang", "isWisu": true },
+    { "id": "hs_g_anyang_2", "name": "범계역 로데오거리 및 학원가", "lat": 37.3915, "lng": 126.9510, "address": "범계역", "type": "subway_academy", "region": "anyang", "isWisu": true },
     { "id": "hs_g_anyang_4", "name": "안양역 일번가 및 메디컬타운", "lat": 37.4013, "lng": 126.9222, "address": "안양역", "type": "subway_hospital", "region": "anyang", "isWisu": true },
     { "id": "hs_g_anyang_5", "name": "산본역 중심상가 및 원광대병원", "lat": 37.3554, "lng": 126.9331, "address": "산본역", "type": "subway_hospital", "region": "gunpo", "isWisu": true },
     { "id": "hs_s_01", "name": "강남역 상업지구 및 병원거리", "lat": 37.4981, "lng": 127.0276, "address": "강남역", "type": "subway_hospital", "region": "seoul", "isWisu": false }
@@ -1415,7 +1415,7 @@
   const MAJOR_HUBS = [
     { name: "인덕원역 환승 거점", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway", isWisu: true },
     { name: "평촌역 먹자골목 및 한림대병원", lat: 37.3942, lng: 126.9638, address: "평촌역", type: "subway_hospital", isWisu: true },
-    { name: "범계역 로데오거리 및 학원가", lat: 37.3897, lng: 126.9502, address: "범계역", type: "subway_academy", isWisu: true },
+    { name: "범계역 로데오거리 및 학원가", lat: 37.3915, lng: 126.9510, address: "범계역", type: "subway_academy", isWisu: true },
     { name: "안양역 일번가", lat: 37.4013, lng: 126.9222, address: "안양역", type: "subway_hospital", isWisu: true },
     { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway_hospital", isWisu: true }
   ];
@@ -1584,7 +1584,7 @@
       if (isSuwon) places = [{ name: "인계동 나혜석거리", lat: 37.2635, lng: 127.0322 }, { name: "수원역 로데오거리", lat: 37.2662, lng: 127.0001 }];
       else if (isAnsan) places = [{ name: "중앙역 로데오거리", lat: 37.3186, lng: 126.8385 }, { name: "상록수역 먹자골목", lat: 37.3025, lng: 126.8654 }];
       else if (isSeoul) places = [{ name: "사당역 먹자골목", lat: 37.4765, lng: 126.9816 }, { name: "강남역 번화가", lat: 37.4981, lng: 127.0276 }];
-      else places = [{ name: "범계역 로데오거리", lat: 37.3897, lng: 126.9502 }, { name: "평촌 학원가", lat: 37.3821, lng: 126.9582 }, { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331 }];
+      else places = [{ name: "범계역 로데오거리", lat: 37.3915, lng: 126.9510 }, { name: "평촌 학원가", lat: 37.3821, lng: 126.9582 }, { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331 }];
       
       return { 
         title: "야간 상권 / 회전율 극대화", 
@@ -1827,7 +1827,16 @@
       customList.sort((a, b) => a.straightDist - b.straightDist);
       apiList.sort((a, b) => a.straightDist - b.straightDist);
       
-      let restrooms = [...customList, ...apiList].slice(0, 3);
+      let combinedList = [...customList, ...apiList];
+      let dedupedRestrooms = [];
+      for (let item of combinedList) {
+          // 100m(0.1km) 이내에 이미 추가된 화장실이 있으면 중복으로 간주하고 제외 (커스텀 우선)
+          if (!dedupedRestrooms.some(d => getStraightDistanceKm(item.lat, item.lng, d.lat, d.lng) <= 0.1)) {
+              dedupedRestrooms.push(item);
+          }
+      }
+      
+      let restrooms = dedupedRestrooms.slice(0, 3);
 
       let scoredPool = await Promise.all(restrooms.map(async (item) => {
         let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
@@ -2434,7 +2443,7 @@
        });
        
        if (sessionHtml) {
-           sessionListEl.innerHTML = sessionHtml + `<div style="text-align:right; font-size:11px; font-weight:900; color:var(--main-text); margin-top:4px;">[총 합산운행] ${formatHHMMSS(todayTotal).substring(0, 5)}</div>`;
+           sessionListEl.innerHTML = sessionHtml;
        }
     }
     
@@ -2940,9 +2949,9 @@
     document.getElementById('btn-add-custom').addEventListener('click', addCustomHotspotPrompt);
     
     const b1 = DEFAULT_MASTER_HOTSPOTS.find(h => h.id === 'hs_g_anyang_2');
-    if(b1) { b1.lat = 37.3897; b1.lng = 126.9502; b1.name = "범계역 로데오거리"; }
+    if(b1) { b1.lat = 37.3915; b1.lng = 126.9510; b1.name = "범계역 로데오거리"; }
     const b2 = MAJOR_HUBS.find(h => h.name.includes("범계역"));
-    if(b2) { b2.lat = 37.3897; b2.lng = 126.9502; b2.name = "범계역 로데오거리"; }
+    if(b2) { b2.lat = 37.3915; b2.lng = 126.9510; b2.name = "범계역 로데오거리"; }
 
     document.getElementById('btn-drive-toggle').addEventListener('click', toggleDriving);
     document.getElementById('btn-break-toggle').addEventListener('click', toggleBreak);
