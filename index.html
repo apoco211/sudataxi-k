@@ -64,9 +64,8 @@
   font-family: "Optimistic Mono", ui-monospace, monospace;
 }
 
-    /* v7.9.22 iPhone 위아래 맞춤 - 디자인/기능 유지, 상하단만 safe-area 대응 */
+    /* v7.9.22 iPhone - 원본 디자인 100% 유지, safe-area만 추가 */
     .sticky-top-area {
-      /* 노치 아래부터 10px 시작 */
       padding-top: calc(10px + env(safe-area-inset-top, 0px)) !important;
       top: 0 !important;
     }
@@ -75,11 +74,10 @@
     }
     body {
       padding-top: 0 !important;
-      /* 하단바(64px) + 10px 여백 + 홈인디케이터 + 기존 120px 여유 */
-      padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
+      /* 원본 120px 여백은 유지하되, 하단바 가림 방지 위해 200px로만 늘림 */
+      padding-bottom: calc(200px + env(safe-area-inset-bottom, 0px)) !important;
     }
     .bottom-bar {
-      /* 홈 인디케이터 위로 10px 띄워서 고정 - 디자인 그대로 */
       bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
       height: 64px !important;
       padding-bottom: 6px !important;
