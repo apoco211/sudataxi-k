@@ -1,9 +1,30 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
+<head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>수다택시 K v7.8.5 AI Upgraded</title>
+  <title>수다택시 K v7.9 AI Upgraded</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -299,6 +320,7 @@
     body.theme-day .target-title-text { color: #D97706 !important; }
     body.theme-day .target-score-text { color: #B45309 !important; }
     
+    /* 주간 모드 - 오늘 실매출 입력 UI 글씨/배경색 수정 */
     body.theme-day .input-rev { background: #FFFFFF; border-color: #D1D5DB; color: #1F2937; }
     body.theme-day .input-unit { color: #1F2937; }
     body.theme-day .rev-stat-value { color: #1F2937; }
@@ -311,8 +333,10 @@
     .strategy-content { font-size: 12px; font-weight: 700; color: var(--main-text); line-height: 1.5; }
     body.theme-day .strategy-box { background: #F0FDF4; }
 
+    /* AI 추가: 관외 공차 배회 경고 스타일 */
     .out-of-bounds-alert { box-shadow: inset 0 0 20px 5px #EA580C !important; transition: box-shadow 0.3s; }
 
+    /* 골든타임 분석 차트 요소 */
     .golden-toggle-group { display: flex; gap: 2px; background: var(--btn-idle-bg); padding: 2px; border-radius: 6px; border: 1px solid var(--btn-idle-border); }
     .golden-toggle-btn { background: transparent; color: var(--btn-idle-text); font-size: 9px; font-weight: 800; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; transition: all 0.2s; }
     .golden-toggle-btn.active { background: var(--theme-accent); color: var(--theme-text-on-accent); box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
@@ -323,6 +347,7 @@
     .golden-time-label { font-size: 9px; font-weight: 700; color: var(--stat-label); text-align: center; font-family: monospace; flex: 1; }
     .golden-time-label.peak { color: var(--theme-accent); font-weight: 900; }
 
+    /* 세션 리스트 요소 */
     .session-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: rgba(0,0,0,0.2); border-radius: 6px; margin-bottom: 4px; border: 1px solid var(--stat-border); }
     body.theme-day .session-item { background: #FFFFFF; }
     .session-time { font-size: 11px; font-weight: 700; color: var(--main-text); font-family: monospace; }
@@ -369,6 +394,7 @@
   <div class="card-list" id="card-list"></div>
 
   <div id="tab1-extras">
+    <!-- 새롭게 추가된 공공데이터 상태 모니터링 패널 -->
     <div class="backup-section" style="margin-bottom: 12px; border-color: var(--theme-accent);">
       <div class="backup-header">
         <span class="backup-title" style="font-size:12px;">📊 공공데이터 AI 엔진 상태</span>
@@ -415,10 +441,9 @@
     </div>
     <div id="strategy-cards-list" class="card-list" style="margin-bottom: 8px;"></div>
     <details style="margin-top: 8px; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 1.4;" open>
-      <summary style="font-weight: 800; color: var(--theme-accent); cursor: pointer;">📌 복귀 경로 및 수급 불균형 안내</summary>
+      <summary style="font-weight: 800; color: var(--theme-accent); cursor: pointer;">📌 복귀 경로 알고리즘 안내</summary>
       <div style="margin-top: 6px; color: var(--stat-label); display: flex; flex-direction: column; gap: 8px; font-size: 10px;">
-        <div>관외 지역(성남, 안산, 안양 등)에서 빈 차로 복귀 시, 반경 2.5km 내의 핫플레이스나 번화가를 <b>우선 경유지</b>로 강력 추천하여 손님을 태우고 복귀할 확률을 높여줍니다.</div>
-        <div style="color:#FFF;"><b>🔥 수급 불균형 배수란?</b><br>해당 지역의 예상 콜 수요 대비, <span style="color:#EF4444;">교통 정체로 인해 진입 가능한 빈 차(공급)가 얼마나 부족한지</span>를 보여주는 지표입니다. 배수가 높을수록 콜을 즉시 잡을 확률이 비약적으로 상승합니다.</div>
+        <div>관외 지역(성남, 안산, 안양 등)에서 빈 차로 복귀 시, 반경 2.5km 내의 핫플레이스나 번화가를 <b>우선 경유지</b>로 강력 추천하여 손님을 태우고 복귀할 확률을 높여줍니다. (복귀 방향이 다소 어긋나더라도 탑승 확률을 우선시합니다)</div>
       </div>
     </details>
   </div>
@@ -481,6 +506,7 @@
         </div>
       </div>
 
+      <!-- 생산성 지표 (KPI) -->
       <div class="kpi-container">
         <div class="kpi-header">
           <span class="kpi-title">📈 생산성 지표 (탑승률)</span>
@@ -497,6 +523,7 @@
         </div>
       </div>
 
+      <!-- 오늘 실매출 입력 UI -->
       <div class="revenue-box">
         <div class="top-row">
           <div class="label">💰 오늘 실매출</div>
@@ -532,6 +559,7 @@
       </div>
     </div>
     
+    <!-- 주간/월간 차트 -->
     <div class="backup-section">
       <div class="backup-title" style="margin-bottom: 4px;">📊 주간 퍼포먼스 (이번 주)</div>
       <div style="font-size: 10px; color: var(--stat-label); text-align: center;">상단: 운행시간 / 막대: 예상매출 / 숫자: 탑승률(KPI)</div>
@@ -548,6 +576,7 @@
       </div>
     </div>
 
+    <!-- 요일/시간대별 콜 발생 통계 인사이트 -->
     <div class="backup-section">
       <div class="backup-title" style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
         <span>💡 나의 골든타임 분석</span>
@@ -557,9 +586,12 @@
         </div>
       </div>
       <div style="font-size: 10px; color: var(--stat-label); margin-bottom: 8px; text-align: center;">새벽 3시 ~ 익일 3시 (2시간 단위 누적 탑승)</div>
-      <div id="golden-time-chart" class="golden-chart-container"></div>
+      <div id="golden-time-chart" class="golden-chart-container">
+        <!-- JS로 렌더링 -->
+      </div>
     </div>
 
+    <!-- 월간 목표 시뮬레이터 (계산기) -->
     <div class="backup-section" style="border-color: rgba(255, 200, 0, 0.4);">
       <div class="backup-title" style="margin-bottom: 12px;">🎯 월간 목표 달성 시뮬레이터</div>
       
@@ -627,6 +659,7 @@
     </div>
   </div>
 
+  <!-- 공통 확인(Confirm) 모달 -->
   <div id="custom-confirm" class="modal-overlay">
     <div class="modal-content" style="max-width: 320px;">
       <div class="modal-header"><span class="modal-title">확인</span></div>
@@ -638,6 +671,7 @@
     </div>
   </div>
 
+  <!-- 휴무일 캘린더 모달 -->
   <div class="modal-overlay" id="calendar-modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -649,14 +683,16 @@
         <div class="calendar-weekdays">
           <span style="color:#EF4444;">일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span style="color:#3B82F6;">토</span>
         </div>
-        <div class="calendar-grid" id="calendar-grid"></div>
+        <div class="calendar-grid" id="calendar-grid">
+          <!-- JS로 생성됨 -->
+        </div>
       </div>
     </div>
   </div>
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.8.5 AI Upgraded"; 
+  const BUILD_VERSION = "v7.9 AI Upgraded"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -674,11 +710,9 @@
   let isTimerRunning = false;
   let isTodayHoliday = false;
   let isCallMapFilterActive = false;
-  
   let weatherCache = null;
   let weatherFetchTime = 0;
   let trafficCache = {};
-  let seoulCongestionCache = {}; // AI V7.8.5: 서울시 혼잡도 메모리 캐시 추가
   
   let currentThemeMode = localStorage.getItem('sudataxi_theme_mode') || 'night';
   
@@ -726,6 +760,7 @@
     setTimeout(() => { t.style.display = 'none'; }, 2200);
   }
 
+  // --- 커스텀 Confirm 모달 ---
   let confirmCallback = null;
   function showCustomConfirm(msg, callback) {
     document.getElementById('confirm-msg').innerHTML = msg.replace(/\\n/g, '<br>');
@@ -741,61 +776,49 @@
     closeConfirm();
   });
 
+  // --- [AI V7.8.2] 1. 서울 실시간 인구 혼잡도 API 연동 (CORS 프록시 우회 적용) ---
   async function fetchSeoulCityData(placeName) {
       try {
           const supportedPlaces = ["강남역", "여의도", "홍대입구역", "신도림역", "사당역", "서울역", "건대입구역"];
           let matchedPlace = supportedPlaces.find(p => placeName.includes(p.replace("역", "")));
           if (!matchedPlace) return null;
 
-          // V7.8.5: 캐싱 처리 (15분 이내 재사용 시 즉각 반환)
-          const now = Date.now();
-          if (seoulCongestionCache[matchedPlace] && (now - seoulCongestionCache[matchedPlace].time < 15 * 60 * 1000)) {
-              return seoulCongestionCache[matchedPlace].level;
-          }
-
-          document.getElementById('status-seoul').innerHTML = `🏙️ 서울시 혼잡도 API: ${matchedPlace} 수신중...`;
+          document.getElementById('status-seoul').innerHTML = `🏙️ 서울시 혼잡도 API: ${matchedPlace} 데이터 수신중...`;
           
+          // allorigins.win을 활용해 깃허브에서도 CORS 에러 없이 공공데이터 포털 호출
           const targetUrl = encodeURIComponent(`http://openapi.seoul.go.kr:8088/sample/json/citydata/1/5/${matchedPlace}`);
           const proxyUrl = `https://api.allorigins.win/get?url=${targetUrl}`;
           
-          // V7.8.5: allorigins.win 무한 로딩 방지를 위한 Promise.race 2.5초 타임아웃
-          const fetchPromise = fetch(proxyUrl);
-          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2500));
-          
-          const res = await Promise.race([fetchPromise, timeoutPromise]);
-          if (!res.ok) throw new Error('Proxy error');
-
+          const res = await fetch(proxyUrl);
           const proxyData = await res.json();
           const data = JSON.parse(proxyData.contents);
           
           if(data && data.CITYDATA && data.CITYDATA.LIVE_PPLTN_STTS) {
               const congestLvl = data.CITYDATA.LIVE_PPLTN_STTS[0].AREA_CONGEST_LVL;
-              
-              // 캐시에 저장
-              seoulCongestionCache[matchedPlace] = { level: congestLvl, time: now };
-              
               let color = congestLvl === "붐빔" ? "#EF4444" : "#22C55E";
-              document.getElementById('status-seoul').innerHTML = `🏙️ 서울시 혼잡도: ${matchedPlace} <span style="color:${color}; font-weight:900;">[${congestLvl}]</span>`;
+              document.getElementById('status-seoul').innerHTML = `🏙️ 서울시 혼잡도 API: ${matchedPlace} <span style="color:${color}; font-weight:900;">[${congestLvl}]</span>`;
               return congestLvl;
           }
           return null;
       } catch(e) { 
-          // 네트워크 에러나 타임아웃 발생 시 프리징 방지를 위해 바로 null 반환
-          document.getElementById('status-seoul').innerHTML = `🏙️ 서울시 혼잡도: API 지연 (무시됨)`;
+          document.getElementById('status-seoul').innerHTML = `🏙️ 서울시 혼잡도 API: 호출 에러`;
           return null; 
       }
   }
 
+  // --- [AI V7.8.2] 2. 카카오 실시간 교통망(속도) 정체 분석 로직 ---
   function getTrafficSurgeScore(distanceKm, durationMin) {
       if (distanceKm === 0 || durationMin === 0) return { score: 0, status: "원활" };
       const speedKmh = (distanceKm / (durationMin / 60));
       
+      // 속도가 심각하게 느리면(정체) 택시 수요 폭발 가중치 부여
       if (speedKmh < 12) return { score: 25, status: "극심한 정체" }; 
       if (speedKmh < 20) return { score: 10, status: "서행" }; 
       if (speedKmh > 45) return { score: -5, status: "원활" }; 
       return { score: 0, status: "보통" };
   }
 
+  // --- [AI Upgraded] 기상청/글로벌 날씨 API 연동 ---
   async function fetchRealtimeWeatherUpgraded(lat, lng) {
     const now = Date.now();
     if (weatherCache && (now - weatherFetchTime < 15 * 60 * 1000)) return weatherCache; 
@@ -820,6 +843,7 @@
     } catch (e) { return { isRainOrSnow: false, precip: 0, temp: 20, isExtremeColdOrHeat: false, weatherMultiplier: 1.0 }; }
   }
 
+  // --- [AI Upgraded] 대중교통 막차 가중치 ---
   function getPublicTransitSurgeBonus(item, nowDate) {
     const hour = nowDate.getHours(); const min = nowDate.getMinutes(); const timeDecimal = hour + (min / 60);
     const name = item.name || ""; let transitBonus = 0;
@@ -918,6 +942,7 @@
     } catch(e) {}
   }
 
+  // --- [AI Upgraded] TTS 음성 브리핑 ---
   function playBriefing() {
      if(currentRouteData && currentRouteData.length > 1) {
          const target = currentRouteData[1];
@@ -1019,7 +1044,7 @@
       });
     }
   }
-
+  
   function restoreDrivingState() {
     const saved = localStorage.getItem('sudataxi_driving_state');
     if (saved) {
@@ -1177,6 +1202,7 @@
                 todayData.emptyCar = (todayData.emptyCar || 0) + elapsed;
                 todayData.currentSession.empty = (todayData.currentSession.empty || 0) + elapsed;
                 
+                // --- [AI Upgraded] 관외 공차 배회 20분 초과 시 경고 ---
                 if (currentMode === 2) {
                      const sessionEmpty = todayData.currentSession.empty;
                      if (sessionEmpty > 1200 && sessionEmpty % 60 === 0) {
@@ -1286,12 +1312,43 @@
         btn.className = 'timer-display-btn finished'; btn.innerText = `⏱️ 00:00 이동 추천!`;
         localStorage.removeItem('sudataxi_timer_state'); 
         playTimerAlarm();
-        playBriefing();
+        playBriefing(); // AI Upgraded: TTS 브리핑
       } else { btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)}`; }
     }, 1000);
   }
 
+  const WISU_HOTSPOTS_V79 = [
+
+    { "id": "wisu_anyang_01", "name": "범계역 로데오거리", "lat": 37.3915, "lng": 126.9510, "address": "범계역", "type": "subway_nightlife", "region": "anyang", "isWisu": true, "peakHours": [18,19,20,21,22,23,0,1], "peakWeekdays": [4,5,6], "weather": { "rain": 15, "cold": 10 }, "baseScore": 30, "desc": "평일 저녁 학원가 + 주말 밤 유흥" },
+    { "id": "wisu_anyang_02", "name": "평촌역 먹자골목 & 한림대병원", "lat": 37.3942, "lng": 126.9638, "address": "평촌역", "type": "subway_hospital", "region": "anyang", "isWisu": true, "peakHours": [11,12,13,17,18,19,20], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 40, "cold": 20 }, "baseScore": 35, "desc": "병원 퇴원 + 직장인 점심/퇴근" },
+    { "id": "wisu_anyang_03", "name": "안양역 일번가", "lat": 37.4013, "lng": 126.9222, "address": "안양역", "type": "subway_nightlife", "region": "anyang", "isWisu": true, "peakHours": [19,20,21,22,23,0], "peakWeekdays": [4,5,6,0], "weather": { "rain": 20, "cold": 15 }, "baseScore": 25 },
+    { "id": "wisu_anyang_04", "name": "인덕원역 환승거점", "lat": 37.4048, "lng": 126.9767, "address": "인덕원역", "type": "subway", "region": "anyang", "isWisu": true, "peakHours": [7,8,9,18,19,20,23,0], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 50, "cold": 25 }, "baseScore": 40, "desc": "막차 23:40 집중" },
+    { "id": "wisu_anyang_05", "name": "평촌 학원가 & 귀인동", "lat": 37.3821, "lng": 126.9582, "address": "귀인동", "type": "academy", "region": "anyang", "isWisu": true, "peakHours": [15,16,17,21,22], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 30 }, "baseScore": 28 },
+    { "id": "wisu_anyang_06", "name": "안양종합운동장 & 평촌 스마트스퀘어", "lat": 37.3920, "lng": 126.9570, "address": "비산동", "type": "office_sports", "region": "anyang", "isWisu": true, "peakHours": [8,9,18,19], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": -10 }, "baseScore": 22, "desc": "행사 있는 날 대박" },
+    { "id": "wisu_anyang_07", "name": "안양 롯데백화점 & 평촌역", "lat": 37.3905, "lng": 126.9655, "address": "호계동", "type": "mall", "region": "anyang", "isWisu": true, "peakHours": [11,12,13,14,15,16], "peakWeekdays": [0,6], "weather": { "rain": 60, "cold": 30, "hot": 25 }, "baseScore": 26, "desc": "비/추위/더위 대피 수요" },
+    { "id": "wisu_anyang_08", "name": "안양 농수산물시장 & E-pit", "lat": 37.3820, "lng": 126.9749, "address": "석수동", "type": "market_charger", "region": "anyang", "isWisu": true, "peakHours": [9,10,11,20,21], "peakWeekdays": [0,1,2,3,4,5,6], "weather": { "rain": 20 }, "baseScore": 23 },
+    { "id": "wisu_anyang_09", "name": "석수역 & 연현마을", "lat": 37.4355, "lng": 126.9022, "address": "석수동", "type": "subway_residential", "region": "anyang", "isWisu": true, "peakHours": [7,8,18,19,23], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 35 }, "baseScore": 27 },
+    { "id": "wisu_anyang_10", "name": "명학역 & 안양예술공원", "lat": 37.3765, "lng": 126.9205, "address": "만안구", "type": "subway_park", "region": "anyang", "isWisu": true, "peakHours": [10,11,14,15,16], "peakWeekdays": [0,6], "weather": { "rain": -20 }, "baseScore": 20 },
+    { "id": "wisu_gunpo_01", "name": "산본역 중심상가 & 로데오", "lat": 37.3554, "lng": 126.9331, "address": "산본동", "type": "subway_nightlife", "region": "gunpo", "isWisu": true, "peakHours": [18,19,20,21,22,23,0], "peakWeekdays": [4,5,6], "weather": { "rain": 20 }, "baseScore": 32 },
+    { "id": "wisu_gunpo_02", "name": "금정역 환승 (1/4호선)", "lat": 37.3720, "lng": 126.9435, "address": "금정동", "type": "subway", "region": "gunpo", "isWisu": true, "peakHours": [7,8,18,19,23,0], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 55 }, "baseScore": 38, "desc": "막차 환승 핵심" },
+    { "id": "wisu_gunpo_03", "name": "산본 원광대병원 & 군포시청", "lat": 37.3620, "lng": 126.9330, "address": "산본동", "type": "hospital_office", "region": "gunpo", "isWisu": true, "peakHours": [9,10,11,14,15,16], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 45 }, "baseScore": 30 },
+    { "id": "wisu_gunpo_04", "name": "대야미역 & 부곡지구", "lat": 37.3380, "lng": 126.9200, "address": "대야미동", "type": "subway_residential", "region": "gunpo", "isWisu": true, "peakHours": [7,8,19,20,21], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 25 }, "baseScore": 24 },
+    { "id": "wisu_gunpo_05", "name": "군포복합화물터미널 & 부곡", "lat": 37.3300, "lng": 126.9150, "address": "부곡동", "type": "logistics", "region": "gunpo", "isWisu": true, "peakHours": [6,7,8,18,19], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 10 }, "baseScore": 21 },
+    { "id": "wisu_uiwang_01", "name": "의왕역 & 부곡도깨비시장", "lat": 37.3445, "lng": 126.9480, "address": "삼동", "type": "subway_market", "region": "uiwang", "isWisu": true, "peakHours": [10,11,16,17,18,19], "peakWeekdays": [0,6,1,2,3,4,5], "weather": { "rain": 35 }, "baseScore": 26 },
+    { "id": "wisu_uiwang_02", "name": "오전동 & 의왕시청", "lat": 37.3495, "lng": 126.9680, "address": "오전동", "type": "office", "region": "uiwang", "isWisu": true, "peakHours": [8,9,17,18], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 20 }, "baseScore": 22 },
+    { "id": "wisu_uiwang_03", "name": "포일동 & 인덕원IT밸리", "lat": 37.3900, "lng": 127.0000, "address": "포일동", "type": "office", "region": "uiwang", "isWisu": true, "peakHours": [8,9,18,19], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 15 }, "baseScore": 24 },
+    { "id": "wisu_uiwang_04", "name": "월암동 물류단지 & 부곡", "lat": 37.3080, "lng": 126.9580, "address": "월암동", "type": "logistics", "region": "uiwang", "isWisu": true, "peakHours": [6,7,18,19,20], "peakWeekdays": [1,2,3,4,5,6], "weather": { "rain": 10 }, "baseScore": 20, "desc": "새벽/퇴근 물류 직원" },
+    { "id": "wisu_uiwang_05", "name": "청계동 & 학의동 판교 경계", "lat": 37.3950, "lng": 127.0120, "address": "청계동", "type": "residential_office", "region": "uiwang", "isWisu": true, "peakHours": [8,9,18,19], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 20 }, "baseScore": 23 },
+    { "id": "wisu_gwacheon_01", "name": "정부과천청사역", "lat": 37.4262, "lng": 126.9898, "address": "중앙동", "type": "subway_office", "region": "gwacheon", "isWisu": true, "peakHours": [8,9,17,18,19], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 30 }, "baseScore": 36, "desc": "공무원 퇴근 17-19시 대박" },
+    { "id": "wisu_gwacheon_02", "name": "과천 지식정보타운", "lat": 37.4144, "lng": 126.9856, "address": "갈현동", "type": "office", "region": "gwacheon", "isWisu": true, "peakHours": [8,9,18,19], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 15 }, "baseScore": 28 },
+    { "id": "wisu_gwacheon_03", "name": "서울대공원 & 과천역", "lat": 37.4340, "lng": 127.0020, "address": "막계동", "type": "park_subway", "region": "gwacheon", "isWisu": true, "peakHours": [11,12,13,14,15,16,17], "peakWeekdays": [0,6], "weather": { "rain": -30, "hot": -10 }, "baseScore": 25, "desc": "맑은 주말에만 터짐" },
+    { "id": "wisu_gwacheon_04", "name": "선바위역 & 경마공원", "lat": 37.4520, "lng": 127.0050, "address": "주암동", "type": "subway_park", "region": "gwacheon", "isWisu": true, "peakHours": [15,16,17,18], "peakWeekdays": [0,6], "weather": { "rain": -20 }, "baseScore": 20 },
+    { "id": "wisu_gwacheon_05", "name": "과천 렛츠런파크 & 주암동", "lat": 37.4480, "lng": 126.9950, "address": "주암동", "type": "park", "region": "gwacheon", "isWisu": true, "peakHours": [12,13,14,15,16], "peakWeekdays": [0,6], "weather": { "rain": -30 }, "baseScore": 22 }
+
+  ];
+
   const DEFAULT_MASTER_HOTSPOTS = [
+
     { "id": "hs_suwon_1", "name": "성대역 먹자골목 및 상권", "lat": 37.2995, "lng": 126.9710, "address": "율전동", "type": "subway_nightlife", "region": "suwon", "isWisu": false },
     { "id": "hs_suwon_3", "name": "수원역 로데오거리 및 환승거점", "lat": 37.2662, "lng": 127.0001, "address": "매산로1가", "type": "subway_nightlife", "region": "suwon", "isWisu": false },
     { "id": "hs_suwon_4", "name": "인계동 나혜석거리 및 유흥상권", "lat": 37.2635, "lng": 127.0322, "address": "인계동", "type": "office_nightlife", "region": "suwon", "isWisu": false },
@@ -1307,6 +1364,34 @@
     { "id": "hs_g_anyang_4", "name": "안양역 일번가 및 메디컬타운", "lat": 37.4013, "lng": 126.9222, "address": "안양역", "type": "subway_hospital", "region": "anyang", "isWisu": true },
     { "id": "hs_g_anyang_5", "name": "산본역 중심상가 및 원광대병원", "lat": 37.3554, "lng": 126.9331, "address": "산본역", "type": "subway_hospital", "region": "gunpo", "isWisu": true },
     { "id": "hs_s_01", "name": "강남역 상업지구 및 병원거리", "lat": 37.4981, "lng": 127.0276, "address": "강남역", "type": "subway_hospital", "region": "seoul", "isWisu": false }
+  ,
+
+    { "id": "wisu_anyang_01", "name": "범계역 로데오거리", "lat": 37.3915, "lng": 126.9510, "address": "범계역", "type": "subway_nightlife", "region": "anyang", "isWisu": true, "peakHours": [18,19,20,21,22,23,0,1], "peakWeekdays": [4,5,6], "weather": { "rain": 15, "cold": 10 }, "baseScore": 30, "desc": "평일 저녁 학원가 + 주말 밤 유흥" },
+    { "id": "wisu_anyang_02", "name": "평촌역 먹자골목 & 한림대병원", "lat": 37.3942, "lng": 126.9638, "address": "평촌역", "type": "subway_hospital", "region": "anyang", "isWisu": true, "peakHours": [11,12,13,17,18,19,20], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 40, "cold": 20 }, "baseScore": 35, "desc": "병원 퇴원 + 직장인 점심/퇴근" },
+    { "id": "wisu_anyang_03", "name": "안양역 일번가", "lat": 37.4013, "lng": 126.9222, "address": "안양역", "type": "subway_nightlife", "region": "anyang", "isWisu": true, "peakHours": [19,20,21,22,23,0], "peakWeekdays": [4,5,6,0], "weather": { "rain": 20, "cold": 15 }, "baseScore": 25 },
+    { "id": "wisu_anyang_04", "name": "인덕원역 환승거점", "lat": 37.4048, "lng": 126.9767, "address": "인덕원역", "type": "subway", "region": "anyang", "isWisu": true, "peakHours": [7,8,9,18,19,20,23,0], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 50, "cold": 25 }, "baseScore": 40, "desc": "막차 23:40 집중" },
+    { "id": "wisu_anyang_05", "name": "평촌 학원가 & 귀인동", "lat": 37.3821, "lng": 126.9582, "address": "귀인동", "type": "academy", "region": "anyang", "isWisu": true, "peakHours": [15,16,17,21,22], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 30 }, "baseScore": 28 },
+    { "id": "wisu_anyang_06", "name": "안양종합운동장 & 평촌 스마트스퀘어", "lat": 37.3920, "lng": 126.9570, "address": "비산동", "type": "office_sports", "region": "anyang", "isWisu": true, "peakHours": [8,9,18,19], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": -10 }, "baseScore": 22, "desc": "행사 있는 날 대박" },
+    { "id": "wisu_anyang_07", "name": "안양 롯데백화점 & 평촌역", "lat": 37.3905, "lng": 126.9655, "address": "호계동", "type": "mall", "region": "anyang", "isWisu": true, "peakHours": [11,12,13,14,15,16], "peakWeekdays": [0,6], "weather": { "rain": 60, "cold": 30, "hot": 25 }, "baseScore": 26, "desc": "비/추위/더위 대피 수요" },
+    { "id": "wisu_anyang_08", "name": "안양 농수산물시장 & E-pit", "lat": 37.3820, "lng": 126.9749, "address": "석수동", "type": "market_charger", "region": "anyang", "isWisu": true, "peakHours": [9,10,11,20,21], "peakWeekdays": [0,1,2,3,4,5,6], "weather": { "rain": 20 }, "baseScore": 23 },
+    { "id": "wisu_anyang_09", "name": "석수역 & 연현마을", "lat": 37.4355, "lng": 126.9022, "address": "석수동", "type": "subway_residential", "region": "anyang", "isWisu": true, "peakHours": [7,8,18,19,23], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 35 }, "baseScore": 27 },
+    { "id": "wisu_anyang_10", "name": "명학역 & 안양예술공원", "lat": 37.3765, "lng": 126.9205, "address": "만안구", "type": "subway_park", "region": "anyang", "isWisu": true, "peakHours": [10,11,14,15,16], "peakWeekdays": [0,6], "weather": { "rain": -20 }, "baseScore": 20 },
+    { "id": "wisu_gunpo_01", "name": "산본역 중심상가 & 로데오", "lat": 37.3554, "lng": 126.9331, "address": "산본동", "type": "subway_nightlife", "region": "gunpo", "isWisu": true, "peakHours": [18,19,20,21,22,23,0], "peakWeekdays": [4,5,6], "weather": { "rain": 20 }, "baseScore": 32 },
+    { "id": "wisu_gunpo_02", "name": "금정역 환승 (1/4호선)", "lat": 37.3720, "lng": 126.9435, "address": "금정동", "type": "subway", "region": "gunpo", "isWisu": true, "peakHours": [7,8,18,19,23,0], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 55 }, "baseScore": 38, "desc": "막차 환승 핵심" },
+    { "id": "wisu_gunpo_03", "name": "산본 원광대병원 & 군포시청", "lat": 37.3620, "lng": 126.9330, "address": "산본동", "type": "hospital_office", "region": "gunpo", "isWisu": true, "peakHours": [9,10,11,14,15,16], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 45 }, "baseScore": 30 },
+    { "id": "wisu_gunpo_04", "name": "대야미역 & 부곡지구", "lat": 37.3380, "lng": 126.9200, "address": "대야미동", "type": "subway_residential", "region": "gunpo", "isWisu": true, "peakHours": [7,8,19,20,21], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 25 }, "baseScore": 24 },
+    { "id": "wisu_gunpo_05", "name": "군포복합화물터미널 & 부곡", "lat": 37.3300, "lng": 126.9150, "address": "부곡동", "type": "logistics", "region": "gunpo", "isWisu": true, "peakHours": [6,7,8,18,19], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 10 }, "baseScore": 21 },
+    { "id": "wisu_uiwang_01", "name": "의왕역 & 부곡도깨비시장", "lat": 37.3445, "lng": 126.9480, "address": "삼동", "type": "subway_market", "region": "uiwang", "isWisu": true, "peakHours": [10,11,16,17,18,19], "peakWeekdays": [0,6,1,2,3,4,5], "weather": { "rain": 35 }, "baseScore": 26 },
+    { "id": "wisu_uiwang_02", "name": "오전동 & 의왕시청", "lat": 37.3495, "lng": 126.9680, "address": "오전동", "type": "office", "region": "uiwang", "isWisu": true, "peakHours": [8,9,17,18], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 20 }, "baseScore": 22 },
+    { "id": "wisu_uiwang_03", "name": "포일동 & 인덕원IT밸리", "lat": 37.3900, "lng": 127.0000, "address": "포일동", "type": "office", "region": "uiwang", "isWisu": true, "peakHours": [8,9,18,19], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 15 }, "baseScore": 24 },
+    { "id": "wisu_uiwang_04", "name": "월암동 물류단지 & 부곡", "lat": 37.3080, "lng": 126.9580, "address": "월암동", "type": "logistics", "region": "uiwang", "isWisu": true, "peakHours": [6,7,18,19,20], "peakWeekdays": [1,2,3,4,5,6], "weather": { "rain": 10 }, "baseScore": 20, "desc": "새벽/퇴근 물류 직원" },
+    { "id": "wisu_uiwang_05", "name": "청계동 & 학의동 판교 경계", "lat": 37.3950, "lng": 127.0120, "address": "청계동", "type": "residential_office", "region": "uiwang", "isWisu": true, "peakHours": [8,9,18,19], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 20 }, "baseScore": 23 },
+    { "id": "wisu_gwacheon_01", "name": "정부과천청사역", "lat": 37.4262, "lng": 126.9898, "address": "중앙동", "type": "subway_office", "region": "gwacheon", "isWisu": true, "peakHours": [8,9,17,18,19], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 30 }, "baseScore": 36, "desc": "공무원 퇴근 17-19시 대박" },
+    { "id": "wisu_gwacheon_02", "name": "과천 지식정보타운", "lat": 37.4144, "lng": 126.9856, "address": "갈현동", "type": "office", "region": "gwacheon", "isWisu": true, "peakHours": [8,9,18,19], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 15 }, "baseScore": 28 },
+    { "id": "wisu_gwacheon_03", "name": "서울대공원 & 과천역", "lat": 37.4340, "lng": 127.0020, "address": "막계동", "type": "park_subway", "region": "gwacheon", "isWisu": true, "peakHours": [11,12,13,14,15,16,17], "peakWeekdays": [0,6], "weather": { "rain": -30, "hot": -10 }, "baseScore": 25, "desc": "맑은 주말에만 터짐" },
+    { "id": "wisu_gwacheon_04", "name": "선바위역 & 경마공원", "lat": 37.4520, "lng": 127.0050, "address": "주암동", "type": "subway_park", "region": "gwacheon", "isWisu": true, "peakHours": [15,16,17,18], "peakWeekdays": [0,6], "weather": { "rain": -20 }, "baseScore": 20 },
+    { "id": "wisu_gwacheon_05", "name": "과천 렛츠런파크 & 주암동", "lat": 37.4480, "lng": 126.9950, "address": "주암동", "type": "park", "region": "gwacheon", "isWisu": true, "peakHours": [12,13,14,15,16], "peakWeekdays": [0,6], "weather": { "rain": -30 }, "baseScore": 22 }
+
   ];
 
   const WISU_BOUNDARY_POINTS = [
@@ -1527,8 +1612,7 @@
     return bonus;
   }
 
-  // V7.8.5 AI Upgraded: 선제이동 예측 알고리즘 시간별 적용
-  function getDynamicStrategyText(nowHour, nowMin, regionName) {
+  function getDynamicStrategyText(nowHour, regionName) {
     let r = regionName || "";
     if (!r && currentPos) {
        if (currentPos.lat >= 37.435) r = "서울";
@@ -1541,25 +1625,13 @@
     let isAnsan = r.includes("안산") || r.includes("시흥");
     let isSeoul = r.includes("서울");
 
-    let isPrePositioning = false;
-    let prePositioningTag = "";
-
-    // 15~30분 전 선제이동 예측
-    if (nowHour === 17 && nowMin >= 30) {
-       isPrePositioning = true; prePositioningTag = "퇴근피크 30분전 선제이동";
-    } else if (nowHour === 20 && nowMin >= 30) {
-       isPrePositioning = true; prePositioningTag = "야간상권 선제이동";
-    } else if (nowHour === 23 && nowMin >= 30) {
-       isPrePositioning = true; prePositioningTag = "자정막차 30분전 선제이동";
-    }
-
-    if (nowHour >= 16 && (nowHour < 17 || (nowHour === 17 && nowMin < 30))) return { 
+    if (nowHour >= 16 && nowHour < 18) return { 
       title: "주간 방어 및 수락률 확보", 
       desc: "콜 발생 빈도가 낮은 시간입니다. <b>수락률(AR) 방어</b>를 위해 단거리 콜도 기꺼이 수락하여 누적 수락률 60% 이상을 확보하세요.",
-      places: [], isPrePositioning, prePositioningTag
+      places: [] 
     };
 
-    if ((nowHour === 17 && nowMin >= 30) || (nowHour >= 18 && nowHour < 20)) {
+    if (nowHour >= 18 && nowHour < 20) {
       let places = [];
       if (isSuwon) places = [{ name: "삼성디지털시티 (영통)", lat: 37.2570, lng: 127.0540 }, { name: "광교테크노밸리", lat: 37.2928, lng: 127.0456 }];
       else if (isAnsan) places = [{ name: "반월국가산업단지", lat: 37.3150, lng: 126.7770 }, { name: "고잔동 법조타운", lat: 37.3168, lng: 126.8232 }];
@@ -1567,13 +1639,13 @@
       else places = [{ name: "과천 지식정보타운", lat: 37.4144, lng: 126.9856 }, { name: "안양 평촌스마트스퀘어", lat: 37.3942, lng: 126.9638 }];
       
       return { 
-        title: isPrePositioning ? "퇴근 피크타임 선제 포지셔닝" : "퇴근 피크 타임", 
-        desc: isPrePositioning ? "곧 퇴근 피크시간이 시작됩니다. 주요 <b>업무지구 및 환승 거점</b>으로 미리 이동하여 장거리 콜을 선점하세요." : "현재 지역의 <b>주요 업무지구 및 환승 거점</b>에 진입하여 중장거리 콜을 유도하고 정체 할증을 노리세요.",
-        places: places, isPrePositioning, prePositioningTag
+        title: "퇴근 피크 타임", 
+        desc: "현재 지역의 <b>주요 업무지구 및 환승 거점</b>에 진입하여 중장거리 콜을 유도하고 정체 할증을 노리세요.",
+        places: places
       };
     }
 
-    if (nowHour >= 20 && (nowHour < 20 || (nowHour === 20 && nowMin < 30))) {
+    if (nowHour >= 20 && nowHour < 21) {
       let places = [];
       if (isSuwon) places = [{ name: "수원월드컵경기장 (휴식/충전)", lat: 37.2863, lng: 127.0368 }, { name: "광교호수공원 주차장", lat: 37.2801, lng: 127.0673 }];
       else if (isAnsan) places = [{ name: "안산와스타디움", lat: 37.3178, lng: 126.8184 }, { name: "화랑유원지 주차장", lat: 37.3200, lng: 126.8144 }];
@@ -1583,11 +1655,11 @@
       return { 
         title: "식사/휴식 및 배터리 정비", 
         desc: "야간 피크를 대비해 하드웨어를 정비하세요. 주요 E-pit이나 대형 주차장을 활용하여 유휴시간을 최소화합니다.",
-        places: places, isPrePositioning, prePositioningTag
+        places: places
       };
     }
 
-    if ((nowHour === 20 && nowMin >= 30) || (nowHour >= 21 && nowHour < 23) || (nowHour === 23 && nowMin < 30)) {
+    if (nowHour >= 21 && nowHour < 23) {
       let places = [];
       if (isSuwon) places = [{ name: "인계동 나혜석거리", lat: 37.2635, lng: 127.0322 }, { name: "수원역 로데오거리", lat: 37.2662, lng: 127.0001 }];
       else if (isAnsan) places = [{ name: "중앙역 로데오거리", lat: 37.3186, lng: 126.8385 }, { name: "상록수역 먹자골목", lat: 37.3025, lng: 126.8654 }];
@@ -1595,13 +1667,13 @@
       else places = [{ name: "범계역 로데오거리", lat: 37.3915, lng: 126.9510 }, { name: "평촌 학원가", lat: 37.3821, lng: 126.9582 }, { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331 }];
       
       return { 
-        title: isPrePositioning ? "야간 수요 선제 포지셔닝" : "야간 상권 / 회전율 극대화", 
-        desc: isPrePositioning ? "잠시 뒤 야간 상권 수요가 폭발합니다. 핵심 로데오거리 일대로 이동하세요." : "현재 지역의 <b>핵심 상권 및 로데오거리</b> 일대에서 짧은 이동 거리로 콜 회전율(시간당 3~4콜)을 극대화하세요.",
-        places: places, isPrePositioning, prePositioningTag
+        title: "야간 상권 / 회전율 극대화", 
+        desc: "현재 지역의 <b>핵심 상권 및 로데오거리</b> 일대에서 짧은 이동 거리로 콜 회전율(시간당 3~4콜)을 극대화하세요.",
+        places: places
       };
     }
 
-    if ((nowHour === 23 && nowMin >= 30) || (nowHour >= 24 || nowHour < 2)) {
+    if (nowHour >= 23 || nowHour < 2) {
       let places = [];
       if (isSuwon) places = [{ name: "성대역 먹자골목", lat: 37.2995, lng: 126.9710 }, { name: "수원시청역", lat: 37.2608, lng: 127.0287 }];
       else if (isAnsan) places = [{ name: "중앙역", lat: 37.3186, lng: 126.8385 }, { name: "상록수역", lat: 37.3025, lng: 126.8654 }];
@@ -1609,9 +1681,9 @@
       else places = [{ name: "선바위역 (과천-서울 경계)", lat: 37.4520, lng: 127.0050 }, { name: "석수역 (안양-서울 경계)", lat: 37.4355, lng: 126.9022 }];
       
       return { 
-        title: isPrePositioning ? "자정 대중교통 종료 선제대응" : "심야 할증 및 장거리 피크", 
-        desc: isPrePositioning ? "자정(0시)을 기점으로 대중교통이 완전히 끊깁니다. <b>인접 시 경계 및 주요 번화가</b>에 대기하여 복합 할증 콜을 선점하세요." : "황금 시간대입니다. 높은 수락률을 무기로 <b>인접 시 경계 및 주요 번화가</b>에서 외곽행 콜을 골라 복합 할증을 노리세요.",
-        places: places, isPrePositioning, prePositioningTag
+        title: "심야 할증 및 장거리 피크", 
+        desc: "황금 시간대입니다. 높은 수락률을 무기로 <b>인접 시 경계 및 주요 번화가</b>에서 외곽행 콜을 골라 복합 할증을 노리세요.",
+        places: places
       };
     }
 
@@ -1624,19 +1696,16 @@
     return { 
       title: "주간 평시 / 새벽 연비 운행", 
       desc: "도심 내 단거리 및 역 주변 수요가 꾸준합니다. 상업지구와 환승역을 오가며 배터리 프리컨디셔닝 등 연비 위주의 운행을 하세요.",
-      places: defaultPlaces, isPrePositioning, prePositioningTag
+      places: defaultPlaces
     };
   }
 
   async function renderStrategyTab() {
-    const nowDate = new Date();
-    const nowHour = nowDate.getHours();
-    const nowMin = nowDate.getMinutes();
-    
-    const strategy = getDynamicStrategyText(nowHour, nowMin, currentRegionName);
+    const nowHour = new Date().getHours();
+    const strategy = getDynamicStrategyText(nowHour, currentRegionName);
     const titleEl = document.getElementById('strategy-time-title');
     const descEl = document.getElementById('strategy-text');
-    if (titleEl) titleEl.innerHTML = `${nowHour}:${String(nowMin).padStart(2,'0')} - ${strategy.title} ${strategy.isPrePositioning ? '⏳' : ''}`;
+    if (titleEl) titleEl.innerText = `${nowHour}시 - ${strategy.title}`;
     if (descEl) descEl.innerHTML = strategy.desc;
 
     const cardsList = document.getElementById('strategy-cards-list');
@@ -1648,31 +1717,12 @@
          return;
       }
 
-      // 날씨와 수급 불균형 지수 연산을 위해 데이터 Fetch
-      const weatherData = await fetchRealtimeWeatherUpgraded(currentPos.lat, currentPos.lng);
-
       let scoredPool = await Promise.all(strategy.places.map(async (item) => {
         let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
-        let pure = await calculatePureSpotScore({...item, isWisu: true}, weatherData, nowHour);
-        
-        // V7.8.5: 수급 불균형 지수 (Imbalance Index) 산출
-        let W_transit = getPublicTransitSurgeBonus(item, nowDate) > 0 ? 1.5 : 1.0;
-        let W_weather = weatherData ? weatherData.weatherMultiplier : 1.0;
-        
-        // 교통 상태를 통한 주변 빈 차(공차) 공급량 유추 (S_avail)
-        let S_avail = 1.0;
-        if (road.trafficStatus === "극심한 정체") S_avail = 0.4; // 길이 막혀 공급 턱없이 부족
-        else if (road.trafficStatus === "서행") S_avail = 0.7;
-        else if (road.trafficStatus === "원활") S_avail = 1.2;
-        
-        let imbalanceRatio = ((W_weather * W_transit) / S_avail).toFixed(1);
-        if (parseFloat(imbalanceRatio) < 1.0) imbalanceRatio = "1.0";
-        
-        return { ...item, dist: road.distanceKm, estimatedTimeMin: road.durationMin, isStrategy: true, imbalanceRatio: imbalanceRatio };
+        return { ...item, dist: road.distanceKm, estimatedTimeMin: road.durationMin, isStrategy: true };
       }));
 
-      // 수급 불균형이 높은 곳 우선 정렬, 같으면 거리순
-      scoredPool.sort((a, b) => parseFloat(b.imbalanceRatio) - parseFloat(a.imbalanceRatio) || a.dist - b.dist);
+      scoredPool.sort((a, b) => a.dist - b.dist);
       
       const fragment = document.createDocumentFragment();
       scoredPool.forEach((item, index) => {
@@ -1688,15 +1738,13 @@
                 <div class="num-badge" style="background:#22C55E; color:#FFF;">${index+1}</div>
                 <div class="place-info">
                   <div class="place-name" style="color:#22C55E;">${item.name}</div>
-                  <div class="score-dist">${item.dist.toFixed(1)}km (${item.estimatedTimeMin}분) · 전략 타겟 거점</div>
+                  <div class="score-dist">${item.dist.toFixed(1)}km (${item.estimatedTimeMin}분) · 타겟 거점</div>
                 </div>
               </div>
               <button type="button" class="right-navi-btn" style="background:#22C55E !important; color:#FFF !important; box-shadow: 0 1px 4px rgba(34, 197, 94, 0.4);" onclick="openKakaoNaviApp('${item.name.replace(/'/g, "\\'")}', ${item.lat}, ${item.lng})"><span>🚗내비</span></button>
             </div>
           </div>
           <div class="tag-group">
-            <span class="tag" style="background:#FFF1F2; color:#E11D48; border-color:#BE123C; font-weight:900;">🔥수급불균형 ${item.imbalanceRatio}배</span>
-            ${strategy.isPrePositioning ? `<span class="tag" style="background:#F3E8FF; color:#9333EA; border-color:#A855F7; font-weight:900;">⏳${strategy.prePositioningTag}</span>` : ''}
             <span class="tag near" style="background:#F0FDF4; color:#16A34A; border-color:#22C55E;">#시간대_운행전략추천</span>
           </div>
         `;
@@ -1707,31 +1755,66 @@
     }
   }
 
+  // [AI V7.8.2] 점수 통합 산출 로직
   async function calculatePureSpotScore(item, weatherData, nowHour) {
     let score = 0;
+    const now = new Date();
+    const nowDay = now.getDay();
+    // 1. 기본 점수 (하위호환 유지)
     if (item.isHighValue) score += 65; 
     else if (item.isUserCallLogCandidate) score += 35; 
     else if (item.isCustom) score += 20; 
     else if (item.isLiveKakao) score += 15;
-    score += await getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
+    else score += (item.baseScore || 15);
     
-    if (weatherData && weatherData.isRainOrSnow) { 
-        const isShelterSpot = (item.name.includes("병원") || item.name.includes("백화점") || item.name.includes("마트") || item.name.includes("역"));
-        score = score * weatherData.weatherMultiplier + (isShelterSpot ? 45 : 10);
+    // 2. [v7.9 NEW] 요일/시간 정밀 매칭 - 핫플마다 peakHours/peakWeekdays 적용
+    if (item.peakHours && Array.isArray(item.peakHours)) {
+      if (item.peakHours.includes(nowHour)) {
+        score += 40;
+        if (item.peakWeekdays && item.peakWeekdays.includes(nowDay)) {
+          score += 30;
+        }
+      } else if (item.peakHours.some(h => Math.abs(h - nowHour) <= 1)) {
+        score += 10;
+      }
     }
 
-    score += getPublicTransitSurgeBonus(item, new Date());
-
-    let matchCount = 0; let isTimeMatch = false;
-    JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]').forEach(log => {
-      const logLat = Number(log.lat); const logLng = Number(log.lng);
-      if (getStraightDistanceKm(item.lat, item.lng, logLat, logLng) <= 0.4) {
-        matchCount++;
-        let hourDiff = Math.abs(nowHour - (new Date(log.timestamp||log.time).getHours()));
-        if (hourDiff > 12) hourDiff = 24 - hourDiff;
-        if (hourDiff <= 1) { score += 35; isTimeMatch = true; } else { score += 20; }
+    // 3. 기존 카테고리 보너스 유지 (이름 기반)
+    score += await getDynamicTimeCategoryBonus(item.type, item.name, nowHour);
+    
+    // 4. [v7.9 NEW] 날씨 연동 - 핫플별 맞춤 가중치
+    if (weatherData) {
+      if (weatherData.isRainOrSnow) { 
+        const rainBoost = (item.weather && typeof item.weather.rain === 'number') ? item.weather.rain : ((item.name.includes("병원") || item.name.includes("백화점") || item.name.includes("마트") || item.name.includes("역")) ? 45 : 10);
+        score = score * (weatherData.weatherMultiplier || 1.2) + rainBoost;
+        if (item.type && item.type.includes("park")) {
+          score -= 30;
+        }
       }
-    });
+      if (weatherData.isExtremeColdOrHeat) {
+        const tempBoost = (item.weather && (item.weather.cold || item.weather.hot)) ? (item.weather.cold || item.weather.hot) : 20;
+        if (item.type && (item.type.includes("mall") || item.type.includes("hospital") || item.type.includes("subway") || (item.name && item.name.includes("역")))) {
+          score += tempBoost;
+        }
+      }
+    }
+
+    // 5. 막차/출근 서지 보너스
+    try { score += getPublicTransitSurgeBonus(item, now); } catch(e){}
+
+    // 6. 내 탑승 기록 보너스 (0.4km 이내 + 같은 시간대면 +35) - 기존 로직 100% 유지
+    let matchCount = 0; let isTimeMatch = false;
+    try {
+      JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]').forEach(log => {
+        const logLat = Number(log.lat); const logLng = Number(log.lng);
+        if (getStraightDistanceKm(item.lat, item.lng, logLat, logLng) <= 0.4) {
+          matchCount++;
+          let hourDiff = Math.abs(nowHour - (new Date(log.timestamp||log.time).getHours()));
+          if (hourDiff > 12) hourDiff = 24 - hourDiff;
+          if (hourDiff <= 1) { score += 35; isTimeMatch = true; } else { score += 20; }
+        }
+      });
+    } catch(e){}
     return { score: Math.max(0, score), logCount: matchCount + (item.clusterCount||0), isTimeMatch: isTimeMatch || item.isTimeMatch };
   }
 
@@ -1785,7 +1868,6 @@
       renderDrivingLogStats();
     }
   }
-
   async function searchRestrooms() {
     if (!currentPos) { showToast("위치를 탐색해주세요."); return; }
     
@@ -1860,6 +1942,7 @@
       let combinedList = [...customList, ...apiList];
       let dedupedRestrooms = [];
       for (let item of combinedList) {
+          // 100m(0.1km) 이내에 이미 추가된 화장실이 있으면 중복으로 간주하고 제외 (커스텀 우선)
           if (!dedupedRestrooms.some(d => getStraightDistanceKm(item.lat, item.lng, d.lat, d.lng) <= 0.1)) {
               dedupedRestrooms.push(item);
           }
@@ -1918,6 +2001,7 @@
     const inWisu = (currentMode === 1);
     if (logEl) logEl.innerText = `⚡ [스마트 ${inWisu ? '관내 추천' : '관외 경유지 탐색'}] 연산 중...`;
     
+    // AI V7.8.2 날씨 정보 연동
     const weatherData = await fetchRealtimeWeatherUpgraded(currentPos.lat, currentPos.lng);
     const liveKakaoHotspots = await fetchLiveKakaoHotspots(currentPos.lat, currentPos.lng);
     let allLiveHotspots = [...liveKakaoHotspots];
@@ -1968,22 +2052,6 @@
       return true;
     });
 
-    // V7.8.5 AI Upgraded: 서울시 혼잡도 사전 병렬 수집 (Pre-fetching)
-    // - for...of 루프 안에서 한 개씩 지연되는 것을 방지하기 위해 중복 지역을 뽑아 동시에 요청합니다.
-    if (!inWisu) {
-        const seoulTargets = new Set();
-        rawPool.forEach(item => {
-            if(item.name.match(/강남|사당|홍대|신도림|건대|여의도|서울역/)) {
-                seoulTargets.add(item.name);
-            }
-        });
-        if (seoulTargets.size > 0) {
-            if (logEl) logEl.innerText = `⚡ 서울 혼잡도 데이터 병렬 수신 중...`;
-            // Promise.all로 최대 2.5초 내에 동시 수집 완료 후 캐시 저장
-            await Promise.all(Array.from(seoulTargets).map(name => fetchSeoulCityData(name)));
-        }
-    }
-
     let preFiltered = [];
     for (let item of rawPool) {
       let straightDist = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
@@ -1992,13 +2060,13 @@
       let pureRes = await calculatePureSpotScore(item, weatherData, nowHour);
       let preliminaryScore = pureRes.score;
       
+      // 대중교통 가중치 합산
       const transitSurge = getPublicTransitSurgeBonus(item, new Date());
       preliminaryScore += transitSurge;
 
+      // 서울 공공데이터 연동 (관외에서 서울지역 스팟인 경우)
       let isSeoulCrowded = false;
       if (!inWisu && item.name.match(/강남|사당|홍대|신도림|건대|여의도|서울역/)) {
-          // 여기서 fetchSeoulCityData를 호출하지만, 위에서 Pre-fetching 해두었으므로 
-          // 캐시를 통해 0.001초 만에 즉시 반환됩니다.
           const congestion = await fetchSeoulCityData(item.name);
           if (congestion === "붐빔") {
               preliminaryScore += 45;
@@ -2014,7 +2082,7 @@
         const crossTrackDist = getCrossTrackDistanceKm(currentPos.lat, currentPos.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng, item.lat, item.lng);
 
         if (straightDist <= 2.5) {
-           preliminaryScore += 120; 
+           preliminaryScore += 120; // 관외 모드 시 반경 2.5km 내 핫플은 복귀 경유지로 무조건 최우선 추천되도록 부스트 강화
            if (deltaAngle > 90) preliminaryScore -= 10; 
         } else {
            if (crossTrackDist > 3.5) continue; 
@@ -2035,9 +2103,11 @@
     preFiltered.sort((a, b) => b.preliminaryScore - a.preliminaryScore);
     const topCandidates = preFiltered.slice(0, 15);
     
+    // 카카오 내비를 찔러서 실제 교통 속도 및 최종 EV 산출
     let scoredPool = await Promise.all(topCandidates.map(async (item) => {
       let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
       
+      // 교통 정체(Traffic Jam) 서지 보너스 반영
       let finalScore = item.preliminaryScore + road.trafficScore;
       document.getElementById('status-traffic').innerHTML = `🚦 실시간 교통: 반경 ${road.distanceKm}km 내 ${road.trafficStatus}`;
 
@@ -2222,6 +2292,7 @@
         L.marker([pt.lat, pt.lng], { icon: L.divIcon({ html, className: '', iconSize: [24, 24] }) }).addTo(leafletMap).bindPopup(`<b>${pt.name}</b>`);
 
         if (pt.geometryCoords && pt.geometryCoords.length > 0) {
+          // 관외 복귀 모드일 때, 목적지(Target)로 다이렉트 연결되는 라인은 얇고 연하게 처리하여 시각적 혼동 방지
           let polyWeight = pt.isTargetBoundary ? 2 : 6;
           let polyOpacity = pt.isTargetBoundary ? 0.3 : 0.8;
           let polyColor = pt.isTargetBoundary ? '#EF4444' : themeColor;
@@ -2230,6 +2301,7 @@
           
           if (currentMode === 2 && !pt.isTargetBoundary && !pt.isCurrent && !pt.isRestroom && !pt.isGasStation) {
              const targetPt = currentRouteData.find(p => p.isTargetBoundary);
+             // 추천된 핫플(경유지)에서 최종 복귀 목적지까지 이어지는 가상의 점선을 직관적인 파란색으로 명확하게 표시
              if (targetPt) {
                  L.polyline([[pt.lat, pt.lng], [targetPt.lat, targetPt.lng]], { color: '#3B82F6', weight: 3, opacity: 0.8, dashArray: '6, 6' }).addTo(leafletMap);
              }
@@ -2710,6 +2782,7 @@
      `;
   }
 
+  // --- V7.1 실매출 입력 로직 추가 ---
   const inputRev = document.getElementById('input-rev');
   const fill = document.getElementById('progress-fill');
   const valPct = document.getElementById('val-pct');
@@ -2753,6 +2826,7 @@
 
   if(inputRev) inputRev.addEventListener('input', calculateDailyRevenue);
 
+  // 음성 인식 로직
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (SpeechRecognition && btnMic) {
     const recognition = new SpeechRecognition();
@@ -2789,6 +2863,7 @@
   }
 
 
+  // --- 월간 시뮬레이터 로직 ---
   function initSimulator() {
     const today = new Date();
     const currentDay = today.getDate();
@@ -3049,6 +3124,7 @@
        });
     }
 
+    // --- 고단가 콜 길게 누르기 이벤트 바인딩 ---
     const saveCallBtn = document.getElementById('btn-save-call');
     let callPressTimer = null; let isCallLongPress = false; let hasTouch = false;
     
@@ -3086,6 +3162,7 @@
     timerBtn.addEventListener('touchcancel', () => { if (touchTimer) clearTimeout(touchTimer); });
     timerBtn.addEventListener('click', (e) => { if (isLongPress) { e.preventDefault(); isLongPress = false; return; } toggleTimer(); });
 
+    // Simulator Init & Events
     initSimulator();
     initDailyRevenue(); 
     
@@ -3104,5 +3181,5 @@
     executeSearch();
   });
 </script>
-</body>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
 </html>
