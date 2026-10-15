@@ -43,39 +43,32 @@
   font-family: "Optimistic Mono", ui-monospace, monospace;
 }
 
-    /* v7.9.21 Final - safe area */
-    .bottom-bar::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: env(safe-area-inset-bottom, 0px); background: inherit; pointer-events: none; z-index: -1; }
+    /* v7.9.21 Balanced - notch optimization */
+    .sticky-top-area {
+      padding-top: env(safe-area-inset-top, 0px);
+      top: 0;
+    }
+    /* bottom bar - keep original height but ensure safe area only once */
+    .bottom-bar {
+      height: calc(64px + env(safe-area-inset-bottom, 0px));
+      padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+    }
+    .bottom-bar::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: env(safe-area-inset-bottom, 0px);
+      background: inherit;
+      pointer-events: none;
+      z-index: -1;
+    }
     /* OCR */
     .penalty-ocr-btn { width: 100%; background: #FFC800; color: #000; border: 2px solid #000; border-radius: 8px; padding: 10px; font-size: 12px; font-weight: 900; cursor: pointer; margin-top: 6px; }
     .penalty-ocr-btn:disabled { opacity: 0.5; }
     .penalty-ocr-status { margin-top: 8px; font-size: 11px; font-weight: 800; color: #000; background: #FFF7CC; border: 1px solid #FFC800; border-radius: 6px; padding: 6px 8px; }
     .penalty-ocr-preview { margin-top: 6px; font-size: 9px; color: #666; background: #F5F5F5; border: 1px dashed #CCC; border-radius: 6px; padding: 6px 8px; max-height: 80px; overflow-y: auto; white-space: pre-wrap; }
-
-
-    .bottom-bar {
-      padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
-    }
-
-
-    /* v7.9.21 Top Fix v2 - iPhone notch */
-    .sticky-top-area {
-      padding-top: calc(env(safe-area-inset-top, 0px) + 14px) !important;
-      top: 0 !important;
-    }
-    body {
-      padding-top: 0 !important;
-    }
-    #app-header-title {
-      margin-top: 2px;
-      line-height: 1.2;
-    }
-    /* Ensure bottom bar doesn't cover */
-    .bottom-bar {
-      padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)) !important;
-    }
-    .bottom-bar::after {
-      height: env(safe-area-inset-bottom, 0px);
-    }
 
 </style>
   <meta charset="UTF-8">
@@ -2038,128 +2031,54 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
   function deletePenalty(id){ const list=getPenaltyList().filter(p=>p.id!==id); savePenaltyList(list); renderPenaltyList(); if(callMapViewLeaflet) renderCallMapView(); showToast("범칙금 장소 삭제됨"); }
   function geocodeAddress(address){ return new Promise((resolve)=>{ try{ if(window.kakao && window.kakao.maps && window.kakao.maps.services){ const geocoder=new kakao.maps.services.Geocoder(); geocoder.addressSearch(address,(result,status)=>{ if(status===kakao.maps.services.Status.OK && result[0]) resolve({lat:parseFloat(result[0].y), lng:parseFloat(result[0].x)}); else { const ps=new kakao.maps.services.Places(); ps.keywordSearch(address,(data,stat)=>{ if(stat===kakao.maps.services.Status.OK && data[0]) resolve({lat:parseFloat(data[0].y), lng:parseFloat(data[0].x)}); else resolve(null); }); } }); } else resolve(null); }catch(e){ resolve(null); } }); }
   
-  // ===== v7.9.21 Final OCR - 안전하게 로드 =====
   (function(){
-    let tesseractLoading = false;
-    async function ensureTesseractLoaded() {
-      if (window.Tesseract) return;
-      if (tesseractLoading) {
-        while (!window.Tesseract) await new Promise(r=>setTimeout(r,200));
-        return;
-      }
-      tesseractLoading = true;
-      return new Promise((resolve, reject)=>{
-        try {
-          const s = document.createElement('script');
-          s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
-          s.onload = function(){ tesseractLoading=false; resolve(); };
-          s.onerror = function(e){ tesseractLoading=false; reject(e); };
-          document.head.appendChild(s);
-        } catch(e){ tesseractLoading=false; reject(e); }
+    let tesseractLoading=false;
+    async function ensureTesseractLoaded(){
+      if(window.Tesseract) return;
+      if(tesseractLoading){ while(!window.Tesseract) await new Promise(r=>setTimeout(r,200)); return; }
+      tesseractLoading=true;
+      return new Promise((resolve,reject)=>{
+        try{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';s.onload=function(){tesseractLoading=false;resolve();};s.onerror=function(e){tesseractLoading=false;reject(e);};document.head.appendChild(s);}catch(e){tesseractLoading=false;reject(e);}
       });
     }
-    function resizeImageForOCR(file, maxWidth) {
-      maxWidth = maxWidth || 1200;
-      return new Promise((resolve, reject)=>{
-        try {
-          const img = new Image();
-          const url = URL.createObjectURL(file);
-          img.onload = function(){
-            let w = img.width, h = img.height;
-            if (w > maxWidth) { h = h * (maxWidth / w); w = maxWidth; }
-            const canvas = document.createElement('canvas');
-            canvas.width = w; canvas.height = h;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, w, h);
-            URL.revokeObjectURL(url);
-            canvas.toBlob(function(b){ if(b) resolve(b); else reject(new Error('resize')); }, 'image/jpeg', 0.8);
-          };
-          img.onerror = function(){ URL.revokeObjectURL(url); reject(new Error('load')); };
-          img.src = url;
-        } catch(e){ reject(e); }
-      });
-    }
-    function parsePenaltyOCRText(text) {
-      const result = {violation:'', amount:'', place:''};
-      if (!text) return result;
-      try {
-        let m = text.match(/(\d{1,3}(?:,\d{3})+|\d{4,6})\s*원/);
-        if (m) result.amount = m[0].replace(/\s+/g,'');
-        else {
-          m = text.match(/(?:범칙금|과태료|금액)\s*[:：]?\s*(\d{1,3}(?:,\d{3})*|\d+)/);
-          if (m) result.amount = m[1] + '원';
-        }
-        if (!result.amount) {
-          m = text.match(/(\d+)\s*만원/);
-          if (m) result.amount = (parseInt(m[1])*10000).toString() + '원';
-        }
-        const vioMap = [
-          {kw:'신호위반', pat:/신호위반|신호\s*위반/},
-          {kw:'과속', pat:/과속|속도위반/},
-          {kw:'주정차위반', pat:/주정차|주차위반/},
-          {kw:'중앙선침범', pat:/중앙선/},
-        ];
-        for (let v of vioMap) {
-          if (v.pat.test(text)) { result.violation = v.kw; if (v.kw==='과속'){ let om=text.match(/(\d+)\s*km\s*초과/); if(om) result.violation='과속 '+om[1]+'km 초과'; } break; }
-        }
-        let pm = text.match(/(?:장소|위치|위반장소|단속장소)\s*[:：]?\s*([^\n]{5,60}(?:로|길|대로|사거리|교차로|앞)[^\n]*)/);
-        if (pm) result.place = pm[1].trim();
-        else {
-          pm = text.match(/([가-힣]+시\s[가-힣]+구\s[가-힣0-9\s\-]+(?:로|길)\s*\d+)/);
-          if (pm) result.place = pm[1].trim();
-        }
-        if (!result.place) {
-          let lines = text.split('\n').map(function(l){return l.trim();}).filter(function(l){return (l.indexOf('로')>-1||l.indexOf('길')>-1)&&l.length>5&&l.length<60;});
-          if (lines.length>0) result.place = lines[0];
-        }
-      } catch(e){}
+    function resizeImageForOCR(file,maxWidth){maxWidth=maxWidth||1200;return new Promise((resolve,reject)=>{try{const img=new Image();const url=URL.createObjectURL(file);img.onload=function(){let w=img.width,h=img.height;if(w>maxWidth){h=h*(maxWidth/w);w=maxWidth;}const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,w,h);URL.revokeObjectURL(url);canvas.toBlob(function(b){if(b) resolve(b); else reject(new Error('resize'));},'image/jpeg',0.8);};img.onerror=function(){URL.revokeObjectURL(url);reject(new Error('load'));};img.src=url;}catch(e){reject(e);}});}
+    function parsePenaltyOCRText(text){
+      const result={violation:'',amount:'',place:''};
+      if(!text) return result;
+      try{
+        let m=text.match(/(\d{1,3}(?:,\d{3})+|\d{4,6})\s*원/);
+        if(m) result.amount=m[0].replace(/\s+/g,'');
+        else{m=text.match(/(?:범칙금|과태료|금액)\s*[:：]?\s*(\d{1,3}(?:,\d{3})*|\d+)/); if(m) result.amount=m[1]+'원';}
+        if(!result.amount){m=text.match(/(\d+)\s*만원/); if(m) result.amount=(parseInt(m[1])*10000).toString()+'원';}
+        const vioMap=[{kw:'신호위반',pat:/신호위반|신호\s*위반/},{kw:'과속',pat:/과속|속도위반/},{kw:'주정차위반',pat:/주정차|주차위반/}];
+        for(let v of vioMap){if(v.pat.test(text)){result.violation=v.kw; if(v.kw==='과속'){let om=text.match(/(\d+)\s*km\s*초과/); if(om) result.violation='과속 '+om[1]+'km 초과';} break;}}
+        let pm=text.match(/(?:장소|위치|위반장소|단속장소)\s*[:：]?\s*([^\n]{5,60}(?:로|길|대로|사거리|교차로|앞)[^\n]*)/);
+        if(pm) result.place=pm[1].trim();
+        else{pm=text.match(/([가-힣]+시\s[가-힣]+구\s[가-힣0-9\s\-]+(?:로|길)\s*\d+)/); if(pm) result.place=pm[1].trim();}
+        if(!result.place){let lines=text.split('\n').map(function(l){return l.trim();}).filter(function(l){return (l.indexOf('로')>-1||l.indexOf('길')>-1)&&l.length>5&&l.length<60;}); if(lines.length>0) result.place=lines[0];}
+      }catch(e){}
       return result;
     }
-    async function handlePenaltyOCR() {
-      const photoInput = document.getElementById('penalty-photo');
-      const statusEl = document.getElementById('ocr-status');
-      const previewEl = document.getElementById('ocr-preview');
-      const btn = document.getElementById('btn-ocr-penalty');
-      if (!photoInput || !photoInput.files[0]) { if(typeof showToast==='function') showToast('📷 사진 선택'); return; }
-      const file = photoInput.files[0];
-      if (btn) btn.disabled = true;
-      if (statusEl) { statusEl.style.display='block'; statusEl.innerText='🔄 OCR 로딩...'; }
-      if (previewEl) previewEl.style.display='none';
-      try {
+    async function handlePenaltyOCR(){
+      const photoInput=document.getElementById('penalty-photo');const statusEl=document.getElementById('ocr-status');const previewEl=document.getElementById('ocr-preview');const btn=document.getElementById('btn-ocr-penalty');
+      if(!photoInput||!photoInput.files[0]){if(typeof showToast==='function') showToast('📷 사진 선택'); return;}
+      const file=photoInput.files[0]; if(btn) btn.disabled=true; if(statusEl){statusEl.style.display='block';statusEl.innerText='🔄 OCR 로딩...';} if(previewEl) previewEl.style.display='none';
+      try{
         await ensureTesseractLoaded();
-        if (statusEl) statusEl.innerText='🖼️ 전처리 중...';
-        let blob = file;
-        try { blob = await resizeImageForOCR(file, 1200); } catch(e){}
-        if (statusEl) statusEl.innerText='🤖 인식 중... 0%';
-        const result = await Tesseract.recognize(blob, 'kor+eng', {
-          logger: function(m){ if(m.status==='recognizing text' && statusEl){ statusEl.innerText='🤖 인식 중... '+Math.round(m.progress*100)+'%'; } }
-        });
-        const text = result.data.text || '';
-        if (statusEl) statusEl.innerText='🔍 분석 중...';
-        if (previewEl) { previewEl.style.display='block'; previewEl.innerText=text.slice(0,600)||'(없음)'; }
-        const parsed = parsePenaltyOCRText(text);
-        let filled=0;
-        if(parsed.violation){ const el=document.getElementById('penalty-violation'); if(el){el.value=parsed.violation; filled++;} }
-        if(parsed.amount){ const el=document.getElementById('penalty-amount'); if(el){el.value=parsed.amount; filled++;} }
-        if(parsed.place){ const el=document.getElementById('penalty-place'); if(el){el.value=parsed.place; filled++;} }
-        if(filled>0){ if(typeof showToast==='function') showToast('✅ '+filled+'개 입력'); if(statusEl) statusEl.innerText='✅ '+filled+'개 입력됨'; }
-        else { if(statusEl) statusEl.innerText='⚠️ 파싱 실패'; }
-      } catch(e){ console.error(e); if(statusEl) statusEl.innerText='❌ 오류'; }
-      finally { if(btn) btn.disabled=false; }
+        if(statusEl) statusEl.innerText='🖼️ 전처리 중...';
+        let blob=file; try{blob=await resizeImageForOCR(file,1200);}catch(e){}
+        if(statusEl) statusEl.innerText='🤖 인식 중... 0%';
+        const result=await Tesseract.recognize(blob,'kor+eng',{logger:function(m){if(m.status==='recognizing text'&&statusEl){statusEl.innerText='🤖 인식 중... '+Math.round(m.progress*100)+'%';}}});
+        const text=result.data.text||''; if(statusEl) statusEl.innerText='🔍 분석 중...'; if(previewEl){previewEl.style.display='block';previewEl.innerText=text.slice(0,600)||'(없음)';}
+        const parsed=parsePenaltyOCRText(text); let filled=0;
+        if(parsed.violation){const el=document.getElementById('penalty-violation'); if(el){el.value=parsed.violation; filled++;}}
+        if(parsed.amount){const el=document.getElementById('penalty-amount'); if(el){el.value=parsed.amount; filled++;}}
+        if(parsed.place){const el=document.getElementById('penalty-place'); if(el){el.value=parsed.place; filled++;}}
+        if(filled>0){if(typeof showToast==='function') showToast('✅ '+filled+'개 입력'); if(statusEl) statusEl.innerText='✅ '+filled+'개 입력됨';} else{if(statusEl) statusEl.innerText='⚠️ 파싱 실패';}
+      }catch(e){console.error(e); if(statusEl) statusEl.innerText='❌ 오류';} finally{if(btn) btn.disabled=false;}
     }
-    function bindOCR(){
-      try {
-        const btn = document.getElementById('btn-ocr-penalty');
-        if(btn && !btn._bound){ btn.addEventListener('click', handlePenaltyOCR); btn._bound=true; }
-      } catch(e){}
-    }
-    // DOM 로드 후 바인딩
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', bindOCR);
-    } else {
-      bindOCR();
-    }
-    setTimeout(bindOCR, 1000);
+    function bindOCR(){try{const btn=document.getElementById('btn-ocr-penalty'); if(btn&&!btn._bound){btn.addEventListener('click', handlePenaltyOCR); btn._bound=true;}}catch(e){}}
+    if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded', bindOCR);} else{bindOCR();} setTimeout(bindOCR,1000);
   })();
 
   async function addPenaltyFromModal(){
@@ -3445,41 +3364,27 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
        });
     }
 
-    // --- v7.9.21 Final 고단가 콜 길게 누르기 + 스와이프업 방지 (터치 살림) ---
+    // --- v7.9.21 Balanced - 고단가 콜 스와이프 방지 ---
     const saveCallBtn = document.getElementById('btn-save-call');
     let callPressTimer = null; let isCallLongPress = false; let hasTouch = false;
     let callStartY = 0, callStartX = 0, callStartTime = 0;
     saveCallBtn.addEventListener('touchstart', (e) => {
         hasTouch = true; isCallLongPress = false;
-        try {
-          const t = e.touches[0];
-          callStartY = t.clientY; callStartX = t.clientX; callStartTime = Date.now();
-        } catch(err){}
+        try { const t=e.touches[0]; callStartY=t.clientY; callStartX=t.clientX; callStartTime=Date.now(); } catch(err){}
         saveCallBtn.classList.add('active-longpress');
         callPressTimer = setTimeout(() => { isCallLongPress = true; saveCallBtn.classList.remove('active-longpress'); saveCurrentCallLocation(true); }, 650);
     }, {passive: true});
     saveCallBtn.addEventListener('touchmove', (e) => {
-        try {
-          const t = e.touches[0];
-          if (Math.abs(t.clientY - callStartY) > 15 || Math.abs(t.clientX - callStartX) > 15) {
-            if (callPressTimer) clearTimeout(callPressTimer);
-            saveCallBtn.classList.remove('active-longpress');
-          }
-        } catch(err){}
+        try { const t=e.touches[0]; if(Math.abs(t.clientY-callStartY)>15 || Math.abs(t.clientX-callStartX)>15){ if(callPressTimer) clearTimeout(callPressTimer); saveCallBtn.classList.remove('active-longpress'); } } catch(err){}
     }, {passive: true});
     saveCallBtn.addEventListener('touchend', (e) => {
         if (callPressTimer) clearTimeout(callPressTimer);
         saveCallBtn.classList.remove('active-longpress');
         try {
-          const t = e.changedTouches[0];
-          const duration = Date.now() - callStartTime;
-          const deltaY = callStartY - t.clientY;
-          const deltaX = Math.abs(t.clientX - callStartX);
-          // 시스템 스와이프업이면 저장 무시 (아이폰 앱 닫기 제스처)
-          if (callStartY > window.innerHeight - 150 && deltaY > 60 && duration < 500) return;
-          if (deltaY > 50 && deltaY > deltaX && duration < 500) return;
-          // 30px 이상 움직이면 탭 아닌 것으로 간주
-          if (Math.abs(deltaY) > 30 || deltaX > 30) return;
+          const t=e.changedTouches[0]; const dur=Date.now()-callStartTime; const dY=callStartY-t.clientY; const dX=Math.abs(t.clientX-callStartX);
+          if(callStartY>window.innerHeight-150 && dY>60 && dur<500) return;
+          if(dY>50 && dY>dX && dur<500) return;
+          if(Math.abs(dY)>30 || dX>30) return;
         } catch(err){}
         if (!isCallLongPress) saveCurrentCallLocation(false);
     });
@@ -3498,28 +3403,14 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     });
 
         (function(){
-        const restBtn = document.getElementById('btn-save-restroom');
-        let rStartY=0,rStartX=0,rStartTime=0,rTouch=false;
-        restBtn.addEventListener('touchstart', function(e){
-          rTouch=true;
-          try{const t=e.touches[0];rStartY=t.clientY;rStartX=t.clientX;rStartTime=Date.now();}catch(err){}
-        }, {passive:true});
+        const restBtn=document.getElementById('btn-save-restroom');
+        let rY=0,rX=0,rT=0,rTouch=false;
+        restBtn.addEventListener('touchstart', function(e){ rTouch=true; try{const t=e.touches[0];rY=t.clientY;rX=t.clientX;rT=Date.now();}catch(err){} }, {passive:true});
         restBtn.addEventListener('touchend', function(e){
-          try{
-            const t=e.changedTouches[0];
-            const dur=Date.now()-rStartTime;
-            const dY=rStartY-t.clientY;
-            const dX=Math.abs(t.clientX-rStartX);
-            if(rStartY>window.innerHeight-150 && dY>60 && dur<500) return;
-            if(dY>50 && dY>dX && dur<500) return;
-            if(Math.abs(dY)>30 || dX>30) return;
-          }catch(err){}
+          try{const t=e.changedTouches[0];const d=Date.now()-rT;const dY=rY-t.clientY;const dX=Math.abs(t.clientX-rX); if(rY>window.innerHeight-150&&dY>60&&d<500) return; if(dY>50&&dY>dX&&d<500) return; if(Math.abs(dY)>30||dX>30) return;}catch(err){}
           saveCurrentRestroomLocation();
         });
-        restBtn.addEventListener('click', function(e){
-          if(rTouch){rTouch=false;return;}
-          saveCurrentRestroomLocation();
-        });
+        restBtn.addEventListener('click', function(e){ if(rTouch){rTouch=false;return;} saveCurrentRestroomLocation(); });
     })();
 
     document.getElementById('timer-btn-5m').addEventListener('click', () => setTimerPreset(5));
