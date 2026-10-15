@@ -24,7 +24,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>수다택시 K v7.9.13 AI Upgraded</title>
+  <title>수다택시 K v7.9.16 AI Upgraded</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -246,7 +246,7 @@
     .text-orange { color: #F97316; }
     .text-purple { color: #A855F7; }
 
-    .drive-control-btn { flex: 1; height: 44px; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 14px; transition: all 0.2s; border: 1px solid transparent; }
+    .drive-control-btn { touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none;  flex: 1; height: 44px; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 14px; transition: all 0.2s; border: 1px solid transparent; }
     .btn-green { background: #22C55E !important; color: #000 !important; border-color: #16A34A !important; }
     .btn-red { background: #EF4444 !important; color: #FFF !important; border-color: #DC2626 !important; }
     .btn-purple { background: #C084FC !important; color: #000 !important; border-color: #9333EA !important; }
@@ -354,7 +354,6 @@
     .session-duration { font-size: 11px; font-weight: 900; color: var(--theme-accent); margin-left: 6px; }
     .session-del-btn { background: #FEE2E2; color: #DC2626; border: 1px solid #F87171; border-radius: 4px; padding: 2px 6px; font-size: 9px; font-weight: 700; cursor: pointer; }
   
-    /* v7.9.13 범칙금 카메라 */
     .penalty-section { background: var(--card-bg); border: 1.5px solid #EF4444; border-radius: 12px; padding: 10px; margin-top: 10px; }
     .penalty-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .penalty-title { font-weight: 900; font-size: 13px; color: #EF4444; }
@@ -491,7 +490,7 @@
     <div class="penalty-section" id="penalty-section">
       <div class="penalty-header">
         <div><span class="penalty-title">📷 범칙금 리스트</span> <span class="penalty-count" id="penalty-count">(0곳)</span></div>
-        <button class="penalty-add-btn" id="btn-add-penalty">+ 추가</button>
+        <button class="penalty-add-btn" id="btn-add-penalty" type="button" onclick="openPenaltyModal()">+ 추가</button>
       </div>
       <div class="penalty-list" id="penalty-list"></div>
       <div style="font-size:10px; color:var(--stat-label); margin-top:6px; line-height:1.4;">위반/금액/장소 형식으로 저장 · 지도에 노란점으로 표시 · 추천탭 2km내 경고</div>
@@ -518,8 +517,8 @@
         <input type="file" class="penalty-input" id="penalty-photo" accept="image/*">
       </div>
       <div class="penalty-modal-btns">
-        <button class="penalty-modal-btn cancel" id="penalty-cancel">취소</button>
-        <button class="penalty-modal-btn submit" id="penalty-submit">입력</button>
+        <button class="penalty-modal-btn cancel" type="button" onclick="closePenaltyModal()">취소</button>
+        <button class="penalty-modal-btn submit" type="button" onclick="addPenaltyFromModal()">입력</button>
       </div>
     </div>
   </div>
@@ -548,7 +547,7 @@
           <button id="btn-reset-today" style="background:#FEE2E2; color:#DC2626; border:1px solid #F87171; border-radius:4px; padding:3px 6px; font-size:10px; font-weight:800; cursor:pointer; width: 64px; text-align: center; line-height: 1.1;">기록 리셋</button>
         </div>
       </div>
-      <div id="driving-time-range" style="font-size: 11px; color: #A3A3A3; margin-top: -6px; margin-bottom: 6px; font-weight: 700; letter-spacing: -0.5px;">⏰ 운행 시간: 데이터 없음</div>
+      <div id="driving-time-range" style="display:none;">⏰ 운행 시간: 데이터 없음</div>
       <div id="driving-session-list" style="display: flex; flex-direction: column; margin-bottom: 10px;"></div>
       <div class="stat-grid">
         <div class="stat-box">
@@ -755,7 +754,7 @@
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.9.13 AI Upgraded"; 
+  const BUILD_VERSION = "v7.9.16 AI Upgraded"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -1222,6 +1221,7 @@
 
   function handleBoarding() {
     if (!drivingState.isDriving || drivingState.isBreak) return;
+    if (drivingState.isPassengerBoarded) { showToast('이미 승차 상태입니다.'); return; }
     drivingState.isPassengerBoarded = true; drivingState.stateStartTime = Date.now();
     updateDrivingUI(); showToast('🙋 승차 처리되었습니다.'); saveDrivingState();
     document.body.classList.remove('out-of-bounds-alert');
@@ -1961,7 +1961,15 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     }
   }
 
-  // v7.9.13 범칙금 카메라 관리
+  // v7.9.16 범칙금 카메라 관리 - 버튼 작동 fix 포함
+  function openPenaltyModal() {
+    const modal = document.getElementById('penalty-modal');
+    if (modal) modal.classList.add('active');
+  }
+  function closePenaltyModal() {
+    const modal = document.getElementById('penalty-modal');
+    if (modal) modal.classList.remove('active');
+  }
   function getPenaltyList() {
     try { return JSON.parse(localStorage.getItem('sudataxi_penalty_list') || '[]'); } catch(e) { return []; }
   }
@@ -2009,7 +2017,6 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
             if (status === kakao.maps.services.Status.OK && result[0]) {
               resolve({ lat: parseFloat(result[0].y), lng: parseFloat(result[0].x) });
             } else {
-              // 키워드 검색으로 fallback
               const ps = new kakao.maps.services.Places();
               ps.keywordSearch(address, (data, stat) => {
                 if (stat === kakao.maps.services.Status.OK && data[0]) resolve({ lat: parseFloat(data[0].y), lng: parseFloat(data[0].x) });
@@ -2022,18 +2029,24 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     });
   }
   async function addPenaltyFromModal() {
-    const violation = document.getElementById('penalty-violation').value.trim();
-    const amount = document.getElementById('penalty-amount').value.trim();
-    const place = document.getElementById('penalty-place').value.trim();
+    const violationEl = document.getElementById('penalty-violation');
+    const amountEl = document.getElementById('penalty-amount');
+    const placeEl = document.getElementById('penalty-place');
+    const violation = violationEl ? violationEl.value.trim() : '';
+    const amount = amountEl ? amountEl.value.trim() : '';
+    const place = placeEl ? placeEl.value.trim() : '';
     const photoInput = document.getElementById('penalty-photo');
     if (!violation || !amount || !place) { showToast("위반/금액/장소를 모두 입력하세요"); return; }
 
     let lat = null; let lng = null; let address = place;
-    const geo = await geocodeAddress(place);
-    if (geo) { lat = geo.lat; lng = geo.lng; }
-    else {
-      // 현재 위치 근처로라도 저장 가능하도록, 현재 위치가 있으면 그 근처로 임시 저장
-      if (currentPos) { lat = currentPos.lat + (Math.random()-0.5)*0.002; lng = currentPos.lng + (Math.random()-0.5)*0.002; }
+    try {
+      const geo = await geocodeAddress(place);
+      if (geo) { lat = geo.lat; lng = geo.lng; }
+      else {
+        if (currentPos) { lat = currentPos.lat + (Math.random()-0.5)*0.002; lng = currentPos.lng + (Math.random()-0.5)*0.002; }
+      }
+    } catch(e) {
+      if (currentPos) { lat = currentPos.lat; lng = currentPos.lng; }
     }
 
     let photoData = null;
@@ -2063,13 +2076,13 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     list.push(newItem);
     savePenaltyList(list);
     renderPenaltyList();
-    if (callMapViewLeaflet) renderCallMapView();
+    if (typeof callMapViewLeaflet !== 'undefined' && callMapViewLeaflet) renderCallMapView();
 
-    document.getElementById('penalty-violation').value = '';
-    document.getElementById('penalty-amount').value = '';
-    document.getElementById('penalty-place').value = '';
+    if (violationEl) violationEl.value = '';
+    if (amountEl) amountEl.value = '';
+    if (placeEl) placeEl.value = '';
     if (photoInput) photoInput.value = '';
-    document.getElementById('penalty-modal').classList.remove('active');
+    closePenaltyModal();
     showToast("📷 범칙금 장소 저장됨");
   }
   function getNearbyPenaltyWarnings(maxDistKm = 2.0) {
@@ -2291,7 +2304,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       const transitSurge = getPublicTransitSurgeBonus(item, new Date());
       preliminaryScore += transitSurge;
 
-      // 서울 공공데이터 연동 - v7.9.13 필요한 지역만 호출 (반경 4.5km + 캐시)
+      // 서울 공공데이터 연동 - v7.9.16 필요한 지역만 호출 (반경 4.5km + 캐시)
       let isSeoulCrowded = false;
       if (!inWisu && item.name.match(/강남|사당|홍대|신도림|건대|여의도|서울역/)) {
           const distToSeoulItem = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
@@ -2370,10 +2383,8 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
   }
 
   function renderCards(routeCards, referenceHubs, targetBoundaryCardData) {
-    // v7.9.13 범칙금 경고 카드 주입 (2km 이내)
     let penaltyWarnings = [];
     try { penaltyWarnings = getNearbyPenaltyWarnings(2.0); } catch(e) {}
-    // penaltyWarnings를 routeCards 사이에 한줄 빨간 카드로 표시하기 위해 별도로 처리
     const originalRouteCards = routeCards ? [...routeCards] : [];
     let combinedForRender = [];
     if (penaltyWarnings.length > 0) {
@@ -2523,7 +2534,6 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
         .bindPopup(popupText);
     });
 
-    // 범칙금 노란 점 표시
     try {
       const penalties = getPenaltyList();
       penalties.forEach(p => {
@@ -2787,21 +2797,16 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
   function renderDrivingLogStats() {
     const today = getTodayDrivingData();
     const todayTotal = today.totalDrive || 0; 
+    const todayBreak = today.breakTime || 0;
     const todayBoard = today.passengerBoard || 0; 
     const todayEmpty = today.emptyCar || 0;
+    const todaySittingTotal = todayTotal + todayBreak;
     
     const timeRangeEl = document.getElementById('driving-time-range');
     const sessionListEl = document.getElementById('driving-session-list');
     
     if (timeRangeEl) {
-      if (today.firstStartTime && todayTotal > 0) {
-         const startD = new Date(today.firstStartTime);
-         const endD = today.lastEndTime ? new Date(today.lastEndTime) : new Date();
-         const fTime = (d) => `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-         timeRangeEl.innerText = `⏰ 운행 시간: ${fTime(startD)} ~ ${fTime(endD)}`;
-      } else {
-         timeRangeEl.innerText = `⏰ 운행 시간: 데이터 없음`;
-      }
+      timeRangeEl.style.display = 'none';
     }
 
     if (sessionListEl) {
@@ -2820,7 +2825,8 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
            if (!s.start) return;
            const sTime = fTime(s.start);
            const eTime = fTime(s.end);
-           const durationStr = formatHHMMSS(s.total || 0).substring(0, 5); 
+           const sittingSec = (s.total || 0) + (s.break || 0);
+           const durationStr = formatHHMMSS(sittingSec).substring(0, 5); 
            
            sessionHtml += `
              <div class="session-item">
@@ -2835,16 +2841,19 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
        
        if (sessionHtml) {
            sessionListEl.innerHTML = sessionHtml;
+       } else {
+           sessionListEl.innerHTML = '<div style="font-size:11px; color:#8A8A8A; text-align:center; padding:8px;">운행 기록 없음</div>';
        }
     }
     
-    document.getElementById('stat-today-total').innerText = formatHHMMSS(todayTotal);
+    document.getElementById('stat-today-total').innerText = formatHHMMSS(todaySittingTotal);
     document.getElementById('stat-today-board').innerText = formatHHMMSS(todayBoard);
     document.getElementById('stat-today-empty').innerText = formatHHMMSS(todayEmpty);
-    document.getElementById('stat-today-break').innerText = formatHHMMSS(today.breakTime || 0);
+    document.getElementById('stat-today-break').innerText = formatHHMMSS(todayBreak);
 
     let todayBoardPct = 0;
-    if (todayTotal > 0) { todayBoardPct = ((todayBoard / todayTotal) * 100); }
+    const _sittingForPct = (typeof todaySittingTotal !== 'undefined' ? todaySittingTotal : (todayTotal + (today.breakTime||0)));
+    if (_sittingForPct > 0) { todayBoardPct = ((todayBoard / _sittingForPct) * 100); } else if (todayTotal > 0) { todayBoardPct = ((todayBoard / todayTotal) * 100); }
     
     document.getElementById('kpi-today-rate').innerText = `${todayBoardPct.toFixed(1)}%`;
     document.getElementById('kpi-today-rate').style.color = getBarColor(todayBoardPct);
@@ -3099,7 +3108,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
 
   if(inputRev) inputRev.addEventListener('input', calculateDailyRevenue);
 
-  // 음성 인식 로직 v7.9.13 - 마이크 권한 1회 + 한글 금액 파서
+  // 음성 인식 로직 v7.9.16 - 마이크 권한 1회 + 한글 금액 파서
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (SpeechRecognition && btnMic) {
     let recognition = null; let isRecognizing = false;
@@ -3292,8 +3301,40 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
   }
 
   window.addEventListener('DOMContentLoaded', () => {
+    try { updateHeaderTitle(new Date(), false, null); } catch(e) {}
+    try {
+      const saveBtn = document.getElementById('btn-save-call');
+      if (saveBtn) {
+        let touchStartY = 0; let touchStartX = 0; let isSwiping = false;
+        saveBtn.addEventListener('touchstart', (e) => { if (e.touches && e.touches[0]) { touchStartY = e.touches[0].clientY; touchStartX = e.touches[0].clientX; isSwiping = false; } }, {passive: true});
+        saveBtn.addEventListener('touchmove', (e) => { if (e.touches && e.touches[0]) { const dy = Math.abs(e.touches[0].clientY - touchStartY); const dx = Math.abs(e.touches[0].clientX - touchStartX); if (dy > 12 || dx > 12) isSwiping = true; } }, {passive: true});
+        saveBtn.addEventListener('touchend', (e) => { if (isSwiping) { e.preventDefault(); e.stopPropagation(); isSwiping = false; return; } if (e.changedTouches && e.changedTouches[0]) { const dy = touchStartY - e.changedTouches[0].clientY; if (dy > 20) { e.preventDefault(); e.stopPropagation(); return; } } }, {passive: false});
+      }
+      const boardBtn = document.getElementById('btn-board');
+      if (boardBtn) {
+        let bStartY = 0; let bSwiping = false;
+        boardBtn.addEventListener('touchstart', (e) => { if (e.touches && e.touches[0]) { bStartY = e.touches[0].clientY; bSwiping = false; } }, {passive: true});
+        boardBtn.addEventListener('touchmove', (e) => { if (e.touches && e.touches[0]) { if (Math.abs(e.touches[0].clientY - bStartY) > 12) bSwiping = true; } }, {passive: true});
+        boardBtn.addEventListener('touchend', (e) => { if (bSwiping) { e.preventDefault(); e.stopPropagation(); bSwiping = false; return; } }, {passive: false});
+      }
+    } catch(e) {}
     initKakaoSdk(); applyThemeMode(currentThemeMode); checkIsPublicHolidayRealtime();
-    updateCallLogStats(); updateCustomHotspotUI(); updateCustomRestroomUI();
+    updateCallLogStats();
+    setTimeout(() => {
+      try {
+        const btnAdd = document.getElementById('btn-add-penalty');
+        const modal = document.getElementById('penalty-modal');
+        const btnCancel = document.getElementById('penalty-cancel');
+        const btnSubmit = document.getElementById('penalty-submit');
+        if (btnAdd && modal) {
+          btnAdd.addEventListener('click', () => modal.classList.add('active'));
+          if (btnCancel) btnCancel.addEventListener('click', () => modal.classList.remove('active'));
+          if (btnSubmit) btnSubmit.addEventListener('click', addPenaltyFromModal);
+          modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); });
+        }
+        renderPenaltyList();
+      } catch(e) {}
+    }, 800); updateCustomHotspotUI(); updateCustomRestroomUI();
     try { migrateOldDataIfNeeded(); } catch(e) {}
     restoreTimerState(); restoreDrivingState(); 
     executeAutoBackup(); setInterval(executeAutoBackup, 10 * 60 * 1000); 
