@@ -42,15 +42,71 @@
 :where(code, pre, kbd, samp) {
   font-family: "Optimistic Mono", ui-monospace, monospace;
 }
+</style><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
 
-    /* v7.9.17 swipe-up protection: bottom safe-area buffer */
-    .bottom-bar::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: env(safe-area-inset-bottom, 0px); background: inherit; pointer-events: none; z-index: -1; }
-    .bottom-bar { padding-bottom: max(6px, env(safe-area-inset-bottom, 0px)); }
+    /* v7.9.21 Minimal - 위로 10px 아래로 10px (요청) */
+    .sticky-top-area {
+      padding-top: 10px !important;
+      top: 0 !important;
+    }
+    html {
+      padding-top: env(safe-area-inset-top, 0px);
+    }
+    body {
+      padding-top: 0;
+    }
+    .bottom-bar {
+      /* FIXED: timer layout - second photo reference */
+      position: fixed !important;
+      bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      width: calc(100% - 16px) !important;
+      max-width: 414px !important;
+      height: auto !important;
+      min-height: 92px !important;
+      padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px)) 10px !important;
+      background: #0F0F0F !important;
+      border: 1px solid rgba(255,200,0,0.25) !important;
+      border-top: 2px solid #FFC800 !important;
+      border-radius: 18px !important;
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: stretch !important;
+      gap: 8px !important;
+      z-index: 200 !important;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.6) !important;
+    }
+    /* OCR */
+    .penalty-ocr-btn { width: 100%; background: #FFC800; color: #000; border: 2px solid #000; border-radius: 8px; padding: 10px; font-size: 12px; font-weight: 900; cursor: pointer; margin-top: 6px; }
+    .penalty-ocr-btn:disabled { opacity: 0.5; }
+    .penalty-ocr-status { margin-top: 8px; font-size: 11px; font-weight: 800; color: #000; background: #FFF7CC; border: 1px solid #FFC800; border-radius: 6px; padding: 6px 8px; }
+    .penalty-ocr-preview { margin-top: 6px; font-size: 9px; color: #666; background: #F5F5F5; border: 1px dashed #CCC; border-radius: 6px; padding: 6px 8px; max-height: 80px; overflow-y: auto; white-space: pre-wrap; }
 
-  </style>
+</style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v7.9.17 SwipeFix</title>
+  <title>수다택시 K v7.9.16 AI Upgraded fix4</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -287,7 +343,7 @@
     .recent-log-item { display: flex; align-items: center; justify-content: space-between; background: var(--stat-bg); border: 1px solid var(--stat-border); border-radius: 6px; padding: 4px 6px; }
     .recent-log-time { font-size: 10px; font-weight: 700; color: var(--main-text); white-space: nowrap; }
     
-    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: calc(64px + env(safe-area-inset-bottom, 0px)); background: rgba(var(--main-bg), 0.95); backdrop-filter: blur(10px); border-top: 2px solid var(--theme-accent); display: flex; align-items: center; gap: 6px; padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px)) 10px; z-index: 100; max-width: 430px; margin: 0 auto; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); touch-action: manipulation; -webkit-touch-callout: none;}
+    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: calc(64px + env(safe-area-inset-bottom, 0px)); background: rgba(var(--main-bg), 0.95); backdrop-filter: blur(10px); border-top: 2px solid var(--theme-accent); display: flex; align-items: center; gap: 6px; padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px)) 10px; z-index: 100; max-width: 430px; margin: 0 auto; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); }
     
     .timer-container { display: flex; flex-direction: column; gap: 3px; justify-content: stretch; height: 100%; }
     .timer-mode-selector { display: flex; gap: 3px; height: 16px; }
@@ -298,9 +354,9 @@
     .timer-display-btn.finished { background: #FEE2E2; color: #DC2626; border-color: #EF4444; animation: alertBlink 1s infinite; }
     
     @keyframes alertBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-    .save-call-btn { flex: 1; height: 100%; background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; font-weight: 900; font-size: 11px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.15; word-break: keep-all; box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: all 0.2s; touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;}
+    .save-call-btn { flex: 1; height: 100%; background: var(--theme-accent) !important; color: var(--theme-text-on-accent) !important; font-weight: 900; font-size: 11px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.15; word-break: keep-all; box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: all 0.2s; }
     .save-call-btn.active-longpress { transform: scale(0.95); background: #DB2777 !important; color: #FFF !important; }
-    .save-restroom-btn { flex: 1; height: 100%; background: #3B82F6 !important; color: #FFFFFF !important; font-weight: 900; font-size: 11px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.15; word-break: keep-all; box-shadow: 0 2px 6px rgba(0,0,0,0.2); touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;}
+    .save-restroom-btn { flex: 1; height: 100%; background: #3B82F6 !important; color: #FFFFFF !important; font-weight: 900; font-size: 11px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.15; word-break: keep-all; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
     
     .map-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
     .map-modal-overlay.active { display: flex; }
@@ -334,7 +390,7 @@
     }
     body.theme-day .sticky-top-area { background-color: #F3F4F6; border-bottom: 1px solid #E5E7EB; }
     body.theme-day.mode-2 { --theme-accent: #EA580C; --theme-bg-dark: #FFF7ED; --theme-border: #FFEDD5; }
-    body.theme-day .bottom-bar { background: rgba(255,255,255,0.95); touch-action: manipulation; -webkit-touch-callout: none;}
+    body.theme-day .bottom-bar { background: rgba(255,255,255,0.95); }
     body.theme-day #call-map-view, body.theme-day #route-map { background: #E5E7EB !important; }
     body.theme-day .map-modal-header { background: #F9FAFB; }
     body.theme-day .text-accent { color: #D97706; }
@@ -407,6 +463,198 @@
     .penalty-modal-btn.submit { background: #EF4444; color: #FFF; }
 
 </style>
+
+<style id="final-timer-fix">
+/* ===== FINAL FIX - 두번째 사진처럼 5분/10분 + 05:00 시작 정상 표시 ===== */
+/* Bottom Bar - 사진 2와 동일 레이아웃 */
+.bottom-bar {
+  position: fixed !important;
+  bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: calc(100% - 16px) !important;
+  max-width: 414px !important;
+  height: auto !important;
+  min-height: 92px !important;
+  max-height: none !important;
+  padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px)) 10px !important;
+  background: #0F0F0F !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255,200,0,0.25) !important;
+  border-top: 2.5px solid #FFC800 !important;
+  border-radius: 18px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  z-index: 9999 !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5) !important;
+  box-sizing: border-box !important;
+}
+
+/* Timer Container - 세로 스택: 위 5분/10분, 아래 05:00 시작 */
+.timer-container {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 !important;
+  gap: 6px !important;
+  height: auto !important;
+  min-height: 72px !important;
+  max-height: none !important;
+  justify-content: flex-start !important;
+  align-items: stretch !important;
+  min-width: 0 !important;
+}
+
+/* Mode Selector - 5분/10분 나란히 */
+.timer-mode-selector {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 6px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
+  width: 100% !important;
+  flex-shrink: 0 !important;
+}
+
+.timer-mode-btn {
+  flex: 1 1 0 !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  border-radius: 10px !important;
+  border: 1px solid #2A2A2A !important;
+  background: #2A2A2A !important;
+  color: #8A8A8A !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  line-height: 1 !important;
+  padding: 0 !important;
+  white-space: nowrap !important;
+}
+
+.timer-mode-btn.active {
+  background: #FF6B00 !important; /* 사진처럼 주황 - 원본은 #FFC800이지만 사진은 주황 */
+  background: #FF8C00 !important;
+  color: #FFFFFF !important;
+  border-color: #FF8C00 !important;
+  font-weight: 900 !important;
+}
+.timer-mode-btn.active#timer-btn-5m {
+  background: #FF6B00 !important;
+  background: #FF7A00 !important;
+}
+
+/* Display Button - 05:00 시작 - 검정 배경, 아래에 위치 */
+.timer-display-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
+  flex: 0 0 42px !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  border-radius: 12px !important;
+  background: #1A1A1A !important;
+  background: #1E1E1E !important;
+  border: 1px solid #333333 !important;
+  color: #FFFFFF !important;
+  cursor: pointer !important;
+  gap: 4px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  position: relative !important;
+  z-index: 1 !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+}
+
+.timer-display-btn.running {
+  background: #2A2210 !important;
+  color: #FFC800 !important;
+  border-color: #FFC800 !important;
+  box-shadow: 0 0 0 2px rgba(255,200,0,0.2) !important;
+}
+
+.timer-display-btn.finished {
+  background: #FEE2E2 !important;
+  color: #DC2626 !important;
+  border-color: #EF4444 !important;
+}
+
+/* 저장 버튼들 - 오른쪽 2개 */
+.save-call-btn {
+  flex: 1 !important;
+  min-height: 72px !important;
+  height: 72px !important;
+  max-height: 72px !important;
+  background: #FFC800 !important;
+  background: #FFB800 !important;
+  color: #000000 !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  line-height: 1.25 !important;
+  border-radius: 14px !important;
+  border: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  padding: 6px !important;
+  box-sizing: border-box !important;
+  word-break: keep-all !important;
+}
+
+.save-restroom-btn {
+  flex: 1 !important;
+  min-height: 72px !important;
+  height: 72px !important;
+  max-height: 72px !important;
+  background: #3B82F6 !important;
+  color: #FFFFFF !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  line-height: 1.25 !important;
+  border-radius: 14px !important;
+  border: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  padding: 6px !important;
+  box-sizing: border-box !important;
+  word-break: keep-all !important;
+}
+
+/* 아이폰 대응 */
+input, select, textarea { font-size: 16px !important; }
+* { -webkit-tap-highlight-color: transparent; }
+button { touch-action: manipulation; }
+body { padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)) !important; }
+
+/* 작은 화면 대응 */
+@media (max-width: 375px) {
+  .bottom-bar { width: calc(100% - 12px) !important; gap: 6px !important; min-height: 86px !important; padding: 8px !important; }
+  .timer-mode-btn { font-size: 11px !important; height: 26px !important; min-height: 26px !important; }
+  .timer-display-btn { font-size: 12px !important; height: 38px !important; min-height: 38px !important; flex: 0 0 38px !important; }
+  .save-call-btn, .save-restroom-btn { min-height: 66px !important; height: 66px !important; font-size: 10px !important; }
+}
+</style>
+
 </head>
 <body class="mode-1">
   
@@ -525,11 +773,16 @@
 
   <div class="penalty-modal-overlay" id="penalty-modal">
     <div class="penalty-modal">
-      <div class="penalty-modal-title">📷 범칙금 장소 추가</div>
+      <div class="penalty-modal-title">📷 범칙금 장소 추가 (OCR)</div>
       <div class="penalty-input-group"><label class="penalty-input-label">1. 위반</label><input type="text" class="penalty-input" id="penalty-violation" placeholder="예: 신호위반, 과속 20km, 주정차"></div>
       <div class="penalty-input-group"><label class="penalty-input-label">2. 금액</label><input type="text" class="penalty-input" id="penalty-amount" placeholder="예: 80000원"></div>
-      <div class="penalty-input-group"><label class="penalty-input-label">3. 장소 (주소)</label><input type="text" class="penalty-input" id="penalty-place" placeholder="예: 안양시 동안구 평촌대로 123 또는 범계역 사거리"></div>
-      <div class="penalty-input-group"><label class="penalty-input-label">사진 (선택)</label><input type="file" class="penalty-input" id="penalty-photo" accept="image/*"></div>
+      <div class="penalty-input-group"><label class="penalty-input-label">3. 장소 (주소)</label><input type="text" class="penalty-input" id="penalty-place" placeholder="예: 안양시 동안구 평촌대로 123"></div>
+      <div class="penalty-input-group"><label class="penalty-input-label">고지서 사진 (OCR용)</label><input type="file" class="penalty-input" id="penalty-photo" accept="image/*" capture="environment"></div>
+      <div class="penalty-input-group">
+        <button class="penalty-ocr-btn" id="btn-ocr-penalty" type="button">🤖 사진에서 자동 입력</button>
+        <div class="penalty-ocr-status" id="ocr-status" style="display:none;"></div>
+        <div class="penalty-ocr-preview" id="ocr-preview" style="display:none;"></div>
+      </div>
       <div class="penalty-modal-btns"><button class="penalty-modal-btn cancel" type="button" onclick="closePenaltyModal()">취소</button><button class="penalty-modal-btn submit" type="button" onclick="addPenaltyFromModal()">입력</button></div>
     </div>
   </div>
@@ -765,7 +1018,7 @@
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.9.17 AI Upgraded fix4"; 
+  const BUILD_VERSION = "v7.9.21 Fix"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -2002,14 +2255,67 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
   }
   function deletePenalty(id){ const list=getPenaltyList().filter(p=>p.id!==id); savePenaltyList(list); renderPenaltyList(); if(callMapViewLeaflet) renderCallMapView(); showToast("범칙금 장소 삭제됨"); }
   function geocodeAddress(address){ return new Promise((resolve)=>{ try{ if(window.kakao && window.kakao.maps && window.kakao.maps.services){ const geocoder=new kakao.maps.services.Geocoder(); geocoder.addressSearch(address,(result,status)=>{ if(status===kakao.maps.services.Status.OK && result[0]) resolve({lat:parseFloat(result[0].y), lng:parseFloat(result[0].x)}); else { const ps=new kakao.maps.services.Places(); ps.keywordSearch(address,(data,stat)=>{ if(stat===kakao.maps.services.Status.OK && data[0]) resolve({lat:parseFloat(data[0].y), lng:parseFloat(data[0].x)}); else resolve(null); }); } }); } else resolve(null); }catch(e){ resolve(null); } }); }
+  
+  (function(){
+    let tesseractLoading=false;
+    async function ensureTesseractLoaded(){
+      if(window.Tesseract) return;
+      if(tesseractLoading){ while(!window.Tesseract) await new Promise(r=>setTimeout(r,200)); return; }
+      tesseractLoading=true;
+      return new Promise((resolve,reject)=>{
+        try{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';s.onload=function(){tesseractLoading=false;resolve();};s.onerror=function(e){tesseractLoading=false;reject(e);};document.head.appendChild(s);}catch(e){tesseractLoading=false;reject(e);}
+      });
+    }
+    function resizeImageForOCR(file,maxWidth){maxWidth=maxWidth||1200;return new Promise((resolve,reject)=>{try{const img=new Image();const url=URL.createObjectURL(file);img.onload=function(){let w=img.width,h=img.height;if(w>maxWidth){h=h*(maxWidth/w);w=maxWidth;}const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,w,h);URL.revokeObjectURL(url);canvas.toBlob(function(b){if(b) resolve(b); else reject(new Error('resize'));},'image/jpeg',0.8);};img.onerror=function(){URL.revokeObjectURL(url);reject(new Error('load'));};img.src=url;}catch(e){reject(e);}});}
+    function parsePenaltyOCRText(text){
+      const result={violation:'',amount:'',place:''};
+      if(!text) return result;
+      try{
+        let m=text.match(/(\d{1,3}(?:,\d{3})+|\d{4,6})\s*원/);
+        if(m) result.amount=m[0].replace(/\s+/g,'');
+        else{m=text.match(/(?:범칙금|과태료|금액)\s*[:：]?\s*(\d{1,3}(?:,\d{3})*|\d+)/); if(m) result.amount=m[1]+'원';}
+        if(!result.amount){m=text.match(/(\d+)\s*만원/); if(m) result.amount=(parseInt(m[1])*10000).toString()+'원';}
+        const vioMap=[{kw:'신호위반',pat:/신호위반|신호\s*위반/},{kw:'과속',pat:/과속|속도위반/},{kw:'주정차위반',pat:/주정차|주차위반/}];
+        for(let v of vioMap){if(v.pat.test(text)){result.violation=v.kw; if(v.kw==='과속'){let om=text.match(/(\d+)\s*km\s*초과/); if(om) result.violation='과속 '+om[1]+'km 초과';} break;}}
+        let pm=text.match(/(?:장소|위치|위반장소|단속장소)\s*[:：]?\s*([^\n]{5,60}(?:로|길|대로|사거리|교차로|앞)[^\n]*)/);
+        if(pm) result.place=pm[1].trim();
+        else{pm=text.match(/([가-힣]+시\s[가-힣]+구\s[가-힣0-9\s\-]+(?:로|길)\s*\d+)/); if(pm) result.place=pm[1].trim();}
+        if(!result.place){let lines=text.split('\n').map(function(l){return l.trim();}).filter(function(l){return (l.indexOf('로')>-1||l.indexOf('길')>-1)&&l.length>5&&l.length<60;}); if(lines.length>0) result.place=lines[0];}
+      }catch(e){}
+      return result;
+    }
+    async function handlePenaltyOCR(){
+      const photoInput=document.getElementById('penalty-photo');const statusEl=document.getElementById('ocr-status');const previewEl=document.getElementById('ocr-preview');const btn=document.getElementById('btn-ocr-penalty');
+      if(!photoInput||!photoInput.files[0]){if(typeof showToast==='function') showToast('📷 사진 선택'); return;}
+      const file=photoInput.files[0]; if(btn) btn.disabled=true; if(statusEl){statusEl.style.display='block';statusEl.innerText='🔄 OCR 로딩...';} if(previewEl) previewEl.style.display='none';
+      try{
+        await ensureTesseractLoaded();
+        if(statusEl) statusEl.innerText='🖼️ 전처리 중...';
+        let blob=file; try{blob=await resizeImageForOCR(file,1200);}catch(e){}
+        if(statusEl) statusEl.innerText='🤖 인식 중... 0%';
+        const result=await Tesseract.recognize(blob,'kor+eng',{logger:function(m){if(m.status==='recognizing text'&&statusEl){statusEl.innerText='🤖 인식 중... '+Math.round(m.progress*100)+'%';}}});
+        const text=result.data.text||''; if(statusEl) statusEl.innerText='🔍 분석 중...'; if(previewEl){previewEl.style.display='block';previewEl.innerText=text.slice(0,600)||'(없음)';}
+        const parsed=parsePenaltyOCRText(text); let filled=0;
+        if(parsed.violation){const el=document.getElementById('penalty-violation'); if(el){el.value=parsed.violation; filled++;}}
+        if(parsed.amount){const el=document.getElementById('penalty-amount'); if(el){el.value=parsed.amount; filled++;}}
+        if(parsed.place){const el=document.getElementById('penalty-place'); if(el){el.value=parsed.place; filled++;}}
+        if(filled>0){if(typeof showToast==='function') showToast('✅ '+filled+'개 입력'); if(statusEl) statusEl.innerText='✅ '+filled+'개 입력됨';} else{if(statusEl) statusEl.innerText='⚠️ 파싱 실패';}
+      }catch(e){console.error(e); if(statusEl) statusEl.innerText='❌ 오류';} finally{if(btn) btn.disabled=false;}
+    }
+    function bindOCR(){try{const btn=document.getElementById('btn-ocr-penalty'); if(btn&&!btn._bound){btn.addEventListener('click', handlePenaltyOCR); btn._bound=true;}}catch(e){}}
+    if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded', bindOCR);} else{bindOCR();} setTimeout(bindOCR,1000);
+  })();
+
   async function addPenaltyFromModal(){
-    const violation=document.getElementById('penalty-violation')?.value.trim()||''; const amount=document.getElementById('penalty-amount')?.value.trim()||''; const place=document.getElementById('penalty-place')?.value.trim()||''; const photoInput=document.getElementById('penalty-photo');
+    const violation=document.getElementById('penalty-violation')?.value.trim()||''; const amount=document.getElementById('penalty-amount')?.value.trim()||''; const place=document.getElementById('penalty-place')?.value.trim()||'';
     if(!violation||!amount||!place){ showToast("위반/금액/장소를 모두 입력하세요"); return; }
     let lat=null,lng=null,address=place; try{ const geo=await geocodeAddress(place); if(geo){ lat=geo.lat; lng=geo.lng; } else if(currentPos){ lat=currentPos.lat+(Math.random()-0.5)*0.002; lng=currentPos.lng+(Math.random()-0.5)*0.002; } }catch(e){ if(currentPos){ lat=currentPos.lat; lng=currentPos.lng; } }
-    let photoData=null; if(photoInput?.files?.[0]){ const file=photoInput.files[0]; if(file.size>2*1024*1024){ showToast("사진 2MB 이하만 가능"); return; } photoData=await new Promise(res=>{ const reader=new FileReader(); reader.onload=e=>res(e.target.result); reader.readAsDataURL(file); }); }
-    const newItem={id:'penalty_'+Date.now(),violation,amount,place,address,lat,lng,photo:photoData,createdAt:new Date().toISOString()};
+    const newItem={id:'penalty_'+Date.now(),violation,amount,place,address,lat,lng,photo:null,createdAt:new Date().toISOString(),source:'ocr'};
     const list=getPenaltyList(); list.push(newItem); savePenaltyList(list); renderPenaltyList(); if(typeof callMapViewLeaflet!=='undefined' && callMapViewLeaflet) renderCallMapView();
-    document.getElementById('penalty-violation').value=''; document.getElementById('penalty-amount').value=''; document.getElementById('penalty-place').value=''; if(photoInput) photoInput.value=''; closePenaltyModal(); showToast("📷 범칙금 장소 저장됨");
+    document.getElementById('penalty-violation').value=''; document.getElementById('penalty-amount').value=''; document.getElementById('penalty-place').value=''; const pi=document.getElementById('penalty-photo'); if(pi) pi.value='';
+    const s=document.getElementById('ocr-status'); if(s){ s.style.display='none'; s.innerText=''; }
+    const p=document.getElementById('ocr-preview'); if(p){ p.style.display='none'; p.innerText=''; }
+    closePenaltyModal(); showToast("📷 범칙금 저장됨 (백업 포함)");
   }
   function getNearbyPenaltyWarnings(maxDistKm=2.0){ if(!currentPos) return []; const list=getPenaltyList(); let warnings=[]; list.forEach(item=>{ if(item.lat&&item.lng){ const d=getStraightDistanceKm(currentPos.lat,currentPos.lng,item.lat,item.lng); if(d<=maxDistKm) warnings.push({...item,dist:d}); } }); warnings.sort((a,b)=>a.dist-b.dist); return warnings; }
 
@@ -3283,58 +3589,28 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
        });
     }
 
-    // --- v7.9.17 고단가 콜 길게 누르기 + 아이폰 스와이프업 오작동 방지 패치 ---
+    // --- v7.9.21 minimal 10px ---
     const saveCallBtn = document.getElementById('btn-save-call');
     let callPressTimer = null; let isCallLongPress = false; let hasTouch = false;
-    let callTouchStartY = 0, callTouchStartX = 0, callTouchStartTime = 0;
-    const SWIPE_THRESHOLD_Y = 50; // 위로 50px 이상 스와이프면 시스템 제스처로 간주
-    const TAP_MOVE_THRESHOLD = 30; // 탭으로 인정할 최대 움직임
-    const SWIPE_TIME_LIMIT = 500; // 500ms 이내 빠른 스와이프
-    
-    function isSystemSwipeUp(startY, endY, startX, endX, duration) {
-        const deltaY = startY - endY; // 위로 스와이프면 양수
-        const deltaX = Math.abs(endX - startX);
-        // 조건 1: 하단 150px에서 시작해서 위로 60px 이상 빠르게 스와이프
-        if (startY > window.innerHeight - 150 && deltaY > 60 && duration < 500) return true;
-        // 조건 2: 수직 위로 50px 이상 & 수직이 수평보다 크면 스와이프
-        if (deltaY > SWIPE_THRESHOLD_Y && deltaY > deltaX && duration < SWIPE_TIME_LIMIT) return true;
-        return false;
-    }
-    
+    let callStartY = 0, callStartX = 0, callStartTime = 0;
     saveCallBtn.addEventListener('touchstart', (e) => {
         hasTouch = true; isCallLongPress = false;
-        const t = e.touches[0];
-        callTouchStartY = t.clientY; callTouchStartX = t.clientX; callTouchStartTime = Date.now();
+        try { const t=e.touches[0]; callStartY=t.clientY; callStartX=t.clientX; callStartTime=Date.now(); } catch(err){}
         saveCallBtn.classList.add('active-longpress');
         callPressTimer = setTimeout(() => { isCallLongPress = true; saveCallBtn.classList.remove('active-longpress'); saveCurrentCallLocation(true); }, 650);
     }, {passive: true});
     saveCallBtn.addEventListener('touchmove', (e) => {
-        const t = e.touches[0];
-        const moveY = Math.abs(t.clientY - callTouchStartY);
-        const moveX = Math.abs(t.clientX - callTouchStartX);
-        if (moveY > 15 || moveX > 15) { // 15px 이상 움직이면 longpress 취소
-            if (callPressTimer) clearTimeout(callPressTimer);
-            saveCallBtn.classList.remove('active-longpress');
-            isCallLongPress = false;
-        }
+        try { const t=e.touches[0]; if(Math.abs(t.clientY-callStartY)>15 || Math.abs(t.clientX-callStartX)>15){ if(callPressTimer) clearTimeout(callPressTimer); saveCallBtn.classList.remove('active-longpress'); } } catch(err){}
     }, {passive: true});
     saveCallBtn.addEventListener('touchend', (e) => {
         if (callPressTimer) clearTimeout(callPressTimer);
         saveCallBtn.classList.remove('active-longpress');
-        const t = e.changedTouches[0];
-        const endY = t.clientY, endX = t.clientX;
-        const duration = Date.now() - callTouchStartTime;
-        const deltaY = callTouchStartY - endY;
-        const deltaX = Math.abs(endX - callTouchStartX);
-        // 스와이프 제스처면 저장 무시 (아이폰 앱 종료 제스처 보호)
-        if (isSystemSwipeUp(callTouchStartY, endY, callTouchStartX, endX, duration)) {
-            // console.log('swipe-up ignored', deltaY, duration);
-            return;
-        }
-        // 움직임이 너무 크면 탭이 아닌 스크롤/스와이프로 간주
-        if (Math.abs(deltaY) > TAP_MOVE_THRESHOLD || deltaX > TAP_MOVE_THRESHOLD) {
-            return;
-        }
+        try {
+          const t=e.changedTouches[0]; const dur=Date.now()-callStartTime; const dY=callStartY-t.clientY; const dX=Math.abs(t.clientX-callStartX);
+          if(callStartY>window.innerHeight-150 && dY>60 && dur<500) return;
+          if(dY>50 && dY>dX && dur<500) return;
+          if(Math.abs(dY)>30 || dX>30) return;
+        } catch(err){}
         if (!isCallLongPress) saveCurrentCallLocation(false);
     });
     saveCallBtn.addEventListener('mousedown', (e) => {
@@ -3351,31 +3627,15 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
         if (callPressTimer) clearTimeout(callPressTimer); saveCallBtn.classList.remove('active-longpress');
     });
 
-        // v7.9.17 화장실 버튼도 스와이프 보호 적용
-    (function() {
-        const restBtn = document.getElementById('btn-save-restroom');
-        let restStartY = 0, restStartX = 0, restStartTime = 0;
-        let restHasTouch = false;
-        restBtn.addEventListener('touchstart', (e) => {
-            restHasTouch = true;
-            const t = e.touches[0];
-            restStartY = t.clientY; restStartX = t.clientX; restStartTime = Date.now();
-        }, {passive: true});
-        restBtn.addEventListener('touchend', (e) => {
-            const t = e.changedTouches[0];
-            const duration = Date.now() - restStartTime;
-            const deltaY = restStartY - t.clientY;
-            const deltaX = Math.abs(t.clientX - restStartX);
-            // 시스템 스와이프면 무시
-            if (restStartY > window.innerHeight - 150 && deltaY > 60 && duration < 500) return;
-            if (deltaY > 50 && deltaY > deltaX && duration < 500) return;
-            if (Math.abs(deltaY) > 30 || deltaX > 30) return;
-            saveCurrentRestroomLocation();
+        (function(){
+        const restBtn=document.getElementById('btn-save-restroom');
+        let rY=0,rX=0,rT=0,rTouch=false;
+        restBtn.addEventListener('touchstart', function(e){ rTouch=true; try{const t=e.touches[0];rY=t.clientY;rX=t.clientX;rT=Date.now();}catch(err){} }, {passive:true});
+        restBtn.addEventListener('touchend', function(e){
+          try{const t=e.changedTouches[0];const d=Date.now()-rT;const dY=rY-t.clientY;const dX=Math.abs(t.clientX-rX); if(rY>window.innerHeight-150&&dY>60&&d<500) return; if(dY>50&&dY>dX&&d<500) return; if(Math.abs(dY)>30||dX>30) return;}catch(err){}
+          saveCurrentRestroomLocation();
         });
-        restBtn.addEventListener('click', (e) => {
-            if (restHasTouch) { restHasTouch = false; return; } // touch가 있으면 click 무시 (중복 방지)
-            saveCurrentRestroomLocation();
-        });
+        restBtn.addEventListener('click', function(e){ if(rTouch){rTouch=false;return;} saveCurrentRestroomLocation(); });
     })();
 
     document.getElementById('timer-btn-5m').addEventListener('click', () => setTimerPreset(5));
@@ -3407,5 +3667,5 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     executeSearch();
   });
 </script>
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
 </html>
