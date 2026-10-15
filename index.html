@@ -24,7 +24,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>수다택시 K v7.9.16 AI Upgraded</title>
+  <title>수다택시 K v7.9.16 AI Upgraded fix4</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -246,7 +246,7 @@
     .text-orange { color: #F97316; }
     .text-purple { color: #A855F7; }
 
-    .drive-control-btn { touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none;  flex: 1; height: 44px; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 14px; transition: all 0.2s; border: 1px solid transparent; }
+    .drive-control-btn { touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none;  flex: 1; height: 44px; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 14px; transition: all 0.2s; border: 1px solid transparent; }
     .btn-green { background: #22C55E !important; color: #000 !important; border-color: #16A34A !important; }
     .btn-red { background: #EF4444 !important; color: #FFF !important; border-color: #DC2626 !important; }
     .btn-purple { background: #C084FC !important; color: #000 !important; border-color: #9333EA !important; }
@@ -500,26 +500,11 @@
   <div class="penalty-modal-overlay" id="penalty-modal">
     <div class="penalty-modal">
       <div class="penalty-modal-title">📷 범칙금 장소 추가</div>
-      <div class="penalty-input-group">
-        <label class="penalty-input-label">1. 위반</label>
-        <input type="text" class="penalty-input" id="penalty-violation" placeholder="예: 신호위반, 과속 20km, 주정차">
-      </div>
-      <div class="penalty-input-group">
-        <label class="penalty-input-label">2. 금액</label>
-        <input type="text" class="penalty-input" id="penalty-amount" placeholder="예: 80000원">
-      </div>
-      <div class="penalty-input-group">
-        <label class="penalty-input-label">3. 장소 (주소)</label>
-        <input type="text" class="penalty-input" id="penalty-place" placeholder="예: 안양시 동안구 평촌대로 123 또는 범계역 사거리">
-      </div>
-      <div class="penalty-input-group">
-        <label class="penalty-input-label">사진 (선택)</label>
-        <input type="file" class="penalty-input" id="penalty-photo" accept="image/*">
-      </div>
-      <div class="penalty-modal-btns">
-        <button class="penalty-modal-btn cancel" type="button" onclick="closePenaltyModal()">취소</button>
-        <button class="penalty-modal-btn submit" type="button" onclick="addPenaltyFromModal()">입력</button>
-      </div>
+      <div class="penalty-input-group"><label class="penalty-input-label">1. 위반</label><input type="text" class="penalty-input" id="penalty-violation" placeholder="예: 신호위반, 과속 20km, 주정차"></div>
+      <div class="penalty-input-group"><label class="penalty-input-label">2. 금액</label><input type="text" class="penalty-input" id="penalty-amount" placeholder="예: 80000원"></div>
+      <div class="penalty-input-group"><label class="penalty-input-label">3. 장소 (주소)</label><input type="text" class="penalty-input" id="penalty-place" placeholder="예: 안양시 동안구 평촌대로 123 또는 범계역 사거리"></div>
+      <div class="penalty-input-group"><label class="penalty-input-label">사진 (선택)</label><input type="file" class="penalty-input" id="penalty-photo" accept="image/*"></div>
+      <div class="penalty-modal-btns"><button class="penalty-modal-btn cancel" type="button" onclick="closePenaltyModal()">취소</button><button class="penalty-modal-btn submit" type="button" onclick="addPenaltyFromModal()">입력</button></div>
     </div>
   </div>
 
@@ -754,7 +739,7 @@
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.9.16 AI Upgraded"; 
+  const BUILD_VERSION = "v7.9.16 AI Upgraded fix4"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -1221,6 +1206,7 @@
 
   let _boardingLockUntil = 0;
   let _lastBoardingAction = 0;
+  let _globalScrollYAtTouchStart = 0;
   function handleBoarding(e) {
     try { if (e) { e.preventDefault(); e.stopPropagation(); } } catch(err) {}
     const now = Date.now();
@@ -1228,25 +1214,17 @@
     if (now - _lastBoardingAction < 800) return;
     _lastBoardingAction = now;
     _boardingLockUntil = now + 1500;
-
     if (!drivingState.isDriving || drivingState.isBreak) { _boardingLockUntil = 0; return; }
     if (drivingState.isPassengerBoarded) { showToast('이미 승차 중입니다.'); _boardingLockUntil = 0; return; }
-
     const boardBtn = document.getElementById('btn-board');
     if (boardBtn) { boardBtn.disabled = true; boardBtn.style.pointerEvents = 'none'; }
-
     drivingState.isPassengerBoarded = true; 
     drivingState.stateStartTime = Date.now();
     updateDrivingUI(); 
     saveDrivingState();
     showToast('🙋 승차 처리되었습니다.');
     document.body.classList.remove('out-of-bounds-alert');
-
-    setTimeout(() => { 
-      _boardingLockUntil = 0; 
-      const b = document.getElementById('btn-board');
-      if (b) b.style.pointerEvents = '';
-    }, 1200);
+    setTimeout(() => { _boardingLockUntil = 0; const b = document.getElementById('btn-board'); if (b) b.style.pointerEvents = ''; }, 1200);
   }
 
   let _alightingLockUntil = 0;
@@ -1256,27 +1234,15 @@
     if (now < _alightingLockUntil) return;
     _alightingLockUntil = now + 1500;
     if (!drivingState.isDriving || drivingState.isBreak || !drivingState.isPassengerBoarded) { _alightingLockUntil = 0; return; }
-
     const alightBtn = document.getElementById('btn-alight');
     if (alightBtn) { alightBtn.disabled = true; alightBtn.style.pointerEvents = 'none'; }
-
     drivingState.isPassengerBoarded = false; drivingState.stateStartTime = Date.now();
-    
-    updateDrivingUI(); 
-    saveDrivingState();
+    updateDrivingUI(); saveDrivingState();
     showToast('👋 하차 완료!\n추천화면 이동 및 5분 단축어 실행!');
-    
-    setTab(1); 
-    setTimerPreset(5); 
-    
+    setTab(1); setTimerPreset(5); 
     try { window.location.href = `shortcuts://run-shortcut?name=수다택시5분`; } catch(e) {}
     startTimerInternal();
-
-    setTimeout(() => { 
-      _alightingLockUntil = 0; 
-      const a = document.getElementById('btn-alight');
-      if (a) a.style.pointerEvents = '';
-    }, 1200);
+    setTimeout(() => { _alightingLockUntil = 0; const a = document.getElementById('btn-alight'); if (a) a.style.pointerEvents = ''; }, 1200);
   }
 
   function startDrivingTimer() {
@@ -1998,106 +1964,28 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     }
   }
 
-  function openPenaltyModal() {
-    const modal = document.getElementById('penalty-modal');
-    if (modal) modal.classList.add('active');
+  function openPenaltyModal(){ const m=document.getElementById('penalty-modal'); if(m) m.classList.add('active'); }
+  function closePenaltyModal(){ const m=document.getElementById('penalty-modal'); if(m) m.classList.remove('active'); }
+  function getPenaltyList(){ try{ return JSON.parse(localStorage.getItem('sudataxi_penalty_list')||'[]'); }catch(e){ return []; } }
+  function savePenaltyList(list){ localStorage.setItem('sudataxi_penalty_list', JSON.stringify(list)); try{ executeAutoBackup(); }catch(e){} }
+  function renderPenaltyList(){
+    const list=getPenaltyList(); const countEl=document.getElementById('penalty-count'); const listEl=document.getElementById('penalty-list');
+    if(countEl) countEl.innerText=`(${list.length}곳)`; if(!listEl) return;
+    if(list.length===0){ listEl.innerHTML='<div style="text-align:center; padding:12px; font-size:11px; color:var(--stat-label);">저장된 범칙금 장소가 없습니다.<br>+ 추가 버튼으로 고지서 내용을 입력하세요.</div>'; return; }
+    listEl.innerHTML=''; list.forEach((item,idx)=>{ const div=document.createElement('div'); div.className='penalty-item'; div.innerHTML=`<div class="penalty-item-info"><div class="penalty-item-main">${idx+1}. ${item.violation} / ${item.amount} / ${item.place}</div><div class="penalty-item-sub">${item.address||''} ${item.lat? '('+item.lat.toFixed(4)+')':''} ${item.photo?'📷':''}</div></div><button class="penalty-item-del" onclick="deletePenalty('${item.id}')">삭제</button>`; listEl.appendChild(div); });
   }
-  function closePenaltyModal() {
-    const modal = document.getElementById('penalty-modal');
-    if (modal) modal.classList.remove('active');
+  function deletePenalty(id){ const list=getPenaltyList().filter(p=>p.id!==id); savePenaltyList(list); renderPenaltyList(); if(callMapViewLeaflet) renderCallMapView(); showToast("범칙금 장소 삭제됨"); }
+  function geocodeAddress(address){ return new Promise((resolve)=>{ try{ if(window.kakao && window.kakao.maps && window.kakao.maps.services){ const geocoder=new kakao.maps.services.Geocoder(); geocoder.addressSearch(address,(result,status)=>{ if(status===kakao.maps.services.Status.OK && result[0]) resolve({lat:parseFloat(result[0].y), lng:parseFloat(result[0].x)}); else { const ps=new kakao.maps.services.Places(); ps.keywordSearch(address,(data,stat)=>{ if(stat===kakao.maps.services.Status.OK && data[0]) resolve({lat:parseFloat(data[0].y), lng:parseFloat(data[0].x)}); else resolve(null); }); } }); } else resolve(null); }catch(e){ resolve(null); } }); }
+  async function addPenaltyFromModal(){
+    const violation=document.getElementById('penalty-violation')?.value.trim()||''; const amount=document.getElementById('penalty-amount')?.value.trim()||''; const place=document.getElementById('penalty-place')?.value.trim()||''; const photoInput=document.getElementById('penalty-photo');
+    if(!violation||!amount||!place){ showToast("위반/금액/장소를 모두 입력하세요"); return; }
+    let lat=null,lng=null,address=place; try{ const geo=await geocodeAddress(place); if(geo){ lat=geo.lat; lng=geo.lng; } else if(currentPos){ lat=currentPos.lat+(Math.random()-0.5)*0.002; lng=currentPos.lng+(Math.random()-0.5)*0.002; } }catch(e){ if(currentPos){ lat=currentPos.lat; lng=currentPos.lng; } }
+    let photoData=null; if(photoInput?.files?.[0]){ const file=photoInput.files[0]; if(file.size>2*1024*1024){ showToast("사진 2MB 이하만 가능"); return; } photoData=await new Promise(res=>{ const reader=new FileReader(); reader.onload=e=>res(e.target.result); reader.readAsDataURL(file); }); }
+    const newItem={id:'penalty_'+Date.now(),violation,amount,place,address,lat,lng,photo:photoData,createdAt:new Date().toISOString()};
+    const list=getPenaltyList(); list.push(newItem); savePenaltyList(list); renderPenaltyList(); if(typeof callMapViewLeaflet!=='undefined' && callMapViewLeaflet) renderCallMapView();
+    document.getElementById('penalty-violation').value=''; document.getElementById('penalty-amount').value=''; document.getElementById('penalty-place').value=''; if(photoInput) photoInput.value=''; closePenaltyModal(); showToast("📷 범칙금 장소 저장됨");
   }
-  function getPenaltyList() {
-    try { return JSON.parse(localStorage.getItem('sudataxi_penalty_list') || '[]'); } catch(e) { return []; }
-  }
-  function savePenaltyList(list) {
-    localStorage.setItem('sudataxi_penalty_list', JSON.stringify(list));
-    try { executeAutoBackup(); } catch(e) {}
-  }
-  function renderPenaltyList() {
-    const list = getPenaltyList();
-    const countEl = document.getElementById('penalty-count');
-    const listEl = document.getElementById('penalty-list');
-    if (countEl) countEl.innerText = `(${list.length}곳)`;
-    if (!listEl) return;
-    if (list.length === 0) {
-      listEl.innerHTML = '<div style="text-align:center; padding:12px; font-size:11px; color:var(--stat-label);">저장된 범칙금 장소가 없습니다.<br>+ 추가 버튼으로 고지서 내용을 입력하세요.</div>';
-      return;
-    }
-    listEl.innerHTML = '';
-    list.forEach((item, idx) => {
-      const div = document.createElement('div');
-      div.className = 'penalty-item';
-      div.innerHTML = `
-        <div class="penalty-item-info">
-          <div class="penalty-item-main">${idx+1}. ${item.violation} / ${item.amount} / ${item.place}</div>
-          <div class="penalty-item-sub">${item.address || ''} ${item.lat ? '('+item.lat.toFixed(4)+')' : ''} ${item.photo ? '📷' : ''}</div>
-        </div>
-        <button class="penalty-item-del" onclick="deletePenalty('${item.id}')">삭제</button>
-      `;
-      listEl.appendChild(div);
-    });
-  }
-  function deletePenalty(id) {
-    const list = getPenaltyList().filter(p => p.id !== id);
-    savePenaltyList(list);
-    renderPenaltyList();
-    if (callMapViewLeaflet) renderCallMapView();
-    showToast("범칙금 장소 삭제됨");
-  }
-  function geocodeAddress(address) {
-    return new Promise((resolve) => {
-      try {
-        if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
-          const geocoder = new kakao.maps.services.Geocoder();
-          geocoder.addressSearch(address, (result, status) => {
-            if (status === kakao.maps.services.Status.OK && result[0]) {
-              resolve({ lat: parseFloat(result[0].y), lng: parseFloat(result[0].x) });
-            } else {
-              const ps = new kakao.maps.services.Places();
-              ps.keywordSearch(address, (data, stat) => {
-                if (stat === kakao.maps.services.Status.OK && data[0]) resolve({ lat: parseFloat(data[0].y), lng: parseFloat(data[0].x) });
-                else resolve(null);
-              });
-            }
-          });
-        } else resolve(null);
-      } catch(e) { resolve(null); }
-    });
-  }
-  async function addPenaltyFromModal() {
-    const violationEl = document.getElementById('penalty-violation');
-    const amountEl = document.getElementById('penalty-amount');
-    const placeEl = document.getElementById('penalty-place');
-    const violation = violationEl ? violationEl.value.trim() : '';
-    const amount = amountEl ? amountEl.value.trim() : '';
-    const place = placeEl ? placeEl.value.trim() : '';
-    const photoInput = document.getElementById('penalty-photo');
-    if (!violation || !amount || !place) { showToast("위반/금액/장소를 모두 입력하세요"); return; }
-    let lat = null; let lng = null; let address = place;
-    try {
-      const geo = await geocodeAddress(place);
-      if (geo) { lat = geo.lat; lng = geo.lng; }
-      else { if (currentPos) { lat = currentPos.lat + (Math.random()-0.5)*0.002; lng = currentPos.lng + (Math.random()-0.5)*0.002; } }
-    } catch(e) { if (currentPos) { lat = currentPos.lat; lng = currentPos.lng; } }
-    let photoData = null;
-    if (photoInput && photoInput.files && photoInput.files[0]) {
-      const file = photoInput.files[0];
-      if (file.size > 2*1024*1024) { showToast("사진 2MB 이하만 가능"); return; }
-      photoData = await new Promise(res => { const reader = new FileReader(); reader.onload = e => res(e.target.result); reader.readAsDataURL(file); });
-    }
-    const newItem = { id: 'penalty_' + Date.now(), violation, amount, place, address, lat, lng, photo: photoData, createdAt: new Date().toISOString() };
-    const list = getPenaltyList(); list.push(newItem); savePenaltyList(list); renderPenaltyList();
-    if (typeof callMapViewLeaflet !== 'undefined' && callMapViewLeaflet) renderCallMapView();
-    if (violationEl) violationEl.value = ''; if (amountEl) amountEl.value = ''; if (placeEl) placeEl.value = ''; if (photoInput) photoInput.value = '';
-    closePenaltyModal(); showToast("📷 범칙금 장소 저장됨");
-  }
-  function getNearbyPenaltyWarnings(maxDistKm = 2.0) {
-    if (!currentPos) return [];
-    const list = getPenaltyList(); let warnings = [];
-    list.forEach(item => { if (item.lat && item.lng) { const d = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng); if (d <= maxDistKm) warnings.push({ ...item, dist: d }); } });
-    warnings.sort((a,b)=>a.dist-b.dist); return warnings;
-  }
-
+  function getNearbyPenaltyWarnings(maxDistKm=2.0){ if(!currentPos) return []; const list=getPenaltyList(); let warnings=[]; list.forEach(item=>{ if(item.lat&&item.lng){ const d=getStraightDistanceKm(currentPos.lat,currentPos.lng,item.lat,item.lng); if(d<=maxDistKm) warnings.push({...item,dist:d}); } }); warnings.sort((a,b)=>a.dist-b.dist); return warnings; }
 
   async function searchRestrooms() {
     if (!currentPos) { showToast("위치를 탐색해주세요."); return; }
@@ -2374,15 +2262,10 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
   }
 
   function renderCards(routeCards, referenceHubs, targetBoundaryCardData) {
-    let penaltyWarnings = [];
-    try { penaltyWarnings = getNearbyPenaltyWarnings(2.0); } catch(e) {}
-    const originalRouteCards = routeCards ? [...routeCards] : [];
-    let combinedForRender = [];
-    if (penaltyWarnings.length > 0) {
-      penaltyWarnings.forEach(p => { combinedForRender.push({ _isPenaltyWarning: true, penalty: p }); });
-    }
-    combinedForRender = [...combinedForRender, ...originalRouteCards];
-    routeCards = combinedForRender;
+    let penaltyWarnings = []; try { penaltyWarnings = getNearbyPenaltyWarnings(2.0); } catch(e) {}
+    const originalRouteCards = routeCards ? [...routeCards] : []; let combinedForRender = [];
+    if (penaltyWarnings.length > 0) { penaltyWarnings.forEach(p => { combinedForRender.push({ _isPenaltyWarning: true, penalty: p }); }); }
+    combinedForRender = [...combinedForRender, ...originalRouteCards]; routeCards = combinedForRender;
 
     const listEl = document.getElementById('card-list');
     if (!listEl) return;
@@ -2394,20 +2277,8 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       if (item._isPenaltyWarning) {
         card.className = 'card penalty-warning-card';
         const p = item.penalty;
-        card.innerHTML = `
-          <div class="card-main-content">
-            <div class="card-compact-row" style="min-height: 32px;">
-              <div class="card-title-group">
-                <div class="num-badge" style="background:#EF4444; color:#FFF; font-size:11px;">⚠️</div>
-                <div class="place-info">
-                  <div class="place-name">[주의] ${p.violation}, ${p.dist.toFixed(1)}km - ${p.place} (${p.amount})</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-        fragment.appendChild(card);
-        return;
+        card.innerHTML = `<div class="card-main-content"><div class="card-compact-row" style="min-height: 32px;"><div class="card-title-group"><div class="num-badge" style="background:#EF4444; color:#FFF; font-size:11px;">⚠️</div><div class="place-info"><div class="place-name">[주의] ${p.violation}, ${p.dist.toFixed(1)}km - ${p.place} (${p.amount})</div></div></div></div></div>`;
+        fragment.appendChild(card); return;
       }
       card.className = 'card';
       
@@ -2490,24 +2361,16 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     } else { callMapViewLeaflet.setView([centerPos.lat, centerPos.lng], 13); callMapViewLeaflet.invalidateSize(); }
     callMapViewLeaflet.eachLayer(l => { if (l instanceof L.Marker) callMapViewLeaflet.removeLayer(l); });
     L.marker([centerPos.lat, centerPos.lng], { icon: L.divIcon({ html: '<div class="custom-map-marker current">📍</div>', className: '', iconSize: [24, 24] }), zIndexOffset: 1000 }).addTo(callMapViewLeaflet);
-    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
-    const nowHour = new Date().getHours();
+    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]'); const nowHour = new Date().getHours();
     logs.forEach(log => {
-       const logLat = Number(log.lat); const logLng = Number(log.lng);
-       const logDate = new Date(log.timestamp || log.time); const logHour = logDate.getHours();
+       const logLat = Number(log.lat); const logLng = Number(log.lng); const logDate = new Date(log.timestamp || log.time); const logHour = logDate.getHours();
        let hourDiff = Math.abs(nowHour - logHour); if (hourDiff > 12) hourDiff = 24 - hourDiff; const isTimeMatch = hourDiff <= 1;
        if (isCallMapFilterActive && !isTimeMatch) return;
-       const color = isTimeMatch ? '#22C55E' : '#64748B';
-       const iconHtml = `<div style="width:14px; height:14px; background:${color}; border:2px solid #FFF; border-radius:50%; box-shadow:0 0 4px rgba(0,0,0,0.5);"></div>`;
-       const timeStr = logDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-       const popupText = `<b>${timeStr}</b><br>${log.region || '저장된 위치'}${log.isHighValue ? '<br>🔥고단가' : ''}`;
+       const color = isTimeMatch ? '#22C55E' : '#64748B'; const iconHtml = `<div style="width:14px; height:14px; background:${color}; border:2px solid #FFF; border-radius:50%; box-shadow:0 0 4px rgba(0,0,0,0.5);"></div>`;
+       const timeStr = logDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); const popupText = `<b>${timeStr}</b><br>${log.region || '저장된 위치'}${log.isHighValue ? '<br>🔥고단가' : ''}`;
        L.marker([logLat, logLng], { icon: L.divIcon({ html: iconHtml, className: '', iconSize: [14, 14] }) }).addTo(callMapViewLeaflet).bindPopup(popupText);
     });
-    try {
-      const penalties = getPenaltyList();
-      penalties.forEach(p => { if (p.lat && p.lng) { const iconHtml = `<div class="penalty-dot" title="${p.violation} / ${p.amount}"></div>`; L.marker([p.lat, p.lng], { icon: L.divIcon({ html: iconHtml, className: '', iconSize: [14,14] }) }).addTo(callMapViewLeaflet).bindPopup(`<b>📷 ${p.violation}</b><br>${p.amount}<br>${p.place}`); } });
-      renderPenaltyList();
-    } catch(e) {}
+    try { const penalties=getPenaltyList(); penalties.forEach(p=>{ if(p.lat&&p.lng){ const iconHtml=`<div class="penalty-dot" title="${p.violation} / ${p.amount}"></div>`; L.marker([p.lat,p.lng], {icon:L.divIcon({html:iconHtml,className:'',iconSize:[14,14]})}).addTo(callMapViewLeaflet).bindPopup(`<b>📷 ${p.violation}</b><br>${p.amount}<br>${p.place}`); } }); renderPenaltyList(); }catch(e){}
   }
 
   async function openRouteMapModal() {
@@ -2763,12 +2626,9 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const todayBoard = today.passengerBoard || 0; 
     const todayEmpty = today.emptyCar || 0;
     const todaySittingTotal = todayTotal + todayBreak;
-    
     const timeRangeEl = document.getElementById('driving-time-range');
     const sessionListEl = document.getElementById('driving-session-list');
-    
     if (timeRangeEl) { timeRangeEl.style.display = 'none'; }
-
     if (sessionListEl) {
        sessionListEl.innerHTML = '';
        let sessionHtml = '';
@@ -2780,19 +2640,10 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
            const sTime = fTime(s.start); const eTime = fTime(s.end);
            const sittingSec = (s.total || 0) + (s.break || 0);
            const durationStr = formatHHMMSS(sittingSec).substring(0, 5); 
-           sessionHtml += `
-             <div class="session-item">
-               <div class="session-time">
-                 <span style="color:#8A8A8A; margin-right:4px;">${idx+1}.</span> ${sTime} ~ ${eTime} 
-                 <span class="session-duration">[${durationStr}]</span>
-               </div>
-               ${s.end ? `<button class="session-del-btn" onclick="deleteSession(${s.id})">❌취소</button>` : `<span style="font-size:9px; color:#22C55E; font-weight:900;">진행중</span>`}
-             </div>
-           `;
+           sessionHtml += `<div class="session-item"><div class="session-time"><span style="color:#8A8A8A; margin-right:4px;">${idx+1}.</span> ${sTime} ~ ${eTime} <span class="session-duration">[${durationStr}]</span></div>${s.end ? `<button class="session-del-btn" onclick="deleteSession(${s.id})">❌취소</button>` : `<span style="font-size:9px; color:#22C55E; font-weight:900;">진행중</span>`}</div>`;
        });
        if (sessionHtml) { sessionListEl.innerHTML = sessionHtml; } else { sessionListEl.innerHTML = '<div style="font-size:11px; color:#8A8A8A; text-align:center; padding:8px;">운행 기록 없음</div>'; }
     }
-    
     document.getElementById('stat-today-total').innerText = formatHHMMSS(todaySittingTotal);
     document.getElementById('stat-today-board').innerText = formatHHMMSS(todayBoard);
     document.getElementById('stat-today-empty').innerText = formatHHMMSS(todayEmpty);
@@ -3248,32 +3099,29 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
 
   window.addEventListener('DOMContentLoaded', () => {
     try { updateHeaderTitle(new Date(), false, null); } catch(e) {}
-    try {
-      const saveBtn = document.getElementById('btn-save-call');
-      if (saveBtn) {
-        let touchStartY = 0; let touchStartX = 0; let isSwiping = false;
-        saveBtn.addEventListener('touchstart', (e) => { if (e.touches && e.touches[0]) { touchStartY = e.touches[0].clientY; touchStartX = e.touches[0].clientX; isSwiping = false; } }, {passive: true});
-        saveBtn.addEventListener('touchmove', (e) => { if (e.touches && e.touches[0]) { const dy = Math.abs(e.touches[0].clientY - touchStartY); const dx = Math.abs(e.touches[0].clientX - touchStartX); if (dy > 12 || dx > 12) isSwiping = true; } }, {passive: true});
-        saveBtn.addEventListener('touchend', (e) => { if (isSwiping) { e.preventDefault(); e.stopPropagation(); isSwiping = false; return; } if (e.changedTouches && e.changedTouches[0]) { const dy = touchStartY - e.changedTouches[0].clientY; if (dy > 20) { e.preventDefault(); e.stopPropagation(); return; } } }, {passive: false});
+    // 전역 스와이프 감지 - 스크롤 시작 위치 기록
+    let globalTouchStartY = 0;
+    let globalTouchStartTime = 0;
+    let globalIsScrolling = false;
+    document.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches[0]) {
+        globalTouchStartY = e.touches[0].clientY;
+        globalTouchStartTime = Date.now();
+        _globalScrollYAtTouchStart = window.scrollY;
       }
-    } catch(e) {}
+      globalIsScrolling = false;
+    }, {passive: true});
+    document.addEventListener('touchmove', (e) => {
+      if (e.touches && e.touches[0]) {
+        const dy = Math.abs(e.touches[0].clientY - globalTouchStartY);
+        if (dy > 8) globalIsScrolling = true;
+      }
+    }, {passive: true});
+    document.addEventListener('touchend', () => {
+      setTimeout(() => { globalIsScrolling = false; }, 300);
+    }, {passive: true});
     initKakaoSdk(); applyThemeMode(currentThemeMode); checkIsPublicHolidayRealtime();
-    updateCallLogStats();
-    setTimeout(() => {
-      try {
-        const btnAdd = document.getElementById('btn-add-penalty');
-        const modal = document.getElementById('penalty-modal');
-        const btnCancel = document.getElementById('penalty-cancel');
-        const btnSubmit = document.getElementById('penalty-submit');
-        if (btnAdd && modal) {
-          btnAdd.addEventListener('click', () => modal.classList.add('active'));
-          if (btnCancel) btnCancel.addEventListener('click', () => modal.classList.remove('active'));
-          if (btnSubmit) btnSubmit.addEventListener('click', addPenaltyFromModal);
-          modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); });
-        }
-        renderPenaltyList();
-      } catch(e) {}
-    }, 800); updateCustomHotspotUI(); updateCustomRestroomUI();
+    updateCallLogStats(); updateCustomHotspotUI(); updateCustomRestroomUI();
     try { migrateOldDataIfNeeded(); } catch(e) {}
     restoreTimerState(); restoreDrivingState(); 
     executeAutoBackup(); setInterval(executeAutoBackup, 10 * 60 * 1000); 
@@ -3310,20 +3158,56 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
 
     document.getElementById('btn-drive-toggle').addEventListener('click', toggleDriving);
     document.getElementById('btn-break-toggle').addEventListener('click', toggleBreak);
-    const boardEl = document.getElementById('btn-board');
-    const alightEl = document.getElementById('btn-alight');
-    if (boardEl) {
-      let boardHasTouch = false;
-      boardEl.addEventListener('touchstart', (e) => { boardHasTouch = true; }, {passive: true});
-      boardEl.addEventListener('touchend', (e) => { e.preventDefault(); handleBoarding(e); }, {passive: false});
-      boardEl.addEventListener('click', (e) => { if (boardHasTouch) { boardHasTouch = false; return; } handleBoarding(e); });
-    }
-    if (alightEl) {
-      let alightHasTouch = false;
-      alightEl.addEventListener('touchstart', (e) => { alightHasTouch = true; }, {passive: true});
-      alightEl.addEventListener('touchend', (e) => { e.preventDefault(); handleAlighting(e); }, {passive: false});
-      alightEl.addEventListener('click', (e) => { if (alightHasTouch) { alightHasTouch = false; return; } handleAlighting(e); });
-    }
+    // === 탑승/하차 버튼 - 쓸어올림 완전 차단 버전 ===
+    (function(){
+      const boardEl = document.getElementById('btn-board');
+      const alightEl = document.getElementById('btn-alight');
+      function createSwipeBlocker(btn, handler){
+        let startY=0, startX=0, startTime=0, startScrollY=0, moved=false, hasTouch=false;
+        let blockUntil=0;
+        btn.addEventListener('touchstart', (e)=>{
+          if(e.touches && e.touches[0]){
+            startY=e.touches[0].clientY; startX=e.touches[0].clientX;
+            startTime=Date.now(); startScrollY=window.scrollY; moved=false; hasTouch=true;
+          }
+        }, {passive:true});
+        btn.addEventListener('touchmove', (e)=>{
+          if(!e.touches || !e.touches[0]) return;
+          const dy=Math.abs(e.touches[0].clientY-startY);
+          const dx=Math.abs(e.touches[0].clientX-startX);
+          const scrollDy=Math.abs(window.scrollY-startScrollY);
+          if(dy>8 || dx>8 || scrollDy>5) moved=true;
+        }, {passive:true});
+        btn.addEventListener('touchend', (e)=>{
+          const duration=Date.now()-startTime;
+          const wasMoved=moved;
+          const wasScrolling=typeof globalIsScrolling!=='undefined' && globalIsScrolling;
+          const scrollChanged=Math.abs(window.scrollY-startScrollY)>3;
+          moved=false;
+          if(wasMoved || wasScrolling || scrollChanged || duration>400){
+            // 스와이프/스크롤로 판정 - 절대 실행 안함
+            hasTouch=true; blockUntil=Date.now()+1000;
+            setTimeout(()=>{ hasTouch=false; },600);
+            return;
+          }
+          if(Date.now()<blockUntil){ e.preventDefault(); e.stopPropagation(); return; }
+          e.preventDefault(); e.stopPropagation();
+          blockUntil=Date.now()+1200;
+          handler(e);
+          setTimeout(()=>{ hasTouch=false; },600);
+        }, {passive:false});
+        btn.addEventListener('touchcancel', ()=>{ moved=false; hasTouch=false; blockUntil=Date.now()+1000; }, {passive:true});
+        btn.addEventListener('click', (e)=>{
+          if(Date.now()<blockUntil){ e.preventDefault(); e.stopPropagation(); return; }
+          if(hasTouch){ hasTouch=false; return; }
+          // 마우스 클릭은 허용하지만 스와이프 후 클릭은 위에서 차단됨
+          handler(e);
+        });
+      }
+      if(boardEl) createSwipeBlocker(boardEl, handleBoarding);
+      if(alightEl) createSwipeBlocker(alightEl, handleAlighting);
+    })();
+
     
     const resetBtn = document.getElementById('btn-reset-today');
     if (resetBtn) {
