@@ -2826,31 +2826,178 @@
 
   if(inputRev) inputRev.addEventListener('input', calculateDailyRevenue);
 
-  // 음성 인식 로직
+  // 음성 인식 로직 v7.9.1 - 마이크 권한 팝업 1회로 고정
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (SpeechRecognition && btnMic) {
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'ko-KR';
-    
-    btnMic.addEventListener('click', () => {
-      btnMic.classList.add('recording');
-      recognition.start();
+    let recognition = null;
+    let isRecognizing = false;
+
+    function getRecognition() {
+      if (!recognition) {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'ko-KR';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+        recognition.continuous = false;
+
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          const parsed = parseKoreanMoney(transcript);
+          if (parsed > 0 && inputRev) {
+            inputRev.value = parsed.toString();
+            calculateDailyRevenue();
+            showToast(`🎤 ${parsed.toLocaleString()}원 인식됨 (${transcript})`);
+          } else {
+            const fallback = transcript.replace(/[^0-9]/g, '');
+            if (fallback && inputRev) {
+              inputRev.value = fallback;
+              calculateDailyRevenue();
+              showToast(`🎤 ${parseInt(fallback).toLocaleString()}원 인식됨`);
+            } else {
+              showToast(`인식: "${transcript}" - 숫자로 변환 실패`);
+            }
+          }
+          btnMic.classList.remove('recording');
+          isRecognizing = false;
+        };
+
+        recognition.onend = () => {
+          btnMic.classList.remove('recording');
+          isRecognizing = false;
+        };
+
+        recognition.onerror = (event) => {
+          btnMic.classList.remove('recording');
+          isRecognizing = false;
+          if (event.error !== 'no-speech' && event.error !== 'aborted') {
+            console.log('Speech error', event.error);
+          }
+        };
+      }
+      return recognition;
+    }
+
+    function parseSmallKorean(str) {
+      if (!str) return 0;
+      const numMap = { '일':1,'이':2,'삼':3,'사':4,'오':5,'육':6,'칠':7,'팔':8,'구':9,'하나':1,'둘':2,'셋':3,'넷':4 };
+      let total = 0;
+      let num = 0;
+      // Normalize: remove spaces
+      str = str.replace(/\s+/g,'');
+      for (let i=0; i<str.length; i++) {
+        const ch = str[i];
+        if (numMap[ch] !== undefined) {
+          num = numMap[ch];
+        } else if (ch === '십') {
+          if (num === 0) num = 1;
+          total += num * 10;
+          num = 0;
+        } else if (ch === '백') {
+          if (num === 0) num = 1;
+          total += num * 100;
+          num = 0;
+        } else if (ch === '천') {
+          if (num === 0) num = 1;
+          total += num * 1000;
+          num = 0;
+        } else if (/[0-9]/.test(ch)) {
+          // Arabic digits mixed in like "13"
+          let numStr = '';
+          while (i < str.length && /[0-9]/.test(str[i])) {
+            numStr += str[i];
+            i++;
+          }
+          i--;
+          num = parseInt(numStr);
+        }
+      }
+      total += num;
+      return total;
+    }
+
+    function parseKoreanMoney(text) {
+      if (!text) return 0;
+      let t = text.replace(/원|\s|,|원/g,'').trim();
+      // Direct digits only like "132500"
+      if (/^[0-9]+$/.test(t)) return parseInt(t);
+
+      // Mixed like "13만2500" or "13만 2500"
+      let total = 0;
+      if (t.includes('만')) {
+        const parts = t.split('만');
+        let manPart = parts[0];
+        let restPart = parts.slice(1).join('만');
+
+        let manVal = 0;
+        // manPart could be "십삼" or "13" or ""
+        if (!manPart) manVal = 1;
+        else if (/[0-9]+/.test(manPart)) {
+          const m = manPart.match(/[0-9]+/);
+          manVal = parseInt(m[0]);
+          // also add Korean remainder in manPart
+          const koreanRem = manPart.replace(/[0-9]+/g,'');
+          if (koreanRem) manVal = manVal + parseSmallKorean(koreanRem) || manVal;
+          // Actually for "십삼" case, manPart is Korean, no digits
+        } else {
+          manVal = parseSmallKorean(manPart);
+          if (manVal === 0) manVal = 1;
+        }
+        total += manVal * 10000;
+        t = restPart;
+      }
+      if (!t) return total;
+      // Remaining part could be digits or Korean
+      if (/[0-9]+/.test(t)) {
+        const nums = t.match(/[0-9]+/g);
+        if (nums) {
+          // If multiple numbers like "2천 500" already handled? Use last or sum?
+          // For "이천오백" with digits "2500" already extracted as 2500, but we want to add
+          // If t is "2500", just add
+          // If t is mixed like "2천500", digits extraction will give 2500 but we need to avoid double count
+          // So if t contains Korean units, parse Korean, else digits
+          if (/[천백십]/.test(t)) {
+            total += parseSmallKorean(t);
+          } else {
+            // Just digits
+            total += parseInt(t.replace(/[^0-9]/g,'')) || 0;
+          }
+        }
+      } else {
+        total += parseSmallKorean(t);
+      }
+      return total;
+    }
+
+    async function requestMicPermissionOnce() {
+      if (localStorage.getItem('sudataxi_mic_granted') === 'true') return true;
+      try {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+          stream.getTracks().forEach(t => t.stop());
+          localStorage.setItem('sudataxi_mic_granted', 'true');
+          return true;
+        }
+      } catch(e) {}
+      return false;
+    }
+
+    btnMic.addEventListener('click', async () => {
+      if (isRecognizing) {
+        try { getRecognition().stop(); } catch(e){}
+        return;
+      }
+      await requestMicPermissionOnce();
+      try {
+        const rec = getRecognition();
+        rec.start();
+        isRecognizing = true;
+        btnMic.classList.add('recording');
+      } catch(e) {
+        btnMic.classList.remove('recording');
+        isRecognizing = false;
+      }
     });
 
-    recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      const numbersOnly = transcript.replace(/[^0-9]/g, '');
-      if (numbersOnly && inputRev) {
-        inputRev.value = numbersOnly;
-        calculateDailyRevenue();
-        showToast(`🎤 ${parseInt(numbersOnly).toLocaleString()}원 입력 완료`);
-      } else {
-        showToast("숫자를 인식하지 못했습니다.");
-      }
-    };
-
-    recognition.onend = () => btnMic.classList.remove('recording');
-    recognition.onerror = () => btnMic.classList.remove('recording');
   }
 
   function initDailyRevenue() {
