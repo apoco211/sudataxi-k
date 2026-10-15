@@ -692,7 +692,7 @@
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.9 AI Upgraded"; 
+  const BUILD_VERSION = "v7.9.5 AI Upgraded"; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
@@ -1534,21 +1534,33 @@
   function formatHHMMSS(sec) { return `${String(Math.floor(sec/3600)).padStart(2,'0')}:${String(Math.floor((sec%3600)/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`; }
 
   function updateHeaderTitle(nowDate, isHoliday, holidayName) {
-    const headerEl = document.getElementById('app-header-title');
-    if (!headerEl) return;
-    const year = nowDate.getFullYear(); const month = nowDate.getMonth() + 1; const date = nowDate.getDate();
-    const days = ['일', '월', '화', '수', '목', '금', '토']; const dayStr = days[nowDate.getDay()];
-    const isWeekend = (nowDate.getDay() === 0 || nowDate.getDay() === 6);
-    let badgeHtml = isHoliday ? `<span class="holiday-badge">🔴 ${holidayName || '공휴일'}</span>` : (isWeekend ? `<span class="holiday-badge" style="background:#FF8C00;">🟡 휴일</span>` : `<span class="weekday-badge">🟢 평일</span>`);
-    headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) <span class="build-ver-tag">${BUILD_VERSION}</span> ${badgeHtml}`;
+    try {
+      const headerEl = document.getElementById('app-header-title');
+      if (!headerEl) return;
+      const year = nowDate.getFullYear(); const month = nowDate.getMonth() + 1; const date = nowDate.getDate();
+      const days = ['일', '월', '화', '수', '목', '금', '토']; const dayStr = days[nowDate.getDay()];
+      const isWeekend = (nowDate.getDay() === 0 || nowDate.getDay() === 6);
+      let badgeHtml = isHoliday ? `<span class="holiday-badge">🔴 ${holidayName || '공휴일'}</span>` : (isWeekend ? `<span class="holiday-badge" style="background:#FF8C00;">🟡 휴일</span>` : `<span class="weekday-badge">🟢 평일</span>`);
+      headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) <span class="build-ver-tag">${BUILD_VERSION}</span> ${badgeHtml}`;
+    } catch(e) {
+      try {
+        const headerEl = document.getElementById('app-header-title');
+        if (headerEl) headerEl.innerHTML = `📅 ${nowDate.getMonth()+1}.${nowDate.getDate()} <span class="build-ver-tag">${BUILD_VERSION}</span>`;
+      } catch(e2) {}
+    }
   }
 
   async function checkIsPublicHolidayRealtime() {
-    const now = new Date(); const todayStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
-    const fallbackHolidays = ["20261225", "20270101"];
-    isTodayHoliday = fallbackHolidays.includes(todayStr);
-    updateHeaderTitle(now, isTodayHoliday, isTodayHoliday ? "공휴일" : null);
-    return isTodayHoliday;
+    try {
+      const now = new Date(); const todayStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+      const fallbackHolidays = ["20261225", "20270101"];
+      isTodayHoliday = fallbackHolidays.includes(todayStr);
+      updateHeaderTitle(now, isTodayHoliday, isTodayHoliday ? "공휴일" : null);
+      return isTodayHoliday;
+    } catch(e) {
+      try { updateHeaderTitle(new Date(), false, null); } catch(e2) {}
+      return false;
+    }
   }
 
   async function fetchLiveKakaoHotspots(lat, lng) {
@@ -1997,6 +2009,7 @@
 
   async function calculateAndRender() {
     if (!currentPos) return;
+    window._seoulCongestionCache = new Map(); // v7.9.4 캐시 초기화
     const logEl = document.getElementById('pipeline-log');
     const inWisu = (currentMode === 1);
     if (logEl) logEl.innerText = `⚡ [스마트 ${inWisu ? '관내 추천' : '관외 경유지 탐색'}] 연산 중...`;
@@ -2064,15 +2077,27 @@
       const transitSurge = getPublicTransitSurgeBonus(item, new Date());
       preliminaryScore += transitSurge;
 
-      // 서울 공공데이터 연동 (관외에서 서울지역 스팟인 경우)
+      // 서울 공공데이터 연동 - v7.9.4 서울에서도 필요한 지역만 호출 (반경 4.5km + 캐시)
       let isSeoulCrowded = false;
       if (!inWisu && item.name.match(/강남|사당|홍대|신도림|건대|여의도|서울역/)) {
-          const congestion = await fetchSeoulCityData(item.name);
-          if (congestion === "붐빔") {
-              preliminaryScore += 45;
-              isSeoulCrowded = true;
-          } else if (congestion === "여유") {
-              preliminaryScore -= 30; 
+          const distToSeoulItem = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
+          // 수원(33km)면 스킵, 서울 안에서도 4.5km 밖이면 스킵 -> 홍대 근처면 홍대만 호출
+          if (distToSeoulItem <= 4.5) {
+              if (!window._seoulCongestionCache) window._seoulCongestionCache = new Map();
+              const cacheKey = item.name.match(/강남|사당|홍대|신도림|건대|여의도|서울역/)[0];
+              let congestion;
+              if (window._seoulCongestionCache.has(cacheKey)) {
+                  congestion = window._seoulCongestionCache.get(cacheKey);
+              } else {
+                  congestion = await fetchSeoulCityData(item.name);
+                  window._seoulCongestionCache.set(cacheKey, congestion);
+              }
+              if (congestion === "붐빔") {
+                  preliminaryScore += 45;
+                  isSeoulCrowded = true;
+              } else if (congestion === "여유") {
+                  preliminaryScore -= 30; 
+              }
           }
       }
 
@@ -2826,11 +2851,47 @@
 
   if(inputRev) inputRev.addEventListener('input', calculateDailyRevenue);
 
-  // 음성 인식 로직 v7.9.1 - 마이크 권한 팝업 1회로 고정
+  // 음성 인식 로직 v7.9.2 + v7.9.4 - 마이크 권한 1회 + 한글 금액 파서
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (SpeechRecognition && btnMic) {
     let recognition = null;
     let isRecognizing = false;
+
+    function parseSmallKorean(str) {
+      if (!str) return 0;
+      const numMap = { '일':1,'이':2,'삼':3,'사':4,'오':5,'육':6,'칠':7,'팔':8,'구':9,'하나':1,'둘':2,'셋':3,'넷':4 };
+      let total = 0; let num = 0;
+      str = str.replace(/\s+/g,'');
+      for (let i=0; i<str.length; i++) {
+        const ch = str[i];
+        if (numMap[ch] !== undefined) num = numMap[ch];
+        else if (ch === '십') { if (num===0) num=1; total+=num*10; num=0; }
+        else if (ch === '백') { if (num===0) num=1; total+=num*100; num=0; }
+        else if (ch === '천') { if (num===0) num=1; total+=num*1000; num=0; }
+        else if (/[0-9]/.test(ch)) {
+          let numStr=''; while (i<str.length && /[0-9]/.test(str[i])) { numStr+=str[i]; i++; } i--; num=parseInt(numStr);
+        }
+      }
+      total+=num; return total;
+    }
+    function parseKoreanMoney(text) {
+      if (!text) return 0;
+      let t = text.replace(/원|\s|,|원/g,'').trim();
+      if (/^[0-9]+$/.test(t)) return parseInt(t);
+      let total=0;
+      if (t.includes('만')) {
+        const parts=t.split('만'); let manPart=parts[0]; let restPart=parts.slice(1).join('만');
+        let manVal=0;
+        if (!manPart) manVal=1;
+        else if (/[0-9]+/.test(manPart)) { const m=manPart.match(/[0-9]+/); manVal=parseInt(m[0]); const koreanRem=manPart.replace(/[0-9]+/g,''); if(koreanRem) manVal=manVal+parseSmallKorean(koreanRem)||manVal; }
+        else { manVal=parseSmallKorean(manPart); if(manVal===0) manVal=1; }
+        total+=manVal*10000; t=restPart;
+      }
+      if (!t) return total;
+      if (/[0-9]+/.test(t)) { if (/[천백십]/.test(t)) total+=parseSmallKorean(t); else total+=parseInt(t.replace(/[^0-9]/g,''))||0; }
+      else total+=parseSmallKorean(t);
+      return total;
+    }
 
     function getRecognition() {
       if (!recognition) {
@@ -2839,7 +2900,6 @@
         recognition.interimResults = false;
         recognition.maxAlternatives = 1;
         recognition.continuous = false;
-
         recognition.onresult = (event) => {
           const transcript = event.results[0][0].transcript;
           const parsed = parseKoreanMoney(transcript);
@@ -2849,155 +2909,26 @@
             showToast(`🎤 ${parsed.toLocaleString()}원 인식됨 (${transcript})`);
           } else {
             const fallback = transcript.replace(/[^0-9]/g, '');
-            if (fallback && inputRev) {
-              inputRev.value = fallback;
-              calculateDailyRevenue();
-              showToast(`🎤 ${parseInt(fallback).toLocaleString()}원 인식됨`);
-            } else {
-              showToast(`인식: "${transcript}" - 숫자로 변환 실패`);
-            }
+            if (fallback && inputRev) { inputRev.value = fallback; calculateDailyRevenue(); showToast(`🎤 ${parseInt(fallback).toLocaleString()}원 인식됨`); }
+            else showToast(`인식: "${transcript}" - 변환 실패`);
           }
-          btnMic.classList.remove('recording');
-          isRecognizing = false;
+          btnMic.classList.remove('recording'); isRecognizing=false;
         };
-
-        recognition.onend = () => {
-          btnMic.classList.remove('recording');
-          isRecognizing = false;
-        };
-
-        recognition.onerror = (event) => {
-          btnMic.classList.remove('recording');
-          isRecognizing = false;
-          if (event.error !== 'no-speech' && event.error !== 'aborted') {
-            console.log('Speech error', event.error);
-          }
-        };
+        recognition.onend = () => { btnMic.classList.remove('recording'); isRecognizing=false; };
+        recognition.onerror = (event) => { btnMic.classList.remove('recording'); isRecognizing=false; };
       }
       return recognition;
     }
-
-    function parseSmallKorean(str) {
-      if (!str) return 0;
-      const numMap = { '일':1,'이':2,'삼':3,'사':4,'오':5,'육':6,'칠':7,'팔':8,'구':9,'하나':1,'둘':2,'셋':3,'넷':4 };
-      let total = 0;
-      let num = 0;
-      // Normalize: remove spaces
-      str = str.replace(/\s+/g,'');
-      for (let i=0; i<str.length; i++) {
-        const ch = str[i];
-        if (numMap[ch] !== undefined) {
-          num = numMap[ch];
-        } else if (ch === '십') {
-          if (num === 0) num = 1;
-          total += num * 10;
-          num = 0;
-        } else if (ch === '백') {
-          if (num === 0) num = 1;
-          total += num * 100;
-          num = 0;
-        } else if (ch === '천') {
-          if (num === 0) num = 1;
-          total += num * 1000;
-          num = 0;
-        } else if (/[0-9]/.test(ch)) {
-          // Arabic digits mixed in like "13"
-          let numStr = '';
-          while (i < str.length && /[0-9]/.test(str[i])) {
-            numStr += str[i];
-            i++;
-          }
-          i--;
-          num = parseInt(numStr);
-        }
-      }
-      total += num;
-      return total;
-    }
-
-    function parseKoreanMoney(text) {
-      if (!text) return 0;
-      let t = text.replace(/원|\s|,|원/g,'').trim();
-      // Direct digits only like "132500"
-      if (/^[0-9]+$/.test(t)) return parseInt(t);
-
-      // Mixed like "13만2500" or "13만 2500"
-      let total = 0;
-      if (t.includes('만')) {
-        const parts = t.split('만');
-        let manPart = parts[0];
-        let restPart = parts.slice(1).join('만');
-
-        let manVal = 0;
-        // manPart could be "십삼" or "13" or ""
-        if (!manPart) manVal = 1;
-        else if (/[0-9]+/.test(manPart)) {
-          const m = manPart.match(/[0-9]+/);
-          manVal = parseInt(m[0]);
-          // also add Korean remainder in manPart
-          const koreanRem = manPart.replace(/[0-9]+/g,'');
-          if (koreanRem) manVal = manVal + parseSmallKorean(koreanRem) || manVal;
-          // Actually for "십삼" case, manPart is Korean, no digits
-        } else {
-          manVal = parseSmallKorean(manPart);
-          if (manVal === 0) manVal = 1;
-        }
-        total += manVal * 10000;
-        t = restPart;
-      }
-      if (!t) return total;
-      // Remaining part could be digits or Korean
-      if (/[0-9]+/.test(t)) {
-        const nums = t.match(/[0-9]+/g);
-        if (nums) {
-          // If multiple numbers like "2천 500" already handled? Use last or sum?
-          // For "이천오백" with digits "2500" already extracted as 2500, but we want to add
-          // If t is "2500", just add
-          // If t is mixed like "2천500", digits extraction will give 2500 but we need to avoid double count
-          // So if t contains Korean units, parse Korean, else digits
-          if (/[천백십]/.test(t)) {
-            total += parseSmallKorean(t);
-          } else {
-            // Just digits
-            total += parseInt(t.replace(/[^0-9]/g,'')) || 0;
-          }
-        }
-      } else {
-        total += parseSmallKorean(t);
-      }
-      return total;
-    }
-
     async function requestMicPermissionOnce() {
       if (localStorage.getItem('sudataxi_mic_granted') === 'true') return true;
-      try {
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-          const stream = await navigator.mediaDevices.getUserMedia({audio: true});
-          stream.getTracks().forEach(t => t.stop());
-          localStorage.setItem('sudataxi_mic_granted', 'true');
-          return true;
-        }
-      } catch(e) {}
+      try { if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) { const stream = await navigator.mediaDevices.getUserMedia({audio:true}); stream.getTracks().forEach(t=>t.stop()); localStorage.setItem('sudataxi_mic_granted','true'); return true; } } catch(e) {}
       return false;
     }
-
     btnMic.addEventListener('click', async () => {
-      if (isRecognizing) {
-        try { getRecognition().stop(); } catch(e){}
-        return;
-      }
+      if (isRecognizing) { try { getRecognition().stop(); } catch(e){} return; }
       await requestMicPermissionOnce();
-      try {
-        const rec = getRecognition();
-        rec.start();
-        isRecognizing = true;
-        btnMic.classList.add('recording');
-      } catch(e) {
-        btnMic.classList.remove('recording');
-        isRecognizing = false;
-      }
+      try { const rec=getRecognition(); rec.start(); isRecognizing=true; btnMic.classList.add('recording'); } catch(e) { btnMic.classList.remove('recording'); isRecognizing=false; }
     });
-
   }
 
   function initDailyRevenue() {
@@ -3182,6 +3113,7 @@
   }
 
   window.addEventListener('DOMContentLoaded', () => {
+    try { updateHeaderTitle(new Date(), false, null); } catch(e) {}
     initKakaoSdk(); applyThemeMode(currentThemeMode); checkIsPublicHolidayRealtime();
     updateCallLogStats(); updateCustomHotspotUI(); updateCustomRestroomUI();
     try { migrateOldDataIfNeeded(); } catch(e) {}
