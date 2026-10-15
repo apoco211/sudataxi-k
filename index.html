@@ -331,6 +331,7 @@
   </style>
 </head>
 <body class="mode-1">
+  
   <div class="sticky-top-area">
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 8px;">
       <div class="header" id="app-header-title" style="margin-bottom: 0; flex: 1;">📅 날짜 수신 대기 중...</div>
@@ -673,9 +674,11 @@
   let isTimerRunning = false;
   let isTodayHoliday = false;
   let isCallMapFilterActive = false;
+  
   let weatherCache = null;
   let weatherFetchTime = 0;
   let trafficCache = {};
+  let seoulCongestionCache = {}; // AI V7.8.5: 서울시 혼잡도 메모리 캐시 추가
   
   let currentThemeMode = localStorage.getItem('sudataxi_theme_mode') || 'night';
   
@@ -744,24 +747,41 @@
           let matchedPlace = supportedPlaces.find(p => placeName.includes(p.replace("역", "")));
           if (!matchedPlace) return null;
 
-          document.getElementById('status-seoul').innerHTML = `🏙️ 서울시 혼잡도 API: ${matchedPlace} 데이터 수신중...`;
+          // V7.8.5: 캐싱 처리 (15분 이내 재사용 시 즉각 반환)
+          const now = Date.now();
+          if (seoulCongestionCache[matchedPlace] && (now - seoulCongestionCache[matchedPlace].time < 15 * 60 * 1000)) {
+              return seoulCongestionCache[matchedPlace].level;
+          }
+
+          document.getElementById('status-seoul').innerHTML = `🏙️ 서울시 혼잡도 API: ${matchedPlace} 수신중...`;
           
           const targetUrl = encodeURIComponent(`http://openapi.seoul.go.kr:8088/sample/json/citydata/1/5/${matchedPlace}`);
           const proxyUrl = `https://api.allorigins.win/get?url=${targetUrl}`;
           
-          const res = await fetch(proxyUrl);
+          // V7.8.5: allorigins.win 무한 로딩 방지를 위한 Promise.race 2.5초 타임아웃
+          const fetchPromise = fetch(proxyUrl);
+          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2500));
+          
+          const res = await Promise.race([fetchPromise, timeoutPromise]);
+          if (!res.ok) throw new Error('Proxy error');
+
           const proxyData = await res.json();
           const data = JSON.parse(proxyData.contents);
           
           if(data && data.CITYDATA && data.CITYDATA.LIVE_PPLTN_STTS) {
               const congestLvl = data.CITYDATA.LIVE_PPLTN_STTS[0].AREA_CONGEST_LVL;
+              
+              // 캐시에 저장
+              seoulCongestionCache[matchedPlace] = { level: congestLvl, time: now };
+              
               let color = congestLvl === "붐빔" ? "#EF4444" : "#22C55E";
-              document.getElementById('status-seoul').innerHTML = `🏙️ 서울시 혼잡도 API: ${matchedPlace} <span style="color:${color}; font-weight:900;">[${congestLvl}]</span>`;
+              document.getElementById('status-seoul').innerHTML = `🏙️ 서울시 혼잡도: ${matchedPlace} <span style="color:${color}; font-weight:900;">[${congestLvl}]</span>`;
               return congestLvl;
           }
           return null;
       } catch(e) { 
-          document.getElementById('status-seoul').innerHTML = `🏙️ 서울시 혼잡도 API: 호출 에러`;
+          // 네트워크 에러나 타임아웃 발생 시 프리징 방지를 위해 바로 null 반환
+          document.getElementById('status-seoul').innerHTML = `🏙️ 서울시 혼잡도: API 지연 (무시됨)`;
           return null; 
       }
   }
@@ -1507,6 +1527,7 @@
     return bonus;
   }
 
+  // V7.8.5 AI Upgraded: 선제이동 예측 알고리즘 시간별 적용
   function getDynamicStrategyText(nowHour, nowMin, regionName) {
     let r = regionName || "";
     if (!r && currentPos) {
@@ -1627,28 +1648,25 @@
          return;
       }
 
-      // [V7.8.5 AI Upgraded] 날씨와 수급 불균형 지수 연산을 위해 데이터 Fetch
+      // 날씨와 수급 불균형 지수 연산을 위해 데이터 Fetch
       const weatherData = await fetchRealtimeWeatherUpgraded(currentPos.lat, currentPos.lng);
 
       let scoredPool = await Promise.all(strategy.places.map(async (item) => {
         let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
         let pure = await calculatePureSpotScore({...item, isWisu: true}, weatherData, nowHour);
         
-        // --- [AI V7.8.5] 수급 불균형 지수 (Imbalance Index) 산출 알고리즘 ---
+        // V7.8.5: 수급 불균형 지수 (Imbalance Index) 산출
         let W_transit = getPublicTransitSurgeBonus(item, nowDate) > 0 ? 1.5 : 1.0;
         let W_weather = weatherData ? weatherData.weatherMultiplier : 1.0;
         
         // 교통 상태를 통한 주변 빈 차(공차) 공급량 유추 (S_avail)
         let S_avail = 1.0;
-        if (road.trafficStatus === "극심한 정체") S_avail = 0.4; // 묶인 차가 많아 공급 턱없이 부족
+        if (road.trafficStatus === "극심한 정체") S_avail = 0.4; // 길이 막혀 공급 턱없이 부족
         else if (road.trafficStatus === "서행") S_avail = 0.7;
         else if (road.trafficStatus === "원활") S_avail = 1.2;
         
-        let baseDemand = pure.score > 0 ? pure.score : 10; // 기본 수요값 보정
-        
-        // 공식: (수요 * 날씨가중치 * 막차가중치) / (공급) -> 배수로 변환하여 UI 표시
         let imbalanceRatio = ((W_weather * W_transit) / S_avail).toFixed(1);
-        if (parseFloat(imbalanceRatio) < 1.0) imbalanceRatio = "1.0"; // 최소 1배수 시각적 보정
+        if (parseFloat(imbalanceRatio) < 1.0) imbalanceRatio = "1.0";
         
         return { ...item, dist: road.distanceKm, estimatedTimeMin: road.durationMin, isStrategy: true, imbalanceRatio: imbalanceRatio };
       }));
@@ -1950,6 +1968,22 @@
       return true;
     });
 
+    // V7.8.5 AI Upgraded: 서울시 혼잡도 사전 병렬 수집 (Pre-fetching)
+    // - for...of 루프 안에서 한 개씩 지연되는 것을 방지하기 위해 중복 지역을 뽑아 동시에 요청합니다.
+    if (!inWisu) {
+        const seoulTargets = new Set();
+        rawPool.forEach(item => {
+            if(item.name.match(/강남|사당|홍대|신도림|건대|여의도|서울역/)) {
+                seoulTargets.add(item.name);
+            }
+        });
+        if (seoulTargets.size > 0) {
+            if (logEl) logEl.innerText = `⚡ 서울 혼잡도 데이터 병렬 수신 중...`;
+            // Promise.all로 최대 2.5초 내에 동시 수집 완료 후 캐시 저장
+            await Promise.all(Array.from(seoulTargets).map(name => fetchSeoulCityData(name)));
+        }
+    }
+
     let preFiltered = [];
     for (let item of rawPool) {
       let straightDist = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
@@ -1963,6 +1997,8 @@
 
       let isSeoulCrowded = false;
       if (!inWisu && item.name.match(/강남|사당|홍대|신도림|건대|여의도|서울역/)) {
+          // 여기서 fetchSeoulCityData를 호출하지만, 위에서 Pre-fetching 해두었으므로 
+          // 캐시를 통해 0.001초 만에 즉시 반환됩니다.
           const congestion = await fetchSeoulCityData(item.name);
           if (congestion === "붐빔") {
               preliminaryScore += 45;
