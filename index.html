@@ -63,6 +63,27 @@
 :where(code, pre, kbd, samp) {
   font-family: "Optimistic Mono", ui-monospace, monospace;
 }
+</style><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
 
     /* v7.9.21 Minimal - 위로 10px 아래로 10px (요청) */
     .sticky-top-area {
@@ -103,10 +124,27 @@
     .penalty-ocr-status { margin-top: 8px; font-size: 11px; font-weight: 800; color: #000; background: #FFF7CC; border: 1px solid #FFC800; border-radius: 6px; padding: 6px 8px; }
     .penalty-ocr-preview { margin-top: 6px; font-size: 9px; color: #666; background: #F5F5F5; border: 1px dashed #CCC; border-radius: 6px; padding: 6px 8px; max-height: 80px; overflow-y: auto; white-space: pre-wrap; }
 
+    /* v7.9.23 NEW: 자주가는 곳 프리셋 */
+    .frequent-presets-section { margin: 12px 0 90px 0; background: #162032; border: 1px solid rgba(45,212,191,0.35); border-top: 2px solid #2DD4BF; border-radius: 14px; padding: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+    .frequent-preset-card { background: #1C2B3A; border: 1px solid rgba(45,212,191,0.25); border-radius: 10px; padding: 10px 12px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .frequent-preset-card .fp-left { display:flex; flex-direction:column; gap:2px; flex:1; }
+    .frequent-preset-card .fp-name { font-weight:900; font-size:13px; color:#5EEAD4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .frequent-preset-card .fp-addr { font-size:10px; color:#94A3B8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .frequent-preset-card .fp-meta { font-size:11px; font-weight:800; color:#FBBF24; }
+    .frequent-preset-card .fp-actions { display:flex; gap:4px; }
+    .fp-btn { border:none; border-radius:6px; padding:6px 8px; font-size:11px; font-weight:900; cursor:pointer; }
+    .fp-btn-navi { background:#2DD4BF; color:#000; }
+    .fp-btn-del { background:#1E293B; color:#94A3B8; border:1px solid #334155; }
+    .fp-add-btn { cursor:pointer; }
+    .fp-badge { background:#0F172A; color:#5EEAD4; border:1px solid #2DD4BF; font-size:9px; font-weight:900; padding:2px 6px; border-radius:10px; }
+    /* v7.9.23 auto-region badge */
+    .auto-region-badge { background:#FEF3C7; color:#92400E; border:1px solid #FBBF24; font-size:10px; font-weight:800; padding:3px 8px; border-radius:8px; }
+
+
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v7.9.22 Compact Bottom</title>
+  <title>수다택시 K v7.9.24 Compact Bottom</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -850,6 +888,43 @@ body {
   <div class="pipeline-log" id="pipeline-log">대기 중 · 데이터 결합 연산 준비</div>
   <div class="card-list" id="card-list"></div>
 
+  <div id="frequent-presets-section" class="frequent-presets-section">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span style="font-size:12px; font-weight:900; color:#5EEAD4;">📌 자주가는 곳 (프리셋)</span>
+        <span class="fp-badge">거리·실시간</span>
+      </div>
+      <div style="display:flex; gap:4px;">
+        <button id="btn-add-frequent" class="fp-add-btn" style="background:#2DD4BF; color:#000; border:none; border-radius:6px; padding:4px 8px; font-size:11px; font-weight:900;">+ 등록</button>
+        <button id="btn-frequent-search" class="fp-add-btn" style="background:#1E293B; color:#5EEAD4; border:1px solid #2DD4BF; border-radius:6px; padding:4px 8px; font-size:11px; font-weight:800;">🔍 검색</button>
+      </div>
+    </div>
+    <div id="frequent-presets-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+    <div id="frequent-presets-empty" style="font-size:11px; color:#64748B; text-align:center; padding:14px; display:none;">등록된 자주가는 곳이 없습니다.<br>현재 위치에서 + 등록 (예: 집, 회사)</div>
+  </div>
+
+  <!-- v7.9.23 자주가는 곳 검색 모달 -->
+  <div id="frequent-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="max-width:340px;">
+      <div class="modal-header"><span class="modal-title">📌 자주가는 곳 등록</span><button class="modal-close" onclick="closeFrequentModal()">✕</button></div>
+      <div style="padding:12px; display:flex; flex-direction:column; gap:8px;">
+        <input id="fp-input-name" placeholder="이름 (예: 집, 회사, 단골식당)" style="padding:10px; border-radius:8px; border:1px solid #334155; background:#0F172A; color:#FFF; font-size:13px; font-weight:800;">
+        <div style="display:flex; gap:6px;">
+          <input id="fp-input-keyword" placeholder="장소 검색어 (예: 용인 기흥역)" style="flex:1; padding:10px; border-radius:8px; border:1px solid #334155; background:#0F172A; color:#FFF; font-size:12px;">
+          <button onclick="searchFrequentPlace()" style="background:#2DD4BF; color:#000; border:none; border-radius:8px; padding:8px 12px; font-weight:900; font-size:12px;">검색</button>
+        </div>
+        <div id="fp-search-results" style="max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
+        <div style="font-size:10px; color:#94A3B8; line-height:1.4;">💡 현재 위치로 등록하려면 이름만 입력 후 [현재 위치로 등록]을 누르세요. 카테고리는 추후 확장 예정 (현재는 none으로 저장).</div>
+      </div>
+      <div class="modal-footer" style="display:flex; gap:6px; justify-content:flex-end; padding:10px 12px;">
+        <button onclick="closeFrequentModal()" style="background:#1E293B; color:#FFF; border:none; padding:8px 14px; border-radius:6px; font-weight:800;">취소</button>
+        <button onclick="addFrequentFromCurrentPos()" style="background:#0F172A; color:#5EEAD4; border:1px solid #2DD4BF; padding:8px 14px; border-radius:6px; font-weight:800;">📍 현재 위치로 등록</button>
+        <button onclick="confirmFrequentAdd()" style="background:#2DD4BF; color:#000; border:none; padding:8px 14px; border-radius:6px; font-weight:900;">저장</button>
+      </div>
+    </div>
+  </div>
+
+
   <div id="tab1-extras">
     <!-- 새롭게 추가된 공공데이터 상태 모니터링 패널 -->
     <div class="backup-section" style="margin-bottom: 12px; border-color: var(--theme-accent);">
@@ -1174,7 +1249,7 @@ body {
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.9.22 Compact Bottom";
+  const BUILD_VERSION = "v7.9.24 Compact Bottom";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -1822,7 +1897,7 @@ body {
 
   const WISU_HOTSPOTS_V79 = [
 
-    { "id": "wisu_anyang_01", "name": "범계역 로데오거리", "lat": 37.3915, "lng": 126.9510, "address": "범계역", "type": "subway_nightlife", "region": "anyang", "isWisu": true, "peakHours": [18,19,20,21,22,23,0,1], "peakWeekdays": [4,5,6], "weather": { "rain": 15, "cold": 10 }, "baseScore": 30, "desc": "평일 저녁 학원가 + 주말 밤 유흥" },
+    { "id": "wisu_anyang_01", "name": "범계역 로데오거리", "lat": 37.38965, "lng": 126.95061, "address": "범계역", "type": "subway_nightlife", "region": "anyang", "isWisu": true, "peakHours": [18,19,20,21,22,23,0,1], "peakWeekdays": [4,5,6], "weather": { "rain": 15, "cold": 10 }, "baseScore": 30, "desc": "평일 저녁 학원가 + 주말 밤 유흥" },
     { "id": "wisu_anyang_02", "name": "평촌역 먹자골목 & 한림대병원", "lat": 37.3942, "lng": 126.9638, "address": "평촌역", "type": "subway_hospital", "region": "anyang", "isWisu": true, "peakHours": [11,12,13,17,18,19,20], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 40, "cold": 20 }, "baseScore": 35, "desc": "병원 퇴원 + 직장인 점심/퇴근" },
     { "id": "wisu_anyang_03", "name": "안양역 일번가", "lat": 37.4013, "lng": 126.9222, "address": "안양역", "type": "subway_nightlife", "region": "anyang", "isWisu": true, "peakHours": [19,20,21,22,23,0], "peakWeekdays": [4,5,6,0], "weather": { "rain": 20, "cold": 15 }, "baseScore": 25 },
     { "id": "wisu_anyang_04", "name": "인덕원역 환승거점", "lat": 37.4048, "lng": 126.9767, "address": "인덕원역", "type": "subway", "region": "anyang", "isWisu": true, "peakHours": [7,8,9,18,19,20,23,0], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 50, "cold": 25 }, "baseScore": 40, "desc": "막차 23:40 집중" },
@@ -1863,13 +1938,13 @@ body {
     { "id": "hs_s_yeouido_1", "name": "여의도역 및 증권가 상권", "lat": 37.5216, "lng": 126.9242, "address": "여의도동", "type": "office_nightlife", "region": "seoul", "isWisu": false },
     { "id": "hs_g_gwacheon_1", "name": "정부과천청사역 중심상가 및 로데오", "lat": 37.4262, "lng": 126.9898, "address": "정부과천청사역", "type": "subway_nightlife", "region": "gwacheon", "isWisu": true },
     { "id": "hs_g_anyang_1", "name": "평촌역 먹자골목 및 한림대병원", "lat": 37.3942, "lng": 126.9638, "address": "평촌역", "type": "subway_hospital", "region": "anyang", "isWisu": true },
-    { "id": "hs_g_anyang_2", "name": "범계역 로데오거리 및 학원가", "lat": 37.3915, "lng": 126.9510, "address": "범계역", "type": "subway_academy", "region": "anyang", "isWisu": true },
+    { "id": "hs_g_anyang_2", "name": "범계역 로데오거리 및 학원가", "lat": 37.38965, "lng": 126.95061, "address": "범계역", "type": "subway_academy", "region": "anyang", "isWisu": true },
     { "id": "hs_g_anyang_4", "name": "안양역 일번가 및 메디컬타운", "lat": 37.4013, "lng": 126.9222, "address": "안양역", "type": "subway_hospital", "region": "anyang", "isWisu": true },
     { "id": "hs_g_anyang_5", "name": "산본역 중심상가 및 원광대병원", "lat": 37.3554, "lng": 126.9331, "address": "산본역", "type": "subway_hospital", "region": "gunpo", "isWisu": true },
     { "id": "hs_s_01", "name": "강남역 상업지구 및 병원거리", "lat": 37.4981, "lng": 127.0276, "address": "강남역", "type": "subway_hospital", "region": "seoul", "isWisu": false }
   ,
 
-    { "id": "wisu_anyang_01", "name": "범계역 로데오거리", "lat": 37.3915, "lng": 126.9510, "address": "범계역", "type": "subway_nightlife", "region": "anyang", "isWisu": true, "peakHours": [18,19,20,21,22,23,0,1], "peakWeekdays": [4,5,6], "weather": { "rain": 15, "cold": 10 }, "baseScore": 30, "desc": "평일 저녁 학원가 + 주말 밤 유흥" },
+    { "id": "wisu_anyang_01", "name": "범계역 로데오거리", "lat": 37.38965, "lng": 126.95061, "address": "범계역", "type": "subway_nightlife", "region": "anyang", "isWisu": true, "peakHours": [18,19,20,21,22,23,0,1], "peakWeekdays": [4,5,6], "weather": { "rain": 15, "cold": 10 }, "baseScore": 30, "desc": "평일 저녁 학원가 + 주말 밤 유흥" },
     { "id": "wisu_anyang_02", "name": "평촌역 먹자골목 & 한림대병원", "lat": 37.3942, "lng": 126.9638, "address": "평촌역", "type": "subway_hospital", "region": "anyang", "isWisu": true, "peakHours": [11,12,13,17,18,19,20], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 40, "cold": 20 }, "baseScore": 35, "desc": "병원 퇴원 + 직장인 점심/퇴근" },
     { "id": "wisu_anyang_03", "name": "안양역 일번가", "lat": 37.4013, "lng": 126.9222, "address": "안양역", "type": "subway_nightlife", "region": "anyang", "isWisu": true, "peakHours": [19,20,21,22,23,0], "peakWeekdays": [4,5,6,0], "weather": { "rain": 20, "cold": 15 }, "baseScore": 25 },
     { "id": "wisu_anyang_04", "name": "인덕원역 환승거점", "lat": 37.4048, "lng": 126.9767, "address": "인덕원역", "type": "subway", "region": "anyang", "isWisu": true, "peakHours": [7,8,9,18,19,20,23,0], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 50, "cold": 25 }, "baseScore": 40, "desc": "막차 23:40 집중" },
@@ -1915,6 +1990,343 @@ body {
     return Array.from(mergedMap.values());
   }
 
+  // === v7.9.23 NEW: 자주가는 곳 프리셋 ===
+  const FREQUENT_PRESETS_KEY = 'sudataxi_frequent_presets';
+  let frequentPresetsCache = [];
+  let pendingFrequentSelection = null;
+
+  function getFrequentPresets() {
+    try {
+      const raw = localStorage.getItem(FREQUENT_PRESETS_KEY);
+      if (!raw) return [];
+      const arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr : [];
+    } catch(e) { return []; }
+  }
+  function saveFrequentPresets(list) {
+    try { localStorage.setItem(FREQUENT_PRESETS_KEY, JSON.stringify(list)); frequentPresetsCache = list; } catch(e) {}
+  }
+  function generateFrequentId() { return 'freq_' + Date.now() + '_' + Math.random().toString(36).substring(2,6); }
+
+  async function renderFrequentPresets() {
+    const listEl = document.getElementById('frequent-presets-list');
+    const emptyEl = document.getElementById('frequent-presets-empty');
+    if (!listEl) return;
+    let presets = getFrequentPresets();
+    frequentPresetsCache = presets;
+    listEl.innerHTML = '';
+    if (presets.length === 0) {
+      if (emptyEl) emptyEl.style.display = 'block';
+      return;
+    }
+    if (emptyEl) emptyEl.style.display = 'none';
+
+    // 거리순 정렬 (currentPos 기준)
+    if (currentPos) {
+      presets = presets.map(p => ({ ...p, _straight: getStraightDistanceKm(currentPos.lat, currentPos.lng, p.lat, p.lng) }))
+                       .sort((a,b) => a._straight - b._straight);
+    }
+
+    for (let p of presets) {
+      const card = document.createElement('div');
+      card.className = 'frequent-preset-card';
+      let distText = currentPos ? `${getStraightDistanceKm(currentPos.lat, currentPos.lng, p.lat, p.lng).toFixed(1)}km` : '거리계산중';
+      let etaText = p._etaMin ? `(${p._etaMin}분)` : (p._etaLoading ? '(계산중)' : '');
+      card.innerHTML = `
+        <div class="fp-left">
+          <div class="fp-name">📍 ${p.name} <span class="fp-badge" style="margin-left:4px;">${p.category && p.category!=='none' ? p.category : '자주'}</span></div>
+          <div class="fp-addr">${p.address || (p.lat.toFixed(4)+','+p.lng.toFixed(4))}</div>
+          <div class="fp-meta">${distText} ${etaText} · 실시간</div>
+        </div>
+        <div class="fp-actions">
+          <button class="fp-btn fp-btn-navi" onclick="naviToFrequent('${p.id}')">내비</button>
+          <button class="fp-btn fp-btn-del" onclick="deleteFrequentPreset('${p.id}')">삭제</button>
+        </div>`;
+      listEl.appendChild(card);
+    }
+
+    // 비동기로 ETA 업데이트 (카카오 도로 경로)
+    if (currentPos) {
+      for (let p of presets) {
+        p._etaLoading = true;
+        try {
+          let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, p.lat, p.lng);
+          p._etaMin = road.durationMin;
+          p._distKm = road.distanceKm;
+        } catch(e) {
+          p._etaMin = null;
+        }
+        p._etaLoading = false;
+      }
+      // ETA 반영해서 다시 그리기 (거리+시간)
+      // 무한 루프 방지 위해 _straight 정렬 없이 텍스트만 갱신
+      const cards = listEl.querySelectorAll('.frequent-preset-card');
+      presets.forEach((p, idx) => {
+        if (cards[idx]) {
+          const meta = cards[idx].querySelector('.fp-meta');
+          if (meta) {
+            let d = currentPos ? getStraightDistanceKm(currentPos.lat, currentPos.lng, p.lat, p.lng).toFixed(1) : '-';
+            let eta = p._etaMin ? `(${p._etaMin}분)` : '';
+            meta.textContent = `${d}km ${eta} · 실시간`;
+          }
+        }
+      });
+    }
+  }
+
+  function openFrequentModal() {
+    const modal = document.getElementById('frequent-modal');
+    if (modal) modal.style.display = 'flex';
+    const nameInput = document.getElementById('fp-input-name');
+    if (nameInput) nameInput.focus();
+    const results = document.getElementById('fp-search-results');
+    if (results) results.innerHTML = '';
+    pendingFrequentSelection = null;
+  }
+  function closeFrequentModal() {
+    const modal = document.getElementById('frequent-modal');
+    if (modal) modal.style.display = 'none';
+    pendingFrequentSelection = null;
+    const kw = document.getElementById('fp-input-keyword');
+    const name = document.getElementById('fp-input-name');
+    if (kw) kw.value = '';
+    if (name) name.value = '';
+    const results = document.getElementById('fp-search-results');
+    if (results) results.innerHTML = '';
+  }
+
+  async function searchFrequentPlace() {
+    const kwInput = document.getElementById('fp-input-keyword');
+    const kw = (kwInput && kwInput.value.trim()) || '';
+    if (!kw) { showToast('🔍 검색어를 입력하세요'); return; }
+    const resultsEl = document.getElementById('fp-search-results');
+    if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px; color:#94A3B8; padding:8px;">검색 중...</div>';
+    try {
+      if (window.kakao && kakao.maps && kakao.maps.services) {
+        const places = new kakao.maps.services.Places();
+        const searchPromise = new Promise((resolve) => {
+          places.keywordSearch(kw, (data, status) => {
+            if (status === kakao.maps.services.Status.OK && data && data.length>0) resolve(data.slice(0,8));
+            else resolve([]);
+          });
+        });
+        const data = await searchPromise;
+        if (!data || data.length===0) {
+          if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px; color:#EF4444; padding:8px;">검색 결과 없음</div>';
+          return;
+        }
+        if (resultsEl) {
+          resultsEl.innerHTML = '';
+          data.forEach((place, idx) => {
+            const div = document.createElement('div');
+            div.style.cssText = 'padding:8px; background:#0F172A; border:1px solid #1E293B; border-radius:8px; cursor:pointer; display:flex; flex-direction:column; gap:2px;';
+            div.innerHTML = `<div style="font-size:12px; font-weight:800; color:#FFF;">${place.place_name}</div><div style="font-size:10px; color:#94A3B8;">${place.road_address_name || place.address_name}</div><div style="font-size:10px; color:#2DD4BF;">${parseFloat(place.y).toFixed(5)}, ${parseFloat(place.x).toFixed(5)}</div>`;
+            div.onclick = () => {
+              pendingFrequentSelection = { lat: parseFloat(place.y), lng: parseFloat(place.x), address: place.road_address_name || place.address_name, name: place.place_name };
+              // 하이라이트
+              Array.from(resultsEl.children).forEach(c => c.style.borderColor = '#1E293B');
+              div.style.borderColor = '#2DD4BF';
+              const nameInput = document.getElementById('fp-input-name');
+              if (nameInput && !nameInput.value.trim()) nameInput.value = place.place_name;
+            };
+            resultsEl.appendChild(div);
+          });
+        }
+      } else {
+        if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px; color:#EF4444;">카카오 지도 로딩 필요 - 현재 위치로 등록을 이용하세요</div>';
+      }
+    } catch(e) {
+      if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px; color:#EF4444;">검색 오류</div>';
+    }
+  }
+
+  function addFrequentFromCurrentPos() {
+    if (!currentPos) { showToast('📍 위치 탐색이 필요합니다'); return; }
+    const nameInput = document.getElementById('fp-input-name');
+    let name = (nameInput && nameInput.value.trim()) || '';
+    if (!name) {
+      name = prompt('자주가는 곳 이름 (예: 집, 회사)');
+      if (!name) return;
+    }
+    const newItem = {
+      id: generateFrequentId(),
+      name: name,
+      address: currentRegionName || '현재 위치',
+      lat: currentPos.lat,
+      lng: currentPos.lng,
+      category: 'none',
+      createdAt: Date.now()
+    };
+    let list = getFrequentPresets();
+    if (list.length >= 8) { showToast('⚠️ 최대 8개까지 등록 가능'); return; }
+    list.push(newItem);
+    saveFrequentPresets(list);
+    closeFrequentModal();
+    renderFrequentPresets();
+    showToast(`📌 ${name} 등록 완료`);
+  }
+
+  function confirmFrequentAdd() {
+    const nameInput = document.getElementById('fp-input-name');
+    let name = (nameInput && nameInput.value.trim()) || '';
+    if (!name) { showToast('이름을 입력하세요'); return; }
+    let target = pendingFrequentSelection;
+    if (!target) {
+      // 현재 위치로 폴백
+      if (!currentPos) { showToast('장소를 선택하거나 현재 위치로 등록하세요'); return; }
+      target = { lat: currentPos.lat, lng: currentPos.lng, address: currentRegionName || '' };
+    }
+    const newItem = {
+      id: generateFrequentId(),
+      name: name,
+      address: target.address || '',
+      lat: target.lat,
+      lng: target.lng,
+      category: 'none',
+      createdAt: Date.now()
+    };
+    let list = getFrequentPresets();
+    if (list.length >= 8) { showToast('⚠️ 최대 8개까지 등록 가능'); return; }
+    list.push(newItem);
+    saveFrequentPresets(list);
+    closeFrequentModal();
+    renderFrequentPresets();
+    showToast(`📌 ${name} 등록 완료`);
+  }
+
+  function deleteFrequentPreset(id) {
+    if (!confirm('이 자주가는 곳을 삭제할까요?')) return;
+    let list = getFrequentPresets().filter(p => p.id !== id);
+    saveFrequentPresets(list);
+    renderFrequentPresets();
+    showToast('🗑️ 삭제됨');
+  }
+
+  function naviToFrequent(id) {
+    const item = getFrequentPresets().find(p => p.id === id);
+    if (!item) return;
+    // 기존 내비 함수 재사용 - kakao navi
+    if (window.kakao && kakao.maps) {
+      try {
+        // 카카오내비 스킴 또는 지도 이동
+        const url = `https://map.kakao.com/link/to/${encodeURIComponent(item.name)},${item.lat},${item.lng}`;
+        window.open(url, '_blank');
+      } catch(e) {
+        showToast(`📍 ${item.name}로 이동`);
+      }
+    } else {
+      showToast(`📍 ${item.name} ${item.lat.toFixed(4)},${item.lng.toFixed(4)}`);
+    }
+  }
+
+  // === v7.9.23 NEW: DB 없는 지역 자동 검색 업데이트 ===
+  let autoRegionCache = new Map();
+  let isAutoRegionSearching = false;
+
+  async function fetchAndAutoUpdateForUnknownRegion(lat, lng, regionName) {
+    if (isAutoRegionSearching) return [];
+    if (autoRegionCache.has(`${lat.toFixed(3)}_${lng.toFixed(3)}`)) {
+      return autoRegionCache.get(`${lat.toFixed(3)}_${lng.toFixed(3)}`);
+    }
+    isAutoRegionSearching = true;
+    let generated = [];
+    try {
+      if (!(window.kakao && kakao.maps && kakao.maps.services)) {
+        isAutoRegionSearching = false;
+        return [];
+      }
+      const places = new kakao.maps.services.Places();
+      const categories = [
+        { code: kakao.maps.services.CATEGORY_CODE.FOOD, label: '맛집' },
+        { code: kakao.maps.services.CATEGORY_CODE.CAFE, label: '카페' },
+        { code: kakao.maps.services.CATEGORY_CODE.HOSPITAL, label: '병원' },
+        { code: kakao.maps.services.CATEGORY_CODE.CS2, label: '편의점' }
+      ];
+      const allResults = [];
+
+      // 카테고리 병렬 검색 (반경 3000m)
+      const promises = categories.map(cat => new Promise(res => {
+        places.categorySearch(cat.code, (data, status) => {
+          if (status === kakao.maps.services.Status.OK && data) {
+            res(data.slice(0,6).map(d => ({ ...d, _catLabel: cat.label })));
+          } else res([]);
+        }, { location: new kakao.maps.LatLng(lat, lng), radius: 3000, sort: kakao.maps.services.SortBy.DISTANCE });
+      }));
+
+      // 키워드 검색 추가: 택시 수요 높은 키워드
+      const keywordList = ['택시승강장', '역', '버스터미널', '대학병원'];
+      const kwPromises = keywordList.map(kw => new Promise(res => {
+        places.keywordSearch(kw, (data, status) => {
+          if (status === kakao.maps.services.Status.OK && data) res(data.slice(0,3));
+          else res([]);
+        }, { location: new kakao.maps.LatLng(lat, lng), radius: 3000 });
+      }));
+
+      const resultsArrays = await Promise.all([...promises, ...kwPromises]);
+      resultsArrays.forEach(arr => allResults.push(...arr));
+
+      // 중복 제거 (300m 이내)
+      const deduped = [];
+      allResults.forEach(place => {
+        const plat = parseFloat(place.y), plng = parseFloat(place.x);
+        if (isNaN(plat) || isNaN(plng)) return;
+        if (!deduped.some(d => getStraightDistanceKm(d.lat, d.lng, plat, plng) < 0.3)) {
+          deduped.push({
+            id: 'auto_' + (place.id || (plat.toFixed(5)+'_'+plng.toFixed(5))),
+            name: place.place_name || '실시간 인기',
+            lat: plat,
+            lng: plng,
+            address: place.road_address_name || place.address_name || regionName,
+            type: 'auto_live',
+            region: regionName.replace(/\(.*\)/, '').trim(),
+            isWisu: false,
+            isLiveKakao: true,
+            isAutoGenerated: true,
+            baseScore: 35 + (place._catLabel ? 5 : 0),
+            desc: `${regionName} 실시간 검색`,
+            _catLabel: place._catLabel || '인기'
+          });
+        }
+      });
+
+      generated = deduped.slice(0,15);
+      autoRegionCache.set(`${lat.toFixed(3)}_${lng.toFixed(3)}`, generated);
+
+      // UI 알림
+      if (generated.length > 0) {
+        const logEl = document.getElementById('pipeline-log');
+        if (logEl) logEl.innerHTML = `⚡ [${regionName}] DB 없는 지역 감지 · 실시간 ${generated.length}곳 자동 생성 <button onclick="saveAutoRegionToMaster()" style="margin-left:6px; background:#FBBF24; color:#000; border:none; border-radius:6px; padding:2px 6px; font-size:10px; font-weight:900;">마스터에 저장</button>`;
+      }
+
+    } catch(e) {
+      console.warn('auto region search error', e);
+    }
+    isAutoRegionSearching = false;
+    return generated;
+  }
+
+  function saveAutoRegionToMaster() {
+    try {
+      let lastGenerated = [];
+      // 캐시에서 마지막 검색 결과 가져오기
+      for (let v of autoRegionCache.values()) { lastGenerated = v; }
+      if (lastGenerated.length === 0) { showToast('저장할 데이터 없음'); return; }
+      const saved = localStorage.getItem('sudataxi_master_hotspots');
+      let existing = [];
+      if (saved) { try { existing = JSON.parse(saved); } catch(e) {} }
+      let merged = [...existing];
+      lastGenerated.forEach(g => {
+        if (!merged.some(m => m.id === g.id || getStraightDistanceKm(m.lat, m.lng, g.lat, g.lng) < 0.2)) {
+          merged.push({ id: g.id, name: g.name, lat: g.lat, lng: g.lng, address: g.address, type: g.type, region: g.region, isWisu: false, baseScore: g.baseScore });
+        }
+      });
+      localStorage.setItem('sudataxi_master_hotspots', JSON.stringify(merged));
+      showToast(`📦 ${lastGenerated.length}곳 마스터 DB에 저장됨`);
+    } catch(e) { showToast('저장 실패'); }
+  }
+
+
+
   async function checkIsInsideWisuRealtime(lat, lng) {
     return new Promise((resolve) => {
       const fallbackResolve = () => {
@@ -1942,7 +2354,13 @@ body {
              { name: "수원", lat: 37.2662, lng: 127.0001 },
              { name: "안산", lat: 37.3168, lng: 126.8232 },
              { name: "서울", lat: 37.4765, lng: 126.9816 },
-             { name: "성남", lat: 37.3827, lng: 127.1189 }
+             { name: "성남", lat: 37.3827, lng: 127.1189 },
+             { name: "용인", lat: 37.2410, lng: 127.1778 },
+             { name: "화성", lat: 37.1995, lng: 126.8312 },
+             { name: "시흥", lat: 37.3800, lng: 126.8028 },
+             { name: "광명", lat: 37.4784, lng: 126.8644 },
+             { name: "분당", lat: 37.3827, lng: 127.1189 },
+             { name: "기흥", lat: 37.2750, lng: 127.1150 }
         ];
         outsideCenters.forEach(pt => {
             let d = getStraightDistanceKm(lat, lng, pt.lat, pt.lng);
@@ -1998,7 +2416,7 @@ body {
   const MAJOR_HUBS = [
     { name: "인덕원역 환승 거점", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway", isWisu: true },
     { name: "평촌역 먹자골목 및 한림대병원", lat: 37.3942, lng: 126.9638, address: "평촌역", type: "subway_hospital", isWisu: true },
-    { name: "범계역 로데오거리 및 학원가", lat: 37.3915, lng: 126.9510, address: "범계역", type: "subway_academy", isWisu: true },
+    { name: "범계역 로데오거리 및 학원가", lat: 37.38965, lng: 126.95061, address: "범계역", type: "subway_academy", isWisu: true },
     { name: "안양역 일번가", lat: 37.4013, lng: 126.9222, address: "안양역", type: "subway_hospital", isWisu: true },
     { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway_hospital", isWisu: true }
   ];
@@ -2154,7 +2572,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       if (isSuwon) places = [{ name: "수원역 환승거점", lat: 37.2662, lng: 127.0001 }, { name: "인계동 나혜석거리", lat: 37.2635, lng: 127.0322 }, { name: "영통역 중심상가", lat: 37.2515, lng: 127.0714 }];
       else if (isAnsan) places = [{ name: "중앙역 로데오거리", lat: 37.3186, lng: 126.8385 }, { name: "고잔역 법조타운", lat: 37.3168, lng: 126.8232 }];
       else if (isSeoul) places = [{ name: "강남역 상업지구", lat: 37.4981, lng: 127.0276 }, { name: "여의도역", lat: 37.5216, lng: 126.9242 }];
-      else places = [{ name: "범계역 로데오거리", lat: 37.3915, lng: 126.9510 }, { name: "평촌역 먹자골목", lat: 37.3942, lng: 126.9638 }];
+      else places = [{ name: "범계역 로데오거리", lat: 37.38965, lng: 126.95061 }, { name: "평촌역 먹자골목", lat: 37.3942, lng: 126.9638 }];
       return { 
         title: "주간 방어 및 수락률 확보", 
         desc: "콜 발생 빈도가 낮은 시간입니다. <b>수락률(AR) 방어</b>를 위해 단거리 콜도 기꺼이 수락하며, 현재 지역의 <b>환승거점과 중심상가</b>에서 대기하세요. 누적 수락률 60% 이상을 확보하면 야간 피크에 유리합니다.",
@@ -2195,7 +2613,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       if (isSuwon) places = [{ name: "인계동 나혜석거리", lat: 37.2635, lng: 127.0322 }, { name: "수원역 로데오거리", lat: 37.2662, lng: 127.0001 }];
       else if (isAnsan) places = [{ name: "중앙역 로데오거리", lat: 37.3186, lng: 126.8385 }, { name: "상록수역 먹자골목", lat: 37.3025, lng: 126.8654 }];
       else if (isSeoul) places = [{ name: "사당역 먹자골목", lat: 37.4765, lng: 126.9816 }, { name: "강남역 번화가", lat: 37.4981, lng: 127.0276 }];
-      else places = [{ name: "범계역 로데오거리", lat: 37.3915, lng: 126.9510 }, { name: "평촌 학원가", lat: 37.3821, lng: 126.9582 }, { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331 }];
+      else places = [{ name: "범계역 로데오거리", lat: 37.38965, lng: 126.95061 }, { name: "평촌 학원가", lat: 37.3821, lng: 126.9582 }, { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331 }];
       
       return { 
         title: "야간 상권 / 회전율 극대화", 
@@ -2379,22 +2797,28 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const mainGrp = document.getElementById('main-btn-group');
     const pipeLog = document.getElementById('pipeline-log');
     const cList = document.getElementById('card-list');
+    const freqSec = document.getElementById('frequent-presets-section');
     const locBar = document.getElementById('loc-bar') || document.querySelector('.loc-bar');
     
     if (tab === 1) {
       if (mainGrp) mainGrp.style.display = 'flex'; if (pipeLog) pipeLog.style.display = 'block'; if (cList) cList.style.display = 'flex';
+      if (freqSec) freqSec.style.display = 'block';
       if (locBar) locBar.style.display = 'flex';
       executeSearch();
+      try { renderFrequentPresets(); } catch(e) {}
     } else if (tab === 2) {
       if (mainGrp) mainGrp.style.display = 'none'; if (pipeLog) pipeLog.style.display = 'none'; if (cList) cList.style.display = 'none';
+      if (freqSec) freqSec.style.display = 'none';
       if (locBar) locBar.style.display = 'flex';
       renderStrategyTab();
     } else if (tab === 3) {
       if (mainGrp) mainGrp.style.display = 'none'; if (pipeLog) pipeLog.style.display = 'none'; if (cList) cList.style.display = 'none';
+      if (freqSec) freqSec.style.display = 'none';
       if (locBar) locBar.style.display = 'flex';
       renderCallMapView();
     } else if (tab === 4) {
       if (mainGrp) mainGrp.style.display = 'none'; if (pipeLog) pipeLog.style.display = 'none'; if (cList) cList.style.display = 'none';
+      if (freqSec) freqSec.style.display = 'none';
       if (locBar) locBar.style.display = 'none';
       renderDrivingLogStats();
     }
@@ -2599,7 +3023,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
   function isDuplicatePlace(candName, candLat, candLng, existingList) {
     return existingList.some(item => {
       const nameA = item.name.replace(/\s+/g, '').substring(0, 3); const nameB = candName.replace(/\s+/g, '').substring(0, 3);
-      return (nameA === nameB || nameA.includes(nameB) || nameB.includes(nameA)) || (getStraightDistanceKm(item.lat, item.lng, candLat, candLng) < 0.3);
+      return (nameA === nameB || nameA.includes(nameB) || nameB.includes(nameA)) || (getStraightDistanceKm(item.lat, item.lng, candLat, candLng) < 0.15);
     });
   }
 
@@ -2614,6 +3038,21 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const weatherData = await fetchRealtimeWeatherUpgraded(currentPos.lat, currentPos.lng);
     const liveKakaoHotspots = await fetchLiveKakaoHotspots(currentPos.lat, currentPos.lng);
     let allLiveHotspots = [...liveKakaoHotspots];
+
+    // v7.9.23 NEW: DB 없는 지역 자동 검색
+    try {
+      const activeMasters = getMasterHotspotsFromStorage();
+      let nearbyMasterCount = activeMasters.filter(m => getStraightDistanceKm(currentPos.lat, currentPos.lng, m.lat, m.lng) <= 5.0).length;
+      let nearbyLiveCount = allLiveHotspots.filter(h => getStraightDistanceKm(currentPos.lat, currentPos.lng, h.lat, h.lng) <= 3.0).length;
+      if (nearbyMasterCount < 3 && nearbyLiveCount < 5) {
+        // DB 없는 지역으로 판단
+        let autoGenerated = await fetchAndAutoUpdateForUnknownRegion(currentPos.lat, currentPos.lng, currentRegionName || '관외지역');
+        if (autoGenerated && autoGenerated.length > 0) {
+          allLiveHotspots = [...allLiveHotspots, ...autoGenerated];
+        }
+      }
+    } catch(e) { console.warn('auto region check fail', e); }
+
     const customHotspots = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
     const activeMasterHotspots = getMasterHotspotsFromStorage();
     const nowHour = new Date().getHours();
@@ -2741,13 +3180,16 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     }
 
     currentRouteData = [{ name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true }, ...selectedCandidates];
-    if (targetBoundaryCardData) currentRouteData.push(targetBoundaryCardData);
+    // v7.9.23: 원거리 관외(15km 초과)에서는 복귀 경계점 카드 숨김 - 용인 등 DB 없는 지역 대응
+    if (targetBoundaryCardData && targetBoundaryCardData.dist <= 15.0) currentRouteData.push(targetBoundaryCardData);
     
     const mapBtn = document.getElementById('btn-show-map');
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) logEl.innerText = selectedCandidates.length > 0 ? `방금 · [공공데이터 AI 결합] 연산 완료` : `방금 · 주변 적합한 경로 검색 결과 없음`;
     
     renderCards(selectedCandidates, referenceHubs, targetBoundaryCardData);
+    // v7.9.23 자주가는 곳 렌더링
+    try { renderFrequentPresets(); } catch(e) {}
   }
 
   function renderCards(routeCards, referenceHubs, targetBoundaryCardData) {
@@ -3639,11 +4081,21 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     document.getElementById('btn-import-open').addEventListener('click', () => document.getElementById('import-file-input').click());
     document.getElementById('import-file-input').addEventListener('change', importCallLogs);
     document.getElementById('btn-add-custom').addEventListener('click', addCustomHotspotPrompt);
+    // v7.9.23 frequent presets listeners
+    try {
+      const btnAddFreq = document.getElementById('btn-add-frequent');
+      if (btnAddFreq) btnAddFreq.addEventListener('click', openFrequentModal);
+      const btnSearchFreq = document.getElementById('btn-frequent-search');
+      if (btnSearchFreq) btnSearchFreq.addEventListener('click', openFrequentModal);
+    } catch(e) {}
+    // 초기 렌더링 (위치 없어도 빈 상태 표시)
+    try { setTimeout(() => renderFrequentPresets(), 800); } catch(e) {}
+
     
     const b1 = DEFAULT_MASTER_HOTSPOTS.find(h => h.id === 'hs_g_anyang_2');
-    if(b1) { b1.lat = 37.3915; b1.lng = 126.9510; b1.name = "범계역 로데오거리"; }
+    if(b1) { b1.lat = 37.38965; b1.lng = 126.95061; b1.name = "범계역 로데오거리"; }
     const b2 = MAJOR_HUBS.find(h => h.name.includes("범계역"));
-    if(b2) { b2.lat = 37.3915; b2.lng = 126.9510; b2.name = "범계역 로데오거리"; }
+    if(b2) { b2.lat = 37.38965; b2.lng = 126.95061; b2.name = "범계역 로데오거리"; }
 
     document.getElementById('btn-drive-toggle').addEventListener('click', toggleDriving);
     document.getElementById('btn-break-toggle').addEventListener('click', toggleBreak);
@@ -3824,5 +4276,5 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     executeSearch();
   });
 </script>
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
 </html>
