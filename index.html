@@ -126,9 +126,9 @@
 
     /* v7.9.23 NEW: 자주가는 곳 프리셋 - v7.9.25 개선 */
     .frequent-presets-section { margin: 12px 0 90px 0; background: #162032; border: 1px solid rgba(45,212,191,0.35); border-top: 2px solid #2DD4BF; border-radius: 14px; padding: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
-    .frequent-header { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
-    .frequent-header-left { display:flex; align-items:center; gap:6px; flex:1; min-width:140px; }
-    .frequent-header-actions { display:flex; gap:6px; flex-shrink:0; align-items:center; }
+    .frequent-header { display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:nowrap; margin-bottom:8px; overflow:hidden; }
+    .frequent-header-left { display:flex; align-items:center; gap:5px; flex:1; min-width:0; overflow:hidden; }
+    .frequent-header-actions { display:flex; gap:5px; flex-shrink:0; align-items:center; }
     .frequent-preset-card { background: #1C2B3A; border: 1px solid rgba(45,212,191,0.25); border-radius: 10px; padding: 10px 12px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
     .frequent-preset-card .fp-left { display:flex; flex-direction:column; gap:2px; flex:1; min-width:0; }
     .frequent-preset-card .fp-name { font-weight:900; font-size:13px; color:#5EEAD4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -160,7 +160,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v7.9.27 Compact Bottom</title>
+  <title>수다택시 K v7.9.28 Compact Bottom</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -905,14 +905,12 @@ body {
   <div class="card-list" id="card-list"></div>
 
   <div id="frequent-presets-section" class="frequent-presets-section">
-    <div class="frequent-header">
-      <div class="frequent-header-left">
-        <span style="font-size:12px; font-weight:900; color:inherit;">📌 자주가는 곳</span>
-        <span class="fp-badge">거리·실시간</span>
-      </div>
-      <div class="frequent-header-actions">
-        <button id="btn-add-frequent" class="fp-add-btn" style="background:#2DD4BF; color:#000; border:none; border-radius:8px; padding:6px 12px; font-size:11px;">+ 등록</button>
-        <button id="btn-frequent-search" class="fp-add-btn" style="background:#1E293B; color:#5EEAD4; border:1px solid #2DD4BF; border-radius:8px; padding:6px 10px; font-size:11px;">🔍 검색</button>
+    <div class="frequent-header" style="flex-wrap:nowrap;">
+      <div class="frequent-header-left" style="flex-wrap:nowrap;">
+        <span style="font-size:12px; font-weight:900; color:inherit; white-space:nowrap;">📌 자주가는 곳</span>
+        <span class="fp-badge" style="white-space:nowrap;">거리·실시간</span>
+        <button id="btn-add-frequent" class="fp-add-btn" style="background:#2DD4BF; color:#000; border:none; border-radius:8px; padding:5px 10px; font-size:11px; white-space:nowrap;">+ 등록</button>
+        <button id="btn-frequent-search" class="fp-add-btn" style="background:#1E293B; color:#5EEAD4; border:1px solid #2DD4BF; border-radius:8px; padding:5px 10px; font-size:11px; white-space:nowrap;">🔍 검색</button>
       </div>
     </div>
     <div id="frequent-presets-list" style="display:flex; flex-direction:column; gap:6px;"></div>
@@ -1265,7 +1263,7 @@ body {
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.9.27 Compact Bottom";
+  const BUILD_VERSION = "v7.9.28 Compact Bottom";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
