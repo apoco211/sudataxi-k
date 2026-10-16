@@ -181,7 +181,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v7.9.34 Compact Bottom Fix</title>
+  <title>수다택시 K v7.9.37 Real Target Fix</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -958,8 +958,7 @@ body {
 </style>
 
 
-<style id="v7-9-34-fix">
-/* ===== v7.9.34 - 사진 기준 완전 수정: 둥근 플로팅 박스 + 박스 안 정렬 + 아래로 내리기 ===== */
+<style id="v7-9-37-fix">
 .bottom-bar {
   position: fixed !important;
   bottom: calc(6px + env(safe-area-inset-bottom, 0px)) !important;
@@ -981,123 +980,93 @@ body {
   gap: 6px !important;
   box-sizing: border-box !important;
   z-index: 999 !important;
-  box-shadow: 0 10px 32px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,200,0,0.15) !important;
+  box-shadow: 0 10px 32px rgba(0,0,0,0.7) !important;
   overflow: hidden !important;
 }
+.timer-container { flex: 0 0 98px !important; width: 98px !important; min-width: 98px !important; max-width: 98px !important; display: flex !important; flex-direction: column !important; gap: 4px !important; min-height: 54px !important; height: 54px !important; max-height: 54px !important; justify-content: space-between !important; box-sizing: border-box !important; }
+.timer-mode-selector { display: flex !important; flex-direction: row !important; gap: 4px !important; width: 100% !important; height: 22px !important; min-height: 22px !important; max-height: 22px !important; }
+.timer-mode-btn { flex: 1 !important; height: 22px !important; min-height: 22px !important; max-height: 22px !important; font-size: 11px !important; font-weight: 900 !important; border-radius: 7px !important; line-height: 1 !important; padding: 0 !important; }
+.timer-display-btn { width: 100% !important; height: 28px !important; min-height: 28px !important; max-height: 28px !important; flex: 0 0 28px !important; font-size: 11.5px !important; font-weight: 900 !important; border-radius: 8px !important; display: flex !important; align-items: center !important; justify-content: center !important; box-sizing: border-box !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; padding: 0 4px !important; }
+.save-call-btn, .save-restroom-btn { flex: 1 !important; min-height: 54px !important; height: 54px !important; max-height: 54px !important; border-radius: 12px !important; padding: 4px 6px !important; line-height: 1.2 !important; font-weight: 900 !important; font-size: 11px !important; box-sizing: border-box !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-align: center !important; word-break: keep-all !important; white-space: normal !important; overflow: hidden !important; letter-spacing: -0.3px !important; }
+.save-call-btn { background: #FFC800 !important; color: #000 !important; }
+.save-restroom-btn { background: #3B82F6 !important; color: #FFF !important; }
+.save-call-btn span, .save-restroom-btn span { font-size: 8.5px !important; font-weight: 700 !important; opacity: 0.9 !important; line-height: 1.1 !important; margin-top: 1px !important; }
+body { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important; }
+/* v7.9.37 chart fix */
+#weekly-chart { display: block !important; }
+#weekly-bars-wrapper { display: flex !important; justify-content: space-between !important; align-items: flex-end !important; width: 100% !important; gap: 2px !important; }
+#monthly-chart { display: flex !important; justify-content: space-around !important; }
+#weekly-target-info, #monthly-target-info { display: block !important; width: 100% !important; }
+</style>
 
-.timer-container {
-  flex: 0 0 98px !important;
-  width: 98px !important;
-  min-width: 98px !important;
-  max-width: 98px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 4px !important;
-  min-height: 54px !important;
-  height: 54px !important;
-  max-height: 54px !important;
-  justify-content: space-between !important;
-  box-sizing: border-box !important;
-}
 
-.timer-mode-selector {
-  display: flex !important;
-  flex-direction: row !important;
-  gap: 4px !important;
+<style id="v7-9-37-portrait-fix">
+/* 세로모드 박스 밖으로 나가는 버그 수정 - 빌드번호 유지 */
+.backup-section {
   width: 100% !important;
-  height: 22px !important;
-  min-height: 22px !important;
-  max-height: 22px !important;
-}
-
-.timer-mode-btn {
-  flex: 1 !important;
-  height: 22px !important;
-  min-height: 22px !important;
-  max-height: 22px !important;
-  font-size: 11px !important;
-  font-weight: 900 !important;
-  border-radius: 7px !important;
-  line-height: 1 !important;
-  padding: 0 !important;
+  max-width: 100% !important;
   box-sizing: border-box !important;
+  overflow: hidden !important;
+  padding: 12px 10px !important;
 }
-
-.timer-display-btn {
+.chart-wrapper {
   width: 100% !important;
-  height: 28px !important;
-  min-height: 28px !important;
-  max-height: 28px !important;
-  flex: 0 0 28px !important;
-  font-size: 11.5px !important;
-  font-weight: 900 !important;
-  border-radius: 8px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  padding-top: 6px !important;
   box-sizing: border-box !important;
+}
+.chart-container, #weekly-chart, #monthly-chart, #weekly-bars-wrapper {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  padding: 0 2px !important;
+  gap: 3px !important;
+}
+.chart-col {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  gap: 2px !important;
+}
+.chart-bar-bg {
+  width: 100% !important;
+  max-width: 26px !important;
+  min-width: 18px !important;
+  height: 70px !important;
+  margin: 0 auto !important;
+}
+.chart-bar-fill {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+.chart-label {
+  font-size: 9px !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  padding: 0 4px !important;
+  max-width: 100% !important;
 }
-
-.save-call-btn, .save-restroom-btn {
-  flex: 1 !important;
-  min-height: 54px !important;
-  height: 54px !important;
-  max-height: 54px !important;
-  border-radius: 12px !important;
-  padding: 4px 6px !important;
-  line-height: 1.2 !important;
-  font-weight: 900 !important;
-  font-size: 11px !important;
+.chart-time-text {
+  font-size: 8px !important;
+}
+#weekly-target-info, #monthly-target-info {
+  width: 100% !important;
+  max-width: 100% !important;
   box-sizing: border-box !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  text-align: center !important;
-  word-break: keep-all !important;
+  word-break: break-all !important;
   white-space: normal !important;
   overflow: hidden !important;
-  letter-spacing: -0.3px !important;
+  padding: 0 4px !important;
+  font-size: 9px !important;
 }
-
-.save-call-btn {
-  background: #FFC800 !important;
-  color: #000 !important;
-  font-size: 11px !important;
+@media (max-width: 400px) {
+  .chart-bar-bg { max-width: 22px !important; height: 60px !important; }
+  .chart-col { gap: 1px !important; }
+  .chart-container, #weekly-bars-wrapper { gap: 2px !important; padding: 0 1px !important; }
+  .backup-section { padding: 10px 8px !important; }
 }
-.save-restroom-btn {
-  background: #3B82F6 !important;
-  color: #FFF !important;
-  font-size: 11px !important;
-}
-.save-call-btn span, .save-restroom-btn span {
-  font-size: 8.5px !important;
-  font-weight: 700 !important;
-  opacity: 0.9 !important;
-  line-height: 1.1 !important;
-  margin-top: 1px !important;
-}
-
-/* body 하단 여백 - 박스가 가리지 않게 */
-body {
-  padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
-}
-
-@media (max-width: 375px) {
-  .bottom-bar { width: calc(100% - 10px) !important; min-height: 64px !important; height: 64px !important; max-height: 64px !important; padding: 5px !important; gap: 4px !important; border-radius: 16px !important; }
-  .timer-container { flex: 0 0 90px !important; width: 90px !important; min-width: 90px !important; max-width: 90px !important; min-height: 50px !important; height: 50px !important; }
-  .timer-mode-btn { height: 20px !important; min-height: 20px !important; font-size: 10px !important; }
-  .timer-display-btn { height: 26px !important; min-height: 26px !important; flex: 0 0 26px !important; font-size: 10.5px !important; }
-  .save-call-btn, .save-restroom-btn { min-height: 50px !important; height: 50px !important; font-size: 10px !important; }
-  body { padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px)) !important; }
-}
-
-.fp-btn-navi { background: #2DD4BF !important; color: #000 !important; }
-.fp-btn-navi:active { transform: scale(0.93) !important; }
 </style>
 
 </head>
@@ -1498,7 +1467,7 @@ body {
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.9.34 Compact Bottom Fix";
+  const BUILD_VERSION = "v7.9.37 Real Target Fix";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -1551,23 +1520,16 @@ body {
     initKakaoSdk();
     let cleanName = (typeof cleanQuery === 'function' ? cleanQuery(name) : name) || name;
     cleanName = (cleanName + '').trim().slice(0, 30) || '목적지';
-    const latNum = Number(lat);
-    const lngNum = Number(lng);
+    const latNum = Number(lat); const lngNum = Number(lng);
     if (isNaN(latNum) || isNaN(lngNum)) { showToast('❌ 좌표 오류'); return; }
     if (window.Kakao && window.Kakao.Navi && window.Kakao.isInitialized && window.Kakao.isInitialized()) {
       try { window.Kakao.Navi.share({ name: cleanName, x: lngNum, y: latNum, coordType: 'wgs84' }); return; } catch(e) {}
     }
     const kakaoNaviScheme = `kakaonavi://route?ep=${latNum},${lngNum}&by=CAR`;
     let fallbackTriggered = false;
-    const fallbackToMap = () => {
-      if (fallbackTriggered) return;
-      fallbackTriggered = true;
-      try { window.location.href = `https://map.kakao.com/link/to/${encodeURIComponent(cleanName)},${latNum},${lngNum}`; }
-      catch(e){ window.location.href = `https://m.map.kakao.com/scheme/route?ep=${latNum},${lngNum}&by=car`; }
-    };
+    const fallbackToMap = () => { if (fallbackTriggered) return; fallbackTriggered = true; try { window.location.href = `https://map.kakao.com/link/to/${encodeURIComponent(cleanName)},${latNum},${lngNum}`; } catch(e){ window.location.href = `https://m.map.kakao.com/scheme/route?ep=${latNum},${lngNum}&by=car`; } };
     try {
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-      const isAndroid = /Android/.test(navigator.userAgent);
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent); const isAndroid = /Android/.test(navigator.userAgent);
       if (isIOS || isAndroid) { window.location.href = kakaoNaviScheme; setTimeout(fallbackToMap, 1200); }
       else { window.location.href = `https://map.kakao.com/link/to/${encodeURIComponent(cleanName)},${latNum},${lngNum}`; }
     } catch(e){ fallbackToMap(); }
@@ -2568,12 +2530,7 @@ body {
   function naviToFrequent(id) {
     const item = getFrequentPresets().find(p => p.id === id);
     if (!item) { showToast('❌ 장소를 찾을 수 없어요'); return; }
-    try {
-      openKakaoNaviApp(item.name, item.lat, item.lng);
-    } catch(e) {
-      const url = `https://map.kakao.com/link/to/${encodeURIComponent(item.name)},${item.lat},${item.lng}`;
-      window.location.href = url;
-    }
+    try { openKakaoNaviApp(item.name, item.lat, item.lng); } catch(e) { window.location.href = `https://map.kakao.com/link/to/${encodeURIComponent(item.name)},${item.lat},${item.lng}`; }
   }
 
   // === v7.9.23 NEW// === v7.9.23 NEW: DB 없는 지역 자동 검색 업데이트 ===
@@ -4016,19 +3973,15 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     document.getElementById('stat-today-board').innerText = formatHHMMSS(todayBoard);
     document.getElementById('stat-today-empty').innerText = formatHHMMSS(todayEmpty);
     document.getElementById('stat-today-break').innerText = formatHHMMSS(todayBreak);
-
     let todayBoardPct = 0;
     const _sittingForPct = (typeof todaySittingTotal !== 'undefined' ? todaySittingTotal : (todayTotal + (today.breakTime||0)));
     if (_sittingForPct > 0) { todayBoardPct = ((todayBoard / _sittingForPct) * 100); } else if (todayTotal > 0) { todayBoardPct = ((todayBoard / todayTotal) * 100); }
-    
     document.getElementById('kpi-today-rate').innerText = `${todayBoardPct.toFixed(1)}%`;
     document.getElementById('kpi-today-rate').style.color = getBarColor(todayBoardPct);
     document.getElementById('kpi-today-fill').style.width = `${Math.min(todayBoardPct, 100)}%`;
     document.getElementById('kpi-today-fill').style.background = getBarColor(todayBoardPct);
-
     const feedbackIcon = document.getElementById('kpi-feedback-icon');
     const feedbackText = document.getElementById('kpi-feedback-text');
-    
     if (todayTotal < 1800) {
       feedbackIcon.innerText = "ℹ️";
       feedbackText.innerText = "아직 운행 데이터가 충분하지 않습니다.";
@@ -4046,110 +3999,227 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const records = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
     const now = new Date();
     const workNow = getWorkDate(now);
+    const curYear = workNow.getFullYear();
+    const curMonth = workNow.getMonth() + 1;
+    const daysInMonth = new Date(curYear, curMonth, 0).getDate();
     
+    function getSimDataForChart() {
+      try {
+        const simRaw = localStorage.getItem('sudataxi_sim_data');
+        const sim = simRaw ? JSON.parse(simRaw) : {target:4000000, current:0, restDates:[]};
+        const target = Number(sim.target) || 4000000;
+        const current = Number(sim.current) || 0;
+        const restDates = Array.isArray(sim.restDates) ? sim.restDates.map(Number).filter(n=>!isNaN(n)) : [];
+        const todayDay = workNow.getDate();
+        const totalDaysLeft = (daysInMonth - todayDay) + 1;
+        const restRemaining = restDates.filter(d => d >= todayDay).length;
+        const workDaysLeft = Math.max(1, totalDaysLeft - restRemaining);
+        const remainMoney = Math.max(0, target - current);
+        const dailyNeeded = remainMoney / workDaysLeft;
+        const dailyBaseline25 = target / 25;
+        return {target, current, restDates, remainMoney, workDaysLeft, dailyNeeded: dailyNeeded > 1000 ? dailyNeeded : dailyBaseline25, dailyBaseline25, daysInMonth, todayDay, totalDaysLeft, restRemaining};
+      } catch(e) {
+        return {target:4000000, current:0, restDates:[], remainMoney:4000000, workDaysLeft:25, dailyNeeded:160000, dailyBaseline25:160000, daysInMonth:30, todayDay:1, totalDaysLeft:30, restRemaining:0};
+      }
+    }
+    const sim = getSimDataForChart();
+    const dailyNeeded = sim.dailyNeeded;
+    const dailyBaseline25 = sim.dailyBaseline25;
+
+    const firstDay = new Date(curYear, curMonth-1, 1);
+    const firstOffset = (firstDay.getDay() + 6) % 7;
+
+    function getWeekInfoByIdx(weekIdx) {
+      let start, end;
+      if (weekIdx === 0) {
+        start = 1;
+        end = Math.min(daysInMonth, 7 - firstOffset);
+      } else {
+        start = (weekIdx * 7 - firstOffset) + 1;
+        end = Math.min(daysInMonth, start + 6);
+      }
+      if (start > daysInMonth || start < 1) return {start:0,end:0,dayCount:0,workDays:0,restCount:0};
+      const dayCount = Math.max(0, end - start + 1);
+      const restCount = sim.restDates.filter(d => d >= start && d <= end).length;
+      const workDays = Math.max(0, dayCount - restCount);
+      return {start, end, dayCount, workDays, restCount};
+    }
+
+    let weeklyData = [
+      { label: '월', rev: 0, rate: 0, total: 0, count:0, date: null },
+      { label: '화', rev: 0, rate: 0, total: 0, count:0, date: null },
+      { label: '수', rev: 0, rate: 0, total: 0, count:0, date: null },
+      { label: '목', rev: 0, rate: 0, total: 0, count:0, date: null },
+      { label: '금', rev: 0, rate: 0, total: 0, count:0, date: null },
+      { label: '토', rev: 0, rate: 0, total: 0, count:0, date: null },
+      { label: '일', rev: 0, rate: 0, total: 0, count:0, date: null }
+    ];
+
     const dayOfWeek = workNow.getDay();
     const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; 
     const weekStart = new Date(workNow.getFullYear(), workNow.getMonth(), workNow.getDate() - diffToMonday);
     weekStart.setHours(0,0,0,0);
-
-    const monthStart = new Date(workNow.getFullYear(), workNow.getMonth(), 1);
-    monthStart.setHours(0,0,0,0);
-
-    let weeklyData = [
-      { label: '월', rev: 0, rate: 0, total: 0, count:0 }, { label: '화', rev: 0, rate: 0, total: 0, count:0 },
-      { label: '수', rev: 0, rate: 0, total: 0, count:0 }, { label: '목', rev: 0, rate: 0, total: 0, count:0 },
-      { label: '금', rev: 0, rate: 0, total: 0, count:0 }, { label: '토', rev: 0, rate: 0, total: 0, count:0 },
-      { label: '일', rev: 0, rate: 0, total: 0, count:0 }
-    ];
+    const weekStartDay = weekStart.getDate();
+    const weekStartMonth = weekStart.getMonth() + 1;
+    const weekStartYear = weekStart.getFullYear();
 
     let monthlyData = [
-      { label: '1주차', rev: 0, rate: 0, total: 0, count:0 }, { label: '2주차', rev: 0, rate: 0, total: 0, count:0 },
-      { label: '3주차', rev: 0, rate: 0, total: 0, count:0 }, { label: '4주차', rev: 0, rate: 0, total: 0, count:0 },
-      { label: '5주차', rev: 0, rate: 0, total: 0, count:0 }
+      { label: '1주차', rev: 0, rate: 0, total: 0, count:0, weekIdx:0 },
+      { label: '2주차', rev: 0, rate: 0, total: 0, count:0, weekIdx:1 },
+      { label: '3주차', rev: 0, rate: 0, total: 0, count:0, weekIdx:2 },
+      { label: '4주차', rev: 0, rate: 0, total: 0, count:0, weekIdx:3 },
+      { label: '5주차', rev: 0, rate: 0, total: 0, count:0, weekIdx:4 }
     ];
 
     Object.keys(records).forEach(k => {
       const rec = records[k];
       const driveSec = rec.totalDrive || 0; 
       if (driveSec <= 0) return; 
-
       const boardSec = rec.passengerBoard || 0; 
       const estRev = Math.floor(boardSec / 60) * 700;
       const rate = (boardSec / driveSec) * 100;
-
       const dateParts = k.split('-'); 
       const recDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
-
-      if (recDate >= weekStart) {
-        let wIdx = recDate.getDay() === 0 ? 6 : recDate.getDay() - 1;
-        weeklyData[wIdx].rev += estRev;
-        weeklyData[wIdx].total += driveSec;
-        weeklyData[wIdx].rate += rate;
-        weeklyData[wIdx].count++;
+      const recDay = recDate.getDate();
+      const recMonth = recDate.getMonth() + 1;
+      const recYear = recDate.getFullYear();
+      if (recYear === weekStartYear && recMonth === weekStartMonth) {
+        const diff = recDay - weekStartDay;
+        if (diff >=0 && diff <=6) {
+          weeklyData[diff].rev += estRev;
+          weeklyData[diff].total += driveSec;
+          weeklyData[diff].rate += rate;
+          weeklyData[diff].count++;
+          weeklyData[diff].date = recDay;
+        }
       }
-
-      if (recDate >= monthStart && recDate.getMonth() === workNow.getMonth()) {
-        let weekNum = Math.floor((recDate.getDate() - 1) / 7);
+      if (recDate >= weekStart && recDate < new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate()+7)) {
+        const diffTime = recDate - weekStart;
+        const diffDays = Math.floor(diffTime / (1000*60*60*24));
+        if (diffDays >=0 && diffDays <=6) {
+          if (!(recYear === weekStartYear && recMonth === weekStartMonth && recDay >= weekStartDay && recDay <= weekStartDay+6)) {
+            if (weeklyData[diffDays]) {
+              weeklyData[diffDays].rev += estRev;
+              weeklyData[diffDays].total += driveSec;
+              weeklyData[diffDays].rate += rate;
+              weeklyData[diffDays].count++;
+              weeklyData[diffDays].date = recDay;
+            }
+          }
+        }
+      }
+      if (recMonth === curMonth && recYear === curYear) {
+        const offset = firstOffset;
+        let weekNum = Math.floor((offset + recDay - 1) / 7);
         if (weekNum > 4) weekNum = 4;
-        monthlyData[weekNum].rev += estRev;
-        monthlyData[weekNum].total += driveSec;
-        monthlyData[weekNum].rate += rate;
-        monthlyData[weekNum].count++;
+        if (weekNum >=0 && weekNum <=4) {
+          monthlyData[weekNum].rev += estRev;
+          monthlyData[weekNum].total += driveSec;
+          monthlyData[weekNum].rate += rate;
+          monthlyData[weekNum].count++;
+        }
       }
     });
 
+    // 주간 차트 렌더 - v7.9.37 레이아웃 수정: 제목 블록 + 막대 flex 분리
     const weeklyChart = document.getElementById('weekly-chart');
     if (weeklyChart) {
+      // 중복 제거
+      document.querySelectorAll('#weekly-target-info, #weekly-bars-wrapper').forEach(el=>el.remove());
+      const oldDup = document.querySelectorAll('.weekly-dup');
+      oldDup.forEach(el=>el.remove());
       weeklyChart.innerHTML = '';
-      weeklyData.forEach(d => {
+      weeklyChart.style.display = 'block';
+      
+      const headerInfo = document.createElement('div');
+      headerInfo.id = 'weekly-target-info';
+      headerInfo.style.cssText = 'display:block;width:100%;font-size:10px;color:#FFC800;text-align:center;margin-bottom:8px;font-weight:800;line-height:1.3;';
+      headerInfo.innerHTML = `실재 기준: 일일필요 <span style="color:#FFF;">${Math.round(dailyNeeded).toLocaleString()}원</span> (남은 ${sim.remainMoney.toLocaleString()}원 / ${sim.workDaysLeft}일)`;
+      weeklyChart.appendChild(headerInfo);
+      
+      const barsWrapper = document.createElement('div');
+      barsWrapper.id = 'weekly-bars-wrapper';
+      barsWrapper.style.cssText = 'display:flex;justify-content:space-between;align-items:flex-end;gap:2px;width:100%;';
+      
+      weeklyData.forEach((d) => {
         let finalRate = d.count > 0 ? Math.round(d.rate / d.count) : 0;
-        let heightPct = Math.min((d.rev / 400000) * 100, 100); 
+        let baseline = dailyNeeded;
+        if (baseline < 1000) baseline = dailyBaseline25;
+        let heightPct = baseline > 0 ? (d.rev / baseline) * 100 : 0;
+        heightPct = Math.min(heightPct, 130);
         let color = d.rev > 0 ? getBarColor(finalRate) : '#2A2A2A';
-        let text = d.rev > 0 ? `${finalRate}%` : '';
+        const isRestDay = d.date ? sim.restDates.includes(d.date) : false;
+        if (isRestDay) { color = '#444'; }
+        let text = d.rev > 0 ? `${finalRate}%` : (isRestDay ? '휴무' : '');
         let timeStr = d.total > 0 ? `${Math.floor(d.total/3600)}h` : '-';
-
-        weeklyChart.innerHTML += `
-          <div class="chart-col">
+        
+        barsWrapper.innerHTML += `
+          <div class="chart-col" style="flex:1;min-width:0;">
             <div class="chart-time-text">${timeStr}</div>
-            <div class="chart-bar-bg">
+            <div class="chart-bar-bg" style="position:relative;">
               <div class="chart-bar-fill" style="height: ${heightPct}%; background-color: ${color};">
                 <span class="chart-bar-text">${text}</span>
               </div>
+              ${d.rev > baseline ? `<div style="position:absolute;top:-2px;left:0;right:0;height:2px;background:#FFC800;opacity:0.8;"></div>` : ''}
             </div>
             <span class="chart-label">${d.label}</span>
           </div>
         `;
       });
+      weeklyChart.appendChild(barsWrapper);
     }
 
+    // 월간 차트 렌더
     const monthlyChart = document.getElementById('monthly-chart');
     if (monthlyChart) {
+      document.querySelectorAll('#monthly-target-info, .monthly-target-info-dup').forEach(el=>el.remove());
       monthlyChart.innerHTML = '';
-      monthlyData.slice(0, 4).forEach(d => {
+      monthlyChart.style.display = 'flex';
+      monthlyChart.style.justifyContent = 'space-around';
+      monthlyData.slice(0, 5).forEach((d, idx) => {
+        const wInfo = getWeekInfoByIdx(idx);
+        if (wInfo.dayCount === 0 && idx >= 4) return;
         let finalRate = d.count > 0 ? Math.round(d.rate / d.count) : 0;
-        let heightPct = Math.min((d.rev / 1000000) * 100, 100); 
+        let effectiveWorkDays = wInfo.workDays;
+        let cappedDays = effectiveWorkDays;
+        if (wInfo.dayCount >= 5) { cappedDays = Math.min(effectiveWorkDays, 5); }
+        if (cappedDays <=0) cappedDays = wInfo.dayCount >0 ? Math.min(wInfo.dayCount,5) : 5;
+        let weekBaseline = dailyNeeded * cappedDays;
+        if (weekBaseline < 1000) weekBaseline = dailyBaseline25 * cappedDays;
+        let heightPct = weekBaseline > 0 ? (d.rev / weekBaseline) * 100 : 0;
+        heightPct = Math.min(heightPct, 130);
         let color = d.rev > 0 ? getBarColor(finalRate) : '#2A2A2A';
         let text = d.rev > 0 ? `${finalRate}%` : '';
         let timeStr = d.count > 0 ? `${Math.floor((d.total/d.count)/3600)}h` : '-';
-
+        let labelDetail = `${d.label}<br><span style="font-size:8px;color:#888;">${wInfo.start}~${wInfo.end}일 (${cappedDays}일)</span>`;
         monthlyChart.innerHTML += `
           <div class="chart-col">
             <div class="chart-time-text">${timeStr}</div>
-            <div class="chart-bar-bg" style="max-width: 40px; height: 80px;">
+            <div class="chart-bar-bg" style="max-width: 40px; height: 80px; position:relative;">
               <div class="chart-bar-fill" style="height: ${heightPct}%; background-color: ${color};">
                 <span class="chart-bar-text" style="font-size:11px;">${text}</span>
               </div>
             </div>
-            <span class="chart-label" style="margin-top: 4px;">${d.label}</span>
+            <span class="chart-label" style="margin-top: 4px; font-size:10px; line-height:1.1;">${labelDetail}</span>
           </div>
         `;
       });
+      let monthlyInfo = document.getElementById('monthly-target-info');
+      if (!monthlyInfo) {
+        monthlyInfo = document.createElement('div');
+        monthlyInfo.id = 'monthly-target-info';
+        monthlyInfo.className = 'monthly-target-info-dup';
+        monthlyChart.parentNode.appendChild(monthlyInfo);
+      }
+      monthlyInfo.style.cssText = 'font-size:9px;color:#A3A3A3;text-align:center;margin-top:8px;display:block;width:100%;';
+      monthlyInfo.innerHTML = `기준: 일일필요 ${Math.round(dailyNeeded).toLocaleString()}원 × 근무일 (기본 5일, 첫/막주는 일수만큼) / 남은 ${sim.remainMoney.toLocaleString()}원`;
     }
     
     renderGoldenTimeInsights();
   }
 
   function renderGoldenTimeInsights() {
+function renderGoldenTimeInsights() {
      const chartEl = document.getElementById('golden-time-chart');
      if (!chartEl) return;
      
@@ -4390,6 +4460,8 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
             resHours.style.color = "#4ADE80";
         }
     }
+  }
+    try { if (typeof renderDrivingLogStats === 'function') renderDrivingLogStats(); } catch(e) {}
   }
 
   function exportCallLogs() {
@@ -4714,7 +4786,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
   });
 </script>
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
-<script id="v7-9-34-date-fix">
+<script id="v7-9-37-date-fix">
 (function(){
   function forceUpdateHeader(){
     try{
@@ -4723,7 +4795,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v7.9.34 Compact Bottom Fix</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v7.9.37 Real Target Fix</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
