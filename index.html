@@ -105,7 +105,30 @@
 :where(code, pre, kbd, samp) {
   font-family: "Optimistic Mono", ui-monospace, monospace;
 }
-
+<style id="v7-9-37-fix">
+.bottom-bar {
+  position: fixed !important;
+  bottom: calc(4px + env(safe-area-inset-bottom, 0px)) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: calc(100% - 12px) !important;
+  max-width: 420px !important;
+  min-height: 68px !important;
+  height: auto !important;
+  padding: 6px 8px !important;
+  background: #0F0F0F !important;
+  border: 2px solid #FFC800 !important;
+  border-radius: 16px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  justify-content: space-between !important;
+  gap: 6px !important;
+  box-sizing: border-box !important;
+  z-index: 999 !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.6) !important;
+  overflow: hidden !important;
+}
     /* v7.9.21 Minimal - 위로 10px 아래로 10px (요청) */
     .sticky-top-area {
       padding-top: 10px !important;
