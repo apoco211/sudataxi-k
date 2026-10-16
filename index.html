@@ -160,7 +160,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v7.9.28 Compact Bottom</title>
+  <title>수다택시 K v7.9.30 Compact Bottom</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1263,7 +1263,7 @@ body {
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.9.28 Compact Bottom";
+  const BUILD_VERSION = "v7.9.30 Compact Bottom";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2127,65 +2127,120 @@ body {
     const kw = (kwInput && kwInput.value.trim()) || '';
     if (!kw) { showToast('🔍 검색어를 입력하세요'); return; }
     const resultsEl = document.getElementById('fp-search-results');
-    if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px; color:#94A3B8; padding:8px;">전국 검색 중... (카카오)</div>';
+    if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px; color:#94A3B8; padding:8px;">전국 검색 중... (카카오 REST)</div>';
     try {
-      if (!(window.kakao && kakao.maps && kakao.maps.services)) {
-        if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px; color:#EF4444; padding:8px;">카카오 지도 SDK 로딩 중 - 잠시 후 다시 시도하거나 현재 위치로 등록을 이용하세요</div>';
-        return;
-      }
-      const places = new kakao.maps.services.Places();
-
-      // v7.9.26 전국 검색 지원: 위치 바이어스 없이 먼저, 그 다음 위치 기반 정렬로 재시도 없이 전국 커버
-      const doSearch = (opts) => new Promise((resolve) => {
-        const callback = (data, status) => {
-          if (status === kakao.maps.services.Status.OK && data && data.length>0) resolve(data);
-          else resolve([]);
-        };
-        if (opts) places.keywordSearch(kw, callback, opts);
-        else places.keywordSearch(kw, callback);
-      });
-
       let data = [];
 
-      // 1차: 전국 검색 (옵션 없이) - 부산, 제주 등 전국 어디나 가능
-      data = await doSearch(null);
-
-      // 2차: 결과가 없고 현재 위치가 있으면 위치 기반 정렬로 재시도 (근처 우선)
-      if ((!data || data.length===0) && currentPos && currentPos.lat && currentPos.lng) {
-        if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px; color:#94A3B8; padding:8px;">근처에서 재검색 중...</div>';
-        const optNearby = { x: currentPos.lng, y: currentPos.lat, location: new kakao.maps.LatLng(currentPos.lat, currentPos.lng), sort: kakao.maps.services.SortBy.DISTANCE };
-        data = await doSearch(optNearby);
+      // v7.9.30 핵심 수정: SDK 의존 제거, REST API로 전국 검색
+      // 1차 시도: SDK가 있으면 SDK로 (빠름)
+      if (window.kakao && kakao.maps && kakao.maps.services) {
+        try {
+          const places = new kakao.maps.services.Places();
+          const doSearchSDK = (opts) => new Promise((resolve) => {
+            const callback = (d, status) => {
+              if (status === kakao.maps.services.Status.OK && d && d.length>0) resolve(d);
+              else resolve([]);
+            };
+            if (opts) places.keywordSearch(kw, callback, opts);
+            else places.keywordSearch(kw, callback);
+          });
+          data = await doSearchSDK(null);
+          if (data && data.length>0) {
+            console.log('SDK 검색 성공', data.length);
+          }
+        } catch(e) {
+          console.warn('SDK 검색 실패, REST로 폴백', e);
+          data = [];
+        }
       }
 
-      // 3차: 그래도 없으면 반경 넓게(20km) 재시도
-      if ((!data || data.length===0) && currentPos) {
-        const optRadius = { x: currentPos.lng, y: currentPos.lat, y: currentPos.lat, x: currentPos.lng, location: new kakao.maps.LatLng(currentPos.lat, currentPos.lng), radius: 20000, sort: kakao.maps.services.SortBy.DISTANCE };
-        // kakao expects x,y,radius
-        data = await doSearch({ x: currentPos.lng, y: currentPos.lat, radius: 20000 });
+      // 2차: SDK 실패 또는 결과 없음 → REST API로 전국 검색 (SDK 로딩 전에도 동작)
+      if (!data || data.length===0) {
+        if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px; color:#94A3B8; padding:8px;">REST API로 전국 검색 중... (수원삼환아파트)</div>';
+        try {
+          // Kakao Local REST API - JS키 그대로 사용 (KakaoAK)
+          let url = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(kw)}&size=15`;
+          if (currentPos && currentPos.lat && currentPos.lng) {
+            url += `&x=${currentPos.lng}&y=${currentPos.lat}&sort=distance`;
+          }
+          const res = await fetch(url, {
+            headers: { 'Authorization': `KakaoAK ${KAKAO_JS_KEY}` }
+          });
+          if (res.ok) {
+            const json = await res.json();
+            if (json.documents && json.documents.length>0) {
+              data = json.documents.map(d => ({
+                id: d.id,
+                place_name: d.place_name,
+                y: d.y,
+                x: d.x,
+                address_name: d.address_name,
+                road_address_name: d.road_address_name
+              }));
+              console.log('REST 검색 성공', data.length);
+            }
+          } else {
+            console.warn('REST API 실패', res.status, await res.text());
+          }
+        } catch(e) {
+          console.error('REST 검색 오류', e);
+        }
+      }
+
+      // 3차: 그래도 없으면 키워드 변형 (아파트 → 아파트 단지 등)
+      if (!data || data.length===0) {
+        let altKw = kw.replace('아파트','').trim();
+        if (altKw && altKw !== kw) {
+          if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px; color:#94A3B8; padding:8px;">유사 검색어로 재시도 중...</div>';
+          try {
+            let url = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(altKw)}&size=15`;
+            const res = await fetch(url, { headers: { 'Authorization': `KakaoAK ${KAKAO_JS_KEY}` } });
+            if (res.ok) {
+              const json = await res.json();
+              if (json.documents && json.documents.length>0) {
+                data = json.documents.map(d => ({
+                  id: d.id, place_name: d.place_name, y: d.y, x: d.x,
+                  address_name: d.address_name, road_address_name: d.road_address_name
+                }));
+              }
+            }
+          } catch(e) {}
+        }
       }
 
       data = (data || []).slice(0,15);
+      console.log('searchFrequentPlace final result', data);
 
-      console.log('searchFrequentPlace nationwide result', data);
       if (!data || data.length===0) {
-        if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px; color:#EF4444; padding:8px;">검색 결과 없음 - 정확한 상호명이나 주소로 시도해보세요<br>예: 부산 해운대, 제주공항, 서울 강남역</div>';
-        showToast('🔍 결과 없음 - 전국 검색');
+        if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px; color:#EF4444; padding:10px; line-height:1.5;">검색 결과 없음<br><br>• 정확한 상호명이나 주소로 시도<br>예: 수원 삼환아파트, 부산 해운대<br>• 또는 현재 위치에서 + 등록 이용</div>';
+        showToast('🔍 결과 없음');
         return;
       }
+
       if (resultsEl) {
         resultsEl.innerHTML = '';
-        data.forEach((place, idx) => {
-          const distText = currentPos ? `${getStraightDistanceKm(currentPos.lat, currentPos.lng, parseFloat(place.y), parseFloat(place.x)).toFixed(1)}km` : '';
+        data.forEach((place) => {
+          const plat = parseFloat(place.y), plng = parseFloat(place.x);
+          const distText = currentPos ? `${getStraightDistanceKm(currentPos.lat, currentPos.lng, plat, plng).toFixed(1)}km` : '';
           const div = document.createElement('div');
           div.style.cssText = 'padding:10px; background:#0F172A; border:1px solid #1E293B; border-radius:8px; cursor:pointer; display:flex; flex-direction:column; gap:3px;';
-          div.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center;"><div style="font-size:12px; font-weight:800; color:#FFF;">${place.place_name}</div><div style="font-size:10px; color:#FBBF24; font-weight:800;">${distText}</div></div><div style="font-size:10px; color:#94A3B8;">${place.road_address_name || place.address_name}</div><div style="font-size:9px; color:#2DD4BF;">${place.y}, ${place.x}</div>`;
+          div.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center;"><div style="font-size:12px; font-weight:800; color:#FFF;">${place.place_name}</div><div style="font-size:10px; color:#FBBF24; font-weight:800;">${distText}</div></div><div style="font-size:10px; color:#94A3B8;">${place.road_address_name || place.address_name}</div><div style="font-size:9px; color:#2DD4BF;">${plat.toFixed(5)}, ${plng.toFixed(5)}</div>`;
           div.onclick = () => {
-            pendingFrequentSelection = { lat: parseFloat(place.y), lng: parseFloat(place.x), address: place.road_address_name || place.address_name, name: place.place_name };
+            pendingFrequentSelection = { lat: plat, lng: plng, address: place.road_address_name || place.address_name, name: place.place_name };
             Array.from(resultsEl.children).forEach(c => { c.style.borderColor = '#1E293B'; c.style.background = '#0F172A'; });
             div.style.borderColor = '#2DD4BF';
             div.style.background = '#162032';
             const nameInput = document.getElementById('fp-input-name');
-            if (nameInput && !nameInput.value.trim()) nameInput.value = place.place_name;
+            if (nameInput) {
+              // 이름이 '집'이면 유지, 아니면 장소명으로 덮어쓰기 제안
+              if (!nameInput.value.trim() || nameInput.value.trim() === '집') {
+                // 집이면 그대로 두고 주소만 참고
+              } else {
+                // 기존 이름 유지 (사용자가 집이라고 입력했으면 유지)
+              }
+              // 빈 값이면 장소명 넣기
+              if (!nameInput.value.trim()) nameInput.value = place.place_name;
+            }
             showToast(`📍 ${place.place_name} 선택됨 - 저장 누르세요`);
           };
           resultsEl.appendChild(div);
@@ -2194,7 +2249,7 @@ body {
       }
     } catch(e) {
       console.error('searchFrequentPlace error', e);
-      if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px; color:#EF4444; padding:8px;">검색 오류: ' + (e.message||'') + '</div>';
+      if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px; color:#EF4444; padding:8px;">검색 오류: ' + (e.message||'') + '<br>현재 위치로 등록을 이용해주세요</div>';
       showToast('❌ 검색 오류');
     }
   }
@@ -3199,26 +3254,48 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       }
 
       if (isAutoRegion) {
-        // DB 없는 지역: 경로 경유지 로직 완전 스킵, 가까운 곳에 가중치만
+        // v7.9.29 DB 없는 지역: 복귀 경로 없이 가까운 곳만 - 용인/수원 외곽 대응
         if (straightDist <= 1.0) preliminaryScore += 80;
         else if (straightDist <= 2.5) preliminaryScore += 50;
         else if (straightDist <= 5.0) preliminaryScore += 20;
+        // 5km 초과는 이미 rawPool에서 제외됨
       } else if (!inWisu && targetBoundaryCardData) {
+        // v7.9.29 모드2 원칙 강화: 복귀지점까지 과정에 있는 핫스팟만
+        // 현재→복귀점 직선 경로를 기준으로 크로스트랙/각도/우회거리 엄격 필터
         let candBearing = getBearing(currentPos.lat, currentPos.lng, item.lat, item.lng);
         let deltaAngle = getAngleDelta(candBearing, targetBearing);
         const crossTrackDist = getCrossTrackDistanceKm(currentPos.lat, currentPos.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng, item.lat, item.lng);
-        if (straightDist <= 3.0) {
+        const distToTarget = getStraightDistanceKm(item.lat, item.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng);
+        const detourKm = (straightDist + distToTarget) - directTargetDist;
+
+        // 1) 경로에서 너무 벗어나면 제외 - 2.5km로 강화 (기존 5km)
+        if (crossTrackDist > 2.5) continue;
+
+        // 2) 복귀 방향과 너무 다르면 제외 - 60도 이상이면 완전 뒤쪽, 40도 이상이면 먼 곳은 제외
+        if (straightDist <= 2.5) {
+           // 가까운 곳은 60도까지 허용
+           if (deltaAngle > 60) continue;
            preliminaryScore += 120;
-           if (deltaAngle > 90) preliminaryScore -= 10; 
         } else {
-           if (crossTrackDist > 5.0) continue;
-           if (deltaAngle > 90 && straightDist > 5.0) continue;
-           const distToTarget = getStraightDistanceKm(item.lat, item.lng, targetBoundaryCardData.lat, targetBoundaryCardData.lng);
-           const detourKm = (straightDist + distToTarget) - directTargetDist;
-           if (detourKm > Math.min(8.0, directTargetDist * 0.6 + 3.0)) continue;
-           if (deltaAngle <= 45) preliminaryScore += 25;
-           else if (deltaAngle > 60) preliminaryScore -= 20;
+           // 먼 곳은 40도 이상이면 제외 (원칙: 과정에 있어야 함)
+           if (deltaAngle > 40) continue;
+           // 우회거리 4km 초과면 제외 (기존 8km → 4km로 강화)
+           if (detourKm > Math.min(4.0, directTargetDist * 0.3 + 2.0)) continue;
+           // 복귀지점을 넘어선 곳은 제외 (과정이 아닌 곳)
+           if (straightDist > directTargetDist + 2.0) continue;
+           if (deltaAngle <= 20) preliminaryScore += 35;
+           else if (deltaAngle <= 30) preliminaryScore += 20;
+           else preliminaryScore += 5;
         }
+
+        // 경로에 딱 붙어있으면 추가 가산점
+        if (crossTrackDist <= 1.0) preliminaryScore += 30;
+        else if (crossTrackDist <= 1.8) preliminaryScore += 15;
+
+        // 우회 적으면 가산
+        if (detourKm <= 1.0) preliminaryScore += 25;
+        else if (detourKm <= 2.0) preliminaryScore += 10;
+
       } else if (straightDist <= 2.5) { preliminaryScore += 40; }
 
       preFiltered.push({ ...item, straightDist, preliminaryScore, logCount: pureRes.logCount, isTimeMatch: pureRes.isTimeMatch, isWeatherBoosted: weatherData.isRainOrSnow, isTransitSurge: transitSurge >= 30, isSeoulCrowded: isSeoulCrowded, isMasterDb: (!item.isCustom && !item.isLiveKakao && !item.isUserCallLogCandidate) });
@@ -3257,8 +3334,10 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     }
 
     currentRouteData = [{ name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true }, ...selectedCandidates];
-    // v7.9.27: DB 없는 지역이면 복귀 경계점 완전 숨김, 일반 관외도 10km 초과면 숨김 - 사진처럼 긴 주황선 방지
-    if (!isAutoRegion && targetBoundaryCardData && targetBoundaryCardData.dist <= 10.0) currentRouteData.push(targetBoundaryCardData);
+    // v7.9.29: DB 없는 지역(isAutoRegion)이면 복귀점 숨김, 일반 관외(성남 등)는 복귀 과정 원칙 유지하므로 복귀점 항상 표시 (멀어도 과정에 있는 핫스팟 안내가 목적)
+    if (!isAutoRegion && targetBoundaryCardData) {
+      currentRouteData.push(targetBoundaryCardData);
+    }
     
     const mapBtn = document.getElementById('btn-show-map');
     if (mapBtn) mapBtn.style.display = 'flex';
@@ -3404,30 +3483,64 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       const themeColor = currentMode === 1 ? '#FFC800' : '#FF6B00';
       const markerCoords = currentRouteData.map(pt => [pt.lat, pt.lng]);
       
+      // v7.9.29 모드2 경로 원칙 시각화 개선: 복귀 과정에 있는 핫스팟만 표시하므로, 지도에서 현재→후보→복귀점 순서로 연결된 주황 실선을 그린다
       currentRouteData.forEach((pt, idx) => {
         let badgeNum = pt.isTargetBoundary ? '🎯' : (pt.isGasStation ? '⛽' : (pt.isRestroom ? '🚻' : idx));
         let badgeColor = pt.isTargetBoundary ? '#FF6B00' : (pt.isGasStation ? '#8B5CF6' : (pt.isRestroom ? '#3B82F6' : ''));
         
         let html = pt.isCurrent ? '<div class="custom-map-marker current" style="z-index: 1000; position: relative;">📍</div>' : `<div class="custom-map-marker" ${badgeColor ? `style="background:${badgeColor}; color:#FFF;"` : ''}>${badgeNum}</div>`;
         L.marker([pt.lat, pt.lng], { icon: L.divIcon({ html, className: '', iconSize: [24, 24] }) }).addTo(leafletMap).bindPopup(`<b>${pt.name}</b>`);
-
-        if (pt.geometryCoords && pt.geometryCoords.length > 0) {
-          // 관외 복귀 모드일 때, 목적지(Target)로 다이렉트 연결되는 라인은 얇고 연하게 처리하여 시각적 혼동 방지
-          let polyWeight = pt.isTargetBoundary ? 2 : 6;
-          let polyOpacity = pt.isTargetBoundary ? 0.3 : 0.8;
-          let polyColor = pt.isTargetBoundary ? '#EF4444' : themeColor;
-          
-          L.polyline(pt.geometryCoords, { color: polyColor, weight: polyWeight, opacity: polyOpacity, dashArray: pt.isTargetBoundary ? '5, 5' : null }).addTo(leafletMap);
-          
-          if (currentMode === 2 && !pt.isTargetBoundary && !pt.isCurrent && !pt.isRestroom && !pt.isGasStation) {
-             const targetPt = currentRouteData.find(p => p.isTargetBoundary);
-             if (targetPt) {
-                 const curvedToTarget = generateCurvedLine(pt.lat, pt.lng, targetPt.lat, targetPt.lng, 20);
-                 L.polyline(curvedToTarget, { color: '#3B82F6', weight: 3, opacity: 0.85, dashArray: '8, 8' }).addTo(leafletMap);
-             }
-          }
-        }
       });
+
+      // 경로 그리기 - 모드2는 과정에 있는 핫스팟을 복귀점까지 순서대로 연결
+      if (currentMode === 2 && currentRouteData.length >= 2) {
+        // 현재→1→2→3→4→복귀점 순서로 정렬 (이미 selectedCandidates가 거리+점수 순이지만, 복귀점 방향 투영 순으로 재정렬)
+        let targetPt = currentRouteData.find(p => p.isTargetBoundary);
+        let nonTarget = currentRouteData.filter(p => !p.isTargetBoundary && !p.isCurrent);
+        // 복귀 방향으로의 투영 거리로 정렬 (복귀 과정 순서)
+        if (targetPt) {
+          let mainBearing = getBearing(currentPos.lat, currentPos.lng, targetPt.lat, targetPt.lng);
+          nonTarget.sort((a,b) => {
+            let da = getStraightDistanceKm(currentPos.lat, currentPos.lng, a.lat, a.lng) * Math.cos(getAngleDelta(getBearing(currentPos.lat, currentPos.lng, a.lat, a.lng), mainBearing) * Math.PI/180);
+            let db = getStraightDistanceKm(currentPos.lat, currentPos.lng, b.lat, b.lng) * Math.cos(getAngleDelta(getBearing(currentPos.lat, currentPos.lng, b.lat, b.lng), mainBearing) * Math.PI/180);
+            return da - db;
+          });
+        }
+        let ordered = [currentRouteData[0], ...nonTarget];
+        if (targetPt) ordered.push(targetPt);
+
+        for (let i=0; i<ordered.length-1; i++) {
+          let from = ordered[i];
+          let to = ordered[i+1];
+          // 가능한 카카오 도로 경로 재사용, 없으면 직선 곡선
+          let fromHasGeometryToNext = false;
+          // to의 geometry가 from→to가 아니고 current→to이므로, 여기서는 직선 곡선으로 과정 시각화
+          let curved = generateCurvedLine(from.lat, from.lng, to.lat, to.lng, 20);
+          let isLastToTarget = to.isTargetBoundary;
+          L.polyline(curved, { 
+            color: isLastToTarget ? '#FF6B00' : themeColor, 
+            weight: isLastToTarget ? 4 : 6, 
+            opacity: isLastToTarget ? 0.9 : 0.85,
+            dashArray: isLastToTarget ? '6,6' : null
+          }).addTo(leafletMap);
+        }
+        // 기존 각 후보의 카카오 실제 도로 경로도 얇게 표시 (참고용)
+        currentRouteData.forEach(pt => {
+          if (pt.geometryCoords && pt.geometryCoords.length>0 && !pt.isCurrent) {
+            L.polyline(pt.geometryCoords, { color: themeColor, weight: 2, opacity: 0.25 }).addTo(leafletMap);
+          }
+        });
+      } else {
+        // 모드1은 기존대로 각 후보까지 경로 표시
+        currentRouteData.forEach((pt, idx) => {
+          if (pt.geometryCoords && pt.geometryCoords.length > 0) {
+            let polyWeight = pt.isTargetBoundary ? 2 : 6;
+            let polyOpacity = pt.isTargetBoundary ? 0.3 : 0.8;
+            let polyColor = pt.isTargetBoundary ? '#EF4444' : themeColor;
+            L.polyline(pt.geometryCoords, { color: polyColor, weight: polyWeight, opacity: polyOpacity, dashArray: pt.isTargetBoundary ? '5, 5' : null }).addTo(leafletMap);
+          }
+        });
+      }
       leafletMap.fitBounds(L.latLngBounds(markerCoords), { padding: [30, 30] });
     }, 200);
   }
