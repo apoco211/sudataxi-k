@@ -867,7 +867,7 @@ body {
 
 
 <style>
-/* v7.9.31 SLIM BOTTOM BAR - same build number, thinner buttons */
+/* v7.9.31 SLIM BOTTOM BAR - same build number, thinner buttons + bigger text for visibility */
 .bottom-bar {
   min-height: 52px !important;
   max-height: 52px !important;
@@ -909,12 +909,25 @@ body {
   min-height: 46px !important;
   max-height: 46px !important;
   height: 46px !important;
-  font-size: 9px !important;
   border-radius: 9px !important;
-  padding: 2px 3px !important;
+  padding: 2px 4px !important;
   line-height: 1.1 !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.3px !important;
 }
-.save-call-btn span { font-size: 7.5px !important; }
+.save-call-btn {
+  font-size: 12.5px !important;
+}
+.save-restroom-btn {
+  font-size: 11.5px !important;
+}
+.save-call-btn span { 
+  font-size: 9px !important; 
+  font-weight: 700 !important;
+  opacity: 0.9;
+  margin-top: 1px;
+}
+.save-restroom-btn span, .save-restroom-btn br { line-height: 1.15 !important; }
 </style>
 
 </head>
