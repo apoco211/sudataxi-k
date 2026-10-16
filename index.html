@@ -125,21 +125,21 @@
     .penalty-ocr-preview { margin-top: 6px; font-size: 9px; color: #666; background: #F5F5F5; border: 1px dashed #CCC; border-radius: 6px; padding: 6px 8px; max-height: 80px; overflow-y: auto; white-space: pre-wrap; }
 
     /* v7.9.23 NEW: 자주가는 곳 프리셋 - v7.9.25 개선 */
-    .frequent-presets-section { margin: 12px 0 90px 0; background: #162032; border: 1px solid rgba(45,212,191,0.35); border-top: 2px solid #2DD4BF; border-radius: 14px; padding: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
-    .frequent-header { display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:nowrap; margin-bottom:8px; overflow:hidden; }
-    .frequent-header-left { display:flex; align-items:center; gap:5px; flex:1; min-width:0; overflow:hidden; }
-    .frequent-header-actions { display:flex; gap:5px; flex-shrink:0; align-items:center; }
-    .frequent-preset-card { background: #1C2B3A; border: 1px solid rgba(45,212,191,0.25); border-radius: 10px; padding: 10px 12px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
-    .frequent-preset-card .fp-left { display:flex; flex-direction:column; gap:2px; flex:1; min-width:0; }
-    .frequent-preset-card .fp-name { font-weight:900; font-size:13px; color:#5EEAD4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .frequent-preset-card .fp-addr { font-size:10px; color:#94A3B8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .frequent-preset-card .fp-meta { font-size:11px; font-weight:800; color:#FBBF24; }
-    .frequent-preset-card .fp-actions { display:flex; gap:4px; flex-shrink:0; }
-    .fp-btn { border:none; border-radius:6px; padding:6px 10px; font-size:11px; font-weight:900; cursor:pointer; white-space:nowrap; }
+    .frequent-presets-section { margin: 6px 0 80px 0; background: #162032; border: 1px solid rgba(45,212,191,0.35); border-top: 2px solid #2DD4BF; border-radius: 12px; padding: 6px 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+    .frequent-header { display:flex; justify-content:space-between; align-items:center; gap:4px; flex-wrap:nowrap; margin-bottom:4px; overflow:hidden; }
+    .frequent-header-left { display:flex; align-items:center; gap:4px; flex:1; min-width:0; overflow:hidden; }
+    .frequent-header-actions { display:flex; gap:4px; flex-shrink:0; align-items:center; }
+    .frequent-preset-card { background: #1C2B3A; border: 1px solid rgba(45,212,191,0.25); border-radius: 8px; padding: 5px 8px; display:flex; justify-content:space-between; align-items:center; gap:6px; min-height:36px; }
+    .frequent-preset-card .fp-left { display:flex; flex-direction:column; gap:0px; flex:1; min-width:0; line-height:1.15; }
+    .frequent-preset-card .fp-name { font-weight:900; font-size:12px; color:#5EEAD4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2; }
+    .frequent-preset-card .fp-addr { font-size:9px; color:#94A3B8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2; }
+    .frequent-preset-card .fp-meta { font-size:10px; font-weight:800; color:#FBBF24; line-height:1.2; margin-top:1px; }
+    .frequent-preset-card .fp-actions { display:flex; gap:3px; flex-shrink:0; }
+    .fp-btn { border:none; border-radius:5px; padding:4px 8px; font-size:10px; font-weight:900; cursor:pointer; white-space:nowrap; line-height:1; }
     .fp-btn-navi { background:#2DD4BF; color:#000; }
     .fp-btn-del { background:#1E293B; color:#94A3B8; border:1px solid #334155; }
     .fp-add-btn { cursor:pointer; white-space:nowrap; font-weight:900; }
-    .fp-badge { background:#0F172A; color:#5EEAD4; border:1px solid #2DD4BF; font-size:9px; font-weight:900; padding:3px 7px; border-radius:10px; white-space:nowrap; }
+    .fp-badge { background:#0F172A; color:#5EEAD4; border:1px solid #2DD4BF; font-size:8px; font-weight:900; padding:2px 5px; border-radius:8px; white-space:nowrap; line-height:1; }
     .auto-region-badge { background:#FEF3C7; color:#92400E; border:1px solid #FBBF24; font-size:10px; font-weight:800; padding:3px 8px; border-radius:8px; }
     /* v7.9.25 주간모드 대응 */
     body.theme-day .frequent-presets-section { background:#FFFFFF; border:1px solid #CCFBF1; border-top:2px solid #14B8A6; box-shadow:0 2px 12px rgba(0,0,0,0.06); }
@@ -160,7 +160,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v7.9.30 Compact Bottom</title>
+  <title>수다택시 K v7.9.31 Compact Bottom</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -251,7 +251,7 @@
     
     .pipeline-log { font-family: monospace; font-size: 10px; color: var(--stat-label); margin: 0 0 8px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     
-    .card-list { display: flex; flex-direction: column; gap: 6px; }
+    .card-list { display: flex; flex-direction: column; gap: 4px; }
     .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 6px 8px; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
     .card.target-destination-card { border: 1.5px solid var(--theme-accent); box-shadow: 0 0 10px rgba(234, 88, 12, 0.2); margin-top: 4px; }
     
@@ -865,6 +865,58 @@ body {
 }
 </style>
 
+
+<style>
+/* v7.9.31 SLIM BOTTOM BAR - same build number, thinner buttons */
+.bottom-bar {
+  min-height: 52px !important;
+  max-height: 52px !important;
+  height: 52px !important;
+  padding: 3px 4px calc(3px + env(safe-area-inset-bottom, 0px)) 4px !important;
+  gap: 3px !important;
+  border-radius: 12px !important;
+  bottom: calc(1px + env(safe-area-inset-bottom, 0px)) !important;
+}
+.timer-container {
+  min-height: 46px !important;
+  max-height: 46px !important;
+  height: 46px !important;
+  gap: 2px !important;
+}
+.timer-mode-selector {
+  height: 18px !important;
+  min-height: 18px !important;
+  max-height: 18px !important;
+  gap: 3px !important;
+}
+.timer-mode-btn {
+  height: 18px !important;
+  min-height: 18px !important;
+  max-height: 18px !important;
+  font-size: 10px !important;
+  border-radius: 6px !important;
+  line-height: 1 !important;
+}
+.timer-display-btn {
+  height: 26px !important;
+  min-height: 26px !important;
+  max-height: 26px !important;
+  flex: 0 0 26px !important;
+  font-size: 11px !important;
+  border-radius: 7px !important;
+}
+.save-call-btn, .save-restroom-btn {
+  min-height: 46px !important;
+  max-height: 46px !important;
+  height: 46px !important;
+  font-size: 9px !important;
+  border-radius: 9px !important;
+  padding: 2px 3px !important;
+  line-height: 1.1 !important;
+}
+.save-call-btn span { font-size: 7.5px !important; }
+</style>
+
 </head>
 <body class="mode-1">
   
@@ -1263,7 +1315,7 @@ body {
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.9.30 Compact Bottom";
+  const BUILD_VERSION = "v7.9.31 Compact Bottom";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
