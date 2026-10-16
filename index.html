@@ -181,7 +181,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v7.9.33 Compact Bottom Fix</title>
+  <title>수다택시 K v7.9.34 Compact Bottom Fix</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -958,52 +958,58 @@ body {
 </style>
 
 
-<style id="v7-9-33-fix">
-/* ===== v7.9.33 Compact Bottom Fix - A안 밀착형 + 버튼 박스 내부 정렬 + 카카오내비 강제 + 날짜수신대기 fix ===== */
+<style id="v7-9-34-fix">
+/* ===== v7.9.34 - 사진 기준 완전 수정: 둥근 플로팅 박스 + 박스 안 정렬 + 아래로 내리기 ===== */
 .bottom-bar {
-  bottom: 0px !important;
-  bottom: env(safe-area-inset-bottom, 0px) !important;
+  position: fixed !important;
+  bottom: calc(6px + env(safe-area-inset-bottom, 0px)) !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
-  width: calc(100% - 10px) !important;
-  max-width: 430px !important;
-  min-height: 64px !important;
-  max-height: 72px !important;
-  height: auto !important;
-  padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px)) 8px !important;
+  width: calc(100% - 14px) !important;
+  max-width: 418px !important;
+  min-height: 68px !important;
+  height: 68px !important;
+  max-height: 68px !important;
+  padding: 6px !important;
   background: #0F0F0F !important;
-  border: 1.5px solid #FFC800 !important;
-  border-top: 2.5px solid #FFC800 !important;
-  border-bottom: none !important;
-  border-radius: 16px 16px 0 0 !important;
+  border: 2px solid #FFC800 !important;
+  border-radius: 18px !important;
   display: flex !important;
   flex-direction: row !important;
   align-items: stretch !important;
   justify-content: space-between !important;
   gap: 6px !important;
-  z-index: 300 !important;
-  box-shadow: 0 -4px 24px rgba(0,0,0,0.55) !important;
   box-sizing: border-box !important;
-  overflow: visible !important;
+  z-index: 999 !important;
+  box-shadow: 0 10px 32px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,200,0,0.15) !important;
+  overflow: hidden !important;
 }
+
 .timer-container {
-  flex: 1.1 !important;
+  flex: 0 0 98px !important;
+  width: 98px !important;
+  min-width: 98px !important;
+  max-width: 98px !important;
   display: flex !important;
   flex-direction: column !important;
   gap: 4px !important;
-  min-height: 50px !important;
-  max-height: none !important;
-  height: auto !important;
-  justify-content: center !important;
+  min-height: 54px !important;
+  height: 54px !important;
+  max-height: 54px !important;
+  justify-content: space-between !important;
   box-sizing: border-box !important;
 }
+
 .timer-mode-selector {
   display: flex !important;
+  flex-direction: row !important;
   gap: 4px !important;
+  width: 100% !important;
   height: 22px !important;
   min-height: 22px !important;
   max-height: 22px !important;
 }
+
 .timer-mode-btn {
   flex: 1 !important;
   height: 22px !important;
@@ -1013,26 +1019,39 @@ body {
   font-weight: 900 !important;
   border-radius: 7px !important;
   line-height: 1 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
 }
+
 .timer-display-btn {
+  width: 100% !important;
   height: 28px !important;
   min-height: 28px !important;
   max-height: 28px !important;
   flex: 0 0 28px !important;
-  font-size: 12px !important;
+  font-size: 11.5px !important;
   font-weight: 900 !important;
   border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   box-sizing: border-box !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  padding: 0 4px !important;
 }
+
 .save-call-btn, .save-restroom-btn {
   flex: 1 !important;
-  min-height: 50px !important;
-  max-height: none !important;
-  height: auto !important;
-  border-radius: 11px !important;
-  padding: 6px 4px !important;
-  line-height: 1.15 !important;
+  min-height: 54px !important;
+  height: 54px !important;
+  max-height: 54px !important;
+  border-radius: 12px !important;
+  padding: 4px 6px !important;
+  line-height: 1.2 !important;
   font-weight: 900 !important;
+  font-size: 11px !important;
   box-sizing: border-box !important;
   display: flex !important;
   flex-direction: column !important;
@@ -1040,20 +1059,45 @@ body {
   justify-content: center !important;
   text-align: center !important;
   word-break: keep-all !important;
+  white-space: normal !important;
   overflow: hidden !important;
+  letter-spacing: -0.3px !important;
 }
-.save-call-btn { background: #FFC800 !important; color: #000 !important; font-size: 11.5px !important; }
-.save-restroom-btn { background: #3B82F6 !important; color: #FFF !important; font-size: 11px !important; }
-.save-call-btn span, .save-restroom-btn span { font-size: 8.5px !important; font-weight: 700 !important; opacity: 0.9 !important; margin-top: 1px !important; }
-body { padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important; }
+
+.save-call-btn {
+  background: #FFC800 !important;
+  color: #000 !important;
+  font-size: 11px !important;
+}
+.save-restroom-btn {
+  background: #3B82F6 !important;
+  color: #FFF !important;
+  font-size: 11px !important;
+}
+.save-call-btn span, .save-restroom-btn span {
+  font-size: 8.5px !important;
+  font-weight: 700 !important;
+  opacity: 0.9 !important;
+  line-height: 1.1 !important;
+  margin-top: 1px !important;
+}
+
+/* body 하단 여백 - 박스가 가리지 않게 */
+body {
+  padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
 @media (max-width: 375px) {
-  .bottom-bar { width: calc(100% - 8px) !important; min-height: 60px !important; padding: 5px 6px calc(5px + env(safe-area-inset-bottom, 0px)) 6px !important; gap: 4px !important; }
-  .timer-mode-btn { font-size: 10px !important; height: 20px !important; min-height: 20px !important; }
-  .timer-display-btn { font-size: 11px !important; height: 26px !important; min-height: 26px !important; flex: 0 0 26px !important; }
-  .save-call-btn, .save-restroom-btn { min-height: 46px !important; font-size: 10px !important; }
+  .bottom-bar { width: calc(100% - 10px) !important; min-height: 64px !important; height: 64px !important; max-height: 64px !important; padding: 5px !important; gap: 4px !important; border-radius: 16px !important; }
+  .timer-container { flex: 0 0 90px !important; width: 90px !important; min-width: 90px !important; max-width: 90px !important; min-height: 50px !important; height: 50px !important; }
+  .timer-mode-btn { height: 20px !important; min-height: 20px !important; font-size: 10px !important; }
+  .timer-display-btn { height: 26px !important; min-height: 26px !important; flex: 0 0 26px !important; font-size: 10.5px !important; }
+  .save-call-btn, .save-restroom-btn { min-height: 50px !important; height: 50px !important; font-size: 10px !important; }
+  body { padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px)) !important; }
 }
-.fp-btn-navi { background: #2DD4BF !important; color: #000 !important; transition: transform 0.1s !important; }
-.fp-btn-navi:active { transform: scale(0.93) !important; background: #14B8A6 !important; }
+
+.fp-btn-navi { background: #2DD4BF !important; color: #000 !important; }
+.fp-btn-navi:active { transform: scale(0.93) !important; }
 </style>
 
 </head>
@@ -1454,7 +1498,7 @@ body { padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.9.33 Compact Bottom Fix";
+  const BUILD_VERSION = "v7.9.34 Compact Bottom Fix";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -1509,47 +1553,24 @@ body { padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
     cleanName = (cleanName + '').trim().slice(0, 30) || '목적지';
     const latNum = Number(lat);
     const lngNum = Number(lng);
-    if (isNaN(latNum) || isNaN(lngNum)) {
-      showToast('❌ 좌표 오류');
-      return;
-    }
+    if (isNaN(latNum) || isNaN(lngNum)) { showToast('❌ 좌표 오류'); return; }
     if (window.Kakao && window.Kakao.Navi && window.Kakao.isInitialized && window.Kakao.isInitialized()) {
-      try {
-        window.Kakao.Navi.share({
-          name: cleanName,
-          x: lngNum,
-          y: latNum,
-          coordType: 'wgs84'
-        });
-        return;
-      } catch(e) {
-        console.warn('Kakao Navi share failed', e);
-      }
+      try { window.Kakao.Navi.share({ name: cleanName, x: lngNum, y: latNum, coordType: 'wgs84' }); return; } catch(e) {}
     }
     const kakaoNaviScheme = `kakaonavi://route?ep=${latNum},${lngNum}&by=CAR`;
     let fallbackTriggered = false;
     const fallbackToMap = () => {
       if (fallbackTriggered) return;
       fallbackTriggered = true;
-      try {
-        const mapUrl = `https://map.kakao.com/link/to/${encodeURIComponent(cleanName)},${latNum},${lngNum}`;
-        window.location.href = mapUrl;
-      } catch(e) {
-        window.location.href = `https://m.map.kakao.com/scheme/route?ep=${latNum},${lngNum}&by=car`;
-      }
+      try { window.location.href = `https://map.kakao.com/link/to/${encodeURIComponent(cleanName)},${latNum},${lngNum}`; }
+      catch(e){ window.location.href = `https://m.map.kakao.com/scheme/route?ep=${latNum},${lngNum}&by=car`; }
     };
     try {
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       const isAndroid = /Android/.test(navigator.userAgent);
-      if (isIOS || isAndroid) {
-        window.location.href = kakaoNaviScheme;
-        setTimeout(fallbackToMap, 1200);
-      } else {
-        window.location.href = `https://map.kakao.com/link/to/${encodeURIComponent(cleanName)},${latNum},${lngNum}`;
-      }
-    } catch(e) {
-      fallbackToMap();
-    }
+      if (isIOS || isAndroid) { window.location.href = kakaoNaviScheme; setTimeout(fallbackToMap, 1200); }
+      else { window.location.href = `https://map.kakao.com/link/to/${encodeURIComponent(cleanName)},${latNum},${lngNum}`; }
+    } catch(e){ fallbackToMap(); }
   }
 
   function showToast(msg) {
@@ -4693,62 +4714,22 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
   });
 </script>
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
-<script id="v7-9-33-date-fix">
-// v7.9.33 긴급 패치: 날짜 수신 대기 stuck fix
+<script id="v7-9-34-date-fix">
 (function(){
   function forceUpdateHeader(){
-    try {
+    try{
       var headerEl = document.getElementById('app-header-title');
       if(!headerEl) return;
+      if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
-      var year = nowDate.getFullYear();
-      var month = nowDate.getMonth()+1;
-      var date = nowDate.getDate();
       var days = ['일','월','화','수','목','금','토'];
-      var dayStr = days[nowDate.getDay()];
-      var isWeekend = (nowDate.getDay()===0 || nowDate.getDay()===6);
-      var BUILD_VERSION = (typeof window.BUILD_VERSION !== 'undefined' ? window.BUILD_VERSION : (typeof BUILD_VERSION !== 'undefined' ? BUILD_VERSION : 'v7.9.33'));
-      // 원래 함수가 있으면 호출, 없으면 직접 렌더
-      if(typeof updateHeaderTitle === 'function'){
-        try { updateHeaderTitle(nowDate, false, null); return; } catch(e){}
-      }
-      var badgeHtml = isWeekend ? '<span class="holiday-badge" style="background:#FF8C00;">🟡 휴일</span>' : '<span class="weekday-badge">🟢 평일</span>';
-      // BUILD_VERSION 태그가 window에 없을 수도 있으니 텍스트에서 추출 시도
-      var verTag = '';
-      try {
-        var m = document.title.match(/v[0-9.]+[^ ]*/);
-        if(m) verTag = m[0];
-        else verTag = 'v7.9.33 Compact Bottom Fix';
-      } catch(e){ verTag='v7.9.33'; }
-      headerEl.innerHTML = '📅 ' + year + '.' + month + '.' + date + '(' + dayStr + ') <span class="build-ver-tag">' + verTag + '</span> ' + badgeHtml;
-    } catch(e){ console.warn('forceUpdateHeader fail', e); }
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v7.9.34 Compact Bottom Fix</span> <span class="weekday-badge">🟢 평일</span>';
+    }catch(e){}
   }
-
-  // DOMContentLoaded, load, 그리고 1.5초 후 강제 체크
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
   window.addEventListener('load', function(){ setTimeout(forceUpdateHeader, 300); });
-  setTimeout(function(){
-    var h = document.getElementById('app-header-title');
-    if(h && h.innerText.indexOf('대기 중') !== -1){
-      console.log('날짜 대기 중 감지 - 강제 갱신');
-      forceUpdateHeader();
-    }
-  }, 1500);
-
-  // 60초마다 날짜 갱신 (자정 넘어갈 때 대비)
+  setTimeout(function(){ var h=document.getElementById('app-header-title'); if(h && h.innerText.indexOf('대기 중')!==-1) forceUpdateHeader(); }, 1500);
   setInterval(forceUpdateHeader, 60000);
-
-  // 상태 텍스트들도 초기 대기 중이면 3초 후 한 번 더 시도 표시
-  setTimeout(function(){
-    var ids = ['status-weather','status-traffic','status-seoul','status-transit','loc-text','pipeline-log'];
-    ids.forEach(function(id){
-      var el = document.getElementById(id);
-      if(el && el.innerText.indexOf('대기 중') !== -1){
-        // 그대로 두되, 날짜는 위에서 처리했으므로 여기선 로그만
-        console.log(id + ' still waiting');
-      }
-    });
-  }, 3000);
 })();
 </script>
 
