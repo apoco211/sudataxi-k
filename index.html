@@ -124,27 +124,43 @@
     .penalty-ocr-status { margin-top: 8px; font-size: 11px; font-weight: 800; color: #000; background: #FFF7CC; border: 1px solid #FFC800; border-radius: 6px; padding: 6px 8px; }
     .penalty-ocr-preview { margin-top: 6px; font-size: 9px; color: #666; background: #F5F5F5; border: 1px dashed #CCC; border-radius: 6px; padding: 6px 8px; max-height: 80px; overflow-y: auto; white-space: pre-wrap; }
 
-    /* v7.9.23 NEW: 자주가는 곳 프리셋 */
+    /* v7.9.23 NEW: 자주가는 곳 프리셋 - v7.9.25 개선 */
     .frequent-presets-section { margin: 12px 0 90px 0; background: #162032; border: 1px solid rgba(45,212,191,0.35); border-top: 2px solid #2DD4BF; border-radius: 14px; padding: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+    .frequent-header { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+    .frequent-header-left { display:flex; align-items:center; gap:6px; flex:1; min-width:140px; }
+    .frequent-header-actions { display:flex; gap:6px; flex-shrink:0; align-items:center; }
     .frequent-preset-card { background: #1C2B3A; border: 1px solid rgba(45,212,191,0.25); border-radius: 10px; padding: 10px 12px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
-    .frequent-preset-card .fp-left { display:flex; flex-direction:column; gap:2px; flex:1; }
+    .frequent-preset-card .fp-left { display:flex; flex-direction:column; gap:2px; flex:1; min-width:0; }
     .frequent-preset-card .fp-name { font-weight:900; font-size:13px; color:#5EEAD4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .frequent-preset-card .fp-addr { font-size:10px; color:#94A3B8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .frequent-preset-card .fp-meta { font-size:11px; font-weight:800; color:#FBBF24; }
-    .frequent-preset-card .fp-actions { display:flex; gap:4px; }
-    .fp-btn { border:none; border-radius:6px; padding:6px 8px; font-size:11px; font-weight:900; cursor:pointer; }
+    .frequent-preset-card .fp-actions { display:flex; gap:4px; flex-shrink:0; }
+    .fp-btn { border:none; border-radius:6px; padding:6px 10px; font-size:11px; font-weight:900; cursor:pointer; white-space:nowrap; }
     .fp-btn-navi { background:#2DD4BF; color:#000; }
     .fp-btn-del { background:#1E293B; color:#94A3B8; border:1px solid #334155; }
-    .fp-add-btn { cursor:pointer; }
-    .fp-badge { background:#0F172A; color:#5EEAD4; border:1px solid #2DD4BF; font-size:9px; font-weight:900; padding:2px 6px; border-radius:10px; }
-    /* v7.9.23 auto-region badge */
+    .fp-add-btn { cursor:pointer; white-space:nowrap; font-weight:900; }
+    .fp-badge { background:#0F172A; color:#5EEAD4; border:1px solid #2DD4BF; font-size:9px; font-weight:900; padding:3px 7px; border-radius:10px; white-space:nowrap; }
     .auto-region-badge { background:#FEF3C7; color:#92400E; border:1px solid #FBBF24; font-size:10px; font-weight:800; padding:3px 8px; border-radius:8px; }
+    /* v7.9.25 주간모드 대응 */
+    body.theme-day .frequent-presets-section { background:#FFFFFF; border:1px solid #CCFBF1; border-top:2px solid #14B8A6; box-shadow:0 2px 12px rgba(0,0,0,0.06); }
+    body.theme-day .frequent-preset-card { background:#F8FAFC; border-color:#CCFBF1; }
+    body.theme-day .frequent-preset-card .fp-name { color:#0F766E; }
+    body.theme-day .frequent-preset-card .fp-addr { color:#64748B; }
+    body.theme-day .frequent-preset-card .fp-meta { color:#D97706; }
+    body.theme-day .fp-badge { background:#CCFBF1; color:#0F766E; border-color:#14B8A6; }
+    body.theme-day .fp-btn-del { background:#F1F5F9; color:#64748B; border-color:#E2E8F0; }
+    body.theme-day #frequent-presets-empty { color:#94A3B8; }
+    body.theme-day #frequent-modal .modal-content { background:#FFFFFF; }
+    body.theme-day #frequent-modal input { background:#F8FAFC !important; color:#1E293B !important; border-color:#E2E8F0 !important; }
+    body.theme-day #fp-search-results div { background:#F8FAFC !important; border-color:#E2E8F0 !important; }
+    body.theme-day #fp-search-results div div { color:#1E293B !important; }
+
 
 
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v7.9.24 Compact Bottom</title>
+  <title>수다택시 K v7.9.26 Compact Bottom</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -889,14 +905,14 @@ body {
   <div class="card-list" id="card-list"></div>
 
   <div id="frequent-presets-section" class="frequent-presets-section">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-      <div style="display:flex; align-items:center; gap:6px;">
-        <span style="font-size:12px; font-weight:900; color:#5EEAD4;">📌 자주가는 곳 (프리셋)</span>
+    <div class="frequent-header">
+      <div class="frequent-header-left">
+        <span style="font-size:12px; font-weight:900; color:inherit;">📌 자주가는 곳</span>
         <span class="fp-badge">거리·실시간</span>
       </div>
-      <div style="display:flex; gap:4px;">
-        <button id="btn-add-frequent" class="fp-add-btn" style="background:#2DD4BF; color:#000; border:none; border-radius:6px; padding:4px 8px; font-size:11px; font-weight:900;">+ 등록</button>
-        <button id="btn-frequent-search" class="fp-add-btn" style="background:#1E293B; color:#5EEAD4; border:1px solid #2DD4BF; border-radius:6px; padding:4px 8px; font-size:11px; font-weight:800;">🔍 검색</button>
+      <div class="frequent-header-actions">
+        <button id="btn-add-frequent" class="fp-add-btn" style="background:#2DD4BF; color:#000; border:none; border-radius:8px; padding:6px 12px; font-size:11px;">+ 등록</button>
+        <button id="btn-frequent-search" class="fp-add-btn" style="background:#1E293B; color:#5EEAD4; border:1px solid #2DD4BF; border-radius:8px; padding:6px 10px; font-size:11px;">🔍 검색</button>
       </div>
     </div>
     <div id="frequent-presets-list" style="display:flex; flex-direction:column; gap:6px;"></div>
@@ -910,11 +926,11 @@ body {
       <div style="padding:12px; display:flex; flex-direction:column; gap:8px;">
         <input id="fp-input-name" placeholder="이름 (예: 집, 회사, 단골식당)" style="padding:10px; border-radius:8px; border:1px solid #334155; background:#0F172A; color:#FFF; font-size:13px; font-weight:800;">
         <div style="display:flex; gap:6px;">
-          <input id="fp-input-keyword" placeholder="장소 검색어 (예: 용인 기흥역)" style="flex:1; padding:10px; border-radius:8px; border:1px solid #334155; background:#0F172A; color:#FFF; font-size:12px;">
+          <input id="fp-input-keyword" placeholder="장소 검색어 (전국 가능, 예: 부산 해운대)" style="flex:1; padding:10px; border-radius:8px; border:1px solid #334155; background:#0F172A; color:#FFF; font-size:12px;">
           <button onclick="searchFrequentPlace()" style="background:#2DD4BF; color:#000; border:none; border-radius:8px; padding:8px 12px; font-weight:900; font-size:12px;">검색</button>
         </div>
         <div id="fp-search-results" style="max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
-        <div style="font-size:10px; color:#94A3B8; line-height:1.4;">💡 현재 위치로 등록하려면 이름만 입력 후 [현재 위치로 등록]을 누르세요. 카테고리는 추후 확장 예정 (현재는 none으로 저장).</div>
+        <div style="font-size:10px; color:#94A3B8; line-height:1.4;">💡 전국 어디나 검색 가능 (부산, 제주 등). 검색 후 선택 → 저장. 현재 위치 등록은 이름만 입력 후 [현재 위치로 등록].</div>
       </div>
       <div class="modal-footer" style="display:flex; gap:6px; justify-content:flex-end; padding:10px 12px;">
         <button onclick="closeFrequentModal()" style="background:#1E293B; color:#FFF; border:none; padding:8px 14px; border-radius:6px; font-weight:800;">취소</button>
@@ -1249,7 +1265,7 @@ body {
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.9.24 Compact Bottom";
+  const BUILD_VERSION = "v7.9.26 Compact Bottom";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2076,16 +2092,29 @@ body {
 
   function openFrequentModal() {
     const modal = document.getElementById('frequent-modal');
-    if (modal) modal.style.display = 'flex';
+    if (modal) { modal.classList.add('active'); modal.style.display = 'flex'; }
     const nameInput = document.getElementById('fp-input-name');
-    if (nameInput) nameInput.focus();
+    if (nameInput) setTimeout(()=>nameInput.focus(), 100);
     const results = document.getElementById('fp-search-results');
-    if (results) results.innerHTML = '';
+    if (results) results.innerHTML = '<div style="font-size:11px; color:#94A3B8; padding:8px;">전국 어디나 검색 가능 - 예: 부산 해운대, 제주공항, 서울 강남역</div>';
     pendingFrequentSelection = null;
+    // 엔터로 검색 가능하도록
+    try {
+      const kwInput = document.getElementById('fp-input-keyword');
+      if (kwInput && !kwInput._boundEnter) {
+        kwInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); searchFrequentPlace(); } });
+        kwInput._boundEnter = true;
+      }
+      const nameInput2 = document.getElementById('fp-input-name');
+      if (nameInput2 && !nameInput2._boundEnter) {
+        nameInput2.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); if(pendingFrequentSelection) confirmFrequentAdd(); else searchFrequentPlace(); } });
+        nameInput2._boundEnter = true;
+      }
+    } catch(e) {}
   }
   function closeFrequentModal() {
     const modal = document.getElementById('frequent-modal');
-    if (modal) modal.style.display = 'none';
+    if (modal) { modal.classList.remove('active'); modal.style.display = 'none'; }
     pendingFrequentSelection = null;
     const kw = document.getElementById('fp-input-keyword');
     const name = document.getElementById('fp-input-name');
@@ -2100,43 +2129,75 @@ body {
     const kw = (kwInput && kwInput.value.trim()) || '';
     if (!kw) { showToast('🔍 검색어를 입력하세요'); return; }
     const resultsEl = document.getElementById('fp-search-results');
-    if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px; color:#94A3B8; padding:8px;">검색 중...</div>';
+    if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px; color:#94A3B8; padding:8px;">전국 검색 중... (카카오)</div>';
     try {
-      if (window.kakao && kakao.maps && kakao.maps.services) {
-        const places = new kakao.maps.services.Places();
-        const searchPromise = new Promise((resolve) => {
-          places.keywordSearch(kw, (data, status) => {
-            if (status === kakao.maps.services.Status.OK && data && data.length>0) resolve(data.slice(0,8));
-            else resolve([]);
-          });
+      if (!(window.kakao && kakao.maps && kakao.maps.services)) {
+        if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px; color:#EF4444; padding:8px;">카카오 지도 SDK 로딩 중 - 잠시 후 다시 시도하거나 현재 위치로 등록을 이용하세요</div>';
+        return;
+      }
+      const places = new kakao.maps.services.Places();
+
+      // v7.9.26 전국 검색 지원: 위치 바이어스 없이 먼저, 그 다음 위치 기반 정렬로 재시도 없이 전국 커버
+      const doSearch = (opts) => new Promise((resolve) => {
+        const callback = (data, status) => {
+          if (status === kakao.maps.services.Status.OK && data && data.length>0) resolve(data);
+          else resolve([]);
+        };
+        if (opts) places.keywordSearch(kw, callback, opts);
+        else places.keywordSearch(kw, callback);
+      });
+
+      let data = [];
+
+      // 1차: 전국 검색 (옵션 없이) - 부산, 제주 등 전국 어디나 가능
+      data = await doSearch(null);
+
+      // 2차: 결과가 없고 현재 위치가 있으면 위치 기반 정렬로 재시도 (근처 우선)
+      if ((!data || data.length===0) && currentPos && currentPos.lat && currentPos.lng) {
+        if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px; color:#94A3B8; padding:8px;">근처에서 재검색 중...</div>';
+        const optNearby = { x: currentPos.lng, y: currentPos.lat, location: new kakao.maps.LatLng(currentPos.lat, currentPos.lng), sort: kakao.maps.services.SortBy.DISTANCE };
+        data = await doSearch(optNearby);
+      }
+
+      // 3차: 그래도 없으면 반경 넓게(20km) 재시도
+      if ((!data || data.length===0) && currentPos) {
+        const optRadius = { x: currentPos.lng, y: currentPos.lat, y: currentPos.lat, x: currentPos.lng, location: new kakao.maps.LatLng(currentPos.lat, currentPos.lng), radius: 20000, sort: kakao.maps.services.SortBy.DISTANCE };
+        // kakao expects x,y,radius
+        data = await doSearch({ x: currentPos.lng, y: currentPos.lat, radius: 20000 });
+      }
+
+      data = (data || []).slice(0,15);
+
+      console.log('searchFrequentPlace nationwide result', data);
+      if (!data || data.length===0) {
+        if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px; color:#EF4444; padding:8px;">검색 결과 없음 - 정확한 상호명이나 주소로 시도해보세요<br>예: 부산 해운대, 제주공항, 서울 강남역</div>';
+        showToast('🔍 결과 없음 - 전국 검색');
+        return;
+      }
+      if (resultsEl) {
+        resultsEl.innerHTML = '';
+        data.forEach((place, idx) => {
+          const distText = currentPos ? `${getStraightDistanceKm(currentPos.lat, currentPos.lng, parseFloat(place.y), parseFloat(place.x)).toFixed(1)}km` : '';
+          const div = document.createElement('div');
+          div.style.cssText = 'padding:10px; background:#0F172A; border:1px solid #1E293B; border-radius:8px; cursor:pointer; display:flex; flex-direction:column; gap:3px;';
+          div.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center;"><div style="font-size:12px; font-weight:800; color:#FFF;">${place.place_name}</div><div style="font-size:10px; color:#FBBF24; font-weight:800;">${distText}</div></div><div style="font-size:10px; color:#94A3B8;">${place.road_address_name || place.address_name}</div><div style="font-size:9px; color:#2DD4BF;">${place.y}, ${place.x}</div>`;
+          div.onclick = () => {
+            pendingFrequentSelection = { lat: parseFloat(place.y), lng: parseFloat(place.x), address: place.road_address_name || place.address_name, name: place.place_name };
+            Array.from(resultsEl.children).forEach(c => { c.style.borderColor = '#1E293B'; c.style.background = '#0F172A'; });
+            div.style.borderColor = '#2DD4BF';
+            div.style.background = '#162032';
+            const nameInput = document.getElementById('fp-input-name');
+            if (nameInput && !nameInput.value.trim()) nameInput.value = place.place_name;
+            showToast(`📍 ${place.place_name} 선택됨 - 저장 누르세요`);
+          };
+          resultsEl.appendChild(div);
         });
-        const data = await searchPromise;
-        if (!data || data.length===0) {
-          if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px; color:#EF4444; padding:8px;">검색 결과 없음</div>';
-          return;
-        }
-        if (resultsEl) {
-          resultsEl.innerHTML = '';
-          data.forEach((place, idx) => {
-            const div = document.createElement('div');
-            div.style.cssText = 'padding:8px; background:#0F172A; border:1px solid #1E293B; border-radius:8px; cursor:pointer; display:flex; flex-direction:column; gap:2px;';
-            div.innerHTML = `<div style="font-size:12px; font-weight:800; color:#FFF;">${place.place_name}</div><div style="font-size:10px; color:#94A3B8;">${place.road_address_name || place.address_name}</div><div style="font-size:10px; color:#2DD4BF;">${parseFloat(place.y).toFixed(5)}, ${parseFloat(place.x).toFixed(5)}</div>`;
-            div.onclick = () => {
-              pendingFrequentSelection = { lat: parseFloat(place.y), lng: parseFloat(place.x), address: place.road_address_name || place.address_name, name: place.place_name };
-              // 하이라이트
-              Array.from(resultsEl.children).forEach(c => c.style.borderColor = '#1E293B');
-              div.style.borderColor = '#2DD4BF';
-              const nameInput = document.getElementById('fp-input-name');
-              if (nameInput && !nameInput.value.trim()) nameInput.value = place.place_name;
-            };
-            resultsEl.appendChild(div);
-          });
-        }
-      } else {
-        if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px; color:#EF4444;">카카오 지도 로딩 필요 - 현재 위치로 등록을 이용하세요</div>';
+        showToast(`✅ 전국 ${data.length}곳 찾음`);
       }
     } catch(e) {
-      if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px; color:#EF4444;">검색 오류</div>';
+      console.error('searchFrequentPlace error', e);
+      if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px; color:#EF4444; padding:8px;">검색 오류: ' + (e.message||'') + '</div>';
+      showToast('❌ 검색 오류');
     }
   }
 
