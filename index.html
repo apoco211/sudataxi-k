@@ -20,6 +20,7 @@
   <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
   <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=7ee80d17f027cf99b9634ae13731a6a9&libraries=services"></script>
   <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
@@ -672,6 +673,16 @@
           </div>
           <div class="rev-bottom-val" id="val-time">-</div>
         </div>
+      </div>
+
+      <!-- 신규: Gemini AI 일일 결산 및 음성 브리핑 영역 -->
+      <div class="revenue-box" style="border-color: #C084FC; background: rgba(192, 132, 252, 0.05);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-size:14px; font-weight:900; color:#C084FC;">🤖 AI 일일 결산 & 음성 브리핑</span>
+          <button id="btn-gemini-daily-summary" style="background:#C084FC; color:#000; border:none; border-radius:6px; padding:6px 10px; font-size:11px; font-weight:900; cursor:pointer; box-shadow: 0 2px 8px rgba(192,132,252,0.3);">결산 듣기 🔊</button>
+        </div>
+        <div id="gemini-daily-summary-text" style="font-size: 12px; color: #E9D5FF; line-height: 1.5; word-break: keep-all;">오늘의 운행 데이터를 기반으로 AI가 하루를 요약하고 음성으로 브리핑해 줍니다. 퇴근길에 들어보세요!</div>
+        <audio id="gemini-tts-audio" style="display:none;"></audio>
       </div>
     </div>
     
@@ -1378,6 +1389,134 @@
     }
   }
 
+  async function runDailySummaryAndTTS() {
+    const btn = document.getElementById('btn-gemini-daily-summary');
+    const textEl = document.getElementById('gemini-daily-summary-text');
+    const audioEl = document.getElementById('gemini-tts-audio');
+
+    if (btn.innerText.includes('정지')) {
+      audioEl.pause();
+      audioEl.currentTime = 0;
+      btn.innerText = '결산 듣기 🔊';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = '데이터 분석 중...';
+    textEl.innerText = '오늘의 운행 기록을 AI가 분석하고 있습니다...';
+
+    // 1. 데이터 수집
+    const today = getTodayDrivingData();
+    const revInput = document.getElementById('input-rev');
+    const rev = revInput ? (parseInt(revInput.value) || 0) : 0;
+    
+    // getDynamicDailyTarget 함수가 없을 경우를 대비한 폴백 처리
+    let target = 300000;
+    try { target = getDynamicDailyTarget().dailyTarget; } catch(e) {}
+    
+    const pct = target > 0 ? ((rev / target) * 100).toFixed(1) : 0;
+    const emptyH = formatHHMMSS(today.emptyCar || 0);
+    const boardH = formatHHMMSS(today.passengerBoard || 0);
+
+    const prompt = `당신은 택시 기사를 위한 따뜻하고 친근한 AI 매니저입니다.
+    오늘 기사님의 운행 데이터:
+    - 실매출: ${rev.toLocaleString()}원 (일일 목표달성률 ${pct}%)
+    - 손님 탑승 시간: ${boardH}
+    - 빈차 배회 시간: ${emptyH}
+    이 데이터를 바탕으로 기사님의 오늘 하루 운행을 짧게 평가하고, 퇴근길을 위로하는 따뜻한 격려를 포함해 딱 2~3문장 이내의 아주 자연스러운 구어체(라디오 DJ 톤)로 요약해주세요.`;
+
+    const apiKey = ""; // Canvas 환경에서 자동 주입됨
+
+    try {
+        // 2. 텍스트 생성 (Gemini 3 Flash)
+        const textPayload = {
+            contents: [{ parts: [{ text: prompt }] }],
+            systemInstruction: { parts: [{ text: "친근한 목소리로 택시 기사님에게 직접 말하듯이 텍스트를 작성하세요. 이모지는 사용하지 마세요(음성 변환용입니다)." }] }
+        };
+        const textRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(textPayload)
+        });
+        const textResult = await textRes.json();
+        const summaryText = textResult.candidates?.[0]?.content?.parts?.[0]?.text || "오늘 하루도 정말 고생 많으셨습니다. 안전하게 귀가하시길 바랍니다!";
+        textEl.innerText = summaryText;
+
+        // 3. 음성 생성 (Gemini 2.5 Flash TTS)
+        btn.innerText = '음성 합성 중...';
+        const ttsPayload = {
+            contents: [{ parts: [{ text: summaryText }] }],
+            generationConfig: {
+                responseModalities: ["AUDIO"],
+                speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Aoede" } } } // 밝고 기분 좋은 목소리
+            },
+            model: "gemini-2.5-flash-preview-tts"
+        };
+        const ttsRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(ttsPayload)
+        });
+        const ttsResult = await ttsRes.json();
+        const part = ttsResult?.candidates?.[0]?.content?.parts?.[0];
+
+        if (part?.inlineData?.data) {
+            // PCM 데이터를 WAV로 변환하여 재생
+            const pcmWavUrl = createWavUrlFromPCMBase64(part.inlineData.data, 24000);
+            audioEl.src = pcmWavUrl;
+            audioEl.play();
+            btn.innerText = '재생 정지 ⏹️';
+            btn.disabled = false;
+            audioEl.onended = () => { btn.innerText = '결산 듣기 🔊'; };
+        } else {
+            btn.innerText = '결산 듣기 🔊'; btn.disabled = false;
+        }
+    } catch (e) {
+        console.error(e);
+        textEl.innerText = 'AI 결산을 불러오는데 실패했습니다.';
+        btn.innerText = '다시 시도'; btn.disabled = false;
+    }
+  }
+
+  // PCM 데이터를 브라우저에서 재생 가능한 WAV Blob URL로 변환하는 헬퍼 함수
+  function createWavUrlFromPCMBase64(base64Data, sampleRate = 24000) {
+      const binaryString = atob(base64Data);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+      }
+      
+      const buffer = new ArrayBuffer(44 + bytes.length);
+      const view = new DataView(buffer);
+      
+      // RIFF chunk descriptor
+      writeWavString(view, 0, 'RIFF');
+      view.setUint32(4, 36 + bytes.length, true);
+      writeWavString(view, 8, 'WAVE');
+      // FMT sub-chunk
+      writeWavString(view, 12, 'fmt ');
+      view.setUint32(16, 16, true); // Subchunk1Size
+      view.setUint16(20, 1, true); // AudioFormat
+      view.setUint16(22, 1, true); // NumChannels
+      view.setUint32(24, sampleRate, true); // SampleRate
+      view.setUint32(28, sampleRate * 2, true); // ByteRate
+      view.setUint16(32, 2, true); // BlockAlign
+      view.setUint16(34, 16, true); // BitsPerSample
+      // Data sub-chunk
+      writeWavString(view, 36, 'data');
+      view.setUint32(40, bytes.length, true);
+      
+      // Write PCM data
+      const dataArray = new Uint8Array(buffer, 44);
+      dataArray.set(bytes);
+
+      const blob = new Blob([buffer], { type: 'audio/wav' });
+      return URL.createObjectURL(blob);
+  }
+
+  function writeWavString(view, offset, string) {
+      for (let i = 0; i < string.length; i++) {
+          view.setUint8(offset + i, string.charCodeAt(i));
+      }
+  }
+
   function renderCards(routeCards, targetBoundaryCardData) {
     const listEl = document.getElementById('card-list'); if (!listEl) return;
     const fragment = document.createDocumentFragment();
@@ -1696,7 +1835,7 @@
 
   // --- v7.9.44 지도 모달(실시간 도로망) ---
   async function openRouteMapModal() {
-    if (typeof L === 'undefined') return;
+    if (typeof L === 'undefined') { showToast('🗺️ 지도 데이터를 불러오는 중입니다...'); return; }
     document.getElementById('map-modal').classList.add('active');
     setTimeout(async () => {
       if (!leafletMap) {
@@ -2244,6 +2383,9 @@
 
     const btnOcrPenalty = document.getElementById('btn-ocr-penalty');
     if (btnOcrPenalty) btnOcrPenalty.addEventListener('click', handlePenaltyOCR);
+
+    const btnDailySummary = document.getElementById('btn-gemini-daily-summary');
+    if (btnDailySummary) btnDailySummary.addEventListener('click', runDailySummaryAndTTS);
 
     initSimulator();
 
