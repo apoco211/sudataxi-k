@@ -105,6 +105,27 @@
 :where(code, pre, kbd, samp) {
   font-family: "Optimistic Mono", ui-monospace, monospace;
 }
+</style><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
 <style id="v7-9-37-fix">
 .bottom-bar {
   position: fixed !important;
@@ -205,7 +226,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v7.9.42</title>
+  <title>수다택시 K v7.9.52</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1084,6 +1105,176 @@ body.theme-day .save-restroom-btn {
 
 </style>
 
+
+<style id="v7-9-51-square-final">
+/* v7.9.52 FINAL - 원본 보존 + 정사각형 + 큰 글씨 + 타이머 외곽선 분리 */
+.bottom-bar {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 6px !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  position: fixed !important;
+  bottom: calc(2px + env(safe-area-inset-bottom, 0px)) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: calc(100% - 8px) !important;
+  max-width: 430px !important;
+  min-height: 72px !important;
+  height: 72px !important;
+  max-height: 72px !important;
+  padding: 5px 5px calc(5px + env(safe-area-inset-bottom, 0px)) 5px !important;
+  background: #0F0F0F !important;
+  border: 2px solid #FFC800 !important;
+  border-radius: 18px !important;
+  z-index: 200 !important;
+  box-shadow: 0 -2px 16px rgba(0,0,0,0.6) !important;
+}
+body.theme-day .bottom-bar { background: #FFFFFF !important; }
+
+/* 타이머 - 왼쪽 유동 영역, 외곽선 없음 */
+.bottom-bar .timer-cell {
+  flex: 1 !important;
+  display: grid !important;
+  grid-template-rows: 22px 1fr !important;
+  gap: 4px !important;
+  height: 62px !important;
+  min-height: 62px !important;
+  max-height: 62px !important;
+  background: transparent !important;
+  border: none !important;
+}
+.bottom-bar .timer-mode-selector {
+  display: flex !important;
+  gap: 4px !important;
+  height: 22px !important;
+}
+.bottom-bar .timer-mode-btn {
+  flex: 1 !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  border-radius: 8px !important;
+  background: #F3F4F6 !important;
+  color: #374151 !important;
+  border: 1px solid #D1D5DB !important;
+}
+.bottom-bar .timer-mode-btn.active {
+  background: #FF6A00 !important;
+  color: #FFF !important;
+  border-color: #FF6A00 !important;
+  box-shadow: 0 2px 6px rgba(255,106,0,0.4) !important;
+}
+.bottom-bar .timer-display-btn {
+  width: 100% !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  border-radius: 10px !important;
+  background: #FFFFFF !important;
+  border: 1.5px solid #9CA3AF !important;
+  color: #111827 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.bottom-bar .timer-display-btn.running {
+  background: #FFF7ED !important;
+  border-color: #FF6A00 !important;
+  color: #C2410C !important;
+}
+.bottom-bar .timer-display-btn.finished {
+  background: #FEE2E2 !important;
+  color: #DC2626 !important;
+  border-color: #EF4444 !important;
+}
+
+/* 3개 버튼 - 높이기준 정사각형 62x62, 오른쪽 몰림 */
+.bottom-bar .bb-btn {
+  width: 62px !important;
+  min-width: 62px !important;
+  max-width: 62px !important;
+  height: 62px !important;
+  min-height: 62px !important;
+  max-height: 62px !important;
+  border-radius: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25) !important;
+  transition: transform 0.1s ease !important;
+  flex-shrink: 0 !important;
+}
+.bottom-bar .bb-btn:active { transform: scale(0.94) !important; }
+.bottom-bar .bb-btn .bb-label {
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.5px !important;
+  line-height: 1 !important;
+}
+.bottom-bar .board-btn {
+  background: #FFC800 !important;
+  color: #000 !important;
+  border: 1.5px solid #000 !important;
+}
+.bottom-bar .alight-btn {
+  background: #FF4D12 !important;
+  color: #FFF !important;
+  border: 1.5px solid #7A1F00 !important;
+}
+.bottom-bar .restroom-btn {
+  background: #2563EB !important;
+  color: #FFF !important;
+  border: 1.5px solid #1E3A8A !important;
+}
+.bottom-bar .bb-btn:disabled {
+  opacity: 0.55 !important;
+  /* 기능은 유지하되 시각적으로만 흐리게 */
+}
+
+body { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important; }
+
+@media (max-width: 375px) {
+  .bottom-bar { min-height: 68px !important; height: 68px !important; max-height: 68px !important; gap: 4px !important; padding: 4px !important; }
+  .bottom-bar .timer-cell { height: 58px !important; min-height: 58px !important; }
+  .bottom-bar .bb-btn { width: 56px !important; min-width: 56px !important; max-width: 56px !important; height: 56px !important; min-height: 56px !important; border-radius: 14px !important; }
+  .bottom-bar .bb-btn .bb-label { font-size: 13.5px !important; }
+}
+</style>
+
+
+<style id="v7-9-52-border-fix">
+/* v7.9.52 - 각 버튼 테두리 추가 (사진 디자인 기준) */
+.bottom-bar .bb-btn {
+  border-width: 2.5px !important;
+  border-style: solid !important;
+}
+.bottom-bar .board-btn {
+  border-color: #000 !important;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.1) inset, 0 2px 6px rgba(0,0,0,0.2) !important;
+}
+.bottom-bar .alight-btn {
+  border-color: #000 !important;
+}
+.bottom-bar .restroom-btn {
+  border-color: #000 !important;
+}
+.bottom-bar .timer-mode-btn {
+  border: 1.5px solid #000 !important;
+}
+.bottom-bar .timer-display-btn {
+  border: 2px solid #000 !important;
+}
+</style>
+
 </head>
 <body class="mode-1">
   
@@ -1425,16 +1616,18 @@ body.theme-day .save-restroom-btn {
     </div>
   </div>
   
-  <div class="bottom-bar">
-    <div class="timer-container" style="flex: 1;">
+  <div class="bottom-bar" id="bottom-bar-v7951">
+    <div class="bb-cell timer-cell">
       <div class="timer-mode-selector">
         <button class="timer-mode-btn active" id="timer-btn-5m">5분</button>
         <button class="timer-mode-btn" id="timer-btn-10m">10분</button>
       </div>
       <button class="timer-display-btn" id="timer-display-btn" title="길게 누르면 iOS 시스템 타이머 실행">⏱️ 05:00 시작</button>
     </div>
-    <button class="save-call-btn" id="btn-save-call" style="flex: 1;">📍 일반 탑승 저장<br><span style="font-size: 9px; font-weight:normal;">(길게누르면 고단가)</span></button>
-    <button class="save-restroom-btn" id="btn-save-restroom" style="flex: 1;">🚻 내 화장실<br>위치 저장</button>
+    <button class="bb-btn board-btn" id="btn-bottom-board"><span class="bb-label">승차</span></button>
+    <button class="bb-btn alight-btn" id="btn-bottom-alight"><span class="bb-label">하차</span></button>
+    <button class="bb-btn restroom-btn" id="btn-save-restroom"><span class="bb-label">화장실</span></button>
+    <button id="btn-save-call" style="display:none !important;">📍 일반 탑승 저장</button>
   </div>
   
   <div class="toast-banner" id="toast-banner" style="position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 12px; padding: 6px 12px; border-radius: 12px; z-index: 300; display: none; box-shadow: 0 3px 12px rgba(0,0,0,0.6);"></div>
@@ -1482,7 +1675,7 @@ body.theme-day .save-restroom-btn {
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.9.42";
+  const BUILD_VERSION = "v7.9.52";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -4867,13 +5060,219 @@ function initDailyRevenue() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v7.9.42</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v7.9.52</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
   window.addEventListener('load', function(){ setTimeout(forceUpdateHeader, 300); });
   setTimeout(function(){ var h=document.getElementById('app-header-title'); if(h && h.innerText.indexOf('대기 중')!==-1) forceUpdateHeader(); }, 1500);
   setInterval(forceUpdateHeader, 60000);
+})();
+</script>
+
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
+<script id="v7-9-51-patch">
+// v7.9.52 FINAL PATCH - 원본 기능 보존 + 하단 버튼 정확 동작 + 강력 타이머
+(function(){
+  console.log('[v7.9.52] patch loaded');
+
+  // --- Robust timer V2 ---
+  function saveTimerStateV2(){
+    try{
+      var preset=(typeof timerPresetMin!=='undefined')?timerPresetMin:5;
+      var remain=(typeof timerRemainingSec!=='undefined')?timerRemainingSec:preset*60;
+      var isRun=(typeof isTimerRunning!=='undefined')?isTimerRunning:false;
+      var target=null;
+      if(isRun){
+        try{ var raw=localStorage.getItem('sudataxi_timer_state'); var s=JSON.parse(raw); if(s&&s.targetEndTime) target=s.targetEndTime; }catch(e){}
+        if(!target) target=Date.now()+remain*1000;
+      }
+      localStorage.setItem('sudataxi_timer_state', JSON.stringify({presetMin:preset, remainingSec:remain, isRunning:isRun, targetEndTime:target, startedAt:Date.now(), v:'7.9.51'}));
+    }catch(e){}
+  }
+
+  window.startTimerInternalV2=function(){
+    try{
+      if(typeof timerPresetMin==='undefined') return;
+      if(typeof timerRemainingSec==='undefined') timerRemainingSec=timerPresetMin*60;
+      isTimerRunning=true;
+      var btn=document.getElementById('timer-display-btn'); if(!btn) return;
+      btn.classList.add('running'); btn.classList.remove('finished');
+      var targetEnd=Date.now()+timerRemainingSec*1000;
+      localStorage.setItem('sudataxi_timer_state', JSON.stringify({presetMin:timerPresetMin, remainingSec:timerRemainingSec, isRunning:true, targetEndTime:targetEnd, startedAt:Date.now(), v:'7.9.51'}));
+      if(navigator.serviceWorker&&navigator.serviceWorker.controller){ try{ navigator.serviceWorker.controller.postMessage({action:'startTimer', minutes:timerPresetMin}); }catch(e){} }
+      if(typeof timerInterval!=='undefined'&&timerInterval) clearInterval(timerInterval);
+      timerInterval=setInterval(function(){
+        var now=Date.now();
+        var remain=Math.round((targetEnd-now)/1000); if(remain<0) remain=0;
+        timerRemainingSec=remain;
+        if(remain<=0){
+          clearInterval(timerInterval); isTimerRunning=false; timerRemainingSec=0;
+          if(btn){ btn.className='timer-display-btn finished'; btn.innerText='⏱️ 00:00 이동 추천!'; }
+          try{ localStorage.removeItem('sudataxi_timer_state'); }catch(e){}
+          try{ if(typeof playTimerAlarm==='function') playTimerAlarm(); }catch(e){}
+          try{ if(typeof playBriefing==='function') playBriefing(); }catch(e){}
+          try{ if(navigator.vibrate) navigator.vibrate([300,100,300]); }catch(e){}
+        }else{
+          if(btn) btn.innerText='⏱️ '+(typeof formatMMSS==='function'?formatMMSS(remain):(Math.floor(remain/60)+':'+('0'+remain%60).slice(-2)));
+        }
+      },500);
+    }catch(e){ console.error(e); }
+  };
+
+  if(typeof window.startTimerInternal==='function'){
+    window.startTimerInternal=function(){ return window.startTimerInternalV2(); };
+  }
+  if(typeof window.saveTimerState==='function'){
+    window.saveTimerState=saveTimerStateV2;
+  }
+
+  // --- 하차 패치: 단축어 제거 ---
+  window.handleAlighting=function(e){
+    try{ if(e){ e.preventDefault(); e.stopPropagation(); } }catch(err){}
+    var now=Date.now();
+    if(typeof _alightingLockUntil!=='undefined' && now<_alightingLockUntil) return;
+    if(typeof _alightingLockUntil!=='undefined') _alightingLockUntil=now+1500;
+    if(typeof drivingState!=='undefined'){
+      if(!drivingState.isDriving || drivingState.isBreak || !drivingState.isPassengerBoarded){
+        if(typeof _alightingLockUntil!=='undefined') _alightingLockUntil=0;
+        if(typeof showToast==='function') showToast('⚠️ 하차할 고객이 없습니다.');
+        return;
+      }
+    }
+    var alightBtn=document.getElementById('btn-alight');
+    if(alightBtn){ alightBtn.disabled=true; alightBtn.style.pointerEvents='none'; }
+    if(typeof drivingState!=='undefined'){
+      drivingState.isPassengerBoarded=false;
+      drivingState.stateStartTime=Date.now();
+      if(typeof updateDrivingUI==='function') updateDrivingUI();
+      if(typeof saveDrivingState==='function') saveDrivingState();
+    }
+    if(typeof showToast==='function') showToast('👋 하차 완료! 추천화면 이동 + 5분 타이머 시작');
+    if(typeof setTab==='function') setTab(1);
+    if(typeof setTimerPreset==='function') setTimerPreset(5);
+    // 단축어 호출 없음
+    window.startTimerInternalV2();
+    setTimeout(function(){
+      if(typeof _alightingLockUntil!=='undefined') _alightingLockUntil=0;
+      var a=document.getElementById('btn-alight'); if(a) a.style.pointerEvents='';
+      if(typeof updateDrivingUI==='function') updateDrivingUI();
+    },1200);
+  };
+
+  // --- 하단 버튼 정확 동작 ---
+  function bindBottom(){
+    var board=document.getElementById('btn-bottom-board');
+    var alight=document.getElementById('btn-bottom-alight');
+    var rest=document.getElementById('btn-save-restroom');
+
+    if(board && !board._b51){
+      var handlerBoard=function(e){
+        try{ e.preventDefault(); e.stopPropagation(); }catch(err){}
+        // 원본 기능 보존: 운행 중이 아니면 운행 시작 후 승차
+        if(typeof drivingState!=='undefined' && !drivingState.isDriving){
+          if(typeof toggleDriving==='function'){
+            toggleDriving();
+            setTimeout(function(){ if(typeof handleBoarding==='function') handleBoarding(e); }, 300);
+            return;
+          }
+        }
+        if(typeof handleBoarding==='function') handleBoarding(e);
+        else { var orig=document.getElementById('btn-board'); if(orig) orig.click(); }
+      };
+      board.addEventListener('click', handlerBoard);
+      board.addEventListener('touchend', function(e){ /* 터치도 허용 */ }, {passive:true});
+      board._b51=true;
+    }
+
+    if(alight && !alight._b51){
+      var handlerAlight=function(e){
+        try{ e.preventDefault(); e.stopPropagation(); }catch(err){}
+        window.handleAlighting(e);
+      };
+      alight.addEventListener('click', handlerAlight);
+      alight._b51=true;
+    }
+
+    // 화장실은 원본 로직 그대로 유지 (이미 바인딩되어 있음)
+    if(rest && !rest._b51){
+      // 원본 saveCurrentRestroomLocation이 이미 바인딩되어 있으므로 추가 바인딩 불필요
+      rest._b51=true;
+    }
+  }
+
+  function patchUI(){
+    if(typeof window.updateDrivingUI!=='function' || window.updateDrivingUI._b51) return;
+    var orig=window.updateDrivingUI;
+    window.updateDrivingUI=function(){
+      orig.apply(this, arguments);
+      try{
+        var bBtn=document.getElementById('btn-board');
+        var aBtn=document.getElementById('btn-alight');
+        var bbBoard=document.getElementById('btn-bottom-board');
+        var bbAlight=document.getElementById('btn-bottom-alight');
+        // 원본 disabled 상태를 시각적으로만 반영, 기능은 막지 않음
+        if(bbBoard && bBtn){
+          // disabled여도 클릭 가능하도록 pointerEvents는 유지
+          bbBoard.style.opacity = bBtn.disabled ? '0.55' : '1';
+        }
+        if(bbAlight && aBtn){
+          bbAlight.style.opacity = aBtn.disabled ? '0.55' : '1';
+        }
+      }catch(e){}
+    };
+    window.updateDrivingUI._b51=true;
+  }
+
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden) return;
+    try{
+      var raw=localStorage.getItem('sudataxi_timer_state');
+      if(!raw) return;
+      var s=JSON.parse(raw);
+      if(s&&s.isRunning&&s.targetEndTime){
+        var left=Math.round((s.targetEndTime-Date.now())/1000);
+        if(left<=0){
+          if(typeof timerInterval!=='undefined'&&timerInterval) clearInterval(timerInterval);
+          isTimerRunning=false; timerRemainingSec=0;
+          var btn=document.getElementById('timer-display-btn');
+          if(btn){ btn.className='timer-display-btn finished'; btn.innerText='⏱️ 00:00 이동 추천!'; }
+          localStorage.removeItem('sudataxi_timer_state');
+        }else{
+          timerRemainingSec=left;
+          if(!isTimerRunning) window.startTimerInternalV2();
+        }
+      }
+    }catch(e){}
+  });
+
+  function init51(){
+    bindBottom(); patchUI();
+    try{ if(typeof updateDrivingUI==='function') updateDrivingUI(); }catch(e){}
+    // 타이머 복구
+    try{
+      var raw=localStorage.getItem('sudataxi_timer_state');
+      if(raw){
+        var st=JSON.parse(raw);
+        if(st&&st.isRunning&&st.targetEndTime){
+          var left=Math.round((st.targetEndTime-Date.now())/1000);
+          if(left>0){
+            timerRemainingSec=left;
+            timerPresetMin=st.presetMin||5;
+            var b5=document.getElementById('timer-btn-5m');
+            var b10=document.getElementById('timer-btn-10m');
+            if(b5&&b10){ b5.classList.toggle('active', timerPresetMin===5); b10.classList.toggle('active', timerPresetMin===10); }
+            window.startTimerInternalV2();
+          }
+        }
+      }
+    }catch(e){}
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(init51, 300); });
+  window.addEventListener('load', function(){ setTimeout(init51, 700); });
+  setTimeout(init51, 1000);
+  setTimeout(init51, 2500);
 })();
 </script>
 
