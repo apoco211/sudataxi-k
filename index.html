@@ -169,7 +169,7 @@
     .penalty-ocr-preview { margin-top: 6px; font-size: 9px; color: #666; background: #F5F5F5; border: 1px dashed #CCC; border-radius: 6px; padding: 6px 8px; max-height: 80px; overflow-y: auto; white-space: pre-wrap; }
 
     /* v7.9.23 NEW: 자주가는 곳 프리셋 - v7.9.25 개선 */
-    .frequent-presets-section { margin: 6px 0 80px 0; background: #162032; border: 1px solid rgba(45,212,191,0.35); border-top: 2px solid #2DD4BF; border-radius: 12px; padding: 6px 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+    .frequent-presets-section { margin: 6px 0 10px 0; background: #162032; border: 1px solid rgba(45,212,191,0.35); border-top: 2px solid #2DD4BF; border-radius: 12px; padding: 6px 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
     .frequent-header { display:flex; justify-content:space-between; align-items:center; gap:4px; flex-wrap:nowrap; margin-bottom:4px; overflow:hidden; }
     .frequent-header-left { display:flex; align-items:center; gap:4px; flex:1; min-width:0; overflow:hidden; }
     .frequent-header-actions { display:flex; gap:4px; flex-shrink:0; align-items:center; }
@@ -204,7 +204,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v7.9.40 Bottom Bar Theme Match</title>
+  <title>수다택시 K v7.9.41 Preset Margin Fix</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1481,7 +1481,7 @@ body.theme-day .save-restroom-btn {
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.9.40 Bottom Bar Theme Match";
+  const BUILD_VERSION = "v7.9.41 Preset Margin Fix";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -4866,7 +4866,7 @@ function initDailyRevenue() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v7.9.40 Bottom Bar Theme Match</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v7.9.41 Preset Margin Fix</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
