@@ -175,7 +175,8 @@
     .frequent-header-actions { display:flex; gap:4px; flex-shrink:0; align-items:center; }
     .frequent-preset-card { background: #1C2B3A; border: 1px solid rgba(45,212,191,0.25); border-radius: 8px; padding: 5px 8px; display:flex; justify-content:space-between; align-items:center; gap:6px; min-height:36px; }
     .frequent-preset-card .fp-left { display:flex; flex-direction:column; gap:0px; flex:1; min-width:0; line-height:1.15; }
-    .frequent-preset-card .fp-name { font-weight:900; font-size:12px; color:#5EEAD4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2; }
+    .frequent-preset-card .fp-name { display:flex !important; align-items:center !important; gap:5px !important; font-weight:900; font-size:12px; color:#5EEAD4; min-width:0; line-height:1.3 !important; }
+    .frequent-preset-card .fp-name-text { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; flex-shrink:1; }
     .frequent-preset-card .fp-addr { font-size:9px; color:#94A3B8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2; }
     .frequent-preset-card .fp-meta { font-size:10px; font-weight:800; color:#FBBF24; line-height:1.2; margin-top:1px; }
     .frequent-preset-card .fp-actions { display:flex; gap:3px; flex-shrink:0; }
@@ -183,7 +184,7 @@
     .fp-btn-navi { background:#2DD4BF; color:#000; }
     .fp-btn-del { background:#1E293B; color:#94A3B8; border:1px solid #334155; }
     .fp-add-btn { cursor:pointer; white-space:nowrap; font-weight:900; }
-    .fp-badge { background:#0F172A; color:#5EEAD4; border:1px solid #2DD4BF; font-size:8px; font-weight:900; padding:2px 5px; border-radius:8px; white-space:nowrap; line-height:1; }
+    .fp-badge { display:inline-flex !important; align-items:center !important; justify-content:center !important; background:#0F172A; color:#5EEAD4; border:1px solid #2DD4BF; font-size:8.5px !important; font-weight:900; height:16px !important; padding:0 6px !important; border-radius:999px !important; white-space:nowrap !important; line-height:1 !important; box-sizing:border-box !important; flex-shrink:0 !important; vertical-align:middle !important; }
     .auto-region-badge { background:#FEF3C7; color:#92400E; border:1px solid #FBBF24; font-size:10px; font-weight:800; padding:3px 8px; border-radius:8px; }
     /* v7.9.25 주간모드 대응 */
     body.theme-day .frequent-presets-section { background:#FFFFFF; border:1px solid #CCFBF1; border-top:2px solid #14B8A6; box-shadow:0 2px 12px rgba(0,0,0,0.06); }
@@ -204,7 +205,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v7.9.41 Preset Margin Fix</title>
+  <title>수다택시 K v7.9.42</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -984,7 +985,7 @@ body {
 <style id="v7-9-37-fix">
 .bottom-bar {
   position: fixed !important;
-  bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+  bottom: calc(1px + env(safe-area-inset-bottom, 0px)) !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
   width: calc(100% - 16px) !important;
@@ -1014,7 +1015,7 @@ body {
 .save-call-btn, .save-restroom-btn { flex: 1 !important; min-height: 54px !important; height: 54px !important; border-radius: 12px !important; padding: 4px 6px !important; line-height: 1.2 !important; font-weight: 900 !important; font-size: 11px !important; box-sizing: border-box !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-align: center !important; word-break: keep-all !important; white-space: normal !important; overflow: hidden !important; letter-spacing: -0.3px !important; }
 .save-call-btn { background: #FFC800 !important; color: #000 !important; }
 .save-restroom-btn { background: #3B82F6 !important; color: #FFF !important; }
-body { padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important; }
+body { padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px)) !important; }
 .backup-section { width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; overflow: hidden !important; padding: 12px 10px !important; }
 .chart-wrapper { width: 100% !important; max-width: 100% !important; overflow: hidden !important; padding-top: 6px !important; box-sizing: border-box !important; }
 .chart-container, #weekly-chart, #monthly-chart, #weekly-bars-wrapper { width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; overflow: hidden !important; padding: 0 2px !important; gap: 3px !important; }
@@ -1481,7 +1482,7 @@ body.theme-day .save-restroom-btn {
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.9.41 Preset Margin Fix";
+  const BUILD_VERSION = "v7.9.42";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2273,7 +2274,7 @@ body.theme-day .save-restroom-btn {
       let etaText = p._etaMin ? `(${p._etaMin}분)` : (p._etaLoading ? '(계산중)' : '');
       card.innerHTML = `
         <div class="fp-left">
-          <div class="fp-name">📍 ${p.name} <span class="fp-badge" style="margin-left:4px;">${p.category && p.category!=='none' ? p.category : '자주'}</span></div>
+          <div class="fp-name"><span class="fp-name-text">📍 ${p.name}</span><span class="fp-badge">${p.category && p.category!=='none' ? p.category : '자주'}</span></div>
           <div class="fp-addr">${p.address || (p.lat.toFixed(4)+','+p.lng.toFixed(4))}</div>
           <div class="fp-meta">${distText} ${etaText} · 실시간</div>
         </div>
@@ -4866,7 +4867,7 @@ function initDailyRevenue() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v7.9.41 Preset Margin Fix</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v7.9.42</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
