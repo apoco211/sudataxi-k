@@ -441,8 +441,11 @@
       <button class="map-btn" id="btn-show-map" style="display: none; flex: 2;">
         <span>🗺️ 동선 지도 보기</span>
       </button>
-      <button class="restroom-btn" id="btn-restroom" style="flex: 1;">
+      <button class="restroom-btn" id="btn-restroom" style="flex: 1.5;">
         <span>🚻 화장실 / ⛽ 주유소</span>
+      </button>
+      <button class="restroom-btn" onclick="openTranslatorModal()" style="background: #A855F7 !important; flex: 1;">
+        <span>🌐 AI 통역</span>
       </button>
     </div>
   </div>
@@ -681,8 +684,11 @@
           <span style="font-size:14px; font-weight:900; color:#C084FC;">🤖 AI 일일 결산 & 음성 브리핑</span>
           <button id="btn-gemini-daily-summary" style="background:#C084FC; color:#000; border:none; border-radius:6px; padding:6px 10px; font-size:11px; font-weight:900; cursor:pointer; box-shadow: 0 2px 8px rgba(192,132,252,0.3);">결산 듣기 🔊</button>
         </div>
-        <div id="gemini-daily-summary-text" style="font-size: 12px; color: #E9D5FF; line-height: 1.5; word-break: keep-all;">오늘의 운행 데이터를 기반으로 AI가 하루를 요약하고 음성으로 브리핑해 줍니다. 퇴근길에 들어보세요!</div>
+        <div id="gemini-daily-summary-text" style="font-size: 12px; color: #E9D5FF; line-height: 1.5; word-break: keep-all; margin-bottom: 8px;">오늘의 운행 데이터를 기반으로 AI가 하루를 요약하고 음성으로 브리핑해 줍니다. 퇴근길에 들어보세요!</div>
         <audio id="gemini-tts-audio" style="display:none;"></audio>
+        
+        <button id="btn-ai-log" onclick="generateAIDrivingLog()" style="width:100%; background:#2A2A2A; color:#E9D5FF; border:1px solid #C084FC; border-radius:6px; padding:8px 10px; font-size:12px; font-weight:900; cursor:pointer; margin-top:4px;">📝 상세 운행 일지 AI 리포트 생성 (JSON)</button>
+        <div id="ai-log-container"></div>
       </div>
     </div>
     
@@ -812,6 +818,29 @@
     </div>
   </div>
   
+  <div class="modal-overlay" id="translator-modal">
+    <div class="modal-content" style="border: 1.5px solid #A855F7; padding: 16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+        <div style="font-weight: 900; font-size: 14px; color: #A855F7;">🌐 외국인 승객 실시간 AI 통역기</div>
+        <button onclick="closeTranslatorModal()" style="background:none; border:none; font-size:16px; font-weight:900; color:var(--stat-label); cursor:pointer;">✕</button>
+      </div>
+      <div style="font-size: 11px; color: var(--stat-label); margin-bottom: 8px;">승객과 원활하게 소통하세요. 한국어로 입력하면 선택한 언어로, 외국어로 입력하면 한국어로 자동 감지해 통역합니다.</div>
+      <select id="trans-lang" class="input-rev" style="width: 100%; text-align: left; margin-bottom: 8px; font-size:13px;">
+        <option value="en-US">🇺🇸 영어 (English)</option>
+        <option value="ja-JP">🇯🇵 일본어 (日本語)</option>
+        <option value="zh-CN">🇨🇳 중국어 (中文)</option>
+      </select>
+      <textarea id="trans-input" class="input-rev" style="width: 100%; height: 80px; text-align: left; font-size: 14px; padding: 8px; margin-bottom: 8px; resize: none;" placeholder="번역할 내용을 입력하세요..."></textarea>
+      <button onclick="runTranslation()" style="width:100%; padding:10px; border-radius:8px; background:#A855F7; color:#FFF; border:none; font-weight:900; margin-bottom: 12px; cursor:pointer;">번역하기 ✨</button>
+      
+      <div id="trans-result-box" style="display:none; background:var(--stat-bg); border:1px solid var(--stat-border); border-radius:8px; padding:10px;">
+        <div id="trans-result-text" style="font-size:14px; font-weight:700; color:#FFF; margin-bottom:8px; word-break:keep-all;"></div>
+        <button onclick="playTranslationTTS()" style="width:100%; padding:8px; border-radius:6px; background:#2A2A2A; color:#A855F7; border:1px solid #A855F7; font-weight:900; cursor:pointer;">🔊 소리내어 읽기 (TTS)</button>
+        <audio id="trans-audio" style="display:none;"></audio>
+      </div>
+    </div>
+  </div>
+
 <script>
   const BUILD_VERSION = "v7.9.44";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
@@ -1517,6 +1546,175 @@
       }
   }
 
+  function openTranslatorModal() {
+      document.getElementById('translator-modal').classList.add('active');
+  }
+  
+  function closeTranslatorModal() {
+      document.getElementById('translator-modal').classList.remove('active');
+      document.getElementById('trans-input').value = '';
+      document.getElementById('trans-result-box').style.display = 'none';
+  }
+
+  async function runTranslation() {
+      const input = document.getElementById('trans-input').value.trim();
+      if (!input) { showToast('번역할 텍스트를 입력해주세요.'); return; }
+      
+      const resultTextEl = document.getElementById('trans-result-text');
+      const resultBox = document.getElementById('trans-result-box');
+      resultBox.style.display = 'block';
+      resultTextEl.innerText = '번역 중... ✨';
+
+      const langSelect = document.getElementById('trans-lang');
+      const targetLangName = langSelect.options[langSelect.selectedIndex].text;
+      
+      // 언어 자동 감지 및 양방향 번역 프롬프트
+      const prompt = `You are a helpful translator for a taxi driver in South Korea. 
+      Target Language: ${targetLangName}.
+      Instructions: Analyze the following text. If it is in Korean, translate it to ${targetLangName}. If it is already in ${targetLangName} (or any other foreign language), translate it to Korean. 
+      Only return the translated text without any quotes or extra explanations.
+      Text: "${input}"`;
+
+      const payload = {
+          contents: [{ parts: [{ text: prompt }] }],
+      };
+      
+      const apiKey = ""; // API Key 런타임 주입
+      
+      try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`, {
+              method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (data.candidates && data.candidates[0].content) {
+              resultTextEl.innerText = data.candidates[0].content.parts[0].text;
+          } else {
+              resultTextEl.innerText = '번역 결과를 가져오지 못했습니다.';
+          }
+      } catch(e) {
+          console.error(e);
+          resultTextEl.innerText = 'AI 서버 연결 오류가 발생했습니다.';
+      }
+  }
+
+  async function playTranslationTTS() {
+      const text = document.getElementById('trans-result-text').innerText;
+      if (!text || text === '번역 중... ✨' || text.includes('오류')) return;
+      
+      const audioEl = document.getElementById('trans-audio');
+      
+      const payload = {
+          contents: [{ parts: [{ text: text }] }],
+          generationConfig: {
+              responseModalities: ["AUDIO"],
+              speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } } } // Upbeat voice
+          },
+          model: "gemini-2.5-flash-preview-tts"
+      };
+      
+      const apiKey = ""; // API Key 런타임 주입
+      
+      try {
+          showToast('음성 생성 중... 🔊');
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
+              method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          const pcmData = data?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+          
+          if (pcmData) {
+              const wavUrl = createWavUrlFromPCMBase64(pcmData, 24000);
+              audioEl.src = wavUrl;
+              audioEl.play();
+          } else {
+              showToast('TTS 오디오 생성 실패');
+          }
+      } catch(e) {
+          console.error(e);
+          showToast('TTS 서버 연결 오류');
+      }
+  }
+
+  async function generateAIDrivingLog() {
+      const btn = document.getElementById('btn-ai-log');
+      const container = document.getElementById('ai-log-container');
+      
+      btn.disabled = true;
+      btn.innerText = '리포트 작성 중... ⏳';
+      
+      const today = getTodayDrivingData();
+      const revInput = document.getElementById('input-rev');
+      const rev = revInput ? (parseInt(revInput.value) || 0) : 0;
+      
+      const totalHours = (today.totalDrive || 0) / 3600;
+      const boardHours = (today.passengerBoard || 0) / 3600;
+      const boardRate = (today.totalDrive || 0) > 0 ? ((today.passengerBoard || 0) / (today.totalDrive || 0) * 100).toFixed(1) : 0;
+      
+      const prompt = `당신은 대한민국 택시 기사의 든든한 AI 코치입니다. 오늘의 운행 데이터를 분석하여, 객관적인 평가와 내일을 위한 실행 가능한 팁을 작성해주세요.
+      [오늘의 운행 데이터]
+      - 총 운행 시간: ${totalHours.toFixed(1)}시간
+      - 손님 탑승 시간: ${boardHours.toFixed(1)}시간 (탑승률 ${boardRate}%)
+      - 총 매출: ${rev.toLocaleString()}원
+      
+      위 데이터를 바탕으로 JSON 형식에 맞게 리포트를 작성해주세요.`;
+
+      const payload = {
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+              responseMimeType: "application/json",
+              responseSchema: {
+                  type: "OBJECT",
+                  properties: {
+                      "rating": { "type": "INTEGER", "description": "전반적인 운행 효율 점수 (1에서 5까지의 별점 수)" },
+                      "analysis": { "type": "STRING", "description": "오늘의 운행 효율 및 매출에 대한 전문가적이고 따뜻한 분석 내용 (3문장 내외)" },
+                      "tips": { 
+                          "type": "ARRAY", 
+                          "items": { "type": "STRING" }, 
+                          "description": "내일 매출을 끌어올리기 위한 구체적인 팁이나 조언 2~3가지" 
+                      }
+                  },
+                  required: ["rating", "analysis", "tips"]
+              }
+          }
+      };
+      
+      const apiKey = ""; // API Key 런타임 주입
+      
+      try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`, {
+              method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          const jsonText = data.candidates[0].content.parts[0].text;
+          const parsed = JSON.parse(jsonText);
+          
+          const stars = '⭐'.repeat(parsed.rating) + '☆'.repeat(5 - parsed.rating);
+          const tipsHtml = parsed.tips.map(t => `<li style="margin-bottom:4px;">${t}</li>`).join('');
+          
+          container.innerHTML = `
+            <div style="background:#121212; border:1.5px solid #A855F7; border-radius:8px; padding:12px; margin-top:10px; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.1);">
+              <div style="font-weight:900; color:#A855F7; font-size:14px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between;">
+                <span>📊 오늘의 AI 운행 리포트</span>
+                <span style="font-size:16px;">${stars}</span>
+              </div>
+              <div style="font-size:12px; color:#FFF; margin-bottom:10px; line-height:1.4;">
+                <strong style="color:#E9D5FF;">🔍 심층 분석:</strong><br>${parsed.analysis}
+              </div>
+              <div style="font-size:12px; color:#A3A3A3;">
+                <strong style="color:#D8B4FE;">💡 내일을 위한 꿀팁:</strong>
+                <ul style="padding-left:16px; margin-top:6px; color:#FFF;">${tipsHtml}</ul>
+              </div>
+            </div>
+          `;
+      } catch(e) {
+          console.error(e);
+          container.innerHTML = `<div style="color:#EF4444; font-size:11px; margin-top:8px;">❌ 리포트 생성에 실패했습니다. 데이터를 다시 확인해주세요.</div>`;
+      } finally {
+          btn.disabled = false;
+          btn.innerText = '📝 상세 운행 일지 AI 리포트 생성 (JSON)';
+      }
+  }
+
   function renderCards(routeCards, targetBoundaryCardData) {
     const listEl = document.getElementById('card-list'); if (!listEl) return;
     const fragment = document.createDocumentFragment();
@@ -1738,6 +1936,24 @@
     const rateEl = document.getElementById('kpi-today-rate'); const fillEl = document.getElementById('kpi-today-fill');
     if (rateEl) { rateEl.innerText = `${pct.toFixed(1)}%`; rateEl.style.color = getBarColor(pct); }
     if (fillEl) { fillEl.style.width = `${Math.min(pct, 100)}%`; fillEl.style.background = getBarColor(pct); }
+
+    // 운행 세션 리스트 렌더링 (개별 취소 버튼 포함)
+    const sessionListEl = document.getElementById('driving-session-list');
+    if (sessionListEl) {
+       sessionListEl.innerHTML = '';
+       let sessionHtml = '';
+       const fTime = (ts) => { if (!ts) return '진행중'; const d = new Date(ts); return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
+       let sessionsToRender = (today.sessions || []).slice();
+       if (today.currentSession) sessionsToRender.push(today.currentSession);
+       sessionsToRender.forEach((s, idx) => {
+           if (!s.start) return;
+           const sTime = fTime(s.start); const eTime = fTime(s.end);
+           const sittingSec = (s.total || 0) + (s.break || 0);
+           const durationStr = formatHHMMSS(sittingSec).substring(0, 5); 
+           sessionHtml += `<div class="session-item"><div class="session-time"><span style="color:#8A8A8A; margin-right:4px;">${idx+1}.</span> ${sTime} ~ ${eTime} <span class="session-duration">[${durationStr}]</span></div>${s.end ? `<button class="session-del-btn" onclick="deleteSession(${s.id})">❌취소</button>` : `<span style="font-size:9px; color:#22C55E; font-weight:900;">진행중</span>`}</div>`;
+       });
+       if (sessionHtml) { sessionListEl.innerHTML = sessionHtml; } else { sessionListEl.innerHTML = '<div style="font-size:11px; color:#8A8A8A; text-align:center; padding:8px;">운행 기록 없음</div>'; }
+    }
 
     // 이번주 주간 차트
     const weeklyChart = document.getElementById('weekly-chart');
@@ -2057,16 +2273,32 @@
     const now = Date.now();
     if (now < _alightingLockUntil) return;
     _alightingLockUntil = now + 1500;
-    if (!drivingState.isDriving || drivingState.isBreak || !drivingState.isPassengerBoarded) { _alightingLockUntil = 0; return; }
+    if (!drivingState.isDriving || drivingState.isBreak || !drivingState.isPassengerBoarded) { 
+      showToast('탑승 중인 손님이 없습니다.');
+      _alightingLockUntil = 0; 
+      return; 
+    }
     const alightBtn = document.getElementById('btn-alight');
+    const alightBottomBtn = document.getElementById('btn-alight-bottom');
     if (alightBtn) { alightBtn.disabled = true; alightBtn.style.pointerEvents = 'none'; }
-    drivingState.isPassengerBoarded = false; drivingState.stateStartTime = Date.now();
-    updateDrivingUI(); saveDrivingState();
-    showToast('👋 하차 완료!\n추천화면 이동 및 5분 단축어 실행!');
-    setTab(1); setTimerPreset(5); 
-    try { window.location.href = `shortcuts://run-shortcut?name=수다택시5분`; } catch(e) {}
+    if (alightBottomBtn) { alightBottomBtn.disabled = true; alightBottomBtn.style.pointerEvents = 'none'; }
+    
+    drivingState.isPassengerBoarded = false; 
+    drivingState.stateStartTime = Date.now();
+    updateDrivingUI(); 
+    saveDrivingState();
+    
+    showToast('👋 하차 완료!\n추천화면 이동 및 5분 자체 타이머 실행!');
+    setTab(1); 
+    setTimerPreset(5); 
+    // 단축어 호출 제거: 자체 타이머 및 백그라운드 푸시 알람만 실행
     startTimerInternal();
-    setTimeout(() => { _alightingLockUntil = 0; const a = document.getElementById('btn-alight'); if (a) a.style.pointerEvents = ''; }, 1200);
+    
+    setTimeout(() => { 
+      _alightingLockUntil = 0; 
+      if (alightBtn) alightBtn.style.pointerEvents = ''; 
+      if (alightBottomBtn) { alightBottomBtn.disabled = false; alightBottomBtn.style.pointerEvents = ''; }
+    }, 1200);
   }
 
   function startDrivingTimer() {
@@ -2253,7 +2485,28 @@
     }
   }
 
+  function requestNotificationPermission() {
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+    }
+  }
+  
+  function playTimerAlarm() {
+    // 1. 강력한 연속 진동 (지원되는 기기)
+    if (navigator.vibrate) navigator.vibrate([500, 200, 500, 200, 500]); 
+    // 2. 다른 앱 사용 중에도 뜨는 푸시 알림
+    try {
+        if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('⏱️ [수다택시 K] 대기 완료!', { 
+                body: `${timerPresetMin}분 대기가 종료되었습니다. 추천지로 이동하세요!`,
+                requireInteraction: true 
+            });
+        }
+    } catch(e) {}
+  }
+
   function setTimerPreset(min) {
+    requestNotificationPermission(); 
     if (isTimerRunning) { clearInterval(timerInterval); isTimerRunning = false; }
     timerPresetMin = min; timerRemainingSec = min * 60;
     const btn5m = document.getElementById('timer-btn-5m'); if (btn5m) btn5m.classList.toggle('active', min === 5);
@@ -2264,6 +2517,7 @@
   }
 
   function toggleTimer() {
+    requestNotificationPermission(); 
     const btn = document.getElementById('timer-display-btn');
     if (timerRemainingSec <= 0) { timerRemainingSec = timerPresetMin * 60; btn.className = 'timer-display-btn'; }
     if (isTimerRunning) {
@@ -2285,30 +2539,34 @@
       if (elapsedSec >= 1) { timerRemainingSec -= elapsedSec; lastTime = now; saveTimerState(); }
       if (timerRemainingSec <= 0) {
         clearInterval(timerInterval); isTimerRunning = false; timerRemainingSec = 0;
-        btn.className = 'timer-display-btn finished'; btn.innerText = `⏱️ 00:00 이동 추천!`;
+        btn.className = 'timer-display-btn finished'; btn.innerText = `⏱️ 00:00 종료!`;
         localStorage.removeItem('sudataxi_timer_state'); 
+        playTimerAlarm(); 
       } else { btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)}`; }
     }, 1000);
   }
 
   function createSwipeBlocker(btn, handler){
     if (!btn) return;
-    let startY=0, startX=0, startTime=0, moved=false, hasTouch=false, blockUntil=0;
+    let startY=0, startX=0, startTime=0, startScrollY=0, moved=false, hasTouch=false, blockUntil=0;
     btn.addEventListener('touchstart', (e)=>{
       if(e.touches && e.touches[0]){
         startY=e.touches[0].clientY; startX=e.touches[0].clientX;
-        startTime=Date.now(); moved=false; hasTouch=true;
+        startTime=Date.now(); startScrollY=window.scrollY; moved=false; hasTouch=true;
       }
     }, {passive:true});
     btn.addEventListener('touchmove', (e)=>{
       if(!e.touches || !e.touches[0]) return;
       const dy=Math.abs(e.touches[0].clientY-startY);
       const dx=Math.abs(e.touches[0].clientX-startX);
-      if(dy>8 || dx>8) moved=true;
+      const scrollDy=Math.abs(window.scrollY-startScrollY);
+      // 스와이프 감지 민감도 강화: 스크롤이나 움직임이 있으면 바로 차단
+      if(dy>10 || dx>10 || scrollDy>5) moved=true;
     }, {passive:true});
     btn.addEventListener('touchend', (e)=>{
       const duration=Date.now()-startTime;
-      if(moved || duration>400){
+      const scrollChanged=Math.abs(window.scrollY-startScrollY)>5;
+      if(moved || scrollChanged || duration>500){
         hasTouch=true; blockUntil=Date.now()+1000;
         setTimeout(()=>{ hasTouch=false; },600);
         return;
@@ -2326,20 +2584,39 @@
     });
   }
 
-  // 승차 저장 (탭 이동 안함)
   function saveCurrentCallLocation(isHighValue = false) {
     if (!currentPos) { showToast('위치 탐색이 필요합니다.'); return; }
-    showToast(isHighValue ? '🔥 고단가 탑승 저장 완료!' : '📍 일반 탑승 저장 완료!');
-    if (!drivingState.isDriving) { drivingState.isDriving = true; drivingState.lastTickTime = Date.now(); startDrivingTimer(); }
-    drivingState.isPassengerBoarded = true; drivingState.isBreak = false; drivingState.stateStartTime = Date.now();
-    updateDrivingUI(); saveDrivingState();
-    
     let logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
-    logs.push({ id: 'log_' + Date.now(), timestamp: new Date().toISOString(), lat: currentPos.lat, lng: currentPos.lng, mode: currentMode, region: currentRegionName, isHighValue: isHighValue });
+    logs.push({ 
+      id: 'log_' + Date.now(), 
+      timestamp: new Date().toISOString(), 
+      lat: currentPos.lat, 
+      lng: currentPos.lng, 
+      mode: currentMode,
+      region: currentRegionName || '저장된 위치',
+      isHighValue: isHighValue
+    });
     localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
+    showToast(isHighValue ? '🔥 고단가 콜 탑승 위치로 저장 및 승차 처리!' : '📍 일반 탑승 위치 저장 및 승차 처리!');
+    
+    if (!drivingState.isDriving) { 
+      drivingState.isDriving = true; 
+      const now = Date.now();
+      drivingState.lastTickTime = now; 
+      const todayData = getTodayDrivingData();
+      if (!todayData.firstStartTime) todayData.firstStartTime = now;
+      todayData.lastEndTime = now;
+      todayData.currentSession = { id: now, start: now, end: null, total: 0, break: 0, board: 0, empty: 0 };
+      saveTodayDrivingData(todayData);
+      startDrivingTimer(); 
+    }
+    drivingState.isPassengerBoarded = true; 
+    drivingState.isBreak = false; 
+    drivingState.stateStartTime = Date.now();
+    updateDrivingUI(); 
+    saveDrivingState();
   }
 
-  // 앱 로드 시 실행 이벤트
   window.addEventListener('DOMContentLoaded', () => {
     initKakaoSdk(); applyThemeMode(currentThemeMode); initDailyRevenue(); initMic();
     
@@ -2361,15 +2638,80 @@
     createSwipeBlocker(document.getElementById('btn-alight-bottom'), handleAlighting);
 
     const saveCallBtn = document.getElementById('btn-save-call');
-    let callPressTimer = null; let isCallLongPress = false; let hasTouch = false;
+    let callPressTimer = null; let isCallLongPress = false; let hasCallTouch = false;
+    let callStartY = 0, callStartX = 0, callStartScrollY = 0;
     saveCallBtn.addEventListener('touchstart', (e) => {
-        hasTouch = true; isCallLongPress = false; saveCallBtn.classList.add('active-longpress');
+        hasCallTouch = true; isCallLongPress = false;
+        try { const t=e.touches[0]; callStartY=t.clientY; callStartX=t.clientX; callStartScrollY=window.scrollY; } catch(err){}
+        saveCallBtn.classList.add('active-longpress');
         callPressTimer = setTimeout(() => { isCallLongPress = true; saveCallBtn.classList.remove('active-longpress'); saveCurrentCallLocation(true); }, 650);
+    }, {passive: true});
+    saveCallBtn.addEventListener('touchmove', (e) => {
+        try { 
+            const t=e.touches[0]; 
+            const dy = Math.abs(t.clientY-callStartY);
+            const dx = Math.abs(t.clientX-callStartX);
+            const scrollDy = Math.abs(window.scrollY-callStartScrollY);
+            if(dy>10 || dx>10 || scrollDy>5){ 
+                if(callPressTimer) clearTimeout(callPressTimer); 
+                saveCallBtn.classList.remove('active-longpress'); 
+                isCallLongPress = true; 
+            } 
+        } catch(err){}
     }, {passive: true});
     saveCallBtn.addEventListener('touchend', (e) => {
         if (callPressTimer) clearTimeout(callPressTimer); saveCallBtn.classList.remove('active-longpress');
         if (!isCallLongPress) saveCurrentCallLocation(false);
+        setTimeout(()=> { hasCallTouch=false; }, 500);
     });
+
+    const resetBtn = document.getElementById('btn-reset-today');
+    if (resetBtn) {
+       resetBtn.addEventListener('click', () => {
+          const todayData = getTodayDrivingData();
+          let target = null;
+          let isCurrent = false;
+
+          if (todayData.currentSession) {
+              target = todayData.currentSession;
+              isCurrent = true;
+          } else if (todayData.sessions && todayData.sessions.length > 0) {
+              target = todayData.sessions[todayData.sessions.length - 1];
+          }
+
+          if (!target) {
+              showToast('삭제할 직전 운행 기록이 없습니다.');
+              return;
+          }
+
+          showCustomConfirm('방금 측정된 "마지막 운행 세션"만 취소하시겠습니까?<br>(잘못 측정된 해당 시간만 오늘 총합에서 제외됩니다)', () => {
+             todayData.totalDrive = Math.max(0, (todayData.totalDrive || 0) - (target.total || 0));
+             todayData.passengerBoard = Math.max(0, (todayData.passengerBoard || 0) - (target.board || 0));
+             todayData.emptyCar = Math.max(0, (todayData.emptyCar || 0) - (target.empty || 0));
+             todayData.breakTime = Math.max(0, (todayData.breakTime || 0) - (target.break || 0));
+             
+             if (isCurrent) {
+                 delete todayData.currentSession;
+                 drivingState.isDriving = false; 
+                 drivingState.isBreak = false; 
+                 drivingState.isPassengerBoarded = false;
+                 saveDrivingState(); 
+                 updateDrivingUI(); 
+                 stopDrivingTimer();
+             } else {
+                 todayData.sessions.pop(); 
+                 if (todayData.sessions.length === 0 && !todayData.currentSession) {
+                     todayData.firstStartTime = null;
+                     todayData.lastEndTime = null;
+                 }
+             }
+
+             saveTodayDrivingData(todayData);
+             if (activeTab === 4) renderDrivingLogStats();
+             showToast('✅ 직전 운행 기록이 성공적으로 취소되었습니다.');
+          });
+       });
+    }
 
     document.getElementById('timer-btn-5m').addEventListener('click', () => setTimerPreset(5));
     document.getElementById('timer-btn-10m').addEventListener('click', () => setTimerPreset(10));
