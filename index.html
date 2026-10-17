@@ -105,16 +105,23 @@
 :where(code, pre, kbd, samp) {
   font-family: "Optimistic Mono", ui-monospace, monospace;
 }
+<<<< SEARCH
+  <title>수다택시 K v7.9.39 Bottom Bar Full Box</title>
+==== REPLACE
+  <title>수다택시 K v7.9.40 Day Mode Bottom Bar Fix</title>
+>>>>
+
+<<<< SEARCH
 <style id="v7-9-37-fix">
 .bottom-bar {
   position: fixed !important;
-  bottom: calc(4px + env(safe-area-inset-bottom, 0px)) !important;
+  bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
-  width: calc(100% - 12px) !important;
+  width: calc(100% - 16px) !important;
   max-width: 420px !important;
   min-height: 68px !important;
-  height: auto !important;
+  height: 68px !important;
   padding: 6px 8px !important;
   background: #0F0F0F !important;
   border: 2px solid #FFC800 !important;
@@ -126,90 +133,77 @@
   gap: 6px !important;
   box-sizing: border-box !important;
   z-index: 999 !important;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.6) !important;
+  box-shadow: 
+    0 -4px 24px rgba(0,0,0,0.6),
+    0 40px 0 24px var(--main-bg) !important;
   overflow: hidden !important;
 }
-    /* v7.9.21 Minimal - 위로 10px 아래로 10px (요청) */
-    .sticky-top-area {
-      padding-top: 10px !important;
-      top: 0 !important;
-    }
-    html {
-      padding-top: env(safe-area-inset-top, 0px);
-    }
-    body {
-      padding-top: 0;
-    }
-    .bottom-bar {
-      /* FIXED: timer layout - second photo reference */
-      position: fixed !important;
-      bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
-      left: 50% !important;
-      transform: translateX(-50%) !important;
-      width: calc(100% - 16px) !important;
-      max-width: 414px !important;
-      height: auto !important;
-      min-height: 92px !important;
-      padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px)) 10px !important;
-      background: #0F0F0F !important;
-      border: 1px solid rgba(255,200,0,0.25) !important;
-      border-top: 2px solid #FFC800 !important;
-      border-radius: 18px !important;
-      display: flex !important;
-      flex-direction: row !important;
-      align-items: stretch !important;
-      gap: 8px !important;
-      z-index: 200 !important;
-      box-shadow: 0 12px 32px rgba(0,0,0,0.6) !important;
-    }
-    /* OCR */
-    .penalty-ocr-btn { width: 100%; background: #FFC800; color: #000; border: 2px solid #000; border-radius: 8px; padding: 10px; font-size: 12px; font-weight: 900; cursor: pointer; margin-top: 6px; }
-    .penalty-ocr-btn:disabled { opacity: 0.5; }
-    .penalty-ocr-status { margin-top: 8px; font-size: 11px; font-weight: 800; color: #000; background: #FFF7CC; border: 1px solid #FFC800; border-radius: 6px; padding: 6px 8px; }
-    .penalty-ocr-preview { margin-top: 6px; font-size: 9px; color: #666; background: #F5F5F5; border: 1px dashed #CCC; border-radius: 6px; padding: 6px 8px; max-height: 80px; overflow-y: auto; white-space: pre-wrap; }
+==== REPLACE
+<style id="v7-9-37-fix">
+.bottom-bar {
+  position: fixed !important;
+  bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: calc(100% - 16px) !important;
+  max-width: 420px !important;
+  min-height: 68px !important;
+  height: 68px !important;
+  padding: 6px 8px !important;
+  background: #0F0F0F !important;
+  border: 2px solid #FFC800 !important;
+  border-radius: 16px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  justify-content: space-between !important;
+  gap: 6px !important;
+  box-sizing: border-box !important;
+  z-index: 999 !important;
+  box-shadow: 
+    0 -4px 24px rgba(0,0,0,0.6),
+    0 40px 0 24px var(--main-bg) !important;
+  overflow: hidden !important;
+}
 
-    /* v7.9.23 NEW: 자주가는 곳 프리셋 - v7.9.25 개선 */
-    .frequent-presets-section { margin: 6px 0 80px 0; background: #162032; border: 1px solid rgba(45,212,191,0.35); border-top: 2px solid #2DD4BF; border-radius: 12px; padding: 6px 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
-    .frequent-header { display:flex; justify-content:space-between; align-items:center; gap:4px; flex-wrap:nowrap; margin-bottom:4px; overflow:hidden; }
-    .frequent-header-left { display:flex; align-items:center; gap:4px; flex:1; min-width:0; overflow:hidden; }
-    .frequent-header-actions { display:flex; gap:4px; flex-shrink:0; align-items:center; }
-    .frequent-preset-card { background: #1C2B3A; border: 1px solid rgba(45,212,191,0.25); border-radius: 8px; padding: 5px 8px; display:flex; justify-content:space-between; align-items:center; gap:6px; min-height:36px; }
-    .frequent-preset-card .fp-left { display:flex; flex-direction:column; gap:0px; flex:1; min-width:0; line-height:1.15; }
-    .frequent-preset-card .fp-name { font-weight:900; font-size:12px; color:#5EEAD4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2; }
-    .frequent-preset-card .fp-addr { font-size:9px; color:#94A3B8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2; }
-    .frequent-preset-card .fp-meta { font-size:10px; font-weight:800; color:#FBBF24; line-height:1.2; margin-top:1px; }
-    .frequent-preset-card .fp-actions { display:flex; gap:3px; flex-shrink:0; }
-    .fp-btn { border:none; border-radius:5px; padding:4px 8px; font-size:10px; font-weight:900; cursor:pointer; white-space:nowrap; line-height:1; }
-    .fp-btn-navi { background:#2DD4BF; color:#000; }
-    .fp-btn-del { background:#1E293B; color:#94A3B8; border:1px solid #334155; }
-    .fp-add-btn { cursor:pointer; white-space:nowrap; font-weight:900; }
-    .fp-badge { background:#0F172A; color:#5EEAD4; border:1px solid #2DD4BF; font-size:8px; font-weight:900; padding:2px 5px; border-radius:8px; white-space:nowrap; line-height:1; }
-    .auto-region-badge { background:#FEF3C7; color:#92400E; border:1px solid #FBBF24; font-size:10px; font-weight:800; padding:3px 8px; border-radius:8px; }
-    /* v7.9.25 주간모드 대응 */
-    body.theme-day .frequent-presets-section { background:#FFFFFF; border:1px solid #CCFBF1; border-top:2px solid #14B8A6; box-shadow:0 2px 12px rgba(0,0,0,0.06); }
-    body.theme-day .frequent-preset-card { background:#F8FAFC; border-color:#CCFBF1; }
-    body.theme-day .frequent-preset-card .fp-name { color:#0F766E; }
-    body.theme-day .frequent-preset-card .fp-addr { color:#64748B; }
-    body.theme-day .frequent-preset-card .fp-meta { color:#D97706; }
-    body.theme-day .fp-badge { background:#CCFBF1; color:#0F766E; border-color:#14B8A6; }
-    body.theme-day .fp-btn-del { background:#F1F5F9; color:#64748B; border-color:#E2E8F0; }
-    body.theme-day #frequent-presets-empty { color:#94A3B8; }
-    body.theme-day #frequent-modal .modal-content { background:#FFFFFF; }
-    body.theme-day #frequent-modal input { background:#F8FAFC !important; color:#1E293B !important; border-color:#E2E8F0 !important; }
-    body.theme-day #fp-search-results div { background:#F8FAFC !important; border-color:#E2E8F0 !important; }
-    body.theme-day #fp-search-results div div { color:#1E293B !important; }
+/* 주간 모드 하단 바 및 타이머 디자인 대응 */
+body.theme-day .bottom-bar {
+  background: #FFFFFF !important;
+  border-color: #EA580C !important;
+  box-shadow: 
+    0 -4px 20px rgba(0,0,0,0.08),
+    0 40px 0 24px var(--main-bg) !important;
+}
+body.theme-day .timer-display-btn {
+  background: #F8FAFC !important;
+  color: #1E293B !important;
+  border-color: #E2E8F0 !important;
+}
+body.theme-day .timer-display-btn.running {
+  background: #FFF7ED !important;
+  color: #EA580C !important;
+  border-color: #EA580C !important;
+}
+body.theme-day .timer-mode-btn {
+  background: #F8FAFC !important;
+  color: #64748B !important;
+  border-color: #E2E8F0 !important;
+}
+body.theme-day .timer-mode-btn.active {
+  background: #EA580C !important;
+  color: #FFFFFF !important;
+  border-color: #EA580C !important;
+}
+>>>>
 
+<<<< SEARCH
+  const BUILD_VERSION = "v7.9.39 Bottom Bar Full Box";
+==== REPLACE
+  const BUILD_VERSION = "v7.9.40 Day Mode Bottom Bar Fix";
+>>>>
 
-
-</style>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v7.9.37 Real Target Fix</title>
-
-  <link rel="manifest" href="./manifest.json">
-  <meta name="theme-color" content="#FFC800">
-
-  <meta name="apple-mobile-web-app-capable" content="yes">
+<<<< SEARCH
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate()
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="수다택시K">
   <link rel="apple-touch-icon" href="./icon-180.png">
