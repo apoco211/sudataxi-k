@@ -247,7 +247,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v8.4</title>
+  <title>수다택시 K v8.5</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1438,8 +1438,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
 </style>
 
 
-<style id="v84-bottombar-5equal">
-/* v8.4: 타이머 완전 제거, 5개 동일 크기 버튼 */
+<style id="v86-5equal-final">
 .bottom-bar#bottom-bar-v7961 {
   grid-template-columns: repeat(5, 1fr) !important;
   max-width: 430px !important;
@@ -1469,26 +1468,12 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
   box-shadow: none !important;
   cursor: pointer !important;
 }
-.bottom-bar#bottom-bar-v7961 .clock-btn {
-  background: #1E1E1E !important;
-  color: #FFFFFF !important;
-  border: 1.5px solid #333333 !important;
-}
-.bottom-bar#bottom-bar-v7961 .clock-btn:active {
-  background: #2A2A2A !important;
-  transform: scale(0.95);
-}
-.bottom-bar#bottom-bar-v7961 .timer-cell {
+.bottom-bar#bottom-bar-v7961 .timer-cell,
+.bottom-bar#bottom-bar-v7961 #timer-btn-5m,
+.bottom-bar#bottom-bar-v7961 #timer-display-btn,
+.bottom-bar#bottom-bar-v7961 .timer-mode-selector,
+.bottom-bar#bottom-bar-v7961 .timer-display-btn {
   display: none !important;
-}
-@media (max-width: 380px) {
-  .bottom-bar#bottom-bar-v7961 {
-    gap: 4px !important;
-    padding: 5px 6px !important;
-  }
-  .bottom-bar#bottom-bar-v7961 .bb-btn .bb-label {
-    font-size: 12px !important;
-  }
 }
 </style>
 
@@ -1839,8 +1824,9 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
     <button class="bb-btn search-btn" id="btn-bottom-search" style="background:#22C55E !important; color:#FFFFFF !important; border:1.5px solid #16A34A !important;"><span class="bb-label">🔍 검색</span></button>
     <button class="bb-btn board-btn" id="btn-bottom-board"><span class="bb-label">승차</span></button>
     <button class="bb-btn alight-btn" id="btn-bottom-alight"><span class="bb-label">하차</span></button>
-    <button class="bb-btn restroom-btn" id="btn-save-restroom"><span class="bb-label">화장실</span></button>
+    <button class="bb-btn restroom-btn" id="btn-bottom-restroom-search" style="background:#3B82F6 !important; color:#FFFFFF !important; border:1.5px solid #2563EB !important;"><span class="bb-label">화장실</span></button>
     <button id="btn-save-call" style="display:none !important;">저장</button>
+    <button id="btn-save-restroom" style="display:none !important;">화장실저장</button>
   </div>
   
   <div class="toast-banner" id="toast-banner" style="position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 12px; padding: 6px 12px; border-radius: 12px; z-index: 300; display: none; box-shadow: 0 3px 12px rgba(0,0,0,0.6);"></div>
@@ -1888,7 +1874,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v8.4";
+  const BUILD_VERSION = "v8.5";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -5531,7 +5517,7 @@ function initDailyRevenue() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.4</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.5</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
@@ -5740,35 +5726,55 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 
-<script id="v84-clock-handler">
+<script id="v86-clock-5equal">
 document.addEventListener('DOMContentLoaded', function() {
   function bindClock() {
-    const clockBtn = document.getElementById('btn-bottom-clock');
-    if (!clockBtn || clockBtn._bound) return;
-    clockBtn._bound = true;
-    clockBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      try {
-        if (typeof showToast === 'function') showToast('🕐 단축어 앱 실행중...');
-        // iOS 단축어 앱 호출 - 5분 단축어
-        try { 
-          window.location.href = 'shortcuts://run-shortcut?name=수다택시5분';
-        } catch(err) {}
-        // 대체: shortcuts://  또는 단축어 앱 자체
-        setTimeout(function() {
-          try { window.location.href = 'shortcuts://'; } catch(err) {}
-        }, 800);
-      } catch(err) { console.error(err); }
+    const el = document.getElementById('btn-bottom-clock');
+    if (!el || el._bound) return; el._bound=true;
+    el.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      try { if(typeof showToast==='function') showToast('🕐 단축어 실행중...'); } catch(e){}
+      try { window.location.href = 'shortcuts://run-shortcut?name=수다택시5분'; } catch(e){}
+      setTimeout(function(){ try{ window.location.href='shortcuts://'; }catch(e){} }, 800);
     });
   }
-  bindClock();
-  setTimeout(bindClock, 1000);
-  setTimeout(bindClock, 2500);
-
-  // 기존 타이머 요소들 완전 제거 (혹시 남아있으면)
-  const timerCell = document.querySelector('.timer-cell');
-  if (timerCell) timerCell.style.display = 'none';
+  function bindSearch() {
+    const el = document.getElementById('btn-bottom-search');
+    if (!el || el._bound) return; el._bound=true;
+    el.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      try { if(typeof setTab==='function') setTab(1); } catch(e){}
+      setTimeout(function(){
+        const main = document.getElementById('btn-search');
+        if (main) main.click(); else if (typeof executeSearch==='function') executeSearch();
+      }, 100);
+    });
+  }
+  function bindRestroomSearch() {
+    const el = document.getElementById('btn-bottom-restroom-search');
+    if (!el || el._bound) return; el._bound=true;
+    let longTimer=null; let isLong=false;
+    el.addEventListener('touchstart', function(){
+      isLong=false;
+      longTimer=setTimeout(function(){ isLong=true; if(typeof saveCurrentRestroomLocation==='function'){ saveCurrentRestroomLocation(); if(typeof showToast==='function') showToast('📍 현재 위치 화장실로 저장됨'); } }, 800);
+    }, {passive:true});
+    el.addEventListener('touchend', function(e){
+      if(longTimer) clearTimeout(longTimer);
+      if(isLong){ e.preventDefault(); isLong=false; return; }
+      e.preventDefault(); e.stopPropagation();
+      if(typeof searchRestrooms==='function') searchRestrooms();
+    });
+    el.addEventListener('click', function(e){
+      if(isLong){ isLong=false; return; }
+      e.preventDefault(); e.stopPropagation();
+      if(typeof searchRestrooms==='function') searchRestrooms();
+    });
+  }
+  bindClock(); bindSearch(); bindRestroomSearch();
+  setTimeout(function(){ bindClock(); bindSearch(); bindRestroomSearch(); }, 1000);
+  setTimeout(function(){ bindClock(); bindSearch(); bindRestroomSearch(); }, 2500);
+  const tc = document.querySelector('.timer-cell');
+  if(tc) tc.style.display='none';
 });
 </script>
 
