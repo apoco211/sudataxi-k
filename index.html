@@ -247,7 +247,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v8.6</title>
+  <title>수다택시 K v8.7</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1874,7 +1874,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v8.6";
+  const BUILD_VERSION = "v8.7";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2327,7 +2327,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.6'
+        version: 'v8.7'
       };
       await fetch(url, {
         method: 'POST',
@@ -2355,7 +2355,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.6'
+        version: 'v8.7'
       };
       
       localStorage.setItem('sudataxi_auto_backup', JSON.stringify(backupData));
@@ -5036,6 +5036,7 @@ function initDailyRevenue() {
 
   // --- 마이크 음성 인식 - v7.9.37 robust ---
   
+
 function initMic() {
     const btnMicEl = document.getElementById('btn-mic');
     const inputRevEl = document.getElementById('input-rev');
@@ -5043,11 +5044,11 @@ function initMic() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) { 
       btnMicEl.style.display = 'none'; 
-      console.warn('SpeechRecognition not supported');
       return; 
     }
     let recognition = null; 
     let isRecognizing = false;
+    let lastStartTime = 0;
 
     function parseSmallKorean(str){ 
       if(!str) return 0; 
@@ -5101,22 +5102,34 @@ function initMic() {
       return total; 
     }
 
-    function getRecognition(){
+    function createRecognition(){
+      try {
+        if (recognition) {
+          try { recognition.abort(); } catch(e){}
+          try { recognition.stop(); } catch(e){}
+        }
+      } catch(e){}
+      
       recognition = new SpeechRecognition();
       recognition.lang='ko-KR'; 
       recognition.interimResults=false; 
-      recognition.maxAlternatives=3; 
+      recognition.maxAlternatives=5; 
       recognition.continuous=false;
+      
       recognition.onstart=()=>{
         isRecognizing=true;
+        lastStartTime = Date.now();
         btnMicEl.classList.add('recording');
-        if(typeof showToast==='function') showToast('🎤 듣는중... 말씀하세요');
+        if(typeof showToast==='function') showToast('🎤 듣는중... "오만원" 처럼 말씀하세요');
       };
+      
       recognition.onresult=(event)=>{
         let bestTranscript = '';
         let bestValue = 0;
+        let allTranscripts = [];
         for(let i=0;i<event.results[0].length;i++){
           const tr = event.results[0][i].transcript;
+          allTranscripts.push(tr);
           const pv = parseKoreanMoney(tr);
           if(pv > bestValue){ bestValue=pv; bestTranscript=tr; }
           if(!bestTranscript) bestTranscript=tr;
@@ -5126,70 +5139,101 @@ function initMic() {
         const inputEl=document.getElementById('input-rev');
         if(parsed>0 && inputEl){ 
           inputEl.value=parsed.toString(); 
-          calculateDailyRevenue(); 
+          try{ calculateDailyRevenue(); }catch(e){}
           try{ localStorage.setItem('sudataxi_daily_rev', parsed.toString()); }catch(e){}
+          try{ if(typeof executeAutoBackup==='function') executeAutoBackup(); }catch(e){}
           if(typeof showToast==='function') showToast(`🎤 ${parsed.toLocaleString()}원 인식됨 (${transcript})`); 
         } else { 
           const fallback=transcript.replace(/[^0-9]/g,''); 
           if(fallback && inputEl){ 
             const num = parseInt(fallback);
             inputEl.value=num.toString(); 
-            calculateDailyRevenue(); 
+            try{ calculateDailyRevenue(); }catch(e){}
             try{ localStorage.setItem('sudataxi_daily_rev', num.toString()); }catch(e){}
             if(typeof showToast==='function') showToast(`🎤 ${num.toLocaleString()}원 인식됨`); 
           } else { 
-            if(typeof showToast==='function') showToast(`인식: "${transcript}" - 숫자 변환 실패, 다시 시도해주세요`); 
+            if(typeof showToast==='function') showToast(`인식됨: "${transcript}" - 금액 변환 실패. 숫자로 말씀해보세요`); 
           } 
         }
-        btnMicEl.classList.remove('recording'); isRecognizing=false;
       };
-      recognition.onend=()=>{ btnMicEl.classList.remove('recording'); isRecognizing=false; };
+      
+      recognition.onend=()=>{ 
+        btnMicEl.classList.remove('recording'); 
+        // 너무 빨리 끝났으면 aborted 가능성, 조용히 리셋
+        const duration = Date.now() - lastStartTime;
+        if(duration < 500){
+          console.log('recognition ended too quickly', duration);
+        }
+        isRecognizing=false; 
+      };
+      
       recognition.onerror=(e)=>{ 
-        console.error('speech error', e);
-        btnMicEl.classList.remove('recording'); isRecognizing=false; 
-        if(e.error==='not-allowed' || e.error==='permission-denied'){
-          if(typeof showToast==='function') showToast('🎤 마이크 권한이 거부됨 - 설정에서 허용해주세요');
+        console.log('speech error', e.error, e.message);
+        btnMicEl.classList.remove('recording'); 
+        isRecognizing=false;
+        // aborted, no-speech는 조용히 처리 (사용자 취소나 짧은 입력)
+        if(e.error==='aborted' || e.error==='no-speech' || e.error==='audio-capture'){
+          // 0.5초 이내 aborted면 무시, 아니면 안내
+          const duration = Date.now() - lastStartTime;
+          if(duration > 800 && e.error==='no-speech'){
+            if(typeof showToast==='function') showToast('🎤 음성을 감지하지 못했습니다. 조금 더 크게 말씀해주세요');
+          }
+          return;
+        }
+        if(e.error==='not-allowed' || e.error==='permission-denied' || e.error==='service-not-allowed'){
+          if(typeof showToast==='function') showToast('🎤 마이크 권한이 거부됨 - Safari 설정 > 마이크 허용');
           localStorage.removeItem('sudataxi_mic_granted');
-        } else if(e.error==='no-speech'){
-          if(typeof showToast==='function') showToast('🎤 음성을 감지하지 못함 - 다시 말씀해주세요');
+        } else if(e.error==='network'){
+          if(typeof showToast==='function') showToast('🎤 네트워크 오류 - 인터넷 연결 확인');
+        } else if(e.error==='not-allowed'){
+          // already handled
         } else {
-          if(typeof showToast==='function') showToast('🎤 음성 인식 오류: '+e.error);
+          // 기타 오류는 표시 안함 (aborted 방지)
+          console.warn('speech error ignored', e.error);
         }
       };
-      recognition.onspeechend=()=>{ try{ recognition.stop(); }catch(e){} };
+      
+      recognition.onspeechend=()=>{
+        // iOS에서 speechend 후 stop 호출 시 aborted 발생하므로 호출 안함 - 자동 종료 대기
+        // try{ recognition.stop(); }catch(e){}
+      };
+      
       return recognition;
-    }
-
-    async function requestMicPermissionOnce(){
-      if(localStorage.getItem('sudataxi_mic_granted')==='true') return true;
-      try{ 
-        if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){ 
-          const stream=await navigator.mediaDevices.getUserMedia({audio:true}); 
-          stream.getTracks().forEach(t=>t.stop()); 
-          localStorage.setItem('sudataxi_mic_granted','true'); 
-          return true; 
-        } 
-      }catch(e){
-        console.warn('mic permission fail', e);
-        return true;
-      } 
-      return true;
     }
 
     btnMicEl.addEventListener('click', async (e)=>{
       e.preventDefault(); e.stopPropagation();
-      if(isRecognizing){ try{ recognition && recognition.stop(); }catch(err){} btnMicEl.classList.remove('recording'); isRecognizing=false; return; }
-      await requestMicPermissionOnce();
+      
+      // 이미 인식중이면 중지
+      if(isRecognizing){ 
+        try{ if(recognition){ recognition.abort(); } }catch(err){}
+        btnMicEl.classList.remove('recording'); 
+        isRecognizing=false; 
+        return; 
+      }
+      
+      // 너무 빠른 연속 클릭 방지 (1초)
+      if(Date.now() - lastStartTime < 1000){
+        return;
+      }
+      
       try{ 
-        const rec=getRecognition(); 
-        rec.start(); 
+        const rec=createRecognition(); 
+        // iOS에서는 약간의 지연 후 start가 안정적
+        setTimeout(()=>{ try{ rec.start(); }catch(err){ console.error('rec start fail', err); btnMicEl.classList.remove('recording'); isRecognizing=false; } }, 100);
       }catch(err){ 
-        console.error('rec start fail', err);
+        console.error('rec create fail', err);
         btnMicEl.classList.remove('recording'); isRecognizing=false; 
-        if(typeof showToast==='function') showToast('🎤 음성 인식 시작 실패 - HTTPS에서만 동작합니다');
       }
     });
+
+    // 터치 디바이스에서 터치로도 작동
+    btnMicEl.addEventListener('touchstart', function(e){
+      // 클릭과 중복 방지
+      e.preventDefault();
+    }, {passive:false});
   }
+
 
   document.addEventListener('DOMContentLoaded', initMic);
   window.addEventListener('load', function(){ setTimeout(initMic, 600); });
@@ -5669,7 +5713,7 @@ function initMic() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.6</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.7</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
