@@ -226,7 +226,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v7.9.61</title>
+  <title>수다택시 K v7.9.62</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1740,7 +1740,7 @@ body { padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px)) !important;
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.9.61";
+  const BUILD_VERSION = "v7.9.62";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2261,24 +2261,39 @@ body { padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px)) !important;
   let _boardingLockUntil = 0;
   let _lastBoardingAction = 0;
   let _globalScrollYAtTouchStart = 0;
-  function handleBoarding(e) {
+  function handleBoarding(e, isHighValue = false) {
     try { if (e) { e.preventDefault(); e.stopPropagation(); } } catch(err) {}
     const now = Date.now();
     if (now < _boardingLockUntil) return;
     if (now - _lastBoardingAction < 800) return;
     _lastBoardingAction = now;
     _boardingLockUntil = now + 1500;
-    if (!drivingState.isDriving || drivingState.isBreak) { _boardingLockUntil = 0; return; }
+    if (!drivingState.isDriving && typeof toggleDriving === 'function') {
+      toggleDriving();
+    }
+    if (drivingState.isBreak) { _boardingLockUntil = 0; return; }
     if (drivingState.isPassengerBoarded) { showToast('이미 승차 중입니다.'); _boardingLockUntil = 0; return; }
     const boardBtn = document.getElementById('btn-board');
     if (boardBtn) { boardBtn.disabled = true; boardBtn.style.pointerEvents = 'none'; }
-    drivingState.isPassengerBoarded = true; 
-    drivingState.stateStartTime = Date.now();
-    updateDrivingUI(); 
-    saveDrivingState();
-    showToast('🙋 승차 처리되었습니다.');
+    const bottomBoardBtn = document.getElementById('btn-bottom-board');
+    if (bottomBoardBtn) { bottomBoardBtn.style.pointerEvents = 'none'; }
+
+    // 고객 탑승 위치 저장 (일반 탑승 / 고액콜)
+    if (typeof saveCurrentCallLocation === 'function') {
+      saveCurrentCallLocation(isHighValue);
+    } else {
+      drivingState.isPassengerBoarded = true; 
+      drivingState.stateStartTime = Date.now();
+      updateDrivingUI(); 
+      saveDrivingState();
+      showToast(isHighValue ? '🔥 고단가 콜 승차 처리되었습니다.' : '🙋 승차 처리되었습니다.');
+    }
     document.body.classList.remove('out-of-bounds-alert');
-    setTimeout(() => { _boardingLockUntil = 0; const b = document.getElementById('btn-board'); if (b) b.style.pointerEvents = ''; }, 1200);
+    setTimeout(() => { 
+      _boardingLockUntil = 0; 
+      if (boardBtn) boardBtn.style.pointerEvents = '';
+      if (bottomBoardBtn) bottomBoardBtn.style.pointerEvents = '';
+    }, 1200);
   }
 
   let _alightingLockUntil = 0;
@@ -4010,44 +4025,56 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
         L.marker([pt.lat, pt.lng], { icon: L.divIcon({ html, className: '', iconSize: [24, 24] }) }).addTo(leafletMap).bindPopup(`<b>${pt.name}</b>`);
       });
 
-      // 경로 그리기 - 모드2는 과정에 있는 핫스팟을 복귀점까지 순서대로 연결
+      // 경로 그리기 - 모드 2: 가상 곡선(generateCurvedLine) 완전 제거 및 카카오 실시간 실제 도로망 표출
       if (currentMode === 2 && currentRouteData.length >= 2) {
-        // 현재→1→2→3→4→복귀점 순서로 정렬 (이미 selectedCandidates가 거리+점수 순이지만, 복귀점 방향 투영 순으로 재정렬)
-        let targetPt = currentRouteData.find(p => p.isTargetBoundary);
-        let nonTarget = currentRouteData.filter(p => !p.isTargetBoundary && !p.isCurrent);
-        // 복귀 방향으로의 투영 거리로 정렬 (복귀 과정 순서)
-        if (targetPt) {
-          let mainBearing = getBearing(currentPos.lat, currentPos.lng, targetPt.lat, targetPt.lng);
-          nonTarget.sort((a,b) => {
-            let da = getStraightDistanceKm(currentPos.lat, currentPos.lng, a.lat, a.lng) * Math.cos(getAngleDelta(getBearing(currentPos.lat, currentPos.lng, a.lat, a.lng), mainBearing) * Math.PI/180);
-            let db = getStraightDistanceKm(currentPos.lat, currentPos.lng, b.lat, b.lng) * Math.cos(getAngleDelta(getBearing(currentPos.lat, currentPos.lng, b.lat, b.lng), mainBearing) * Math.PI/180);
-            return da - db;
-          });
-        }
-        let ordered = [currentRouteData[0], ...nonTarget];
-        if (targetPt) ordered.push(targetPt);
+        const targetPt = currentRouteData.find(p => p.isTargetBoundary);
+        const candidates = currentRouteData.filter(p => !p.isCurrent && !p.isTargetBoundary);
 
-        for (let i=0; i<ordered.length-1; i++) {
-          let from = ordered[i];
-          let to = ordered[i+1];
-          // 가능한 카카오 도로 경로 재사용, 없으면 직선 곡선
-          let fromHasGeometryToNext = false;
-          // to의 geometry가 from→to가 아니고 current→to이므로, 여기서는 직선 곡선으로 과정 시각화
-          let curved = generateCurvedLine(from.lat, from.lng, to.lat, to.lng, 20);
-          let isLastToTarget = to.isTargetBoundary;
-          L.polyline(curved, { 
-            color: isLastToTarget ? '#FF6B00' : themeColor, 
-            weight: isLastToTarget ? 4 : 6, 
-            opacity: isLastToTarget ? 0.9 : 0.85,
-            dashArray: isLastToTarget ? '6,6' : null
+        // 1) 1순위 추천 핫플: 실시간 카카오 도로 주행선 (굵은 주황 실선)
+        if (candidates.length > 0 && candidates[0].geometryCoords && candidates[0].geometryCoords.length > 0) {
+          L.polyline(candidates[0].geometryCoords, {
+            color: '#FF6B00',
+            weight: 6,
+            opacity: 0.95
           }).addTo(leafletMap);
         }
-        // 기존 각 후보의 카카오 실제 도로 경로도 얇게 표시 (참고용)
-        currentRouteData.forEach(pt => {
-          if (pt.geometryCoords && pt.geometryCoords.length>0 && !pt.isCurrent) {
-            L.polyline(pt.geometryCoords, { color: themeColor, weight: 2, opacity: 0.25 }).addTo(leafletMap);
+
+        // 2) 2~4순위 후보지: 서브 추천 도로선 (실제 카카오 도로 주행선)
+        candidates.slice(1).forEach(pt => {
+          if (pt.geometryCoords && pt.geometryCoords.length > 0) {
+            L.polyline(pt.geometryCoords, {
+              color: '#F97316',
+              weight: 4,
+              opacity: 0.7
+            }).addTo(leafletMap);
           }
         });
+
+        // 3) 복귀 경계점(🎯): 직통 복귀 도로선 (카카오 실제 도로 붉은 점선)
+        if (targetPt && targetPt.geometryCoords && targetPt.geometryCoords.length > 0) {
+          L.polyline(targetPt.geometryCoords, {
+            color: '#DC2626',
+            weight: 3.5,
+            opacity: 0.8,
+            dashArray: '6, 6'
+          }).addTo(leafletMap);
+        }
+
+        // 4) 1순위 핫플 → 복귀 경계점: 핫플 경유 복귀 실제 도로망 (카카오 도로 주황 점선)
+        if (candidates.length > 0 && targetPt) {
+          try {
+            const topCand = candidates[0];
+            const viaRoute = await fetchKakaoRoadRoute(topCand.lat, topCand.lng, targetPt.lat, targetPt.lng);
+            if (viaRoute && viaRoute.geometryCoords && viaRoute.geometryCoords.length > 0) {
+              L.polyline(viaRoute.geometryCoords, {
+                color: '#EA580C',
+                weight: 4.5,
+                opacity: 0.85,
+                dashArray: '5, 5'
+              }).addTo(leafletMap);
+            }
+          } catch(e) {}
+        }
       } else {
         // 모드1은 기존대로 각 후보까지 경로 표시
         currentRouteData.forEach((pt, idx) => {
@@ -5170,7 +5197,7 @@ function initDailyRevenue() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v7.9.61</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v7.9.62</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
@@ -5181,9 +5208,9 @@ function initDailyRevenue() {
 </script>
 
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
-<script id="v7-9-61-patch">
+<script id="v7-9-62-patch">
 (function(){
-  console.log('[v7.9.61] patch');
+  console.log('[v7.9.62] patch');
   window.startTimerInternalV2=function(){
     try{
       if(typeof timerPresetMin==='undefined') return;
@@ -5226,33 +5253,109 @@ function initDailyRevenue() {
     if(typeof setTimerPreset==='function') setTimerPreset(5);
     window.startTimerInternalV2();
   };
-  function bindBottom(){
-    var board=document.getElementById('btn-bottom-board');
-    var alight=document.getElementById('btn-bottom-alight');
-    if(board && !board._b60){
-      board.addEventListener('click', function(e){
+
+  // 승차 버튼 통합 바인딩 (일반 클릭: 탑승위치 저장 / 길게 누름: 고액콜 저장)
+  function bindBoardButton(btn){
+    if(!btn || btn._b62) return;
+    btn._b62 = true;
+    var timer = null;
+    var isLong = false;
+    var startY = 0, startX = 0, startTime = 0;
+    var hasTouch = false;
+
+    btn.addEventListener('touchstart', function(e){
+      hasTouch = true;
+      isLong = false;
+      if(e.touches && e.touches[0]){
+        startY = e.touches[0].clientY;
+        startX = e.touches[0].clientX;
+        startTime = Date.now();
+      }
+      btn.style.opacity = '0.75';
+      timer = setTimeout(function(){
+        isLong = true;
+        btn.style.opacity = '1';
+        try{ if(navigator.vibrate) navigator.vibrate([100, 50, 100]); }catch(err){}
+        if(typeof handleBoarding === 'function') handleBoarding(e, true);
+      }, 650);
+    }, { passive: false });
+
+    btn.addEventListener('touchmove', function(e){
+      if(!e.touches || !e.touches[0]) return;
+      var dy = Math.abs(e.touches[0].clientY - startY);
+      var dx = Math.abs(e.touches[0].clientX - startX);
+      if(dy > 12 || dx > 12){
+        if(timer) clearTimeout(timer);
+        btn.style.opacity = '1';
+      }
+    }, { passive: true });
+
+    btn.addEventListener('touchend', function(e){
+      if(timer) clearTimeout(timer);
+      btn.style.opacity = '1';
+      var dur = Date.now() - startTime;
+      var dy = e.changedTouches && e.changedTouches[0] ? Math.abs(e.changedTouches[0].clientY - startY) : 0;
+      var dx = e.changedTouches && e.changedTouches[0] ? Math.abs(e.changedTouches[0].clientX - startX) : 0;
+      if(dy > 20 || dx > 20 || dur > 650){
+        return;
+      }
+      if(!isLong){
         e.preventDefault();
-        if(typeof drivingState!=='undefined' && !drivingState.isDriving && typeof toggleDriving==='function'){
-          toggleDriving();
-          setTimeout(function(){ if(typeof handleBoarding==='function') handleBoarding(e); }, 250);
-        }else{
-          if(typeof handleBoarding==='function') handleBoarding(e);
-        }
-      });
-      board._b60=true;
-    }
+        if(typeof handleBoarding === 'function') handleBoarding(e, false);
+      }
+    }, { passive: false });
+
+    btn.addEventListener('touchcancel', function(){
+      if(timer) clearTimeout(timer);
+      btn.style.opacity = '1';
+    }, { passive: true });
+
+    btn.addEventListener('mousedown', function(e){
+      if(hasTouch) return;
+      isLong = false;
+      btn.style.opacity = '0.75';
+      timer = setTimeout(function(){
+        isLong = true;
+        btn.style.opacity = '1';
+        if(typeof handleBoarding === 'function') handleBoarding(e, true);
+      }, 650);
+    });
+
+    btn.addEventListener('mouseup', function(e){
+      if(hasTouch) return;
+      if(timer) clearTimeout(timer);
+      btn.style.opacity = '1';
+      if(!isLong){
+        if(typeof handleBoarding === 'function') handleBoarding(e, false);
+      }
+    });
+
+    btn.addEventListener('mouseleave', function(){
+      if(hasTouch) return;
+      if(timer) clearTimeout(timer);
+      btn.style.opacity = '1';
+    });
+  }
+
+  function bindBottom(){
+    var board = document.getElementById('btn-bottom-board');
+    var alight = document.getElementById('btn-bottom-alight');
+    var tab4Board = document.getElementById('btn-board');
+    if(board) bindBoardButton(board);
+    if(tab4Board) bindBoardButton(tab4Board);
     if(alight && !alight._b60){
       alight.addEventListener('click', function(e){ e.preventDefault(); window.handleAlighting(e); });
-      alight._b60=true;
+      alight._b60 = true;
     }
   }
-  function init60(){
+
+  function init62(){
     bindBottom();
     try{ if(typeof updateDrivingUI==='function') updateDrivingUI(); }catch(e){}
   }
-  document.addEventListener('DOMContentLoaded', function(){ setTimeout(init60, 300); });
-  window.addEventListener('load', function(){ setTimeout(init60, 600); });
-  setTimeout(init60, 1000);
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(init62, 300); });
+  window.addEventListener('load', function(){ setTimeout(init62, 600); });
+  setTimeout(init62, 1000);
 })();
 </script>
 
