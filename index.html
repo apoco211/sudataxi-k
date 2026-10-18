@@ -247,7 +247,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v8.7</title>
+  <title>수다택시 K v8.8</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1874,7 +1874,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v8.7";
+  const BUILD_VERSION = "v8.8";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2327,7 +2327,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.7'
+        version: 'v8.8'
       };
       await fetch(url, {
         method: 'POST',
@@ -2355,7 +2355,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.7'
+        version: 'v8.8'
       };
       
       localStorage.setItem('sudataxi_auto_backup', JSON.stringify(backupData));
@@ -5021,7 +5021,22 @@ function initDailyRevenue() {
     try {
     const inputRevEl = document.getElementById('input-rev');
     if(!inputRevEl) return;
-    const savedRev = localStorage.getItem('sudataxi_daily_rev');
+
+    // 자동 복구: localStorage가 비어있으면 safe_backup/auto_backup에서 복구
+    let savedRev = localStorage.getItem('sudataxi_daily_rev');
+    if (!savedRev || savedRev === '0' || savedRev === 'null') {
+      try {
+        const safe = JSON.parse(localStorage.getItem('sudataxi_safe_backup') || 'null');
+        const auto = JSON.parse(localStorage.getItem('sudataxi_auto_backup') || 'null');
+        const backup = safe || auto;
+        if (backup && backup.daily_rev && backup.daily_rev > 0) {
+          savedRev = backup.daily_rev.toString();
+          localStorage.setItem('sudataxi_daily_rev', savedRev);
+          console.log('대시보드 매출 자동 복구:', savedRev);
+        }
+      } catch(e){ console.warn('daily_rev auto restore fail', e); }
+    }
+
     if (savedRev) {
       inputRevEl.value = savedRev;
     }
@@ -5029,10 +5044,73 @@ function initDailyRevenue() {
     inputRevEl.removeEventListener('input', calculateDailyRevenue);
     inputRevEl.addEventListener('input', calculateDailyRevenue);
     inputRevEl.addEventListener('change', calculateDailyRevenue);
+    // 입력 시 즉시 백업
+    inputRevEl.addEventListener('input', function(){
+      try {
+        localStorage.setItem('sudataxi_daily_rev', inputRevEl.value);
+        if(typeof executeAutoBackup==='function') executeAutoBackup();
+      } catch(e){}
+    });
     // 초기 1회 더 강제 계산 (지연)
     setTimeout(()=>{ try{ calculateDailyRevenue(); }catch(e){} }, 500);
     } catch(e) { console.error('initDailyRevenue error', e); }
   }
+
+  // 대시보드 전체 숫자 자동 복구 (빌드 후에도 유지)
+  function autoRestoreAllDashboardData() {
+    try {
+      const safe = JSON.parse(localStorage.getItem('sudataxi_safe_backup') || 'null');
+      const auto = JSON.parse(localStorage.getItem('sudataxi_auto_backup') || 'null');
+      const backup = safe || auto;
+      if (!backup) return;
+
+      let restored = false;
+
+      // 1. 일매출 복구
+      const curRev = localStorage.getItem('sudataxi_daily_rev');
+      if ((!curRev || curRev==='0') && backup.daily_rev && backup.daily_rev>0) {
+        localStorage.setItem('sudataxi_daily_rev', backup.daily_rev.toString());
+        const el = document.getElementById('input-rev');
+        if (el) el.value = backup.daily_rev.toString();
+        restored = true;
+      }
+
+      // 2. 시뮬레이터 데이터 복구 (월 목표 등)
+      const curSim = localStorage.getItem('sudataxi_sim_data');
+      if ((!curSim || curSim==='null' || curSim==='{}') && backup.sim_data) {
+        localStorage.setItem('sudataxi_sim_data', JSON.stringify(backup.sim_data));
+        restored = true;
+      }
+
+      // 3. 자주가는 곳 복구
+      const curFreq = JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]');
+      if (curFreq.length===0 && backup.frequent_presets && backup.frequent_presets.length>0) {
+        localStorage.setItem('sudataxi_frequent_presets', JSON.stringify(backup.frequent_presets));
+        restored = true;
+      }
+
+      // 4. 운행 기록 복구 (오늘 데이터가 비어있을 때)
+      const records = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
+      const todayKey = typeof getTodayKey==='function' ? getTodayKey() : null;
+      if (todayKey && backup.driving_records && backup.driving_records[todayKey]) {
+        if (!records[todayKey] || (records[todayKey].totalDrive||0)===0) {
+          if ((backup.driving_records[todayKey].totalDrive||0)>0) {
+            records[todayKey] = backup.driving_records[todayKey];
+            localStorage.setItem('sudataxi_driving_records', JSON.stringify(records));
+            restored = true;
+          }
+        }
+      }
+
+      if (restored) {
+        console.log('대시보드 자동 복구 완료', backup.timestamp);
+        try{ calculateDailyRevenue(); }catch(e){}
+        try{ if(typeof initSimulator==='function') initSimulator(); }catch(e){}
+        if(typeof showToast==='function') setTimeout(()=>showToast('🔄 이전 대시보드 데이터 자동 복구됨'), 800);
+      }
+    } catch(e){ console.warn('autoRestoreAllDashboardData fail', e); }
+  }
+
 
   // --- 마이크 음성 인식 - v7.9.37 robust ---
   
@@ -5655,6 +5733,7 @@ function initMic() {
 
     // Simulator Init & Events
     initSimulator();
+    try{ autoRestoreAllDashboardData(); }catch(e){}
     initDailyRevenue(); 
     
     const btnOpenCal = document.getElementById('btn-open-calendar');
@@ -5713,7 +5792,7 @@ function initMic() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.7</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.8</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
