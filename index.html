@@ -247,7 +247,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v7.9.65</title>
+  <title>수다택시 K v8.4</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1437,6 +1437,61 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
 }
 </style>
 
+
+<style id="v84-bottombar-5equal">
+/* v8.4: 타이머 완전 제거, 5개 동일 크기 버튼 */
+.bottom-bar#bottom-bar-v7961 {
+  grid-template-columns: repeat(5, 1fr) !important;
+  max-width: 430px !important;
+  height: 68px !important;
+  min-height: 68px !important;
+  max-height: 68px !important;
+  gap: 6px !important;
+  padding: 6px 8px !important;
+  align-items: center !important;
+}
+.bottom-bar#bottom-bar-v7961 .bb-btn {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: 54px !important;
+  min-height: 54px !important;
+  max-height: 54px !important;
+  border-radius: 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 900 !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+}
+.bottom-bar#bottom-bar-v7961 .clock-btn {
+  background: #1E1E1E !important;
+  color: #FFFFFF !important;
+  border: 1.5px solid #333333 !important;
+}
+.bottom-bar#bottom-bar-v7961 .clock-btn:active {
+  background: #2A2A2A !important;
+  transform: scale(0.95);
+}
+.bottom-bar#bottom-bar-v7961 .timer-cell {
+  display: none !important;
+}
+@media (max-width: 380px) {
+  .bottom-bar#bottom-bar-v7961 {
+    gap: 4px !important;
+    padding: 5px 6px !important;
+  }
+  .bottom-bar#bottom-bar-v7961 .bb-btn .bb-label {
+    font-size: 12px !important;
+  }
+}
+</style>
+
 </head>
 <body class="mode-1">
   
@@ -1780,13 +1835,8 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
   </div>
 
   <div class="bottom-bar" id="bottom-bar-v7961">
-    <div class="bb-cell timer-cell">
-      <div class="timer-mode-selector single-mode">
-        <button class="timer-mode-btn active" id="timer-btn-5m">5분</button>
-      </div>
-      <button class="timer-display-btn" id="timer-display-btn">⏱️ 05:00 시작</button>
-    </div>
-    <button class="bb-btn search-btn" id="btn-bottom-search" style="background:#22C55E !important; color:#FFFFFF !important;"><span class="bb-label">🔍 검색</span></button>
+    <button class="bb-btn clock-btn" id="btn-bottom-clock" style="background:#1E1E1E !important; color:#FFFFFF !important; border:1.5px solid #333333 !important;"><span class="bb-label">🕐</span></button>
+    <button class="bb-btn search-btn" id="btn-bottom-search" style="background:#22C55E !important; color:#FFFFFF !important; border:1.5px solid #16A34A !important;"><span class="bb-label">🔍 검색</span></button>
     <button class="bb-btn board-btn" id="btn-bottom-board"><span class="bb-label">승차</span></button>
     <button class="bb-btn alight-btn" id="btn-bottom-alight"><span class="bb-label">하차</span></button>
     <button class="bb-btn restroom-btn" id="btn-save-restroom"><span class="bb-label">화장실</span></button>
@@ -1838,7 +1888,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v8.2";
+  const BUILD_VERSION = "v8.4";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2631,22 +2681,27 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
     requestNotificationPermission();
     if (isTimerRunning) { clearInterval(timerInterval); isTimerRunning = false; if (navigator.serviceWorker && navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage({ action: 'stopTimer' }); }
     timerPresetMin = min; timerRemainingSec = min * 60;
-    document.getElementById('timer-btn-5m').classList.toggle('active', min === 5);
-    document.getElementById('timer-btn-10m').classList.toggle('active', min === 10);
+    try {
+        const b5 = document.getElementById('timer-btn-5m');
+        if (b5) b5.classList.toggle('active', min === 5);
+        const b10 = document.getElementById('timer-btn-10m');
+        if (b10) b10.classList.toggle('active', min === 10);
+    } catch(e) { console.warn('timer btn missing', e); }
     const btn = document.getElementById('timer-display-btn');
-    btn.className = 'timer-display-btn'; btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 시작`;
-    saveTimerState();
+    if (btn) { btn.className = 'timer-display-btn'; btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 시작`; }
+    try { saveTimerState(); } catch(e) {}
   }
   
   function toggleTimer() {
     requestNotificationPermission();
     const btn = document.getElementById('timer-display-btn');
+    if (!btn) return;
     if (timerRemainingSec <= 0) { timerRemainingSec = timerPresetMin * 60; btn.className = 'timer-display-btn'; }
     if (isTimerRunning) {
       clearInterval(timerInterval); isTimerRunning = false;
       if (navigator.serviceWorker && navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage({ action: 'stopTimer' });
       btn.classList.remove('running'); btn.innerText = `⏱️ ${formatMMSS(timerRemainingSec)} 재개`;
-      saveTimerState();
+      try { saveTimerState(); } catch(e) {}
     } else { startTimerInternal(); }
   }
 
@@ -4895,8 +4950,10 @@ function renderGoldenTimeInsights() {
   }
 
   function calculateDailyRevenue() {
+    try {
     const dyn = getDynamicDailyTarget();
-    const TARGET = dyn.dailyTarget;
+    let TARGET = dyn.dailyTarget;
+    if (!TARGET || isNaN(TARGET) || TARGET <= 0) TARGET = 300000; // 안전 fallback
     const inputRevEl = document.getElementById('input-rev');
     const fillEl = document.getElementById('progress-fill');
     const valPctEl = document.getElementById('val-pct');
@@ -4906,9 +4963,11 @@ function renderGoldenTimeInsights() {
     const labelEl = document.querySelector('.revenue-box .label');
     
     if(!inputRevEl) return;
-    let current = parseInt(inputRevEl.value) || 0;
+    let current = parseInt(String(inputRevEl.value).replace(/[^0-9]/g,'')) || 0;
     let remain = Math.max(0, TARGET - current);
     let pct = TARGET > 0 ? Math.min(100, (current / TARGET) * 100) : 0;
+    if (isNaN(pct)) pct = 0;
+    if (isNaN(remain)) remain = 0;
     
     if(fillEl) fillEl.style.width = pct + '%';
     if(valPctEl) valPctEl.innerText = pct.toFixed(1) + '%';
@@ -4937,9 +4996,11 @@ function renderGoldenTimeInsights() {
       }
     }
     localStorage.setItem('sudataxi_daily_rev', current.toString());
+    } catch(e) { console.error('calcRevenue error', e); }
   }
 
 function initDailyRevenue() {
+    try {
     const inputRevEl = document.getElementById('input-rev');
     if(!inputRevEl) return;
     const savedRev = localStorage.getItem('sudataxi_daily_rev');
@@ -4947,7 +5008,12 @@ function initDailyRevenue() {
       inputRevEl.value = savedRev;
     }
     calculateDailyRevenue();
+    inputRevEl.removeEventListener('input', calculateDailyRevenue);
     inputRevEl.addEventListener('input', calculateDailyRevenue);
+    inputRevEl.addEventListener('change', calculateDailyRevenue);
+    // 초기 1회 더 강제 계산 (지연)
+    setTimeout(()=>{ try{ calculateDailyRevenue(); }catch(e){} }, 500);
+    } catch(e) { console.error('initDailyRevenue error', e); }
   }
 
   // --- 마이크 음성 인식 - v7.9.37 robust ---
@@ -5465,7 +5531,7 @@ function initDailyRevenue() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v7.9.65</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.4</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
@@ -5670,6 +5736,39 @@ document.addEventListener('DOMContentLoaded', function() {
       if (typeof setTimerPreset === 'function') setTimerPreset(5);
     }
   } catch(e) {}
+});
+</script>
+
+
+<script id="v84-clock-handler">
+document.addEventListener('DOMContentLoaded', function() {
+  function bindClock() {
+    const clockBtn = document.getElementById('btn-bottom-clock');
+    if (!clockBtn || clockBtn._bound) return;
+    clockBtn._bound = true;
+    clockBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      try {
+        if (typeof showToast === 'function') showToast('🕐 단축어 앱 실행중...');
+        // iOS 단축어 앱 호출 - 5분 단축어
+        try { 
+          window.location.href = 'shortcuts://run-shortcut?name=수다택시5분';
+        } catch(err) {}
+        // 대체: shortcuts://  또는 단축어 앱 자체
+        setTimeout(function() {
+          try { window.location.href = 'shortcuts://'; } catch(err) {}
+        }, 800);
+      } catch(err) { console.error(err); }
+    });
+  }
+  bindClock();
+  setTimeout(bindClock, 1000);
+  setTimeout(bindClock, 2500);
+
+  // 기존 타이머 요소들 완전 제거 (혹시 남아있으면)
+  const timerCell = document.querySelector('.timer-cell');
+  if (timerCell) timerCell.style.display = 'none';
 });
 </script>
 
