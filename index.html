@@ -226,7 +226,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v7.9.52</title>
+  <title>수다택시 K v7.9.56</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1107,7 +1107,7 @@ body.theme-day .save-restroom-btn {
 
 
 <style id="v7-9-51-square-final">
-/* v7.9.52 FINAL - 원본 보존 + 정사각형 + 큰 글씨 + 타이머 외곽선 분리 */
+/* v7.9.56 FINAL - 원본 보존 + 정사각형 + 큰 글씨 + 타이머 외곽선 분리 */
 .bottom-bar {
   display: flex !important;
   flex-direction: row !important;
@@ -1252,7 +1252,7 @@ body { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
 
 
 <style id="v7-9-52-border-fix">
-/* v7.9.52 - 각 버튼 테두리 추가 (사진 디자인 기준) */
+/* v7.9.56 - 각 버튼 테두리 추가 (사진 디자인 기준) */
 .bottom-bar .bb-btn {
   border-width: 2.5px !important;
   border-style: solid !important;
@@ -1272,6 +1272,404 @@ body { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
 }
 .bottom-bar .timer-display-btn {
   border: 2px solid #000 !important;
+}
+</style>
+
+
+<style id="v7-9-53-align-night">
+/* v7.9.56 정렬 + 야간 테두리 가시성 개선 */
+.bottom-bar {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 6px !important;
+  padding: 5px !important;
+  height: 72px !important;
+  min-height: 72px !important;
+  max-height: 72px !important;
+}
+.bottom-bar .timer-cell {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  height: 62px !important;
+  min-height: 62px !important;
+  max-height: 62px !important;
+  gap: 0 !important;
+  padding: 0 !important;
+}
+.bottom-bar .timer-mode-selector {
+  display: flex !important;
+  gap: 6px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  max-height: 24px !important;
+  align-items: center !important;
+}
+.bottom-bar .timer-mode-btn {
+  height: 24px !important;
+  min-height: 24px !important;
+  max-height: 24px !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.bottom-bar .timer-display-btn {
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  margin-top: 4px !important;
+  font-size: 13px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* 정사각형 버튼 - 정렬 맞춤 */
+.bottom-bar .bb-btn {
+  width: 62px !important;
+  min-width: 62px !important;
+  max-width: 62px !important;
+  height: 62px !important;
+  min-height: 62px !important;
+  max-height: 62px !important;
+  border-radius: 16px !important;
+  flex-shrink: 0 !important;
+  align-self: center !important;
+}
+
+/* 야간/주간 테두리 가시성 - 다크모드에서는 흰 테두리 */
+.bottom-bar .bb-btn,
+.bottom-bar .timer-mode-btn,
+.bottom-bar .timer-display-btn {
+  border-style: solid !important;
+  border-width: 2px !important;
+}
+/* 다크모드 기본 - 흰/밝은 테두리로 보이게 */
+.bottom-bar .board-btn { border-color: #FFFFFF !important; }
+.bottom-bar .alight-btn { border-color: #FFFFFF !important; }
+.bottom-bar .restroom-btn { border-color: #FFFFFF !important; }
+.bottom-bar .timer-mode-btn { border-color: #FFFFFF !important; }
+.bottom-bar .timer-display-btn { border-color: #FFFFFF !important; }
+
+/* 주간 모드에서는 검정 테두리 */
+body.theme-day .bottom-bar .board-btn,
+body.theme-day .bottom-bar .alight-btn,
+body.theme-day .bottom-bar .restroom-btn,
+body.theme-day .bottom-bar .timer-mode-btn,
+body.theme-day .bottom-bar .timer-display-btn {
+  border-color: #000000 !important;
+}
+
+/* 외곽 바 테두리도 야간에 더 밝게 */
+.bottom-bar {
+  border: 2px solid #FF8C00 !important;
+}
+body.theme-day .bottom-bar {
+  border: 2.5px solid #000 !important;
+}
+</style>
+
+
+<style id="v7-9-54-overflow-fix">
+/* v7.9.56 - 버튼 밖으로 나가는 오버플로우 수정 */
+.bottom-bar {
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  width: calc(100% - 12px) !important;
+  max-width: 420px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  padding: 4px !important;
+  gap: 4px !important;
+  height: 68px !important;
+  min-height: 68px !important;
+  max-height: 68px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+.bottom-bar .timer-cell {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: 60px !important;
+  min-height: 60px !important;
+  max-height: 60px !important;
+}
+.bottom-bar .timer-mode-selector {
+  gap: 4px !important;
+  height: 22px !important;
+}
+.bottom-bar .timer-mode-btn {
+  min-width: 0 !important;
+  flex: 1 1 0 !important;
+  padding: 0 4px !important;
+  font-size: 11px !important;
+}
+.bottom-bar .timer-display-btn {
+  min-width: 0 !important;
+  width: 100% !important;
+  font-size: 12px !important;
+  padding: 0 4px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+.bottom-bar .bb-btn {
+  width: 58px !important;
+  min-width: 58px !important;
+  max-width: 58px !important;
+  height: 58px !important;
+  min-height: 58px !important;
+  max-height: 58px !important;
+  flex: 0 0 58px !important;
+  font-size: 14px !important;
+}
+.bottom-bar .bb-btn .bb-label {
+  font-size: 14px !important;
+}
+
+@media (max-width: 390px) {
+  .bottom-bar {
+    width: calc(100% - 8px) !important;
+    gap: 3px !important;
+    padding: 3px !important;
+    height: 64px !important;
+    min-height: 64px !important;
+  }
+  .bottom-bar .timer-cell {
+    height: 56px !important;
+    min-height: 56px !important;
+  }
+  .bottom-bar .bb-btn {
+    width: 52px !important;
+    min-width: 52px !important;
+    max-width: 52px !important;
+    height: 52px !important;
+    min-height: 52px !important;
+    flex: 0 0 52px !important;
+  }
+  .bottom-bar .bb-btn .bb-label { font-size: 12.5px !important; }
+  .bottom-bar .timer-display-btn { font-size: 11px !important; }
+}
+
+@media (max-width: 340px) {
+  .bottom-bar .bb-btn {
+    width: 46px !important;
+    min-width: 46px !important;
+    max-width: 46px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    flex: 0 0 46px !important;
+  }
+}
+</style>
+
+
+<style id="v7-9-55-equal-height-final">
+/* v7.9.56 - 최종 높이 동일 고정 - 타이머 높이 = 버튼 높이 = 62px */
+.bottom-bar,
+.bottom-bar * {
+  box-sizing: border-box !important;
+}
+.bottom-bar {
+  height: 70px !important;
+  min-height: 70px !important;
+  max-height: 70px !important;
+  padding: 4px !important;
+  gap: 4px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  justify-content: space-between !important;
+  overflow: hidden !important;
+  width: calc(100% - 12px) !important;
+  max-width: 420px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  border: 2.5px solid #000 !important;
+  border-radius: 16px !important;
+  background: #FFFFFF !important;
+}
+body:not(.theme-day) .bottom-bar {
+  background: #0F0F0F !important;
+  border-color: #FF8C00 !important;
+}
+
+/* 타이머 셀 - 전체 높이 62px 고정 = 버튼 높이와 동일 */
+.bottom-bar .timer-cell {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  width: auto !important;
+  height: 62px !important;
+  min-height: 62px !important;
+  max-height: 62px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  gap: 4px !important;
+  align-self: stretch !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+.bottom-bar .timer-mode-selector {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 4px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  flex: 0 0 28px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.bottom-bar .timer-mode-btn {
+  flex: 1 1 0 !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  border-radius: 14px !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 2px solid #000 !important;
+  line-height: 1 !important;
+  padding: 0 !important;
+}
+body:not(.theme-day) .bottom-bar .timer-mode-btn { border-color: #FFF !important; }
+
+.bottom-bar .timer-display-btn {
+  flex: 0 0 30px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
+  width: 100% !important;
+  border-radius: 14px !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 2px solid #000 !important;
+  margin: 0 !important;
+  padding: 0 6px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+body:not(.theme-day) .bottom-bar .timer-display-btn { border-color: #FFF !important; }
+
+/* 3개 정사각형 버튼 - 높이 62px로 타이머 전체와 동일 */
+.bottom-bar .bb-btn {
+  width: 62px !important;
+  min-width: 62px !important;
+  max-width: 62px !important;
+  height: 62px !important;
+  min-height: 62px !important;
+  max-height: 62px !important;
+  flex: 0 0 62px !important;
+  align-self: stretch !important;
+  border-radius: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 2.5px solid #000 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+body:not(.theme-day) .bottom-bar .bb-btn { border-color: #FFF !important; }
+.bottom-bar .bb-btn .bb-label {
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+}
+
+@media (max-width: 390px) {
+  .bottom-bar { height: 66px !important; min-height: 66px !important; max-height: 66px !important; }
+  .bottom-bar .timer-cell { height: 58px !important; min-height: 58px !important; max-height: 58px !important; }
+  .bottom-bar .timer-mode-selector { height: 26px !important; min-height: 26px !important; flex: 0 0 26px !important; }
+  .bottom-bar .timer-display-btn { flex: 0 0 28px !important; height: 28px !important; min-height: 28px !important; }
+  .bottom-bar .bb-btn { width: 58px !important; min-width: 58px !important; max-width: 58px !important; height: 58px !important; min-height: 58px !important; flex: 0 0 58px !important; }
+}
+@media (max-width: 360px) {
+  .bottom-bar { height: 62px !important; min-height: 62px !important; }
+  .bottom-bar .timer-cell { height: 54px !important; min-height: 54px !important; }
+  .bottom-bar .timer-mode-selector { height: 24px !important; flex: 0 0 24px !important; }
+  .bottom-bar .timer-display-btn { flex: 0 0 26px !important; height: 26px !important; }
+  .bottom-bar .bb-btn { width: 52px !important; min-width: 52px !important; height: 54px !important; min-height: 54px !important; flex: 0 0 52px !important; }
+}
+</style>
+
+
+<style id="v7-9-56-equal-padding">
+/* v7.9.56 - 위/아래 여백 동일 고정 - 기본 */
+.bottom-bar {
+  height: auto !important;
+  min-height: 74px !important;
+  max-height: 74px !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+  padding-left: 6px !important;
+  padding-right: 6px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 6px !important;
+  box-sizing: border-box !important;
+}
+.bottom-bar .timer-cell {
+  height: 62px !important;
+  min-height: 62px !important;
+  max-height: 62px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  gap: 0 !important;
+}
+.bottom-bar .timer-mode-selector {
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  flex: 0 0 28px !important;
+}
+.bottom-bar .timer-display-btn {
+  height: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
+  margin: 0 !important;
+  flex: 0 0 30px !important;
+}
+.bottom-bar .bb-btn {
+  height: 62px !important;
+  min-height: 62px !important;
+  max-height: 62px !important;
+  margin: 0 !important;
+  align-self: center !important;
+}
+/* 안전영역 때문에 아래만 커지는 문제 방지 - padding은 동일, bottom 위치만 safe-area */
+.bottom-bar {
+  bottom: 2px !important;
+  padding-bottom: 6px !important;
+}
+@supports (padding: env(safe-area-inset-bottom)) {
+  .bottom-bar {
+    bottom: calc(2px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: 6px !important;
+  }
 }
 </style>
 
@@ -1675,7 +2073,7 @@ body { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.9.52";
+  const BUILD_VERSION = "v7.9.56";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -5060,7 +5458,7 @@ function initDailyRevenue() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v7.9.52</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v7.9.56</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
@@ -5072,9 +5470,9 @@ function initDailyRevenue() {
 
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
 <script id="v7-9-51-patch">
-// v7.9.52 FINAL PATCH - 원본 기능 보존 + 하단 버튼 정확 동작 + 강력 타이머
+// v7.9.56 FINAL PATCH - 원본 기능 보존 + 하단 버튼 정확 동작 + 강력 타이머
 (function(){
-  console.log('[v7.9.52] patch loaded');
+  console.log('[v7.9.56] patch loaded');
 
   // --- Robust timer V2 ---
   function saveTimerStateV2(){
