@@ -126,6 +126,27 @@
 :where(code, pre, kbd, samp) {
   font-family: "Optimistic Mono", ui-monospace, monospace;
 }
+</style><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
 <style id="v7-9-37-fix">
 .bottom-bar {
   position: fixed !important;
@@ -1386,6 +1407,36 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
 }
 </style>
 
+
+<style id="v800-bottombar-fix">
+/* v8.0 Bottom-bar 개편: 10분 타이머 제거, 검색 버튼 추가 */
+.bottom-bar#bottom-bar-v7961 {
+  grid-template-columns: 1fr 54px 54px 54px 54px !important;
+  max-width: 430px !important;
+}
+.bottom-bar#bottom-bar-v7961 .timer-mode-selector.single-mode {
+  grid-template-columns: 1fr !important;
+}
+.bottom-bar#bottom-bar-v7961 .timer-mode-selector.single-mode #timer-btn-10m {
+  display: none !important;
+}
+.bottom-bar#bottom-bar-v7961 .search-btn {
+  background: #22C55E !important;
+  color: #FFFFFF !important;
+  border: 1.5px solid #16A34A !important;
+}
+@media (max-width: 380px) {
+  .bottom-bar#bottom-bar-v7961 {
+    grid-template-columns: 1fr 48px 48px 48px 48px !important;
+    gap: 4px !important;
+  }
+  .bottom-bar#bottom-bar-v7961 .bb-btn {
+    width: 48px !important;
+    min-width: 48px !important;
+  }
+}
+</style>
+
 </head>
 <body class="mode-1">
   
@@ -1730,12 +1781,12 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
 
   <div class="bottom-bar" id="bottom-bar-v7961">
     <div class="bb-cell timer-cell">
-      <div class="timer-mode-selector">
+      <div class="timer-mode-selector single-mode">
         <button class="timer-mode-btn active" id="timer-btn-5m">5분</button>
-        <button class="timer-mode-btn" id="timer-btn-10m">10분</button>
       </div>
       <button class="timer-display-btn" id="timer-display-btn">⏱️ 05:00 시작</button>
     </div>
+    <button class="bb-btn search-btn" id="btn-bottom-search" style="background:#22C55E !important; color:#FFFFFF !important;"><span class="bb-label">🔍 검색</span></button>
     <button class="bb-btn board-btn" id="btn-bottom-board"><span class="bb-label">승차</span></button>
     <button class="bb-btn alight-btn" id="btn-bottom-alight"><span class="bb-label">하차</span></button>
     <button class="bb-btn restroom-btn" id="btn-save-restroom"><span class="bb-label">화장실</span></button>
@@ -1787,7 +1838,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.9.65";
+  const BUILD_VERSION = "v8.2";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -1880,34 +1931,160 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
   });
 
   // --- [AI V7.8.2] 1. 서울 실시간 인구 혼잡도 API 연동 (CORS 프록시 우회 적용) ---
-  async function fetchSeoulCityData(placeName) {
+  async function fetchSeoulCityData(placeName, options = {}) {
+      const statusEl = document.getElementById('status-seoul');
+      const arrivalOnly = options.arrivalOnly !== false;
+      const currentLat = options.lat || (typeof currentPos !== 'undefined' && currentPos ? currentPos.lat : null);
+      const currentLng = options.lng || (typeof currentPos !== 'undefined' && currentPos ? currentPos.lng : null);
       try {
-          const supportedPlaces = ["강남역", "여의도", "홍대입구역", "신도림역", "사당역", "서울역", "건대입구역"];
-          let matchedPlace = supportedPlaces.find(p => placeName.includes(p.replace("역", "")));
-          if (!matchedPlace) return null;
-
-          document.getElementById('status-seoul').innerHTML = `🏙️ 서울시 혼잡도 API: ${matchedPlace} 데이터 수신중...`;
-          
-          // allorigins.win을 활용해 깃허브에서도 CORS 에러 없이 공공데이터 포털 호출
-          const targetUrl = encodeURIComponent(`http://openapi.seoul.go.kr:8088/sample/json/citydata/1/5/${matchedPlace}`);
-          const proxyUrl = `https://api.allorigins.win/get?url=${targetUrl}`;
-          
-          const res = await fetch(proxyUrl);
-          const proxyData = await res.json();
-          const data = JSON.parse(proxyData.contents);
-          
-          if(data && data.CITYDATA && data.CITYDATA.LIVE_PPLTN_STTS) {
-              const congestLvl = data.CITYDATA.LIVE_PPLTN_STTS[0].AREA_CONGEST_LVL;
-              let color = congestLvl === "붐빔" ? "#EF4444" : "#22C55E";
-              document.getElementById('status-seoul').innerHTML = `🏙️ 서울시 혼잡도 API: ${matchedPlace} <span style="color:${color}; font-weight:900;">[${congestLvl}]</span>`;
-              return congestLvl;
+          const seoulHotspotsMeta = [
+              { key: "강남역", aliases: ["강남","강남역"], lat: 37.4981, lng: 127.0276 },
+              { key: "여의도", aliases: ["여의도","여의도역"], lat: 37.5216, lng: 126.9242 },
+              { key: "홍대입구역", aliases: ["홍대","홍대입구"], lat: 37.5577, lng: 126.9240 },
+              { key: "신도림역", aliases: ["신도림"], lat: 37.5088, lng: 126.8910 },
+              { key: "사당역", aliases: ["사당"], lat: 37.4765, lng: 126.9816 },
+              { key: "서울역", aliases: ["서울역"], lat: 37.5563, lng: 126.9723 },
+              { key: "건대입구역", aliases: ["건대","건대입구"], lat: 37.5404, lng: 127.0700 },
+              { key: "잠실역", aliases: ["잠실"], lat: 37.5133, lng: 127.1001 },
+              { key: "명동", aliases: ["명동"], lat: 37.5636, lng: 126.9830 },
+              { key: "이태원", aliases: ["이태원"], lat: 37.5347, lng: 126.9947 }
+          ];
+          let matchedMeta = null;
+          for (let meta of seoulHotspotsMeta) {
+              if (meta.aliases.some(a => placeName.includes(a)) || placeName.includes(meta.key) || meta.key.includes(placeName)) {
+                  matchedMeta = meta; break;
+              }
           }
+          if (!matchedMeta) {
+              const fallback = seoulHotspotsMeta.find(m => placeName.includes(m.key.replace("역","")));
+              matchedMeta = fallback || null;
+          }
+          if (!matchedMeta) {
+              if(statusEl) statusEl.innerHTML = `🏙️ 서울 혼잡도: 대상 아님 (${placeName})`;
+              return null;
+          }
+          if (arrivalOnly && currentLat && currentLng) {
+              const distToSpot = getStraightDistanceKm(currentLat, currentLng, matchedMeta.lat, matchedMeta.lng);
+              if (distToSpot > 1.2) {
+                  if(statusEl) statusEl.innerHTML = `🏙️ 서울 혼잡도: ${matchedMeta.key} 미도착 (${distToSpot.toFixed(1)}km) - 호출 스킵`;
+                  return null;
+              }
+              if(statusEl) statusEl.innerHTML = `🏙️ 서울 혼잡도: ${matchedMeta.key} 도착 감지 (${distToSpot.toFixed(2)}km) - 데이터 수신중...`;
+          } else if (arrivalOnly && !currentLat) {
+              if(statusEl) statusEl.innerHTML = `🏙️ 서울 혼잡도: 위치 대기중 - 호출 스킵`;
+              return null;
+          }
+          const matchedPlace = matchedMeta.key;
+          if (!window._seoulCongestionCache) window._seoulCongestionCache = new Map();
+          if (!window._seoulCongestionTime) window._seoulCongestionTime = new Map();
+          const now = Date.now();
+          const cachedTime = window._seoulCongestionTime.get(matchedPlace);
+          if (cachedTime && (now - cachedTime < 15*60*1000) && window._seoulCongestionCache.has(matchedPlace)) {
+              const cached = window._seoulCongestionCache.get(matchedPlace);
+              if(statusEl) {
+                  let color = (cached === "붐빔") ? "#EF4444" : "#22C55E";
+                  statusEl.innerHTML = `🏙️ 서울 혼잡도: ${matchedPlace} <span style="color:${color}; font-weight:900;">[${cached}]</span> (캐시)`;
+              }
+              return cached;
+          }
+          if(statusEl) statusEl.innerHTML = `🏙️ 서울시 혼잡도 API: ${matchedPlace} 도착 지역 데이터 수신중...`;
+          const seoulKey = "sample";
+          const targetUrls = [
+              `https://openapi.seoul.go.kr:8088/${seoulKey}/json/citydata/1/5/${encodeURIComponent(matchedPlace)}`,
+              `http://openapi.seoul.go.kr:8088/${seoulKey}/json/citydata/1/5/${encodeURIComponent(matchedPlace)}`
+          ];
+          let lastError = null;
+          for (let tUrl of targetUrls) {
+              try {
+                  const proxyUrl1 = `https://api.allorigins.win/get?url=${encodeURIComponent(tUrl)}`;
+                  const res1 = await fetch(proxyUrl1, { signal: AbortSignal.timeout(6000) });
+                  if (res1.ok) {
+                      const proxyData = await res1.json();
+                      if (proxyData && proxyData.contents) {
+                          const data = JSON.parse(proxyData.contents);
+                          if(data && data.CITYDATA && data.CITYDATA.LIVE_PPLTN_STTS && data.CITYDATA.LIVE_PPLTN_STTS[0]) {
+                              const congestLvl = data.CITYDATA.LIVE_PPLTN_STTS[0].AREA_CONGEST_LVL;
+                              const ppltnRate = data.CITYDATA.LIVE_PPLTN_STTS[0].AREA_PPLTN_RATE || "";
+                              let color = (congestLvl === "붐빔" || congestLvl === "매우 붐빔") ? "#EF4444" : (congestLvl === "보통" ? "#F59E0B" : "#22C55E");
+                              if(statusEl) statusEl.innerHTML = `🏙️ 서울 혼잡도: ${matchedPlace} 도착 <span style="color:${color}; font-weight:900;">[${congestLvl}]</span> ${ppltnRate}`;
+                              window._seoulCongestionCache.set(matchedPlace, congestLvl);
+                              window._seoulCongestionCache.set(matchedMeta.aliases[0], congestLvl);
+                              window._seoulCongestionTime.set(matchedPlace, now);
+                              return congestLvl;
+                          }
+                      }
+                  }
+              } catch(e) { lastError = e; }
+              try {
+                  const proxyUrl2 = `https://corsproxy.io/?${encodeURIComponent(tUrl)}`;
+                  const res2 = await fetch(proxyUrl2, { signal: AbortSignal.timeout(6000) });
+                  if (res2.ok) {
+                      const data = await res2.json();
+                      if(data && data.CITYDATA && data.CITYDATA.LIVE_PPLTN_STTS && data.CITYDATA.LIVE_PPLTN_STTS[0]) {
+                          const congestLvl = data.CITYDATA.LIVE_PPLTN_STTS[0].AREA_CONGEST_LVL;
+                          let color = congestLvl === "붐빔" ? "#EF4444" : "#22C55E";
+                          if(statusEl) statusEl.innerHTML = `🏙️ 서울 혼잡도: ${matchedPlace} 도착 <span style="color:${color}; font-weight:900;">[${congestLvl}]</span>`;
+                          window._seoulCongestionCache.set(matchedPlace, congestLvl);
+                          window._seoulCongestionTime.set(matchedPlace, now);
+                          return congestLvl;
+                      }
+                  }
+              } catch(e) { lastError = e; }
+          }
+          try {
+              const directRes = await fetch(targetUrls[0], { signal: AbortSignal.timeout(5000) });
+              if (directRes.ok) {
+                  const data = await directRes.json();
+                  if(data && data.CITYDATA && data.CITYDATA.LIVE_PPLTN_STTS && data.CITYDATA.LIVE_PPLTN_STTS[0]) {
+                      const congestLvl = data.CITYDATA.LIVE_PPLTN_STTS[0].AREA_CONGEST_LVL;
+                      window._seoulCongestionCache.set(matchedPlace, congestLvl);
+                      window._seoulCongestionTime.set(matchedPlace, now);
+                      return congestLvl;
+                  }
+              }
+          } catch(e) { lastError = e; }
+          if(statusEl) statusEl.innerHTML = `🏙️ 서울 혼잡도: ${matchedPlace} API 점검중 - 스킵`;
+          console.warn("Seoul API fail on arrival", lastError);
           return null;
       } catch(e) { 
-          document.getElementById('status-seoul').innerHTML = `🏙️ 서울시 혼잡도 API: 호출 에러`;
+          const el = document.getElementById('status-seoul');
+          if(el) el.innerHTML = `🏙️ 서울 혼잡도 API: 일시 오류`;
+          console.error(e);
           return null; 
       }
   }
+
+  async function checkSeoulArrivalAndFetch() {
+      if (!currentPos) return;
+      const statusEl = document.getElementById('status-seoul');
+      const seoulMetas = [
+          { key: "강남역", lat: 37.4981, lng: 127.0276 },
+          { key: "여의도", lat: 37.5216, lng: 126.9242 },
+          { key: "홍대입구역", lat: 37.5577, lng: 126.9240 },
+          { key: "신도림역", lat: 37.5088, lng: 126.8910 },
+          { key: "사당역", lat: 37.4765, lng: 126.9816 },
+          { key: "서울역", lat: 37.5563, lng: 126.9723 },
+          { key: "건대입구역", lat: 37.5404, lng: 127.0700 },
+          { key: "잠실역", lat: 37.5133, lng: 127.1001 },
+          { key: "명동", lat: 37.5636, lng: 126.9830 },
+          { key: "이태원", lat: 37.5347, lng: 126.9947 }
+      ];
+      let closest = null;
+      let minDist = Infinity;
+      for (let meta of seoulMetas) {
+          let d = getStraightDistanceKm(currentPos.lat, currentPos.lng, meta.lat, meta.lng);
+          if (d < minDist) { minDist = d; closest = meta; }
+      }
+      if (closest && minDist <= 1.2) {
+          if(statusEl) statusEl.innerHTML = `🏙️ 서울 혼잡도: ${closest.key} 도착(${minDist.toFixed(2)}km) - 호출 시도`;
+          const result = await fetchSeoulCityData(closest.key, { lat: currentPos.lat, lng: currentPos.lng, arrivalOnly: true });
+          return result;
+      } else {
+          if(statusEl) statusEl.innerHTML = `🏙️ 서울 혼잡도: 미도착 - 최근접 ${closest ? closest.key + '('+minDist.toFixed(1)+'km)' : '없음'} - 호출 스킵 (도착시 자동 호출)`;
+          return null;
+      }
+  }
+
 
   // --- [AI V7.8.2] 2. 카카오 실시간 교통망(속도) 정체 분석 로직 ---
   function getTrafficSurgeScore(distanceKm, durationMin) {
@@ -3732,6 +3909,8 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       if (locText) locText.innerText = `📍 ${currentRegionName || currentPos.lat.toFixed(4)} (${inWisu ? '관내 수익 극대화' : '관외 경유지 우선 복귀'})`;
       if (activeTab === 1) calculateAndRender();
       if (activeTab === 2) renderStrategyTab();
+      // v8.1: 도착 지역 1곳만 서울 혼잡도 호출
+      try { if(typeof checkSeoulArrivalAndFetch === 'function') checkSeoulArrivalAndFetch(); } catch(e) {}
     }, (err) => { showToast("📍 위치 권한 오류"); }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 3000 });
   }
 
@@ -3841,16 +4020,12 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       preliminaryScore += transitSurge;
 
       let isSeoulCrowded = false;
-      if (!inWisu && item.name.match(/강남|사당|홍대|신도림|건대|여의도|서울역/)) {
-          const distToSeoulItem = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
-          if (distToSeoulItem <= 4.5) {
-              if (!window._seoulCongestionCache) window._seoulCongestionCache = new Map();
-              const cacheKey = item.name.match(/강남|사당|홍대|신도림|건대|여의도|서울역/)[0];
-              let congestion;
-              if (window._seoulCongestionCache.has(cacheKey)) congestion = window._seoulCongestionCache.get(cacheKey);
-              else { congestion = await fetchSeoulCityData(item.name); window._seoulCongestionCache.set(cacheKey, congestion); }
-              if (congestion === "붐빔") { preliminaryScore += 45; isSeoulCrowded = true; }
-              else if (congestion === "여유") preliminaryScore -= 30;
+      // v8.1: 서울혼잡도 API는 스코어링 시 호출하지 않음 - 도착 시에만 호출하도록 이동
+      if (window._seoulCongestionCache) {
+          const keyMatch = item.name.match(/강남|사당|홍대|신도림|건대|여의도|서울역|잠실|명동|이태원/);
+          if (keyMatch) {
+              const cached = window._seoulCongestionCache.get(keyMatch[0]);
+              if (cached === "붐빔" || cached === "매우 붐빔") { preliminaryScore += 45; isSeoulCrowded = true; }
           }
       }
 
@@ -3943,6 +4118,8 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const mapBtn = document.getElementById('btn-show-map');
     if (mapBtn) mapBtn.style.display = 'flex';
     if (logEl) logEl.innerText = selectedCandidates.length > 0 ? `방금 · [공공데이터 AI 결합] 연산 완료` : `방금 · 주변 적합한 경로 검색 결과 없음`;
+    // v8.1: 연산 완료 후 도착지 혼잡도 1곳만 호출 (백그라운드)
+    try { if(typeof checkSeoulArrivalAndFetch === 'function') setTimeout(()=>checkSeoulArrivalAndFetch(), 800); } catch(e) {}
     
     // v7.9.27 로그 개선
     if (isAutoRegion) {
@@ -5448,6 +5625,52 @@ function initDailyRevenue() {
   window.addEventListener('load', function(){ setTimeout(init62, 600); });
   setTimeout(init62, 1000);
 })();
+</script>
+
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
+<script id="v800-search-handler">
+document.addEventListener('DOMContentLoaded', function() {
+  function bindBottomSearch() {
+    const searchBtn = document.getElementById('btn-bottom-search');
+    if (!searchBtn) return;
+    if (searchBtn._bound) return;
+    searchBtn._bound = true;
+    searchBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      try {
+        // 탭1로 전환
+        if (typeof setTab === 'function') setTab(1);
+        // 주변콜 동선 탐색 실행
+        setTimeout(function() {
+          const mainSearchBtn = document.getElementById('btn-search');
+          if (mainSearchBtn) {
+            mainSearchBtn.click();
+          } else if (typeof executeSearch === 'function') {
+            executeSearch();
+          }
+        }, 150);
+        if (typeof showToast === 'function') showToast('🔍 주변 콜/동선 탐색 실행중...');
+      } catch(err) {
+        console.error(err);
+      }
+    });
+  }
+  bindBottomSearch();
+  setTimeout(bindBottomSearch, 1000);
+  setTimeout(bindBottomSearch, 2500);
+
+  // 10분 버튼 완전 제거 (혹시 동적 생성되는 경우 대비)
+  const btn10 = document.getElementById('timer-btn-10m');
+  if (btn10) btn10.remove();
+  
+  // 타이머 프리셋을 5분으로 고정
+  try {
+    if (typeof timerPresetMin !== 'undefined' && timerPresetMin === 10) {
+      if (typeof setTimerPreset === 'function') setTimerPreset(5);
+    }
+  } catch(e) {}
+});
 </script>
 
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
