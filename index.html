@@ -226,7 +226,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v7.9.63</title>
+  <title>수다택시 K v7.9.64</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1314,10 +1314,57 @@ body.theme-day .bottom-bar .restroom-btn {
   border: 1.5px solid #2563EB !important;
 }
 
-/* 본문 하단 여백: 하단바 위치에 맞추어 안정적 확보 */
-body { padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px)) !important; }
+/* 4. 하단 고정 탭 메뉴 독 (하단바 바로 위 고정 + 뒤쪽 본문 완벽 차폐) */
+.bottom-mode-dock {
+  position: fixed !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  bottom: calc(74px + env(safe-area-inset-bottom, 0px)) !important;
+  width: calc(100% - 16px) !important;
+  max-width: 400px !important;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 6px !important;
+  padding: 6px 7px !important;
+  margin: 0 !important;
+  background: #141414 !important;
+  border: 1.5px solid #2E2E2E !important;
+  border-radius: 16px !important;
+  z-index: 199 !important;
+  box-sizing: border-box !important;
+  box-shadow:
+    0 -4px 14px rgba(0,0,0,0.55),
+    0 0 0 6px var(--main-bg),
+    0 50px 0 28px var(--main-bg) !important;
+}
+.bottom-mode-dock .mode-pill {
+  height: 32px !important;
+  border-radius: 10px !important;
+  font-size: 11.5px !important;
+  font-weight: 900 !important;
+}
+body.theme-day .bottom-mode-dock {
+  background: #FFFFFF !important;
+  border: 1.5px solid #D1D5DB !important;
+  box-shadow:
+    0 -4px 14px rgba(0,0,0,0.08),
+    0 0 0 6px var(--main-bg),
+    0 50px 0 28px var(--main-bg) !important;
+}
+
+/* 본문 하단 여백: 2단 하단바 높이에 맞추어 넉넉히 확보 */
+body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important; }
 
 @media (max-width: 380px) {
+  .bottom-mode-dock {
+    max-width: 360px !important;
+    gap: 5px !important;
+    padding: 5px 6px !important;
+  }
+  .bottom-mode-dock .mode-pill {
+    height: 29px !important;
+    font-size: 10.5px !important;
+  }
   .bottom-bar {
     max-width: 360px !important;
     gap: 4px !important;
@@ -1343,16 +1390,9 @@ body { padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px)) !important;
 <body class="mode-1">
   
   <div class="sticky-top-area">
-    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 8px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 2px;">
       <div class="header" id="app-header-title" style="margin-bottom: 0; flex: 1;">📅 날짜 수신 대기 중...</div>
       <button id="btn-theme-toggle" onclick="toggleTheme()" class="btn-idle" style="border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 900; cursor: pointer; white-space: nowrap; flex-shrink: 0; border: 1px solid var(--theme-border); color: var(--theme-accent);">☀️ 주간</button>
-    </div>
-    
-    <div class="mode-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
-      <button class="mode-pill active" id="btn-mode1">⚡ 추천/콜찾기</button>
-      <button class="mode-pill" id="btn-mode2">🧠 운행 전략</button>
-      <button class="mode-pill" id="btn-mode3">📊 콜/범칙금 지도</button>
-      <button class="mode-pill" id="btn-mode4">🚘 대시보드</button>
     </div>
   </div>
 
@@ -1681,6 +1721,13 @@ body { padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px)) !important;
     </div>
   </div>
   
+  <div class="mode-container bottom-mode-dock" id="bottom-mode-dock">
+    <button class="mode-pill active" id="btn-mode1">⚡ 추천/콜찾기</button>
+    <button class="mode-pill" id="btn-mode2">🧠 운행 전략</button>
+    <button class="mode-pill" id="btn-mode3">📊 콜/범칙금 지도</button>
+    <button class="mode-pill" id="btn-mode4">🚘 대시보드</button>
+  </div>
+
   <div class="bottom-bar" id="bottom-bar-v7961">
     <div class="bb-cell timer-cell">
       <div class="timer-mode-selector">
@@ -1740,7 +1787,7 @@ body { padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px)) !important;
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.9.63";
+  const BUILD_VERSION = "v7.9.64";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -5204,7 +5251,7 @@ function initDailyRevenue() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v7.9.63</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v7.9.64</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
