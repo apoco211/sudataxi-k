@@ -1425,6 +1425,7 @@ body { padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px)) !important;
       <div class="backup-btn-group">
         <button class="backup-btn" id="btn-export" style="flex: 2.2;">📦 전체 백업(운행일지 포함)</button>
         <button class="backup-btn" id="btn-import-open" style="flex: 1;">📥 복원</button>
+        <button class="backup-btn" id="btn-sheets-sync" style="flex: 1.5; background: #0F766E; color: #FFF; border-color: #14B8A6;" onclick="setupGoogleSheetsSync()">☁️ 구글시트 연동</button>
         <input type="file" id="import-file-input" accept=".json,application/json" style="display: none;">
       </div>
       
@@ -2023,6 +2024,49 @@ body { padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px)) !important;
     } catch(e) {}
   }
 
+  function getGoogleSheetsUrl() {
+    return localStorage.getItem('sudataxi_sheets_url') || '';
+  }
+
+  function setupGoogleSheetsSync() {
+    const current = getGoogleSheetsUrl();
+    const url = prompt('구글 스프레드시트 배포 웹 앱 URL을 입력하세요:\n(예: https://script.google.com/macros/s/.../exec)', current);
+    if (url !== null) {
+      localStorage.setItem('sudataxi_sheets_url', url.trim());
+      if (url.trim()) {
+        showToast('☁️ 구글 시트 연동 주소 저장됨! 지금 동기화를 진행합니다.');
+        syncToGoogleSheets(true);
+      } else {
+        showToast('☁️ 구글 시트 연동이 해제되었습니다.');
+      }
+    }
+  }
+
+  async function syncToGoogleSheets(showNotification = false) {
+    const url = getGoogleSheetsUrl();
+    if (!url) return;
+    try {
+      const backupData = {
+        call_logs: JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]'),
+        custom_hotspots: JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]'),
+        custom_restrooms: JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]'),
+        penalty_list: JSON.parse(localStorage.getItem('sudataxi_penalty_list') || '[]'),
+        driving_records: JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}'),
+        daily_rev: parseInt(localStorage.getItem('sudataxi_daily_rev') || '0'),
+        timestamp: new Date().toISOString()
+      };
+      await fetch(url, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(backupData)
+      });
+      if (showNotification) showToast('☁️ 구글 시트로 운행일지 실시간 동기화 완료!');
+    } catch (e) {
+      if (showNotification) showToast('⚠️ 구글 시트 통신 오류');
+    }
+  }
+
   function executeAutoBackup() {
     try {
       const currentRecords = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
@@ -2042,6 +2086,8 @@ body { padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px)) !important;
       if (todayData && (todayData.totalDrive || 0) > 0) {
           localStorage.setItem('sudataxi_safe_backup', JSON.stringify(backupData));
       }
+      // 구글 시트로 백그라운드 자동 동기화 실행
+      syncToGoogleSheets(false);
     } catch(e) {}
   }
 
