@@ -226,7 +226,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v7.9.62</title>
+  <title>수다택시 K v7.9.63</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1740,7 +1740,7 @@ body { padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px)) !important;
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.9.62";
+  const BUILD_VERSION = "v7.9.63";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -3990,9 +3990,13 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
        const logLat = Number(log.lat); const logLng = Number(log.lng); const logDate = new Date(log.timestamp || log.time); const logHour = logDate.getHours();
        let hourDiff = Math.abs(nowHour - logHour); if (hourDiff > 12) hourDiff = 24 - hourDiff; const isTimeMatch = hourDiff <= 1;
        if (isCallMapFilterActive && !isTimeMatch) return;
-       const color = isTimeMatch ? '#22C55E' : '#64748B'; const iconHtml = `<div style="width:14px; height:14px; background:${color}; border:2px solid #FFF; border-radius:50%; box-shadow:0 0 4px rgba(0,0,0,0.5);"></div>`;
-       const timeStr = logDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); const popupText = `<b>${timeStr}</b><br>${log.region || '저장된 위치'}${log.isHighValue ? '<br>🔥고단가' : ''}`;
-       L.marker([logLat, logLng], { icon: L.divIcon({ html: iconHtml, className: '', iconSize: [14, 14] }) }).addTo(callMapViewLeaflet).bindPopup(popupText);
+       const color = isTimeMatch ? '#22C55E' : '#64748B';
+       const iconHtml = log.isHighValue 
+         ? `<div style="width:18px; height:18px; background:#BE185D; border:2px solid #FFD700; border-radius:50%; box-shadow:0 0 6px rgba(219,39,119,0.9); display:flex; align-items:center; justify-content:center; font-size:10px; line-height:1; z-index:100;">🔥</div>`
+         : `<div style="width:14px; height:14px; background:${color}; border:2px solid #FFF; border-radius:50%; box-shadow:0 0 4px rgba(0,0,0,0.5);"></div>`;
+       const timeStr = logDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+       const popupText = `<b>${timeStr}</b><br>${log.region || '저장된 위치'}${log.isHighValue ? '<br><span style="color:#DB2777; font-weight:900;">🔥 고액콜(고단가) 발생지</span>' : ''}`;
+       L.marker([logLat, logLng], { icon: L.divIcon({ html: iconHtml, className: '', iconSize: log.isHighValue ? [18, 18] : [14, 14] }) }).addTo(callMapViewLeaflet).bindPopup(popupText);
     });
     try { const penalties=getPenaltyList(); penalties.forEach(p=>{ if(p.lat&&p.lng){ const iconHtml=`<div class="penalty-dot" title="${p.violation} / ${p.amount}"></div>`; L.marker([p.lat,p.lng], {icon:L.divIcon({html:iconHtml,className:'',iconSize:[14,14]})}).addTo(callMapViewLeaflet).bindPopup(`<b>📷 ${p.violation}</b><br>${p.amount}<br>${p.place}`); } }); renderPenaltyList(); }catch(e){}
   }
@@ -4276,7 +4280,10 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     if (logs.length === 0) { list.innerHTML = `<div style="font-size:9px; color:var(--stat-label); text-align:center;">기록이 없습니다.</div>`; return; }
     list.innerHTML = logs.slice(-3).reverse().map(item => `
       <div class="recent-log-item">
-        <span class="recent-log-time">📍 ${new Date(item.timestamp || item.time).toLocaleTimeString().slice(0,-3)} [M${item.mode || 1}] ${item.region ? `(${item.region})` : ''}</span>
+        <span class="recent-log-time" style="display:inline-flex; align-items:center; gap:3px;">
+          ${item.isHighValue ? '🔥' : '📍'} ${new Date(item.timestamp || item.time).toLocaleTimeString().slice(0,-3)} [M${item.mode || 1}] ${item.region ? `(${item.region})` : ''}
+          ${item.isHighValue ? '<span style="background:rgba(219,39,119,0.2); color:#F43F5E; border:1px solid #DB2777; border-radius:4px; padding:1px 4px; font-size:8.5px; font-weight:900; line-height:1;">고액콜</span>' : ''}
+        </span>
         <button class="delete-log-item-btn" data-id="${item.id}" data-ts="${item.timestamp || item.time}" style="background:#FEE2E2; color:#DC2626; border:1px solid #F87171; border-radius:4px; padding:2px 6px; font-size:9px; font-weight:700; cursor:pointer;">삭제</button>
       </div>
     `).join('');
@@ -5197,7 +5204,7 @@ function initDailyRevenue() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v7.9.62</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v7.9.63</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
