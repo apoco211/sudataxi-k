@@ -226,7 +226,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v7.9.60</title>
+  <title>수다택시 K v7.9.61</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1106,38 +1106,36 @@ body.theme-day .save-restroom-btn {
 </style>
 
 
-<style id="v7-9-60-final-clean">
-/* v7.9.60 FINAL CLEAN - 원본 기반 단일 CSS - 위아래 여백 완전 동일 */
+<style id="v7-9-61-final-clean">
+/* v7.9.61 FINAL CLEAN - 야간/주간 테마 분리 & 아이폰 Safe Area 및 상하 균형 여백 */
 .bottom-bar, .bottom-bar * { box-sizing: border-box !important; }
 
+/* 1. 야간 모드 (기본 다크 테마) */
 .bottom-bar {
   position: fixed !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
-  bottom: 6px !important;
+  bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
   width: calc(100% - 16px) !important;
   max-width: 400px !important;
-  height: 70px !important;
-  min-height: 70px !important;
-  max-height: 70px !important;
+  height: 68px !important;
+  min-height: 68px !important;
+  max-height: 68px !important;
   display: grid !important;
-  grid-template-columns: 1fr 56px 56px 56px !important;
+  grid-template-columns: 1fr 54px 54px 54px !important;
   gap: 6px !important;
-  padding: 6px !important;
-  background: #FFFFFF !important;
-  border: 2.5px solid #000 !important;
+  padding: 6px 7px !important;
+  background: #141414 !important;
+  border: 1.5px solid #FFC800 !important;
   border-radius: 18px !important;
   align-items: center !important;
   justify-items: center !important;
   overflow: hidden !important;
   z-index: 200 !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
-}
-@supports (bottom: env(safe-area-inset-bottom)) {
-  .bottom-bar { bottom: calc(6px + env(safe-area-inset-bottom, 0px)) !important; }
+  box-shadow: 0 4px 20px rgba(0,0,0,0.7) !important;
 }
 
-/* 타이머 셀 - 56px 높이 = 옆 버튼과 동일 */
+/* 타이머 셀 (25px + 6px + 25px = 56px, 버튼 56px과 높이 완전 일치) */
 .bottom-bar .timer-cell {
   width: 100% !important;
   height: 56px !important;
@@ -1154,7 +1152,7 @@ body.theme-day .save-restroom-btn {
   padding: 0 !important;
 }
 
-/* 위줄 5분/10분 */
+/* 상단 5분/10분 셀렉터 */
 .bottom-bar .timer-mode-selector {
   display: grid !important;
   grid-template-columns: 1fr 1fr !important;
@@ -1171,52 +1169,64 @@ body.theme-day .save-restroom-btn {
   border-radius: 12px !important;
   font-size: 11px !important;
   font-weight: 900 !important;
-  border: 2px solid #000 !important;
-  background: #F3F4F6 !important;
-  color: #111 !important;
+  border: 1px solid #333333 !important;
+  background: #242424 !important;
+  color: #A3A3A3 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   line-height: 1 !important;
   padding: 0 !important;
+  cursor: pointer !important;
 }
 .bottom-bar .timer-mode-btn.active {
   background: #FF6A00 !important;
-  color: #FFF !important;
-  border-color: #000 !important;
+  color: #FFFFFF !important;
+  border-color: #FF7A00 !important;
 }
 
-/* 아래줄 05:00 시작 - 위줄과 높이 동일 25px */
+/* 하단 05:00 시작 버튼 */
 .bottom-bar .timer-display-btn {
   height: 25px !important;
   min-height: 25px !important;
   width: 100% !important;
   border-radius: 12px !important;
-  font-size: 10px !important;
+  font-size: 10.5px !important;
   font-weight: 900 !important;
-  border: 2px solid #000 !important;
-  background: #FFF !important;
-  color: #111 !important;
+  border: 1px solid #333333 !important;
+  background: #1E1E1E !important;
+  color: #FFFFFF !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   gap: 3px !important;
   line-height: 1 !important;
-  padding: 0 2px !important;
+  padding: 0 4px !important;
   white-space: nowrap !important;
   overflow: hidden !important;
+  cursor: pointer !important;
+}
+.bottom-bar .timer-display-btn.running {
+  background: #2A2210 !important;
+  color: #FFC800 !important;
+  border-color: #FFC800 !important;
+}
+.bottom-bar .timer-display-btn.finished {
+  background: #FEE2E2 !important;
+  color: #DC2626 !important;
+  border-color: #EF4444 !important;
 }
 
-/* 옆 3개 정사각형 - 56x56, 타이머 전체(25+6+25=56)와 높이 동일 */
+/* 우측 3개 기능 버튼 (승차/하차/화장실) */
 .bottom-bar .bb-btn {
-  width: 56px !important;
-  min-width: 56px !important;
-  max-width: 56px !important;
+  width: 54px !important;
+  min-width: 54px !important;
+  max-width: 54px !important;
   height: 56px !important;
   min-height: 56px !important;
   max-height: 56px !important;
-  border-radius: 15px !important;
-  border: 2.5px solid #000 !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(0,0,0,0.3) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -1225,22 +1235,77 @@ body.theme-day .save-restroom-btn {
   margin: 0 !important;
   line-height: 1 !important;
   box-shadow: none !important;
+  cursor: pointer !important;
 }
-.bottom-bar .board-btn { background: #FFEB7A !important; color: #000 !important; }
-.bottom-bar .alight-btn { background: #FF9B7A !important; color: #000 !important; }
-.bottom-bar .restroom-btn { background: #3B82F6 !important; color: #FFF !important; border-color: #000 !important; }
+.bottom-bar .board-btn { background: #FFC800 !important; color: #000000 !important; }
+.bottom-bar .alight-btn { background: #FF6B00 !important; color: #FFFFFF !important; }
+.bottom-bar .restroom-btn { background: #3B82F6 !important; color: #FFFFFF !important; }
 .bottom-bar .bb-btn .bb-label { font-size: 13px !important; font-weight: 900 !important; line-height: 1 !important; }
 
-body { padding-bottom: 86px !important; }
+/* 2. 주간 모드 전용 오버라이드 (body.theme-day) */
+body.theme-day .bottom-bar {
+  background: #FFFFFF !important;
+  border: 2px solid #D97706 !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12) !important;
+}
+body.theme-day .bottom-bar .timer-mode-btn {
+  background: #F3F4F6 !important;
+  color: #374151 !important;
+  border: 1px solid #D1D5DB !important;
+}
+body.theme-day .bottom-bar .timer-mode-btn.active {
+  background: #EA580C !important;
+  color: #FFFFFF !important;
+  border-color: #EA580C !important;
+}
+body.theme-day .bottom-bar .timer-display-btn {
+  background: #F8FAFC !important;
+  color: #1E293B !important;
+  border: 1px solid #CBD5E1 !important;
+}
+body.theme-day .bottom-bar .timer-display-btn.running {
+  background: #FEF3C7 !important;
+  color: #B45309 !important;
+  border-color: #F59E0B !important;
+}
+body.theme-day .bottom-bar .board-btn {
+  background: #FFEB7A !important;
+  color: #000000 !important;
+  border: 1.5px solid #E5C040 !important;
+}
+body.theme-day .bottom-bar .alight-btn {
+  background: #FF9B7A !important;
+  color: #000000 !important;
+  border: 1.5px solid #E07855 !important;
+}
+body.theme-day .bottom-bar .restroom-btn {
+  background: #3B82F6 !important;
+  color: #FFFFFF !important;
+  border: 1.5px solid #2563EB !important;
+}
+
+/* 본문 하단 여백: 하단바 높이 + Safe Area에 맞추어 콘텐츠 가림 방지 */
+body { padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)) !important; }
 
 @media (max-width: 380px) {
-  .bottom-bar { max-width: 360px !important; gap: 4px !important; padding: 5px !important; height: 64px !important; min-height: 64px !important; grid-template-columns: 1fr 50px 50px 50px !important; }
-  .bottom-bar .timer-cell { height: 52px !important; grid-template-rows: 23px 23px !important; gap: 6px !important; }
+  .bottom-bar {
+    max-width: 360px !important;
+    gap: 4px !important;
+    padding: 5px 6px !important;
+    height: 64px !important;
+    min-height: 64px !important;
+    grid-template-columns: 1fr 48px 48px 48px !important;
+  }
+  .bottom-bar .timer-cell {
+    height: 52px !important;
+    grid-template-rows: 23px 23px !important;
+    gap: 6px !important;
+  }
   .bottom-bar .timer-mode-selector { height: 23px !important; }
   .bottom-bar .timer-mode-btn { height: 23px !important; min-height: 23px !important; font-size: 10px !important; }
-  .bottom-bar .timer-display-btn { height: 23px !important; min-height: 23px !important; font-size: 9px !important; }
-  .bottom-bar .bb-btn { width: 50px !important; min-width: 50px !important; height: 50px !important; min-height: 50px !important; }
-  .bottom-bar .bb-btn .bb-label { font-size: 11.5px !important; }
+  .bottom-bar .timer-display-btn { height: 23px !important; min-height: 23px !important; font-size: 9.5px !important; }
+  .bottom-bar .bb-btn { width: 48px !important; min-width: 48px !important; height: 52px !important; min-height: 52px !important; }
+  .bottom-bar .bb-btn .bb-label { font-size: 12px !important; }
 }
 </style>
 
@@ -1585,7 +1650,7 @@ body { padding-bottom: 86px !important; }
     </div>
   </div>
   
-  <div class="bottom-bar" id="bottom-bar-v7960">
+  <div class="bottom-bar" id="bottom-bar-v7961">
     <div class="bb-cell timer-cell">
       <div class="timer-mode-selector">
         <button class="timer-mode-btn active" id="timer-btn-5m">5분</button>
@@ -1644,7 +1709,7 @@ body { padding-bottom: 86px !important; }
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v7.9.60";
+  const BUILD_VERSION = "v7.9.61";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -5029,7 +5094,7 @@ function initDailyRevenue() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v7.9.60</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v7.9.61</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
@@ -5040,9 +5105,9 @@ function initDailyRevenue() {
 </script>
 
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
-<script id="v7-9-60-patch">
+<script id="v7-9-61-patch">
 (function(){
-  console.log('[v7.9.60] patch');
+  console.log('[v7.9.61] patch');
   window.startTimerInternalV2=function(){
     try{
       if(typeof timerPresetMin==='undefined') return;
