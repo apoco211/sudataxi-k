@@ -1107,15 +1107,28 @@ body.theme-day .save-restroom-btn {
 
 
 <style id="v7-9-61-final-clean">
-/* v7.9.61 FINAL CLEAN - 야간/주간 테마 분리 & 아이폰 Safe Area 및 상하 균형 여백 */
+/* v7.9.61 FINAL CLEAN - 노란 테두리 선명 복원 + 상단 상향 & 하단바 하향 + 상하여백 대칭 정렬 */
 .bottom-bar, .bottom-bar * { box-sizing: border-box !important; }
 
-/* 1. 야간 모드 (기본 다크 테마) */
+/* 1. 상단 여백 축소 (시계/배터리 아래 불필요한 공백 제거하여 위로 올림) */
+html {
+  padding-top: max(0px, calc(env(safe-area-inset-top, 0px) - 14px)) !important;
+}
+body {
+  padding-top: 0 !important;
+}
+.sticky-top-area {
+  padding-top: 2px !important;
+  margin-top: -6px !important;
+  top: 0 !important;
+}
+
+/* 2. 하단바 본체 (야간 모드 기준: 선명한 #FFC800 노란 테두리 + 상하여백 5px 대칭 정렬) */
 .bottom-bar {
   position: fixed !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
-  bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+  bottom: calc(2px + env(safe-area-inset-bottom, 0px)) !important;
   width: calc(100% - 16px) !important;
   max-width: 400px !important;
   height: 68px !important;
@@ -1124,25 +1137,27 @@ body.theme-day .save-restroom-btn {
   display: grid !important;
   grid-template-columns: 1fr 54px 54px 54px !important;
   gap: 6px !important;
-  padding: 6px 7px !important;
+  padding: 5px 7px !important;
   background: #141414 !important;
-  border: 1.5px solid #FFC800 !important;
+  border: 2px solid #FFC800 !important;
   border-radius: 18px !important;
   align-items: center !important;
   justify-items: center !important;
   overflow: hidden !important;
   z-index: 200 !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.7) !important;
+  box-shadow: 
+    0 -3px 16px rgba(0,0,0,0.5),
+    0 45px 0 25px var(--main-bg) !important; /* 테두리 뒤쪽에만 렌더링되어 하단 여백 완벽 차단 */
 }
 
-/* 타이머 셀 (25px + 6px + 25px = 56px, 버튼 56px과 높이 완전 일치) */
+/* 타이머 셀 (24px + 6px + 24px = 54px) */
 .bottom-bar .timer-cell {
   width: 100% !important;
-  height: 56px !important;
-  min-height: 56px !important;
-  max-height: 56px !important;
+  height: 54px !important;
+  min-height: 54px !important;
+  max-height: 54px !important;
   display: grid !important;
-  grid-template-rows: 25px 25px !important;
+  grid-template-rows: 24px 24px !important;
   gap: 6px !important;
   align-content: center !important;
   justify-items: stretch !important;
@@ -1152,21 +1167,22 @@ body.theme-day .save-restroom-btn {
   padding: 0 !important;
 }
 
-/* 상단 5분/10분 셀렉터 */
+/* 5분 / 10분 버튼 (높이 24px) */
 .bottom-bar .timer-mode-selector {
   display: grid !important;
   grid-template-columns: 1fr 1fr !important;
   gap: 6px !important;
-  height: 25px !important;
+  height: 24px !important;
   width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
 }
 .bottom-bar .timer-mode-btn {
-  height: 25px !important;
-  min-height: 25px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  max-height: 24px !important;
   width: 100% !important;
-  border-radius: 12px !important;
+  border-radius: 11px !important;
   font-size: 11px !important;
   font-weight: 900 !important;
   border: 1px solid #333333 !important;
@@ -1185,12 +1201,13 @@ body.theme-day .save-restroom-btn {
   border-color: #FF7A00 !important;
 }
 
-/* 하단 05:00 시작 버튼 */
+/* 05:00 시작 버튼 (높이 24px) */
 .bottom-bar .timer-display-btn {
-  height: 25px !important;
-  min-height: 25px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  max-height: 24px !important;
   width: 100% !important;
-  border-radius: 12px !important;
+  border-radius: 11px !important;
   font-size: 10.5px !important;
   font-weight: 900 !important;
   border: 1px solid #333333 !important;
@@ -1217,16 +1234,16 @@ body.theme-day .save-restroom-btn {
   border-color: #EF4444 !important;
 }
 
-/* 우측 3개 기능 버튼 (승차/하차/화장실) */
+/* 우측 3개 버튼 (승차/하차/화장실) - 54x54 정방형, 상하여백 5px 완벽 대칭 */
 .bottom-bar .bb-btn {
   width: 54px !important;
   min-width: 54px !important;
   max-width: 54px !important;
-  height: 56px !important;
-  min-height: 56px !important;
-  max-height: 56px !important;
+  height: 54px !important;
+  min-height: 54px !important;
+  max-height: 54px !important;
   border-radius: 14px !important;
-  border: 1px solid rgba(0,0,0,0.3) !important;
+  border: 1px solid rgba(0,0,0,0.2) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -1242,11 +1259,14 @@ body.theme-day .save-restroom-btn {
 .bottom-bar .restroom-btn { background: #3B82F6 !important; color: #FFFFFF !important; }
 .bottom-bar .bb-btn .bb-label { font-size: 13px !important; font-weight: 900 !important; line-height: 1 !important; }
 
-/* 2. 주간 모드 전용 오버라이드 (body.theme-day) */
+/* 3. 주간 모드 (body.theme-day) - 선명한 노란 테두리(#FFC800)와 둥근 모서리 완벽 유지! */
 body.theme-day .bottom-bar {
   background: #FFFFFF !important;
-  border: 2px solid #D97706 !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.12) !important;
+  border: 2px solid #FFC800 !important;
+  border-radius: 18px !important;
+  box-shadow: 
+    0 -3px 16px rgba(0,0,0,0.08),
+    0 45px 0 25px var(--main-bg) !important;
 }
 body.theme-day .bottom-bar .timer-mode-btn {
   background: #F3F4F6 !important;
@@ -1284,27 +1304,27 @@ body.theme-day .bottom-bar .restroom-btn {
   border: 1.5px solid #2563EB !important;
 }
 
-/* 본문 하단 여백: 하단바 높이 + Safe Area에 맞추어 콘텐츠 가림 방지 */
-body { padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)) !important; }
+/* 본문 하단 여백: 하단바 위치에 맞추어 안정적 확보 */
+body { padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px)) !important; }
 
 @media (max-width: 380px) {
   .bottom-bar {
     max-width: 360px !important;
     gap: 4px !important;
     padding: 5px 6px !important;
-    height: 64px !important;
-    min-height: 64px !important;
     grid-template-columns: 1fr 48px 48px 48px !important;
   }
   .bottom-bar .timer-cell {
-    height: 52px !important;
-    grid-template-rows: 23px 23px !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
+    grid-template-rows: 22px 22px !important;
     gap: 6px !important;
   }
-  .bottom-bar .timer-mode-selector { height: 23px !important; }
-  .bottom-bar .timer-mode-btn { height: 23px !important; min-height: 23px !important; font-size: 10px !important; }
-  .bottom-bar .timer-display-btn { height: 23px !important; min-height: 23px !important; font-size: 9.5px !important; }
-  .bottom-bar .bb-btn { width: 48px !important; min-width: 48px !important; height: 52px !important; min-height: 52px !important; }
+  .bottom-bar .timer-mode-selector { height: 22px !important; }
+  .bottom-bar .timer-mode-btn { height: 22px !important; min-height: 22px !important; font-size: 10px !important; }
+  .bottom-bar .timer-display-btn { height: 22px !important; min-height: 22px !important; font-size: 9.5px !important; }
+  .bottom-bar .bb-btn { width: 48px !important; min-width: 48px !important; height: 50px !important; min-height: 50px !important; }
   .bottom-bar .bb-btn .bb-label { font-size: 12px !important; }
 }
 </style>
