@@ -247,7 +247,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v8.8.2</title>
+  <title>수다택시 K v8.8.3</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1874,7 +1874,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v8.8.2";
+  const BUILD_VERSION = "v8.8.3";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2327,7 +2327,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.8.2'
+        version: 'v8.8.3'
       };
       await fetch(url, {
         method: 'POST',
@@ -2344,31 +2344,114 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
   function executeAutoBackup() {
     try {
       const currentRecords = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
+      const dailyRev = parseInt(localStorage.getItem('sudataxi_daily_rev') || '0');
+      const simData = JSON.parse(localStorage.getItem('sudataxi_sim_data') || 'null');
+      const todayKey = typeof getTodayKey==='function' ? getTodayKey() : null;
+      const todayData = todayKey ? currentRecords[todayKey] : null;
+      
       const backupData = {
         call_logs: JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]'),
         custom_hotspots: JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]'),
         custom_restrooms: JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]'),
         penalty_list: JSON.parse(localStorage.getItem('sudataxi_penalty_list') || '[]'),
         driving_records: currentRecords,
-        daily_rev: parseInt(localStorage.getItem('sudataxi_daily_rev') || '0'),
-        sim_data: JSON.parse(localStorage.getItem('sudataxi_sim_data') || 'null'),
+        daily_rev: dailyRev,
+        sim_data: simData,
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.8.2'
+        version: 'v8.8.3'
       };
       
+      // auto_backup은 항상 최신으로 갱신 (가벼운 백업)
       localStorage.setItem('sudataxi_auto_backup', JSON.stringify(backupData));
       
-      const todayKey = getTodayKey();
-      const todayData = currentRecords[todayKey];
-      const dailyRev = parseInt(localStorage.getItem('sudataxi_daily_rev') || '0');
-      if ((todayData && (todayData.totalDrive || 0) > 0) || dailyRev > 0) {
+      // safe_backup은 중요한 데이터가 있을 때만, 그리고 기존보다 더 많은 데이터를 가질 때만 갱신 (덮어쓰기 방지)
+      try {
+        const existingSafe = JSON.parse(localStorage.getItem('sudataxi_safe_backup') || 'null');
+        const hasMeaningfulData = (dailyRev > 0) || (simData && simData.target) || (todayData && (todayData.totalDrive||0)>0) || (backupData.call_logs && backupData.call_logs.length>0);
+        
+        if (hasMeaningfulData) {
+          if (!existingSafe) {
+            localStorage.setItem('sudataxi_safe_backup', JSON.stringify(backupData));
+          } else {
+            // 기존 백업보다 더 많은 데이터가 있을 때만 덮어쓰기 (데이터 손실 방지)
+            const existingRev = existingSafe.daily_rev || 0;
+            const existingSim = existingSafe.sim_data;
+            const existingLogs = (existingSafe.call_logs||[]).length;
+            const newLogs = (backupData.call_logs||[]).length;
+            
+            // 새 데이터가 기존보다 같거나 많으면 갱신
+            if (dailyRev >= existingRev || newLogs >= existingLogs || (simData && !existingSim) || (todayData && (todayData.totalDrive||0)>0)) {
+              localStorage.setItem('sudataxi_safe_backup', JSON.stringify(backupData));
+            }
+          }
+        }
+      } catch(e) {
+        // 기존 safe_backup 파싱 실패 시 그냥 저장
+        const todayDataCheck = todayKey ? currentRecords[todayKey] : null;
+        if ((todayDataCheck && (todayDataCheck.totalDrive||0)>0) || dailyRev>0 || (simData && simData.target)) {
           localStorage.setItem('sudataxi_safe_backup', JSON.stringify(backupData));
+        }
       }
+      
       syncToGoogleSheets(false);
     } catch(e) { console.error('backup fail', e); }
   }
+
+  // 구글 시트에서 복구 시도 (localStorage가 비었을 때)
+  async function tryRestoreFromGoogleSheets() {
+    const url = typeof getGoogleSheetsUrl==='function' ? getGoogleSheetsUrl() : '';
+    if (!url) return false;
+    try {
+      // Apps Script가 GET을 지원하면 최신 데이터를 반환한다고 가정
+      const res = await fetch(url + '?action=get&timestamp=' + Date.now(), {
+        method: 'GET',
+        mode: 'cors',
+        cache: 'no-store'
+      });
+      if (!res.ok) return false;
+      const data = await res.json();
+      if (!data) return false;
+      
+      let restored = false;
+      // daily_rev 복구
+      const curRev = parseInt(localStorage.getItem('sudataxi_daily_rev') || '0');
+      if ((!curRev || curRev===0) && data.daily_rev && data.daily_rev>0) {
+        localStorage.setItem('sudataxi_daily_rev', data.daily_rev.toString());
+        const el = document.getElementById('input-rev');
+        if (el) el.value = data.daily_rev.toString();
+        restored = true;
+      }
+      // sim_data 복구
+      const curSim = localStorage.getItem('sudataxi_sim_data');
+      if ((!curSim || curSim==='null' || curSim==='{}') && data.sim_data) {
+        localStorage.setItem('sudataxi_sim_data', JSON.stringify(data.sim_data));
+        restored = true;
+      }
+      // driving_records 복구
+      if (data.driving_records) {
+        const existing = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
+        const hasData = Object.keys(existing).length>0;
+        if (!hasData) {
+          localStorage.setItem('sudataxi_driving_records', JSON.stringify(data.driving_records));
+          restored = true;
+        }
+      }
+      if (restored) {
+        localStorage.setItem('sudataxi_safe_backup', JSON.stringify(data));
+        localStorage.setItem('sudataxi_auto_backup', JSON.stringify(data));
+        try{ calculateDailyRevenue(); }catch(e){}
+        try{ if(typeof initSimulator==='function') initSimulator(); }catch(e){}
+        if(typeof showToast==='function') showToast('☁️ 구글 시트에서 대시보드 데이터 복구됨');
+        return true;
+      }
+    } catch(e) {
+      console.log('Google Sheets restore failed', e);
+    }
+    return false;
+  }
+
 
   function getWorkDate(dateObj) {
     const d = new Date(dateObj);
@@ -5090,57 +5173,72 @@ function initDailyRevenue() {
     } catch(e) { console.error('initDailyRevenue error', e); }
   }
 
-  // 대시보드 전체 숫자 자동 복구 (빌드 후에도 유지)
+  // 대시보드 전체 숫자 자동 복구 (빌드 후에도 유지) - v8.8.3 강화
   function autoRestoreAllDashboardData() {
     try {
       const safe = JSON.parse(localStorage.getItem('sudataxi_safe_backup') || 'null');
       const auto = JSON.parse(localStorage.getItem('sudataxi_auto_backup') || 'null');
       const backup = safe || auto;
-      if (!backup) return;
-
+      
       let restored = false;
 
-      // 1. 일매출 복구
-      const curRev = localStorage.getItem('sudataxi_daily_rev');
-      if ((!curRev || curRev==='0') && backup.daily_rev && backup.daily_rev>0) {
-        localStorage.setItem('sudataxi_daily_rev', backup.daily_rev.toString());
-        const el = document.getElementById('input-rev');
-        if (el) el.value = backup.daily_rev.toString();
-        restored = true;
-      }
+      if (backup) {
+        // 1. 일매출 복구
+        const curRev = localStorage.getItem('sudataxi_daily_rev');
+        const curRevNum = parseInt(curRev || '0');
+        if ((!curRev || curRev==='0' || curRevNum===0) && backup.daily_rev && backup.daily_rev>0) {
+          localStorage.setItem('sudataxi_daily_rev', backup.daily_rev.toString());
+          const el = document.getElementById('input-rev');
+          if (el) el.value = backup.daily_rev.toString();
+          restored = true;
+          console.log('일매출 복구:', backup.daily_rev);
+        }
 
-      // 2. 시뮬레이터 데이터 복구 (월 목표 등)
-      const curSim = localStorage.getItem('sudataxi_sim_data');
-      if ((!curSim || curSim==='null' || curSim==='{}') && backup.sim_data) {
-        localStorage.setItem('sudataxi_sim_data', JSON.stringify(backup.sim_data));
-        restored = true;
-      }
+        // 2. 시뮬레이터 데이터 복구 (월 목표 등) - 가장 중요!
+        const curSim = localStorage.getItem('sudataxi_sim_data');
+        const curSimObj = curSim ? JSON.parse(curSim) : null;
+        const isSimEmpty = !curSim || curSim==='null' || curSim==='{}' || !curSimObj || !curSimObj.target;
+        if (isSimEmpty && backup.sim_data && backup.sim_data.target) {
+          localStorage.setItem('sudataxi_sim_data', JSON.stringify(backup.sim_data));
+          restored = true;
+          console.log('시뮬레이터 데이터 복구:', backup.sim_data);
+        }
 
-      // 3. 자주가는 곳 복구
-      const curFreq = JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]');
-      if (curFreq.length===0 && backup.frequent_presets && backup.frequent_presets.length>0) {
-        localStorage.setItem('sudataxi_frequent_presets', JSON.stringify(backup.frequent_presets));
-        restored = true;
-      }
+        // 3. 자주가는 곳 복구
+        const curFreq = JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]');
+        if (curFreq.length===0 && backup.frequent_presets && backup.frequent_presets.length>0) {
+          localStorage.setItem('sudataxi_frequent_presets', JSON.stringify(backup.frequent_presets));
+          restored = true;
+        }
 
-      // 4. 운행 기록 복구 (오늘 데이터가 비어있을 때)
-      const records = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
-      const todayKey = typeof getTodayKey==='function' ? getTodayKey() : null;
-      if (todayKey && backup.driving_records && backup.driving_records[todayKey]) {
-        if (!records[todayKey] || (records[todayKey].totalDrive||0)===0) {
-          if ((backup.driving_records[todayKey].totalDrive||0)>0) {
-            records[todayKey] = backup.driving_records[todayKey];
-            localStorage.setItem('sudataxi_driving_records', JSON.stringify(records));
-            restored = true;
+        // 4. 운행 기록 복구
+        const records = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
+        const todayKey = typeof getTodayKey==='function' ? getTodayKey() : null;
+        if (todayKey && backup.driving_records && backup.driving_records[todayKey]) {
+          if (!records[todayKey] || (records[todayKey].totalDrive||0)===0) {
+            if ((backup.driving_records[todayKey].totalDrive||0)>0) {
+              records[todayKey] = backup.driving_records[todayKey];
+              localStorage.setItem('sudataxi_driving_records', JSON.stringify(records));
+              restored = true;
+            }
           }
         }
       }
 
       if (restored) {
-        console.log('대시보드 자동 복구 완료', backup.timestamp);
-        try{ calculateDailyRevenue(); }catch(e){}
-        try{ if(typeof initSimulator==='function') initSimulator(); }catch(e){}
+        console.log('대시보드 자동 복구 완료', backup ? backup.timestamp : 'no timestamp');
+        try{ calculateDailyRevenue(); }catch(e){ console.warn('calc fail after restore', e); }
+        try{ if(typeof initSimulator==='function') initSimulator(); }catch(e){ console.warn('sim init fail after restore', e); }
+        try{ if(typeof calculateSimulatorTargets==='function') calculateSimulatorTargets(); }catch(e){}
         if(typeof showToast==='function') setTimeout(()=>showToast('🔄 이전 대시보드 데이터 자동 복구됨'), 800);
+      } else {
+        // 로컬 백업이 없으면 구글 시트에서 복구 시도 (비동기)
+        const hasLocalData = localStorage.getItem('sudataxi_daily_rev') || localStorage.getItem('sudataxi_sim_data');
+        if (!hasLocalData || hasLocalData==='0' || hasLocalData==='null') {
+          if (typeof tryRestoreFromGoogleSheets==='function') {
+            setTimeout(()=>{ tryRestoreFromGoogleSheets(); }, 1500);
+          }
+        }
       }
     } catch(e){ console.warn('autoRestoreAllDashboardData fail', e); }
   }
@@ -5853,7 +5951,7 @@ function initMic() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.8.2</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.8.3</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
