@@ -247,7 +247,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v8.8.4</title>
+  <title>수다택시 K v8.8.5</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1887,7 +1887,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v8.8.4";
+  const BUILD_VERSION = "v8.8.5";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2307,6 +2307,64 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
     } catch(e) {}
   }
 
+    // v8.8.5: 다중 저장소 영구 보관 (localStorage가 빌드 시 날아가도 쿠키에서 복구)
+  function setPersistentCookie(name, value, days=365){
+    try{
+      const expires = new Date();
+      expires.setTime(expires.getTime() + (days*24*60*60*1000));
+      document.cookie = name + "=" + encodeURIComponent(value) + ";expires=" + expires.toUTCString() + ";path=/;SameSite=Lax";
+    }catch(e){}
+  }
+  function getPersistentCookie(name){
+    try{
+      const nameEQ = name + "=";
+      const ca = document.cookie.split(';');
+      for(let i=0;i<ca.length;i++){
+        let c = ca[i];
+        while(c.charAt(0)==' ') c = c.substring(1,c.length);
+        if(c.indexOf(nameEQ)==0) return decodeURIComponent(c.substring(nameEQ.length,c.length));
+      }
+    }catch(e){}
+    return null;
+  }
+
+  function saveToAllStorages(key, value){
+    try{ localStorage.setItem(key, value); }catch(e){}
+    try{ sessionStorage.setItem(key, value); }catch(e){}
+    try{ setPersistentCookie(key, value, 365); }catch(e){}
+    // IndexedDB에도 저장 시도 (비동기)
+    try{
+      if(window.indexedDB){
+        const req = indexedDB.open('sudataxi_db', 1);
+        req.onupgradeneeded = function(ev){ 
+          const db = ev.target.result;
+          if(!db.objectStoreNames.contains('keyvalue')) db.createObjectStore('keyvalue');
+        };
+        req.onsuccess = function(ev){
+          const db = ev.target.result;
+          const tx = db.transaction('keyvalue','readwrite');
+          tx.objectStore('keyvalue').put(value, key);
+        };
+      }
+    }catch(e){}
+  }
+
+  function getFromAnyStorage(key){
+    try{
+      const ls = localStorage.getItem(key);
+      if(ls && ls!=='null' && ls!=='0' && ls!=='{}') return ls;
+    }catch(e){}
+    try{
+      const ss = sessionStorage.getItem(key);
+      if(ss && ss!=='null' && ss!=='0' && ss!=='{}') return ss;
+    }catch(e){}
+    try{
+      const ck = getPersistentCookie(key);
+      if(ck && ck!=='null' && ck!=='0' && ck!=='{}') return ck;
+    }catch(e){}
+    return null;
+  }
+
   function getGoogleSheetsUrl() {
     return localStorage.getItem('sudataxi_sheets_url') || '';
   }
@@ -2340,7 +2398,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.8.4'
+        version: 'v8.8.5'
       };
       await fetch(url, {
         method: 'POST',
@@ -2373,11 +2431,16 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.8.4'
+        version: 'v8.8.5'
       };
       
-      // auto_backup은 항상 최신으로 갱신 (가벼운 백업)
-      localStorage.setItem('sudataxi_auto_backup', JSON.stringify(backupData));
+      // auto_backup은 항상 최신으로 갱신 (가벼운 백업) - 다중 저장소
+      try{ localStorage.setItem('sudataxi_auto_backup', JSON.stringify(backupData)); }catch(e){}
+      try{ saveToAllStorages('sudataxi_auto_backup', JSON.stringify(backupData)); }catch(e){}
+      // 핵심 데이터는 개별 키로도 다중 저장 (빌드 시에도 살아남도록)
+      try{ saveToAllStorages('sudataxi_daily_rev', dailyRev.toString()); }catch(e){}
+      try{ if(simData) saveToAllStorages('sudataxi_sim_data', JSON.stringify(simData)); }catch(e){}
+
       
       // safe_backup은 중요한 데이터가 있을 때만, 그리고 기존보다 더 많은 데이터를 가질 때만 갱신 (덮어쓰기 방지)
       try {
@@ -5153,7 +5216,7 @@ function initDailyRevenue() {
     if(!inputRevEl) return;
 
     // 자동 복구: localStorage가 비어있으면 safe_backup/auto_backup에서 복구
-    let savedRev = localStorage.getItem('sudataxi_daily_rev');
+    let savedRev = getFromAnyStorage('sudataxi_daily_rev') || localStorage.getItem('sudataxi_daily_rev');
     if (!savedRev || savedRev === '0' || savedRev === 'null') {
       try {
         const safe = JSON.parse(localStorage.getItem('sudataxi_safe_backup') || 'null');
@@ -5186,12 +5249,48 @@ function initDailyRevenue() {
     } catch(e) { console.error('initDailyRevenue error', e); }
   }
 
-  // 대시보드 전체 숫자 자동 복구 (빌드 후에도 유지) - v8.8.4 강화
+  // 대시보드 전체 숫자 자동 복구 (빌드 후에도 유지) - v8.8.5 강화
   function autoRestoreAllDashboardData() {
     try {
-      const safe = JSON.parse(localStorage.getItem('sudataxi_safe_backup') || 'null');
-      const auto = JSON.parse(localStorage.getItem('sudataxi_auto_backup') || 'null');
+      // v8.8.5: localStorage가 비었으면 쿠키, 세션, IndexedDB에서도 복구 시도
+      let safeRaw = getFromAnyStorage('sudataxi_safe_backup') || localStorage.getItem('sudataxi_safe_backup');
+      let autoRaw = getFromAnyStorage('sudataxi_auto_backup') || localStorage.getItem('sudataxi_auto_backup');
+      // 쿠키에서 직접 daily_rev, sim_data도 시도
+      let cookieRev = getFromAnyStorage('sudataxi_daily_rev');
+      let cookieSim = getFromAnyStorage('sudataxi_sim_data');
+      
+      let safe = null, auto = null;
+      try{ safe = safeRaw ? JSON.parse(safeRaw) : null; }catch(e){}
+      try{ auto = autoRaw ? JSON.parse(autoRaw) : null; }catch(e){}
       const backup = safe || auto;
+      
+      // 쿠키에만 데이터가 있고 백업이 없을 때도 복구
+      if(!backup && (cookieRev || cookieSim)){
+        try{
+          const tempBackup = {
+            daily_rev: cookieRev ? parseInt(cookieRev) : 0,
+            sim_data: cookieSim ? JSON.parse(cookieSim) : null,
+            timestamp: new Date().toISOString()
+          };
+          if(tempBackup.daily_rev || tempBackup.sim_data){
+            // 임시 백업으로 사용
+            console.log('쿠키에서 임시 백업 생성', tempBackup);
+            // 바로 복구
+            if(tempBackup.daily_rev && (!localStorage.getItem('sudataxi_daily_rev') || localStorage.getItem('sudataxi_daily_rev')==='0')){
+              localStorage.setItem('sudataxi_daily_rev', tempBackup.daily_rev.toString());
+              const el = document.getElementById('input-rev');
+              if(el) el.value = tempBackup.daily_rev.toString();
+            }
+            if(tempBackup.sim_data && (!localStorage.getItem('sudataxi_sim_data') || localStorage.getItem('sudataxi_sim_data')==='null')){
+              localStorage.setItem('sudataxi_sim_data', JSON.stringify(tempBackup.sim_data));
+            }
+            try{ calculateDailyRevenue(); }catch(e){}
+            try{ initSimulator(); }catch(e){}
+            return;
+          }
+        }catch(e){}
+      }
+
       
       let restored = false;
 
@@ -6162,7 +6261,7 @@ function initMic() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.8.4</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.8.5</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
