@@ -66,12 +66,12 @@
 </style>
 
 <script id="embedded-defaults">
-  // v8.9.0: 빌드 시에도 살아남는 기본값 (사용자가 직접 수정 가능)
+  // v8.9.5: 빌드 시에도 살아남는 기본값 (사용자가 직접 수정 가능)
   // 빌드 전에 여기에 현재 대시보드 값을 넣어두면, localStorage가 날아가도 복구됨
   const EMBEDDED_DEFAULTS = {
     daily_rev: 0,
     sim_data: {target:4000000, current:0, restDates:[]},
-    version: 'v8.9.4'
+    version: 'v8.9.5'
   };
 </script>
 <style>
@@ -300,7 +300,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v8.9.4</title>
+  <title>수다택시 K v8.9.5</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1545,7 +1545,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
 
 
 <style id="v899-screen-down-optimize">
-/* v8.8.9 전체 화면 아래로 최적화 - 위로 올라간 현상 수정, 하단 레이아웃은 원본 유지, 배경 비침 차단 */
+/* v8.9.5 전체 화면 아래로 최적화 - 위로 올라간 현상 수정, 하단 레이아웃은 원본 유지, 배경 비침 차단 */
 html {
   padding-top: env(safe-area-inset-top, 0px) !important;
 }
@@ -1983,7 +1983,7 @@ body {
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v8.8.9";
+  const BUILD_VERSION = "v8.9.5";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2403,7 +2403,7 @@ body {
     } catch(e) {}
   }
 
-    // v8.8.9: 다중 저장소 영구 보관 (localStorage가 빌드 시 날아가도 쿠키에서 복구)
+    // v8.9.5: 다중 저장소 영구 보관 (localStorage가 빌드 시 날아가도 쿠키에서 복구)
   function setPersistentCookie(name, value, days=365){
     try{
       const expires = new Date();
@@ -2498,9 +2498,9 @@ body {
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
         date_str: new Date().toLocaleDateString('ko-KR'),
-        version: 'v8.9.4'
+        version: 'v8.9.5'
       };
-      // v8.9.2: 매출 상세도 함께 전송 (손님탑승처럼 시트에 바로 기록되게)
+      // v8.9.5: 매출 상세도 함께 전송 (손님탑승처럼 시트에 바로 기록되게)
       try{
         const today = new Date();
         const daysInMonth = new Date(today.getFullYear(), today.getMonth()+1, 0).getDate();
@@ -2527,7 +2527,7 @@ body {
     }
   }
 
-  // v8.9.2: 손님탑승처럼 매출도 개별 로그로 구글시트에 즉시 저장
+  // v8.9.5: 손님탑승처럼 매출도 개별 로그로 구글시트에 즉시 저장
   async function syncRevenueLogToSheets(logType) {
     const url = getGoogleSheetsUrl();
     if (!url) return;
@@ -2546,7 +2546,7 @@ body {
         monthly_target: sim.target||0,
         monthly_current: sim.current||0,
         rest_dates: (sim.restDates||[]).join(','),
-        version: 'v8.9.4'
+        version: 'v8.9.5'
       };
       fetch(url, {
         method: 'POST',
@@ -2576,7 +2576,7 @@ body {
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.9.4'
+        version: 'v8.9.5'
       };
       
       // auto_backup은 항상 최신으로 갱신 (가벼운 백업) - 다중 저장소
@@ -2858,7 +2858,7 @@ body {
   let _lastBoardingAction = 0;
   let _globalScrollYAtTouchStart = 0;
 
-  // v8.8.9 분리: 하단=위치저장, 대시보드=시간만 - 원본 레이아웃 유지
+  // v8.9.5 분리: 하단=위치저장, 대시보드=시간만 - 원본 레이아웃 유지
   function handleBoardingTimeOnly(e, isHighValue = false) {
     try { if (e) { e.preventDefault(); e.stopPropagation(); } } catch(err) {}
     const now = Date.now();
@@ -2869,7 +2869,7 @@ body {
     if (!drivingState.isDriving && typeof toggleDriving === 'function') {
       toggleDriving();
     }
-    // v8.9.3: 휴식모드에서도 바로 승차로 전환
+    // v8.9.5: 휴식모드에서도 바로 승차로 전환
     if (drivingState.isBreak) {
       drivingState.isBreak = false;
       drivingState.stateStartTime = Date.now();
@@ -2908,7 +2908,7 @@ body {
     if (!drivingState.isDriving && typeof toggleDriving === 'function') {
       toggleDriving();
     }
-    // v8.9.3: 휴식모드에서도 바로 승차로 전환 + 위치저장 보장
+    // v8.9.5: 휴식모드에서도 바로 승차로 전환 + 위치저장 보장
     if (drivingState.isBreak) {
       drivingState.isBreak = false;
       drivingState.stateStartTime = Date.now();
@@ -3026,7 +3026,7 @@ body {
       driveBtn.innerText = '⏹️ 운행 종료'; driveBtn.className = 'drive-control-btn btn-red'; breakBtn.disabled = false;
       if (drivingState.isBreak) {
         breakBtn.innerText = '▶️ 휴식 종료'; breakBtn.className = 'drive-control-btn btn-purple';
-        // v8.9.3: 휴식 중에도 승차 가능하게 (바로 전환)
+        // v8.9.5: 휴식 중에도 승차 가능하게 (바로 전환)
         boardBtn.disabled = false; boardBtn.className = 'drive-control-btn btn-accent';
         alightBtn.disabled = true; alightBtn.className = 'drive-control-btn btn-idle';
         if(bottomBoardBtn) { bottomBoardBtn.disabled = false; bottomBoardBtn.style.opacity = '1'; }
@@ -4835,7 +4835,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
   }
 
   async function saveCurrentCallLocation(isHighValue = false) {
-    // v8.9.3: 하단 승차 전용 - 위치 저장 반드시 보장 + 휴식→승차 자동전환
+    // v8.9.5: 하단 승차 전용 - 위치 저장 반드시 보장 + 휴식→승차 자동전환
     let posAvailable = !!currentPos;
     if (!currentPos) {
       try{
@@ -4850,7 +4850,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
         posAvailable = false;
       }
     }
-    // v8.9.3: GPS 실패해도 위치 저장 시도 (마지막 위치나 0,0 대신 빈값 방지)
+    // v8.9.5: GPS 실패해도 위치 저장 시도 (마지막 위치나 0,0 대신 빈값 방지)
     if(!posAvailable || !currentPos){
       try{
         // 마지막 저장된 위치라도 사용 시도
@@ -4953,7 +4953,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     if (!list) return;
     const custom = JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]');
     if (custom.length === 0) { list.innerHTML = `<div style="font-size:9px; color:var(--stat-label); text-align:center;">등록된 장소가 없습니다.</div>`; return; }
-    // v8.9.1: 최근 3개만 표시 (중복방지 이미 되어있으므로 최신순 3개)
+    // v8.9.5: 최근 3개만 표시 (중복방지 이미 되어있으므로 최신순 3개)
     const recent = custom.slice(-3).reverse();
     list.innerHTML = recent.map(item => `
       <div class="recent-log-item">
@@ -5440,7 +5440,7 @@ function initDailyRevenue() {
     const inputRevEl = document.getElementById('input-rev');
     if(!inputRevEl) return;
 
-    // v8.9.1 Fix: 앱 닫아도 유지되게 - localStorage 우선, 0도 유효값
+    // v8.9.5 Fix: 앱 닫아도 유지되게 - localStorage 우선, 0도 유효값
     let savedRev = null;
     try{ savedRev = localStorage.getItem('sudataxi_daily_rev'); }catch(e){}
     if(savedRev === null || savedRev === undefined || savedRev === 'null' || savedRev === 'undefined'){
@@ -5494,10 +5494,10 @@ function initDailyRevenue() {
     } catch(e) { console.error('initDailyRevenue error', e); }
   }
 
-  // 대시보드 전체 숫자 자동 복구 (빌드 후에도 유지) - v8.8.9 강화
+  // 대시보드 전체 숫자 자동 복구 (빌드 후에도 유지) - v8.9.5 강화
   function autoRestoreAllDashboardData() {
     try {
-      // v8.8.9: localStorage가 비었으면 쿠키, 세션, IndexedDB에서도 복구 시도
+      // v8.9.5: localStorage가 비었으면 쿠키, 세션, IndexedDB에서도 복구 시도
       let safeRaw = getFromAnyStorage('sudataxi_safe_backup') || localStorage.getItem('sudataxi_safe_backup');
       let autoRaw = getFromAnyStorage('sudataxi_auto_backup') || localStorage.getItem('sudataxi_auto_backup');
       // 쿠키에서 직접 daily_rev, sim_data도 시도
@@ -5509,7 +5509,7 @@ function initDailyRevenue() {
       try{ auto = autoRaw ? JSON.parse(autoRaw) : null; }catch(e){}
       const backup = safe || auto;
       
-      // v8.8.9: EMBEDDED_DEFAULTS에서도 복구 (빌드 파일 자체에 박힌 기본값)
+      // v8.9.5: EMBEDDED_DEFAULTS에서도 복구 (빌드 파일 자체에 박힌 기본값)
       try{
         if(typeof EMBEDDED_DEFAULTS!=='undefined' && EMBEDDED_DEFAULTS){
           const curRev = localStorage.getItem('sudataxi_daily_rev');
@@ -6035,7 +6035,7 @@ function initMic() {
         calGrid.innerHTML += `<div></div>`;
     }
     
-    // v8.9.1 Fix: sim_data도 localStorage 우선, 0도 유효
+    // v8.9.5 Fix: sim_data도 localStorage 우선, 0도 유효
     let simRaw = null;
     try{ simRaw = localStorage.getItem('sudataxi_sim_data'); }catch(e){}
     if(!simRaw || simRaw==='null' || simRaw==='undefined' || String(simRaw).trim()===''){
@@ -6071,7 +6071,7 @@ function initMic() {
     if(inpTarget) inpTarget.value = (simulatorData.target !== undefined && simulatorData.target !== null && String(simulatorData.target).trim() !== '') ? simulatorData.target : 4000000;
     if(inpCurr) inpCurr.value = (simulatorData.current !== undefined && simulatorData.current !== null && String(simulatorData.current).trim() !== '') ? simulatorData.current : 0;
     calculateSimulatorTargets();
-    // v8.9.1: 닫기 전 강제 저장
+    // v8.9.5: 닫기 전 강제 저장
     try{
       const forceSaveSim = () => {
         try{
@@ -6312,7 +6312,7 @@ function initMic() {
 
     document.getElementById('btn-drive-toggle').addEventListener('click', toggleDriving);
     document.getElementById('btn-break-toggle').addEventListener('click', toggleBreak);
-    // === 탑승/하차 버튼 - v8.9.4 확정: 하단=위치저장 O, 대시보드=시간만 X ===
+    // === 탑승/하차 버튼 - v8.9.5 확정: 하단=위치저장 O, 대시보드=시간만 X ===
     (function(){
       const boardEl = document.getElementById('btn-board');
       const alightEl = document.getElementById('btn-alight');
@@ -6526,7 +6526,7 @@ function initMic() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.8.9</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.5</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
@@ -6667,7 +6667,7 @@ function initMic() {
   }
 
   function bindBottom(){
-    // v8.9.4: 하단 승차는 이미 createSimpleHandler에서 handleBoarding(위치저장)으로 바인딩됨 - 중복 방지 위해 여기선 바인딩 안함
+    // v8.9.5: 하단 승차는 이미 createSimpleHandler에서 handleBoarding(위치저장)으로 바인딩됨 - 중복 방지 위해 여기선 바인딩 안함
     // 대시보드 승차는 시간만, 하단 승차만 위치저장 구조 유지
     var alight = document.getElementById('btn-bottom-alight');
     if(alight && !alight._b60){
@@ -6798,7 +6798,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});)();</script>
 <script id="v891-fix">
 (function(){
-  // v8.9.1: 입력 즉시 저장, 포커스 전체선택, 앱 종료시 강제 저장
+  // v8.9.5: 입력 즉시 저장, 포커스 전체선택, 앱 종료시 강제 저장
   document.addEventListener('focusin', function(e){
     if(e.target && (e.target.id==='input-rev' || e.target.id==='input-sim-target' || e.target.id==='input-sim-current')){
       try{ e.target.select(); }catch(err){}
