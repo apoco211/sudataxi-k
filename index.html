@@ -1523,54 +1523,25 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
 </style>
 
 
-<style id="v889-bottom-stick-fix">
-/* v8.8.9 Fix: 하단박스 아래로 붙이되 테두리 보이게 - 위쪽 공간 확보 + 테두리 가시성 */
-.bottom-bar#bottom-bar-v7961 {
-  position: fixed !important;
-  bottom: calc(3px + env(safe-area-inset-bottom, 0px)) !important;
-  left: 50% !important;
-  right: auto !important;
-  transform: translateX(-50%) !important;
-  width: calc(100% - 10px) !important;
-  max-width: 430px !important;
-  min-height: 68px !important;
-  height: 68px !important;
-  max-height: 68px !important;
-  padding: 6px 8px 6px 8px !important;
-  border-radius: 16px !important;
-  border: 1.8px solid #FFC800 !important;
-  background: #0F0F0F !important;
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,200,0,0.3) !important;
-  z-index: 9999 !important;
-  margin: 0 !important;
-  box-sizing: border-box !important;
-}
-.bottom-mode-dock {
-  position: fixed !important;
-  bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  width: calc(100% - 12px) !important;
-  max-width: 420px !important;
-  margin: 0 !important;
-  border-radius: 12px !important;
-  background: #141414 !important;
-  border: 1px solid #2E2E2E !important;
-  box-shadow: 0 -2px 12px rgba(0,0,0,0.4) !important;
-  z-index: 9998 !important;
-  box-sizing: border-box !important;
+<style id="v899-screen-down-optimize">
+/* v8.8.9 전체 화면 아래로 최적화 - 위로 올라간 현상 수정, 하단 레이아웃은 원본 유지, 배경 비침 차단 */
+html {
+  padding-top: env(safe-area-inset-top, 0px) !important;
 }
 body {
-  padding-bottom: calc(152px + env(safe-area-inset-bottom, 0px)) !important;
+  padding-top: 0 !important;
 }
-body.theme-day .bottom-bar#bottom-bar-v7961 {
-  background: #FFFFFF !important;
-  border-color: #FFC800 !important;
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,200,0,0.2) !important;
+.sticky-top-area {
+  padding-top: 14px !important;
+  margin-top: 0 !important;
+  top: 0 !important;
 }
-body.theme-day .bottom-mode-dock {
-  background: #FFFFFF !important;
-  border-color: #D1D5DB !important;
+/* 하단 배경 비침 원본대로 복구 - box-shadow로 가림 */
+.bottom-bar#bottom-bar-v7961 {
+  box-shadow: 0 -4px 16px rgba(0,0,0,0.5), 0 50px 0 30px var(--main-bg) !important;
+}
+.bottom-mode-dock {
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.4), 0 0 0 8px var(--main-bg), 0 60px 0 35px var(--main-bg) !important;
 }
 </style>
 
@@ -2436,21 +2407,15 @@ body.theme-day .bottom-mode-dock {
   function getFromAnyStorage(key){
     try{
       const ls = localStorage.getItem(key);
-      if(ls !== null && ls !== undefined && ls !== 'null' && ls !== 'undefined' && String(ls).trim() !== ''){
-        return ls;
-      }
+      if(ls && ls!=='null' && ls!=='0' && ls!=='{}') return ls;
     }catch(e){}
     try{
       const ss = sessionStorage.getItem(key);
-      if(ss !== null && ss !== undefined && ss !== 'null' && ss !== 'undefined' && String(ss).trim() !== ''){
-        return ss;
-      }
+      if(ss && ss!=='null' && ss!=='0' && ss!=='{}') return ss;
     }catch(e){}
     try{
       const ck = getPersistentCookie(key);
-      if(ck !== null && ck !== undefined && ck !== 'null' && ck !== 'undefined' && String(ck).trim() !== ''){
-        return ck;
-      }
+      if(ck && ck!=='null' && ck!=='0' && ck!=='{}') return ck;
     }catch(e){}
     return null;
   }
@@ -2803,7 +2768,7 @@ body.theme-day .bottom-mode-dock {
   let _lastBoardingAction = 0;
   let _globalScrollYAtTouchStart = 0;
 
-  // v8.8.9 분리: 하단 승차 = 위치저장+승차, 대시보드 승차 = 시간만 체크
+  // v8.8.9 분리: 하단=위치저장, 대시보드=시간만 - 원본 레이아웃 유지
   function handleBoardingTimeOnly(e, isHighValue = false) {
     try { if (e) { e.preventDefault(); e.stopPropagation(); } } catch(err) {}
     const now = Date.now();
@@ -2820,8 +2785,6 @@ body.theme-day .bottom-mode-dock {
     if (boardBtn) { boardBtn.disabled = true; boardBtn.style.pointerEvents = 'none'; }
     const bottomBoardBtn = document.getElementById('btn-bottom-board');
     if (bottomBoardBtn) { bottomBoardBtn.style.pointerEvents = 'none'; }
-
-    // 대시보드 승차는 위치 저장 없이 시간만 체크
     try{
       drivingState.isPassengerBoarded = true; 
       drivingState.isBreak = false;
@@ -2830,18 +2793,16 @@ body.theme-day .bottom-mode-dock {
       if(typeof saveDrivingState==='function') saveDrivingState();
       if(typeof showToast==='function') showToast(isHighValue ? '🔥 고단가 콜 승차 (시간만)' : '🙋 승차 - 시간 체크됨');
     }catch(err){ console.error('boarding time only fail', err); }
-
     document.body.classList.remove('out-of-bounds-alert');
     setTimeout(() => { 
       _boardingLockUntil = 0; 
-      if (boardBtn) { boardBtn.style.pointerEvents = ''; }
-      if (bottomBoardBtn) { bottomBoardBtn.style.pointerEvents = ''; }
+      if (boardBtn) boardBtn.style.pointerEvents = '';
+      if (bottomBoardBtn) bottomBoardBtn.style.pointerEvents = '';
       try{ if(typeof updateDrivingUI==='function') updateDrivingUI(); }catch(e){}
     }, 700);
   }
 
   function handleBoarding(e, isHighValue = false) {
-    // 하단 승차 = 위치 저장 + 승차 (기존 로직 유지)
     try { if (e) { e.preventDefault(); e.stopPropagation(); } } catch(err) {}
     const now = Date.now();
     if (now < _boardingLockUntil) return;
@@ -2857,8 +2818,6 @@ body.theme-day .bottom-mode-dock {
     if (boardBtn) { boardBtn.disabled = true; boardBtn.style.pointerEvents = 'none'; }
     const bottomBoardBtn = document.getElementById('btn-bottom-board');
     if (bottomBoardBtn) { bottomBoardBtn.style.pointerEvents = 'none'; }
-
-    // 하단 승차만 고객 탑승 위치 저장
     if (typeof saveCurrentCallLocation === 'function') {
       saveCurrentCallLocation(isHighValue);
     } else {
@@ -2882,7 +2841,7 @@ body.theme-day .bottom-mode-dock {
     try { if (e) { e.preventDefault(); e.stopPropagation(); } } catch(err) {}
     const now = Date.now();
     if (now < _alightingLockUntil) return;
-    _alightingLockUntil = now + 600;
+    _alightingLockUntil = now + 1500;
     if (!drivingState.isDriving || drivingState.isBreak || !drivingState.isPassengerBoarded) { _alightingLockUntil = 0; return; }
     const alightBtn = document.getElementById('btn-alight');
     if (alightBtn) { alightBtn.disabled = true; alightBtn.style.pointerEvents = 'none'; }
@@ -2892,7 +2851,7 @@ body.theme-day .bottom-mode-dock {
     setTab(1); setTimerPreset(5); 
     try { window.location.href = `shortcuts://run-shortcut?name=수다택시5분`; } catch(e) {}
     startTimerInternal();
-    setTimeout(() => { _alightingLockUntil = 0; const a = document.getElementById('btn-alight'); if (a) a.style.pointerEvents = ''; }, 700);
+    setTimeout(() => { _alightingLockUntil = 0; const a = document.getElementById('btn-alight'); if (a) a.style.pointerEvents = ''; }, 1200);
   }
 
   function startDrivingTimer() {
@@ -4763,75 +4722,53 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
   }
 
   async function saveCurrentCallLocation(isHighValue = false) {
+    // v8.8.9: 하단 승차 전용 - 위치 저장, GPS 없어도 승차 보장
     let posAvailable = !!currentPos;
     if (!currentPos) {
       try{
-        const p = await new Promise((resolve, reject)=>{
-          if(!navigator.geolocation){ reject('no geo'); return; }
-          navigator.geolocation.getCurrentPosition(resolve, reject, {enableHighAccuracy:true, timeout:3000, maximumAge:10000});
+        const p = await new Promise((res,rej)=>{
+          if(!navigator.geolocation) return rej('no geo');
+          navigator.geolocation.getCurrentPosition(res, rej, {enableHighAccuracy:true, timeout:3000, maximumAge:10000});
         });
-        currentPos = { lat: p.coords.latitude, lng: p.coords.longitude };
+        currentPos = {lat: p.coords.latitude, lng: p.coords.longitude};
         posAvailable = true;
       }catch(e){
         console.warn('GPS fail, boarding anyway', e);
         posAvailable = false;
       }
     }
-    let smartName = '📍 탑승기록';
-    let regionShort = '위치미상';
-    if(posAvailable && currentPos){
+    if(!posAvailable || !currentPos){
       try{
-        smartName = await getSmartLocationName(currentPos.lat, currentPos.lng, '📍 탑승기록');
-        regionShort = smartName.replace('📍 탑승기록 (', '').replace(')', '').trim();
-      }catch(e){ smartName = '📍 탑승기록'; }
+        drivingState.isPassengerBoarded = true;
+        drivingState.isBreak = false;
+        drivingState.stateStartTime = Date.now();
+        if(typeof updateDrivingUI==='function') updateDrivingUI();
+        if(typeof saveDrivingState==='function') saveDrivingState();
+        if(typeof showToast==='function') showToast(isHighValue ? '🔥 고단가 콜 승차 (위치미상)' : '🙋 승차 - 위치 저장 실패, 시간만 체크됨');
+      }catch(err){ console.error('boarding fail', err); }
+      return;
     }
-    if(posAvailable && currentPos){
-      try{
-        let logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
-        logs.push({ 
-          id: 'log_' + Date.now(), 
-          timestamp: new Date().toISOString(), 
-          lat: currentPos.lat, 
-          lng: currentPos.lng, 
-          mode: (typeof currentMode !== 'undefined' ? currentMode : 0),
-          region: regionShort,
-          isHighValue: isHighValue
-        });
-        localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
-        if(typeof updateCallLogStats==='function') updateCallLogStats();
-        if(typeof showToast==='function') showToast(isHighValue ? '🔥 고단가 콜 탑승 위치로 저장되었습니다!' : '📍 일반 탑승 위치로 저장되었습니다.');
-      }catch(e){ console.warn('save log fail', e); }
-    } else {
-      if(typeof showToast==='function') showToast(isHighValue ? '🔥 고단가 콜 승차 (위치없이)' : '🙋 승차 처리 (위치없이)');
-    }
-    try{
-      if (!drivingState.isDriving) { drivingState.isDriving = true; drivingState.lastTickTime = Date.now(); if(typeof startDrivingTimer==='function') startDrivingTimer(); }
-      drivingState.isPassengerBoarded = true; 
-      drivingState.isBreak = false; 
-      drivingState.stateStartTime = Date.now();
-      if(typeof updateDrivingUI==='function') updateDrivingUI(); 
-      if(typeof saveDrivingState==='function') saveDrivingState(); 
-      if(typeof setTab==='function') setTab(4);
-      setTimeout(()=>{ try{ if(typeof updateDrivingUI==='function') updateDrivingUI(); }catch(e){} }, 100);
-    }catch(e){ console.error('boarding state fail', e); }
-  }
-
-  async function saveCurrentRestroomLocation() {
-    if (!currentPos) { showToast('위치 탐색이 필요합니다.'); return; }
-    
-    let custom = JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]');
-    let isDuplicate = custom.some(p => getStraightDistanceKm(currentPos.lat, currentPos.lng, p.lat, p.lng) <= 0.2);
-    
-    if (isDuplicate) { showToast('⚠️ 확인: 이미 200m 이내에 등록된 화장실이 있습니다.'); return; }
-
-    const smartName = await getSmartLocationName(currentPos.lat, currentPos.lng, '🚻 화장실');
-    let regionShort = smartName.replace('🚻 화장실 (', '').replace(')', '').trim();
-    
-    custom.push({ id: 'my_restroom_' + Date.now(), name: smartName, lat: currentPos.lat, lng: currentPos.lng, region: regionShort, savedAt: new Date().toISOString() });
-    localStorage.setItem('sudataxi_custom_restrooms', JSON.stringify(custom));
-    
-    updateCustomRestroomUI();
-    showToast(`${smartName}\n저장 완료!`);
+    let smartName = await getSmartLocationName(currentPos.lat, currentPos.lng, '📍 탑승기록');
+    let regionShort = smartName.replace('📍 탑승기록 (', '').replace(')', '').trim();
+    let logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+    logs.push({ 
+      id: 'log_' + Date.now(), 
+      timestamp: new Date().toISOString(), 
+      lat: currentPos.lat, 
+      lng: currentPos.lng, 
+      name: smartName,
+      region: regionShort,
+      isHighValue: !!isHighValue
+    });
+    localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
+    try{ saveToAllStorages('sudataxi_call_logs', JSON.stringify(logs)); }catch(e){}
+    drivingState.isPassengerBoarded = true;
+    drivingState.isBreak = false;
+    drivingState.stateStartTime = Date.now();
+    updateDrivingUI();
+    saveDrivingState();
+    showToast(isHighValue ? '🔥 고단가 콜 승차 처리되었습니다.' : '🙋 승차 처리되었습니다.');
+    try{ if(typeof executeAutoBackup==='function') executeAutoBackup(); }catch(e){}
   }
 
   async function addCustomHotspotPrompt() {
@@ -5374,13 +5311,12 @@ function initDailyRevenue() {
     const inputRevEl = document.getElementById('input-rev');
     if(!inputRevEl) return;
 
-    // v8.8.9 Fix: '0'도 유효값으로 유지 - 시간/탑승위치처럼 수정 전까지 그대로 유지
+    // v8.8.9 Fix: '0'도 유효값으로 유지
     let savedRev = null;
     try{ savedRev = getFromAnyStorage('sudataxi_daily_rev'); }catch(e){}
     if(savedRev === null || savedRev === undefined || savedRev === 'null' || savedRev === 'undefined' || String(savedRev).trim() === ''){
       savedRev = localStorage.getItem('sudataxi_daily_rev');
     }
-    // '0'은 유효값이므로 복구 대상으로 보지 않음 - null/빈값일 때만 백업에서 복구
     if (savedRev === null || savedRev === undefined || savedRev === '' || savedRev === 'null' || savedRev === 'undefined') {
       try {
         const safe = JSON.parse(localStorage.getItem('sudataxi_safe_backup') || 'null');
@@ -5389,15 +5325,12 @@ function initDailyRevenue() {
         if (backup && backup.daily_rev !== undefined && backup.daily_rev !== null && backup.daily_rev !== '') {
           savedRev = backup.daily_rev.toString();
           try{ localStorage.setItem('sudataxi_daily_rev', savedRev); saveToAllStorages('sudataxi_daily_rev', savedRev); }catch(e){}
-          console.log('대시보드 매출 자동 복구:', savedRev);
         }
       } catch(e){ console.warn('daily_rev auto restore fail', e); }
     }
-
     if (savedRev !== null && savedRev !== undefined && String(savedRev).trim() !== '') {
       inputRevEl.value = savedRev;
     } else {
-      // 저장된 값이 없으면 0으로 유지 (덮어쓰지 않음)
       if(!inputRevEl.value) inputRevEl.value = '0';
     }
     calculateDailyRevenue();
@@ -5547,15 +5480,13 @@ function initDailyRevenue() {
 
 
 
-
 function initMic() {
     const btnMicEl = document.getElementById('btn-mic');
     const inputRevEl = document.getElementById('input-rev');
     if (!btnMicEl || !inputRevEl) return;
-    if (btnMicEl._micBound_v888) return;
-    btnMicEl._micBound_v888 = true;
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
     let mediaRecorder = null;
     let audioChunks = [];
     let audioStream = null;
@@ -5568,7 +5499,7 @@ function initMic() {
 
     function parseSmallKorean(str){ 
       if(!str) return 0; 
-      const numMap={'일':1,'이':2,'삼':3,'사':4,'오':5,'육':6,'칠':7,'팔':8,'구':9,'하나':1,'한':1,'둘':2,'두':2,'셋':3,'세':3,'넷':4,'네':4,'영':0,'공':0}; 
+      const numMap={'일':1,'이':2,'삼':3,'사':4,'오':5,'육':6,'칠':7,'팔':8,'구':9,'하나':1,'둘':2,'셋':3,'넷':4,'영':0,'공':0}; 
       let total=0; let num=0; 
       str=str.replace(/\s+/g,''); 
       for(let i=0;i<str.length;i++){ 
@@ -5577,35 +5508,40 @@ function initMic() {
         else if(ch==='십'){ if(num===0) num=1; total+=num*10; num=0;} 
         else if(ch==='백'){ if(num===0) num=1; total+=num*100; num=0;} 
         else if(ch==='천'){ if(num===0) num=1; total+=num*1000; num=0;} 
-        else if(/[0-9]/.test(ch)){ let numStr=''; while(i<str.length && /[0-9]/.test(str[i])){ numStr+=str[i]; i++; } i--; num=parseInt(numStr, 10);} 
+        else if(/[0-9]/.test(ch)){ let numStr=''; while(i<str.length && /[0-9]/.test(str[i])){ numStr+=str[i]; i++; } i--; num=parseInt(numStr);} 
       } 
       total+=num; 
       return total; 
     }
     function parseKoreanMoney(text){ 
       if(!text) return 0; 
-      let t = String(text).replace(/[,\s]/g, '').replace(/만원/g, '만').replace(/천원/g, '천').replace(/백원/g, '백').replace(/원$/g, '').replace(/원/g, '').trim(); 
-      if(!t) return 0;
-      if(/^[0-9]+$/.test(t)) {
-        const rawNum = parseInt(t, 10);
-        return (rawNum > 0 && rawNum < 100) ? rawNum * 10000 : rawNum;
-      }
+      let t=text.replace(/원|\s|,|만원/g,'만').replace(/천원/g,'천').trim(); 
+      if(/^[0-9]+$/.test(t)) return parseInt(t); 
       let total=0; 
       if(t.includes('만')){
         const parts=t.split('만'); 
         let manPart=parts[0]; 
-        let restPart=parts.slice(1).join(''); 
+        let restPart=parts.slice(1).join('만'); 
         let manVal=0; 
         if(!manPart) manVal=1; 
-        else if(/^[0-9]+$/.test(manPart)){ manVal=parseInt(manPart, 10); } 
-        else { manVal=parseSmallKorean(manPart); if(manVal===0) manVal=1; } 
+        else if(/[0-9]+/.test(manPart)){ 
+          const m=manPart.match(/[0-9]+/); manVal=parseInt(m[0]); 
+          const koreanRem=manPart.replace(/[0-9]+/g,''); 
+          if(koreanRem) manVal=manVal+parseSmallKorean(koreanRem)||manVal; 
+        } else { 
+          manVal=parseSmallKorean(manPart); 
+          if(manVal===0) manVal=1; 
+        } 
         total+=manVal*10000; 
         t=restPart; 
       } 
       if(!t) return total; 
-      if(/^[0-9]+$/.test(t)){
-        const remNum = parseInt(t, 10) || 0;
-        total += (remNum > 0 && remNum < 10 && total >= 10000) ? remNum * 1000 : remNum;
+      if(/[천백십]/.test(t) || /[0-9]/.test(t)){
+        if(/[천백십]/.test(t) || isNaN(parseInt(t))){
+          total+=parseSmallKorean(t);
+        } else {
+          total+=parseInt(t.replace(/[^0-9]/g,''))||0;
+        }
       } else {
         total+=parseSmallKorean(t);
       }
@@ -5646,84 +5582,143 @@ function initMic() {
     function showQuickAmountButtons(isFromSpeechFail=false){
       const existing = document.getElementById('quick-amount-overlay');
       if(existing) existing.remove();
+      
       const title = isFromSpeechFail ? '🎤 인식 실패 - 금액을 선택하세요' : '🎙️ 녹음됨 - 금액을 선택하세요';
       const overlay = document.createElement('div');
       overlay.id = 'quick-amount-overlay';
       overlay.style.cssText = 'position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#1F2937; border:2px solid #374151; border-radius:16px; padding:14px; z-index:9999; display:flex; flex-direction:column; gap:10px; box-shadow:0 8px 32px rgba(0,0,0,0.8); max-width:92%; min-width:280px;';
-      overlay.innerHTML = '<div style="color:#F3F4F6; font-size:13px; font-weight:900; text-align:center;">'+title+'</div><div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;"><button onclick="quickAmountSelect(10000)" style="background:#374151; color:#F3F4F6; border:1px solid #4B5563; border-radius:10px; padding:10px; font-size:13px; font-weight:800;">1만</button><button onclick="quickAmountSelect(20000)" style="background:#374151; color:#F3F4F6; border:1px solid #4B5563; border-radius:10px; padding:10px; font-size:13px; font-weight:800;">2만</button><button onclick="quickAmountSelect(30000)" style="background:#374151; color:#F3F4F6; border:1px solid #4B5563; border-radius:10px; padding:10px; font-size:13px; font-weight:800;">3만</button><button onclick="quickAmountSelect(50000)" style="background:#22C55E; color:#FFFFFF; border:1px solid #16A34A; border-radius:10px; padding:12px; font-size:14px; font-weight:900;">5만</button><button onclick="quickAmountSelect(70000)" style="background:#374151; color:#F3F4F6; border:1px solid #4B5563; border-radius:10px; padding:10px; font-size:13px; font-weight:800;">7만</button><button onclick="quickAmountSelect(100000)" style="background:#3B82F6; color:#FFFFFF; border:1px solid #2563EB; border-radius:10px; padding:12px; font-size:14px; font-weight:900;">10만</button></div><div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px;"><button onclick="quickAmountSelect(1000)" style="background:#1F2937; color:#9CA3AF; border:1px solid #374151; border-radius:8px; padding:6px; font-size:11px;">+1천</button><button onclick="quickAmountSelect(5000)" style="background:#1F2937; color:#9CA3AF; border:1px solid #374151; border-radius:8px; padding:6px; font-size:11px;">+5천</button><button onclick="quickAmountSelect(-10000)" style="background:#7F1D1D; color:#FCA5A5; border:1px solid #991B1B; border-radius:8px; padding:6px; font-size:11px;">-1만</button><button onclick="quickAmountSelect(0); document.getElementById(\'input-rev\').value=\'0\'; calculateDailyRevenue(); localStorage.setItem(\'sudataxi_daily_rev\',\'0\'); saveToAllStorages(\'sudataxi_daily_rev\',\'0\'); showToast(\'0원으로 초기화\');" style="background:#1F2937; color:#F87171; border:1px solid #374151; border-radius:8px; padding:6px; font-size:11px;">초기화</button></div><div style="display:flex; gap:6px;"><button onclick="document.getElementById(\'quick-amount-overlay\').remove()" style="flex:1; background:#111827; color:#9CA3AF; border:1px solid #374151; border-radius:8px; padding:8px; font-size:12px;">닫기</button><button onclick="setupWhisperKey && setupWhisperKey()" style="flex:1; background:#7C3AED; color:#FFFFFF; border:1px solid #6D28D9; border-radius:8px; padding:8px; font-size:12px; font-weight:800;">🤖 Whisper 키</button></div><div style="color:#6B7280; font-size:10px; text-align:center;">💡 팁: 5만+3만=8만처럼 누적됩니다.</div>';
+      overlay.innerHTML = `
+        <div style="color:#F3F4F6; font-size:13px; font-weight:900; text-align:center;">${title}</div>
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;">
+          <button onclick="quickAmountSelect(10000)" style="background:#374151; color:#F3F4F6; border:1px solid #4B5563; border-radius:10px; padding:10px; font-size:13px; font-weight:800;">1만</button>
+          <button onclick="quickAmountSelect(20000)" style="background:#374151; color:#F3F4F6; border:1px solid #4B5563; border-radius:10px; padding:10px; font-size:13px; font-weight:800;">2만</button>
+          <button onclick="quickAmountSelect(30000)" style="background:#374151; color:#F3F4F6; border:1px solid #4B5563; border-radius:10px; padding:10px; font-size:13px; font-weight:800;">3만</button>
+          <button onclick="quickAmountSelect(50000)" style="background:#22C55E; color:#FFFFFF; border:1px solid #16A34A; border-radius:10px; padding:12px; font-size:14px; font-weight:900;">5만</button>
+          <button onclick="quickAmountSelect(70000)" style="background:#374151; color:#F3F4F6; border:1px solid #4B5563; border-radius:10px; padding:10px; font-size:13px; font-weight:800;">7만</button>
+          <button onclick="quickAmountSelect(100000)" style="background:#3B82F6; color:#FFFFFF; border:1px solid #2563EB; border-radius:10px; padding:12px; font-size:14px; font-weight:900;">10만</button>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px;">
+          <button onclick="quickAmountSelect(1000)" style="background:#1F2937; color:#9CA3AF; border:1px solid #374151; border-radius:8px; padding:6px; font-size:11px;">+1천</button>
+          <button onclick="quickAmountSelect(5000)" style="background:#1F2937; color:#9CA3AF; border:1px solid #374151; border-radius:8px; padding:6px; font-size:11px;">+5천</button>
+          <button onclick="quickAmountSelect(-10000)" style="background:#7F1D1D; color:#FCA5A5; border:1px solid #991B1B; border-radius:8px; padding:6px; font-size:11px;">-1만</button>
+          <button onclick="quickAmountSelect(0); document.getElementById('input-rev').value='0'; calculateDailyRevenue(); localStorage.setItem('sudataxi_daily_rev','0'); showToast('0원으로 초기화');" style="background:#1F2937; color:#F87171; border:1px solid #374151; border-radius:8px; padding:6px; font-size:11px;">초기화</button>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <button onclick="document.getElementById('quick-amount-overlay').remove()" style="flex:1; background:#111827; color:#9CA3AF; border:1px solid #374151; border-radius:8px; padding:8px; font-size:12px;">닫기</button>
+          <button onclick="setupWhisperKey()" style="flex:1; background:#7C3AED; color:#FFFFFF; border:1px solid #6D28D9; border-radius:8px; padding:8px; font-size:12px; font-weight:800;">🤖 Whisper 키</button>
+        </div>
+        <div style="color:#6B7280; font-size:10px; text-align:center;">💡 팁: 음성인식보다 버튼이 더 빨라요. 5만+3만=8만처럼 누적됩니다.</div>
+      `;
       document.body.appendChild(overlay);
-      setTimeout(()=>{ const el=document.getElementById('quick-amount-overlay'); if(el) el.remove(); }, 12000);
+      setTimeout(()=>{ const el=document.getElementById('quick-amount-overlay'); if(el) el.remove(); }, 10000);
     }
 
     window.quickAmountSelect = function(amount){
       const inputEl = document.getElementById('input-rev');
       if(!inputEl) return;
-      if(amount===0){ inputEl.value='0'; }
-      else if(amount<0){ const cur = parseInt(inputEl.value||'0')||0; inputEl.value = Math.max(0, cur+amount).toString(); }
-      else { const cur = parseInt(inputEl.value||'0')||0; inputEl.value = (cur + amount).toString(); }
+      if(amount===0){
+        inputEl.value='0';
+      } else if(amount<0){
+        const cur = parseInt(inputEl.value||'0')||0;
+        inputEl.value = Math.max(0, cur + amount).toString();
+      } else {
+        const cur = parseInt(inputEl.value||'0')||0;
+        // 1만 단위 버튼은 누적, 1천/5천도 누적
+        inputEl.value = (cur + amount).toString();
+      }
       try{ calculateDailyRevenue(); }catch(e){}
-      try{ localStorage.setItem('sudataxi_daily_rev', inputEl.value); saveToAllStorages('sudataxi_daily_rev', inputEl.value); }catch(e){}
+      try{ localStorage.setItem('sudataxi_daily_rev', inputEl.value); }catch(e){}
+      try{ saveToAllStorages('sudataxi_daily_rev', inputEl.value); }catch(e){}
       try{ if(typeof executeAutoBackup==='function') executeAutoBackup(); }catch(e){}
-      if(typeof showToast==='function') showToast(`${parseInt(inputEl.value).toLocaleString()}원 입력됨`);
+      if(typeof showToast==='function'){
+        const total = parseInt(inputEl.value||'0')||0;
+        showToast(`💰 총 ${total.toLocaleString()}원`);
+      }
+    };
+
+    window.setupWhisperKey = function(){
+      const cur = localStorage.getItem('sudataxi_openai_key')||'';
+      const key = prompt('OpenAI API 키를 입력하면 Whisper 고정확도 음성인식을 사용합니다.\n없으면 취소.\n\n현재: ' + (cur ? cur.substring(0,12)+'...' : '없음'), cur);
+      if(key!==null){
+        if(key.trim()){
+          localStorage.setItem('sudataxi_openai_key', key.trim());
+          try{ saveToAllStorages('sudataxi_openai_key', key.trim()); }catch(e){}
+          if(typeof showToast==='function') showToast('🤖 Whisper 키 저장됨');
+        } else {
+          localStorage.removeItem('sudataxi_openai_key');
+          try{ localStorage.removeItem('sudataxi_openai_key'); }catch(e){}
+          if(typeof showToast==='function') showToast('Whisper 해제됨');
+        }
+      }
+      const overlay = document.getElementById('quick-amount-overlay');
+      if(overlay) overlay.remove();
     };
 
     async function stopMediaRecordingAndShowQuick(){
-      try{
-        if(mediaRecorder && mediaRecorder.state!=='inactive'){ try{ mediaRecorder.stop(); }catch(e){} }
-        isRecording=false;
-        if(recordingTimer){ clearInterval(recordingTimer); recordingTimer=null; }
-        btnMicEl.classList.remove('recording');
-        btnMicEl.style.background='';
-        btnMicEl.innerHTML='<span style="font-size:20px;">🎤</span>';
-        if(audioStream){ try{ audioStream.getTracks().forEach(t=>t.stop()); }catch(e){} audioStream=null; }
-        if(audioChunks.length>0){
-          const mime = mediaRecorder && mediaRecorder.mimeType ? mediaRecorder.mimeType : 'audio/webm';
-          const audioBlob = new Blob(audioChunks, {type: mime});
-          if(audioBlob.size>1500){
-            const apiKey = localStorage.getItem('sudataxi_openai_key') || getFromAnyStorage('sudataxi_openai_key');
-            if(apiKey){
-              try{
-                if(typeof showToast==='function') showToast('🤖 Whisper 변환중...');
-                const formData = new FormData();
-                formData.append('file', audioBlob, 'rec.webm');
-                formData.append('model','whisper-1');
-                formData.append('language','ko');
-                const res = await fetch('https://api.openai.com/v1/audio/transcriptions',{
-                  method:'POST',
-                  headers:{'Authorization':'Bearer '+apiKey},
-                  body:formData
-                });
-                if(res.ok){
-                  const data = await res.json();
-                  const text = data.text||'';
-                  const parsed = parseKoreanMoney(text);
-                  if(parsed>0){
-                    const inputEl = document.getElementById('input-rev');
-                    if(inputEl){
-                      inputEl.value = parsed.toString();
-                      try{ calculateDailyRevenue(); }catch(e){}
-                      try{ localStorage.setItem('sudataxi_daily_rev', parsed.toString()); saveToAllStorages('sudataxi_daily_rev', parsed.toString()); }catch(e){}
-                      if(typeof showToast==='function') showToast(`🤖 Whisper: ${parsed.toLocaleString()}원 (${text})`);
-                      audioChunks=[];
-                      return;
-                    }
+      if(!isRecording) return;
+      isRecording = false;
+      if(recordingTimer){ clearInterval(recordingTimer); recordingTimer=null; }
+      if(speechTimeout){ clearTimeout(speechTimeout); speechTimeout=null; }
+      
+      if(mediaRecorder && mediaRecorder.state!=='inactive'){
+        try{ mediaRecorder.stop(); }catch(e){}
+        await new Promise(r=>setTimeout(r,300));
+      }
+      if(audioStream){ try{ audioStream.getTracks().forEach(t=>t.stop()); }catch(e){} audioStream=null; }
+      
+      btnMicEl.classList.remove('recording');
+      btnMicEl.innerHTML = '<span style="font-size:20px;">🎤</span>';
+      
+      // Whisper 시도 (키가 있을 때만)
+      if(audioChunks.length>0){
+        const audioBlob = new Blob(audioChunks, {type: mediaRecorder ? mediaRecorder.mimeType : 'audio/webm'});
+        if(audioBlob.size>1500){
+          const apiKey = localStorage.getItem('sudataxi_openai_key') || getFromAnyStorage('sudataxi_openai_key');
+          if(apiKey){
+            try{
+              if(typeof showToast==='function') showToast('🤖 Whisper 변환중...');
+              const formData = new FormData();
+              formData.append('file', audioBlob, 'rec.webm');
+              formData.append('model','whisper-1');
+              formData.append('language','ko');
+              const res = await fetch('https://api.openai.com/v1/audio/transcriptions',{
+                method:'POST',
+                headers:{'Authorization':'Bearer '+apiKey},
+                body:formData
+              });
+              if(res.ok){
+                const data = await res.json();
+                const text = data.text||'';
+                const parsed = parseKoreanMoney(text);
+                if(parsed>0){
+                  const inputEl = document.getElementById('input-rev');
+                  if(inputEl){
+                    inputEl.value = parsed.toString();
+                    try{ calculateDailyRevenue(); }catch(e){}
+                    try{ localStorage.setItem('sudataxi_daily_rev', parsed.toString()); saveToAllStorages('sudataxi_daily_rev', parsed.toString()); }catch(e){}
+                    if(typeof showToast==='function') showToast(`🤖 Whisper: ${parsed.toLocaleString()}원 (${text})`);
+                    audioChunks=[];
+                    return;
                   }
                 }
-              }catch(e){ console.warn('whisper fail', e); }
-            }
+              }
+            }catch(e){ console.warn('whisper fail', e); }
           }
         }
-        audioChunks=[];
-        showQuickAmountButtons(false);
-      }catch(e){
-        console.error('stop recording fail', e);
-        cleanupAll();
-        showQuickAmountButtons(true);
       }
+      
+      audioChunks=[];
+      // 최종 fallback: 빠른 금액 버튼
+      showQuickAmountButtons(false);
     }
 
     function startSpeechRecognitionOnly(){
-      if(!SpeechRecognition){ startMediaRecorderOnly(); return; }
+      if(!SpeechRecognition){
+        // 음성인식 미지원이면 바로 MediaRecorder로
+        startMediaRecorderOnly();
+        return;
+      }
+      
       try{
         if(recognition){ try{ recognition.abort(); }catch(e){} }
         recognition = new SpeechRecognition();
@@ -5731,12 +5726,15 @@ function initMic() {
         recognition.maxAlternatives=5;
         recognition.continuous=false;
         recognition.interimResults=false;
+        
         let gotResult = false;
+        
         recognition.onstart=()=>{
           lastStartTime = Date.now();
           btnMicEl.classList.add('recording');
           btnMicEl.style.background = '#22C55E';
           if(typeof showToast==='function') showToast('🎤 듣는중... "오만원" 말해보세요 (4초)');
+          // 4.5초 타임아웃 - 인식 안되면 MediaRecorder로 전환
           speechTimeout = setTimeout(()=>{
             if(!gotResult){
               try{ recognition.abort(); }catch(e){}
@@ -5745,6 +5743,7 @@ function initMic() {
             }
           }, 4500);
         };
+        
         recognition.onresult=(event)=>{
           gotResult = true;
           if(speechTimeout){ clearTimeout(speechTimeout); speechTimeout=null; }
@@ -5771,7 +5770,7 @@ function initMic() {
               const num = parseInt(fallback);
               inputEl.value = num.toString();
               try{ calculateDailyRevenue(); }catch(e){}
-              try{ localStorage.setItem('sudataxi_daily_rev', num.toString()); saveToAllStorages('sudataxi_daily_rev', num.toString()); }catch(e){}
+              try{ localStorage.setItem('sudataxi_daily_rev', num.toString()); }catch(e){}
               if(typeof showToast==='function') showToast(`🎤 ${num.toLocaleString()}원 입력됨`);
             } else {
               if(typeof showToast==='function') showToast(`"${transcript}" 금액 변환 실패 - 버튼으로 선택해주세요`);
@@ -5780,72 +5779,102 @@ function initMic() {
           }
           cleanupAll();
         };
+        
         recognition.onerror=(e)=>{
+          console.log('speech error', e.error);
           if(speechTimeout){ clearTimeout(speechTimeout); speechTimeout=null; }
-          if(e.error==='not-allowed' || e.error==='permission-denied' || e.error==='service-not-allowed'){
+          if(e.error==='aborted' || e.error==='no-speech' || e.error==='audio-capture'){
+            // 실패 시 MediaRecorder로 전환
+            if(typeof showToast==='function') showToast('🎤 인식 실패, 녹음 모드로 전환중...');
+            setTimeout(()=>{ startMediaRecorderOnly(); }, 300);
+          } else if(e.error==='not-allowed' || e.error==='permission-denied'){
+            if(typeof showToast==='function') showToast('🎤 마이크 권한 필요 - 설정 > Safari > 마이크 허용');
             cleanupAll();
-            if(typeof showToast==='function') showToast('🎤 마이크 권한 필요 - 빠른 금액 선택창을 엽니다');
-            showQuickAmountButtons(true);
           } else {
-            if(typeof showToast==='function') showToast('🎤 음성인식 미감지 - 녹음 모드로 전환');
-            setTimeout(()=>{ startMediaRecorderOnly(); }, 250);
+            // 기타 오류도 MediaRecorder로 전환
+            startMediaRecorderOnly();
           }
         };
-        recognition.onend=()=>{ if(speechTimeout){ clearTimeout(speechTimeout); speechTimeout=null; } };
+        
+        recognition.onend=()=>{
+          if(speechTimeout){ clearTimeout(speechTimeout); speechTimeout=null; }
+          if(!gotResult){
+            // 결과 없이 종료되면 MediaRecorder로 전환하지 않고 그냥 종료 (사용자가 취소)
+            cleanupAll();
+          }
+        };
+        
         recognition.start();
-      }catch(ex){ startMediaRecorderOnly(); }
+        
+      }catch(ex){
+        console.warn('speech start fail', ex);
+        startMediaRecorderOnly();
+      }
     }
 
     async function startMediaRecorderOnly(){
       cleanupAll();
       try{
-        if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ throw new Error('getUserMedia not supported'); }
         const stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true, noiseSuppression:true, sampleRate:16000}});
         audioStream = stream;
         audioChunks = [];
-        let mimeType = '';
-        const candidates = ['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/aac','audio/ogg;codecs=opus',''];
-        for(const cand of candidates){
-          if(cand==='' || (window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(cand))){
-            mimeType=cand; break;
+        
+        let mimeType = 'audio/webm;codecs=opus';
+        if(!MediaRecorder.isTypeSupported(mimeType)){
+          mimeType = 'audio/mp4';
+          if(!MediaRecorder.isTypeSupported(mimeType)){
+            mimeType = 'audio/webm';
+            if(!MediaRecorder.isTypeSupported(mimeType)) mimeType='';
           }
         }
+        
         mediaRecorder = mimeType ? new MediaRecorder(stream, {mimeType: mimeType}) : new MediaRecorder(stream);
         mediaRecorder.ondataavailable = (ev)=>{ if(ev.data && ev.data.size>0) audioChunks.push(ev.data); };
-        mediaRecorder.onstart = ()=>{ 
-          isRecording = true; recordingSeconds = 0;
-          btnMicEl.classList.add('recording'); btnMicEl.style.background = '#EF4444'; btnMicEl.innerHTML = '<span style="font-size:16px;">🔴</span>';
-          recordingTimer = setInterval(updateRecordingUI, 1000); updateRecordingUI();
-        };
-        mediaRecorder.onerror = (e)=>{ cleanupAll(); showQuickAmountButtons(true); };
         mediaRecorder.start(100);
+        isRecording = true;
+        recordingSeconds = 0;
+        btnMicEl.classList.add('recording');
+        btnMicEl.style.background = '#EF4444';
+        btnMicEl.innerHTML = '<span style="font-size:16px;">🔴</span>';
+        recordingTimer = setInterval(updateRecordingUI, 1000);
+        updateRecordingUI();
+        
       }catch(err){
-        if(typeof showToast==='function'){
-          if(err.name==='NotAllowedError' || err.name==='PermissionDeniedError'){ showToast('🎤 마이크 권한이 거부됨'); }
-          else { showToast('🎤 마이크를 사용할 수 없습니다'); }
-        }
-        cleanupAll(); showQuickAmountButtons(true);
+        console.error('getUserMedia fail', err);
+        if(typeof showToast==='function') showToast('🎤 마이크를 사용할 수 없습니다. 권한을 확인해주세요.');
+        cleanupAll();
+        showQuickAmountButtons(true);
       }
     }
 
     btnMicEl.addEventListener('click', async (e)=>{
-      e.preventDefault(); e.stopPropagation();
-      if(isRecording){ await stopMediaRecordingAndShowQuick(); return; }
-      if(recognition && btnMicEl.classList.contains('recording')){ cleanupAll(); return; }
+      e.preventDefault();
+      e.stopPropagation();
+      
+      if(isRecording){
+        await stopMediaRecordingAndShowQuick();
+        return;
+      }
+      
+      if(recognition && btnMicEl.classList.contains('recording')){
+        // 음성인식 중이면 중지
+        cleanupAll();
+        return;
+      }
+      
       if(Date.now() - lastStartTime < 800) return;
+      
+      // 1차: 음성인식 시도 (마이크 충돌 없이 단독으로)
       startSpeechRecognitionOnly();
     });
-
-    window.setupWhisperKey = window.setupWhisperKey || function(){
-      const cur = localStorage.getItem('sudataxi_openai_key') || '';
-      const key = prompt('OpenAI API 키를 입력하세요 (Whisper용):', cur);
-      if(key!==null){ localStorage.setItem('sudataxi_openai_key', key.trim()); saveToAllStorages('sudataxi_openai_key', key.trim()); if(typeof showToast==='function') showToast('🤖 Whisper 키 저장됨'); }
-    };
   }
+
+
+
+
 
   document.addEventListener('DOMContentLoaded', initMic);
   window.addEventListener('load', function(){ setTimeout(initMic, 600); });
-
 
   function initSimulator() {
     const today = new Date();
@@ -5861,7 +5890,7 @@ function initMic() {
         calGrid.innerHTML += `<div></div>`;
     }
     
-    // v8.8.9 Fix: sim_data도 다중 저장소에서 복구 - 시간/위치처럼 유지
+    // v8.8.9 Fix: sim_data도 다중 저장소에서 복구
     let simRaw = null;
     try{ simRaw = getFromAnyStorage('sudataxi_sim_data'); }catch(e){}
     if(!simRaw || simRaw==='null' || simRaw==='undefined' || simRaw.trim()===''){
@@ -6125,8 +6154,8 @@ function initMic() {
       const bottomBoardEl = document.getElementById('btn-bottom-board');
       const bottomAlightEl = document.getElementById('btn-bottom-alight');
       function createSimpleHandler(btn, handler){
-        if(!btn || btn._fixed_v888) return;
-        btn._fixed_v888 = true;
+        if(!btn || btn._fixed_v889) return;
+        btn._fixed_v889 = true;
         let longTimer=null, isLong=false, startY=0, startX=0, startTime=0;
         btn.addEventListener('touchstart', function(e){
           if(e.touches && e.touches[0]){
@@ -6157,34 +6186,10 @@ function initMic() {
           handler(e, false);
         });
       }
-      // 대시보드 승차 = 시간만 체크 (위치 저장 안함)
       if(boardEl) createSimpleHandler(boardEl, handleBoardingTimeOnly);
-      // 대시보드 하차 = 기존 하차
       if(alightEl) createSimpleHandler(alightEl, handleAlighting);
-      // 하단 승차 = 위치 저장 + 승차
-      if(bottomBoardEl) {
-        // 기존 _b62_fixed 플래그 제거하고 새로 바인딩
-        try{ bottomBoardEl._b62_fixed = true; bottomBoardEl._fixed_v888 = false; }catch(e){}
-        createSimpleHandler(bottomBoardEl, handleBoarding);
-      }
-      // 하단 하차
-      if(bottomAlightEl) {
-        try{ bottomAlightEl._b60_fixed = true; bottomAlightEl._fixed_v888 = false; }catch(e){}
-        createSimpleHandler(bottomAlightEl, handleAlighting);
-      }
-      function forceEnableBoard(){
-        const b=document.getElementById('btn-board');
-        const a=document.getElementById('btn-alight');
-        const bb=document.getElementById('btn-bottom-board');
-        const ba=document.getElementById('btn-bottom-alight');
-        if(b){ b.style.pointerEvents='auto'; b.style.touchAction='manipulation'; }
-        if(a){ a.style.pointerEvents='auto'; a.style.touchAction='manipulation'; }
-        if(bb){ bb.style.pointerEvents='auto'; bb.style.touchAction='manipulation'; }
-        if(ba){ ba.style.pointerEvents='auto'; ba.style.touchAction='manipulation'; }
-      }
-      setTimeout(forceEnableBoard, 500);
-      setTimeout(forceEnableBoard, 1500);
-      document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible') setTimeout(forceEnableBoard, 200); });
+      if(bottomBoardEl) createSimpleHandler(bottomBoardEl, handleBoarding);
+      if(bottomAlightEl) createSimpleHandler(bottomAlightEl, handleAlighting);
     })();
 
     
@@ -6617,24 +6622,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
-<script id="v888-boarding-fix">
-// v8.8.9 분리 최종: 하단=위치저장, 대시보드=시간만 - 다른 버튼 간섭 없음
-(function(){
-  function ensureBoardingLink(){
-    try{
-      const ids = ['btn-board','btn-alight','btn-bottom-board','btn-bottom-alight','btn-mode1','btn-mode2','btn-mode3','btn-mode4','btn-search','btn-mic'];
-      ids.forEach(function(id){
-        const el=document.getElementById(id);
-        if(el){ el.style.pointerEvents='auto'; el.style.touchAction='manipulation'; }
-      });
-    }catch(e){}
-  }
-  document.addEventListener('DOMContentLoaded', function(){ setTimeout(ensureBoardingLink, 300); setTimeout(ensureBoardingLink, 1200); });
-  window.addEventListener('load', function(){ setTimeout(ensureBoardingLink, 500); });
-  setTimeout(ensureBoardingLink, 800);
-})();
-</script>
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
-
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
 </html>
