@@ -1522,6 +1522,58 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
 }
 </style>
 
+
+<style id="v889-bottom-stick-fix">
+/* v8.8.9 Fix: 하단박스 아래로 붙이되 테두리 보이게 - 위쪽 공간 확보 + 테두리 가시성 */
+.bottom-bar#bottom-bar-v7961 {
+  position: fixed !important;
+  bottom: calc(3px + env(safe-area-inset-bottom, 0px)) !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  width: calc(100% - 10px) !important;
+  max-width: 430px !important;
+  min-height: 68px !important;
+  height: 68px !important;
+  max-height: 68px !important;
+  padding: 6px 8px 6px 8px !important;
+  border-radius: 16px !important;
+  border: 1.8px solid #FFC800 !important;
+  background: #0F0F0F !important;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,200,0,0.3) !important;
+  z-index: 9999 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+.bottom-mode-dock {
+  position: fixed !important;
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: calc(100% - 12px) !important;
+  max-width: 420px !important;
+  margin: 0 !important;
+  border-radius: 12px !important;
+  background: #141414 !important;
+  border: 1px solid #2E2E2E !important;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.4) !important;
+  z-index: 9998 !important;
+  box-sizing: border-box !important;
+}
+body {
+  padding-bottom: calc(152px + env(safe-area-inset-bottom, 0px)) !important;
+}
+body.theme-day .bottom-bar#bottom-bar-v7961 {
+  background: #FFFFFF !important;
+  border-color: #FFC800 !important;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,200,0,0.2) !important;
+}
+body.theme-day .bottom-mode-dock {
+  background: #FFFFFF !important;
+  border-color: #D1D5DB !important;
+}
+</style>
+
 </head>
 <body class="mode-1">
   
