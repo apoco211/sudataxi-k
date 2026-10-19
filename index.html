@@ -21,244 +21,42 @@
 :where(code, pre, kbd, samp) {
   font-family: "Optimistic Mono", ui-monospace, monospace;
 }
+</style><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
 </style>
 
 <script id="embedded-defaults">
-  // v8.8.6: 빌드 시에도 살아남는 기본값 (사용자가 직접 수정 가능)
+  // v8.8.9: 빌드 시에도 살아남는 기본값 (사용자가 직접 수정 가능)
   // 빌드 전에 여기에 현재 대시보드 값을 넣어두면, localStorage가 날아가도 복구됨
   const EMBEDDED_DEFAULTS = {
     daily_rev: 0,
     sim_data: {target:4000000, current:0, restDates:[]},
-    version: 'v8.8.6'
+    version: 'v8.8.9'
   };
 </script>
-<style>
-@font-face {
-  font-family: "Optimistic";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Optimistic Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-}
-:where(html) {
-  font-family: "Optimistic", system-ui, sans-serif;
-}
-:where(code, pre, kbd, samp) {
-  font-family: "Optimistic Mono", ui-monospace, monospace;
-}
-</style><style>
-@font-face {
-  font-family: "Optimistic";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Optimistic Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-}
-:where(html) {
-  font-family: "Optimistic", system-ui, sans-serif;
-}
-:where(code, pre, kbd, samp) {
-  font-family: "Optimistic Mono", ui-monospace, monospace;
-}
-</style><style>
-@font-face {
-  font-family: "Optimistic";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Optimistic Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-}
-:where(html) {
-  font-family: "Optimistic", system-ui, sans-serif;
-}
-:where(code, pre, kbd, samp) {
-  font-family: "Optimistic Mono", ui-monospace, monospace;
-}
-</style><style>
-@font-face {
-  font-family: "Optimistic";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Optimistic Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-}
-:where(html) {
-  font-family: "Optimistic", system-ui, sans-serif;
-}
-:where(code, pre, kbd, samp) {
-  font-family: "Optimistic Mono", ui-monospace, monospace;
-}
-</style><style>
-@font-face {
-  font-family: "Optimistic";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Optimistic Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-}
-:where(html) {
-  font-family: "Optimistic", system-ui, sans-serif;
-}
-:where(code, pre, kbd, samp) {
-  font-family: "Optimistic Mono", ui-monospace, monospace;
-}
-</style><style>
-@font-face {
-  font-family: "Optimistic";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Optimistic Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-}
-:where(html) {
-  font-family: "Optimistic", system-ui, sans-serif;
-}
-:where(code, pre, kbd, samp) {
-  font-family: "Optimistic Mono", ui-monospace, monospace;
-}
-<style id="v7-9-37-fix">
-.bottom-bar {
-  position: fixed !important;
-  bottom: calc(4px + env(safe-area-inset-bottom, 0px)) !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  width: calc(100% - 12px) !important;
-  max-width: 420px !important;
-  min-height: 68px !important;
-  height: auto !important;
-  padding: 6px 8px !important;
-  background: #0F0F0F !important;
-  border: 2px solid #FFC800 !important;
-  border-radius: 16px !important;
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: stretch !important;
-  justify-content: space-between !important;
-  gap: 6px !important;
-  box-sizing: border-box !important;
-  z-index: 999 !important;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.6) !important;
-  overflow: hidden !important;
-}
-    /* v7.9.21 Minimal - 위로 10px 아래로 10px (요청) */
-    .sticky-top-area {
-      padding-top: 10px !important;
-      top: 0 !important;
-    }
-    html {
-      padding-top: env(safe-area-inset-top, 0px);
-    }
-    body {
-      padding-top: 0;
-    }
-    .bottom-bar {
-      /* FIXED: timer layout - second photo reference */
-      position: fixed !important;
-      bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
-      left: 50% !important;
-      transform: translateX(-50%) !important;
-      width: calc(100% - 16px) !important;
-      max-width: 414px !important;
-      height: auto !important;
-      min-height: 92px !important;
-      padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px)) 10px !important;
-      background: #0F0F0F !important;
-      border: 1px solid rgba(255,200,0,0.25) !important;
-      border-top: 2px solid #FFC800 !important;
-      border-radius: 18px !important;
-      display: flex !important;
-      flex-direction: row !important;
-      align-items: stretch !important;
-      gap: 8px !important;
-      z-index: 200 !important;
-      box-shadow: 0 12px 32px rgba(0,0,0,0.6) !important;
-    }
-    /* OCR */
-    .penalty-ocr-btn { width: 100%; background: #FFC800; color: #000; border: 2px solid #000; border-radius: 8px; padding: 10px; font-size: 12px; font-weight: 900; cursor: pointer; margin-top: 6px; }
-    .penalty-ocr-btn:disabled { opacity: 0.5; }
-    .penalty-ocr-status { margin-top: 8px; font-size: 11px; font-weight: 800; color: #000; background: #FFF7CC; border: 1px solid #FFC800; border-radius: 6px; padding: 6px 8px; }
-    .penalty-ocr-preview { margin-top: 6px; font-size: 9px; color: #666; background: #F5F5F5; border: 1px dashed #CCC; border-radius: 6px; padding: 6px 8px; max-height: 80px; overflow-y: auto; white-space: pre-wrap; }
-
-    /* v7.9.23 NEW: 자주가는 곳 프리셋 - v7.9.25 개선 */
-    .frequent-presets-section { margin: 6px 0 10px 0; background: #162032; border: 1px solid rgba(45,212,191,0.35); border-top: 2px solid #2DD4BF; border-radius: 12px; padding: 6px 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
-    .frequent-header { display:flex; justify-content:space-between; align-items:center; gap:4px; flex-wrap:nowrap; margin-bottom:4px; overflow:hidden; }
-    .frequent-header-left { display:flex; align-items:center; gap:4px; flex:1; min-width:0; overflow:hidden; }
-    .frequent-header-actions { display:flex; gap:4px; flex-shrink:0; align-items:center; }
-    .frequent-preset-card { background: #1C2B3A; border: 1px solid rgba(45,212,191,0.25); border-radius: 8px; padding: 5px 8px; display:flex; justify-content:space-between; align-items:center; gap:6px; min-height:36px; }
-    .frequent-preset-card .fp-left { display:flex; flex-direction:column; gap:0px; flex:1; min-width:0; line-height:1.15; }
-    .frequent-preset-card .fp-name { display:flex !important; align-items:center !important; gap:5px !important; font-weight:900; font-size:12px; color:#5EEAD4; min-width:0; line-height:1.3 !important; }
-    .frequent-preset-card .fp-name-text { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; flex-shrink:1; }
-    .frequent-preset-card .fp-addr { font-size:9px; color:#94A3B8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2; }
-    .frequent-preset-card .fp-meta { font-size:10px; font-weight:800; color:#FBBF24; line-height:1.2; margin-top:1px; }
-    .frequent-preset-card .fp-actions { display:flex; gap:3px; flex-shrink:0; }
-    .fp-btn { border:none; border-radius:5px; padding:4px 8px; font-size:10px; font-weight:900; cursor:pointer; white-space:nowrap; line-height:1; }
-    .fp-btn-navi { background:#2DD4BF; color:#000; }
-    .fp-btn-del { background:#1E293B; color:#94A3B8; border:1px solid #334155; }
-    .fp-add-btn { cursor:pointer; white-space:nowrap; font-weight:900; }
-    .fp-badge { display:inline-flex !important; align-items:center !important; justify-content:center !important; background:#0F172A; color:#5EEAD4; border:1px solid #2DD4BF; font-size:8.5px !important; font-weight:900; height:16px !important; padding:0 6px !important; border-radius:999px !important; white-space:nowrap !important; line-height:1 !important; box-sizing:border-box !important; flex-shrink:0 !important; vertical-align:middle !important; }
-    .auto-region-badge { background:#FEF3C7; color:#92400E; border:1px solid #FBBF24; font-size:10px; font-weight:800; padding:3px 8px; border-radius:8px; }
-    /* v7.9.25 주간모드 대응 */
-    body.theme-day .frequent-presets-section { background:#FFFFFF; border:1px solid #CCFBF1; border-top:2px solid #14B8A6; box-shadow:0 2px 12px rgba(0,0,0,0.06); }
-    body.theme-day .frequent-preset-card { background:#F8FAFC; border-color:#CCFBF1; }
-    body.theme-day .frequent-preset-card .fp-name { color:#0F766E; }
-    body.theme-day .frequent-preset-card .fp-addr { color:#64748B; }
-    body.theme-day .frequent-preset-card .fp-meta { color:#D97706; }
-    body.theme-day .fp-badge { background:#CCFBF1; color:#0F766E; border-color:#14B8A6; }
-    body.theme-day .fp-btn-del { background:#F1F5F9; color:#64748B; border-color:#E2E8F0; }
-    body.theme-day #frequent-presets-empty { color:#94A3B8; }
-    body.theme-day #frequent-modal .modal-content { background:#FFFFFF; }
-    body.theme-day #frequent-modal input { background:#F8FAFC !important; color:#1E293B !important; border-color:#E2E8F0 !important; }
-    body.theme-day #fp-search-results div { background:#F8FAFC !important; border-color:#E2E8F0 !important; }
-    body.theme-day #fp-search-results div div { color:#1E293B !important; }
-
-
-
-</style>
+<!-- v8.8.9: 중복 폰트 제거 --><!-- v8.8.9: 중복 폰트 제거 --><!-- v8.8.9: 중복 폰트 제거 --><!-- v8.8.9: 중복 폰트 제거 --><!-- v8.8.9: 중복 폰트 제거 --><!-- v8.8.9: 중복 폰트 제거 -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v8.8.6</title>
+  <title>수다택시 K v8.8.9</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1898,7 +1696,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v8.8.6";
+  const BUILD_VERSION = "v8.8.9";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2318,7 +2116,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
     } catch(e) {}
   }
 
-    // v8.8.6: 다중 저장소 영구 보관 (localStorage가 빌드 시 날아가도 쿠키에서 복구)
+    // v8.8.9: 다중 저장소 영구 보관 (localStorage가 빌드 시 날아가도 쿠키에서 복구)
   function setPersistentCookie(name, value, days=365){
     try{
       const expires = new Date();
@@ -2343,19 +2141,44 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
     try{ localStorage.setItem(key, value); }catch(e){}
     try{ sessionStorage.setItem(key, value); }catch(e){}
     try{ setPersistentCookie(key, value, 365); }catch(e){}
-    // IndexedDB에도 저장 시도 (비동기)
     try{
       if(window.indexedDB){
-        const req = indexedDB.open('sudataxi_db', 1);
+        const req = indexedDB.open('sudataxi_db', 2);
         req.onupgradeneeded = function(ev){ 
           const db = ev.target.result;
           if(!db.objectStoreNames.contains('keyvalue')) db.createObjectStore('keyvalue');
         };
         req.onsuccess = function(ev){
-          const db = ev.target.result;
-          const tx = db.transaction('keyvalue','readwrite');
-          tx.objectStore('keyvalue').put(value, key);
+          try{
+            const db = ev.target.result;
+            const tx = db.transaction('keyvalue','readwrite');
+            const store = tx.objectStore('keyvalue');
+            store.put(value, key);
+            if(key==='sudataxi_daily_rev' || key==='sudataxi_sim_data'){
+              try{
+                const curSafe = localStorage.getItem('sudataxi_safe_backup');
+                let safeObj = curSafe ? JSON.parse(curSafe) : {};
+                if(key==='sudataxi_daily_rev') safeObj.daily_rev = parseInt(value)||0;
+                if(key==='sudataxi_sim_data') safeObj.sim_data = JSON.parse(value);
+                safeObj._ts = Date.now();
+                const safeStr = JSON.stringify(safeObj);
+                localStorage.setItem('sudataxi_safe_backup', safeStr);
+                store.put(safeStr, 'sudataxi_safe_backup');
+              }catch(e2){}
+            }
+          }catch(e){}
         };
+        req.onerror = function(){};
+      }
+    }catch(e){}
+  }
+
+  function requestPersistentStorage(){
+    try{
+      if(navigator.storage && navigator.storage.persist){
+        navigator.storage.persist().then(function(granted){
+          console.log('Persistent storage:', granted ? 'granted' : 'not granted');
+        });
       }
     }catch(e){}
   }
@@ -2363,17 +2186,83 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
   function getFromAnyStorage(key){
     try{
       const ls = localStorage.getItem(key);
-      if(ls && ls!=='null' && ls!=='0' && ls!=='{}') return ls;
+      if(ls && ls!=='null' && ls!=='0' && ls!=='{}' && ls!=='[]' && ls!=='""') return ls;
     }catch(e){}
     try{
       const ss = sessionStorage.getItem(key);
-      if(ss && ss!=='null' && ss!=='0' && ss!=='{}') return ss;
+      if(ss && ss!=='null' && ss!=='0' && ss!=='{}' && ss!=='[]') return ss;
     }catch(e){}
     try{
       const ck = getPersistentCookie(key);
-      if(ck && ck!=='null' && ck!=='0' && ck!=='{}') return ck;
+      if(ck && ck!=='null' && ck!=='0' && ck!=='{}' && ck!=='[]') return ck;
     }catch(e){}
     return null;
+  }
+
+  function restoreFromIndexedDB(callback){
+    try{
+      requestPersistentStorage();
+      if(!window.indexedDB){ if(callback) callback(false); return; }
+      const req = indexedDB.open('sudataxi_db', 2);
+      req.onupgradeneeded = function(ev){
+        const db = ev.target.result;
+        if(!db.objectStoreNames.contains('keyvalue')) db.createObjectStore('keyvalue');
+      };
+      req.onsuccess = function(ev){
+        try{
+          const db = ev.target.result;
+          if(!db.objectStoreNames.contains('keyvalue')){ if(callback) callback(false); return; }
+          const tx = db.transaction('keyvalue', 'readonly');
+          const store = tx.objectStore('keyvalue');
+          const keys = ['sudataxi_daily_rev', 'sudataxi_sim_data', 'sudataxi_safe_backup', 'sudataxi_auto_backup', 'sudataxi_driving_records', 'sudataxi_call_logs', 'sudataxi_frequent_presets'];
+          let pending = keys.length;
+          let restoredAny = false;
+          keys.forEach(k => {
+            try{
+              const gReq = store.get(k);
+              gReq.onsuccess = function(){
+                const val = gReq.result;
+                if(val && val !== 'null' && val !== '0' && val !== '{}' && val !== '[]' && val !== ''){
+                  try{
+                    const cur = localStorage.getItem(k);
+                    const isEmpty = !cur || cur === 'null' || cur === '0' || cur === '{}' || cur === '[]' || cur === '';
+                    const isDefaultSim = (k === 'sudataxi_sim_data' && cur && cur.indexOf('"target":4000000') !== -1 && cur.indexOf('"current":0') !== -1 && cur.indexOf('"restDates":[]') !== -1);
+                    if(isEmpty || isDefaultSim){
+                      localStorage.setItem(k, typeof val === 'string' ? val : JSON.stringify(val));
+                      try{ sessionStorage.setItem(k, typeof val === 'string' ? val : JSON.stringify(val)); }catch(e){}
+                      restoredAny = true;
+                    }
+                  }catch(e){}
+                }
+                pending--;
+                if(pending === 0){
+                  try{
+                    if(!localStorage.getItem('sudataxi_daily_rev') || localStorage.getItem('sudataxi_daily_rev')==='0'){
+                      const safe = JSON.parse(localStorage.getItem('sudataxi_safe_backup')||'null');
+                      if(safe && safe.daily_rev && safe.daily_rev>0){
+                        localStorage.setItem('sudataxi_daily_rev', safe.daily_rev.toString());
+                        const el = document.getElementById('input-rev');
+                        if(el) el.value = safe.daily_rev.toString();
+                        restoredAny = true;
+                      }
+                    }
+                  }catch(e){}
+                  if(callback) callback(restoredAny);
+                }
+              };
+              gReq.onerror = function(){
+                pending--;
+                if(pending === 0 && callback) callback(restoredAny);
+              };
+            }catch(err){
+              pending--;
+              if(pending === 0 && callback) callback(restoredAny);
+            }
+          });
+        }catch(e){ if(callback) callback(false); }
+      };
+      req.onerror = function(){ if(callback) callback(false); };
+    }catch(e){ if(callback) callback(false); }
   }
 
   function getGoogleSheetsUrl() {
@@ -2409,7 +2298,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.8.6'
+        version: 'v8.8.9'
       };
       await fetch(url, {
         method: 'POST',
@@ -2442,7 +2331,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.8.6'
+        version: 'v8.8.9'
       };
       
       // auto_backup은 항상 최신으로 갱신 (가벼운 백업) - 다중 저장소
@@ -5260,10 +5149,10 @@ function initDailyRevenue() {
     } catch(e) { console.error('initDailyRevenue error', e); }
   }
 
-  // 대시보드 전체 숫자 자동 복구 (빌드 후에도 유지) - v8.8.6 강화
+  // 대시보드 전체 숫자 자동 복구 (빌드 후에도 유지) - v8.8.9 강화
   function autoRestoreAllDashboardData() {
     try {
-      // v8.8.6: localStorage가 비었으면 쿠키, 세션, IndexedDB에서도 복구 시도
+      // v8.8.9: localStorage가 비었으면 쿠키, 세션, IndexedDB에서도 복구 시도
       let safeRaw = getFromAnyStorage('sudataxi_safe_backup') || localStorage.getItem('sudataxi_safe_backup');
       let autoRaw = getFromAnyStorage('sudataxi_auto_backup') || localStorage.getItem('sudataxi_auto_backup');
       // 쿠키에서 직접 daily_rev, sim_data도 시도
@@ -5275,7 +5164,7 @@ function initDailyRevenue() {
       try{ auto = autoRaw ? JSON.parse(autoRaw) : null; }catch(e){}
       const backup = safe || auto;
       
-      // v8.8.6: EMBEDDED_DEFAULTS에서도 복구 (빌드 파일 자체에 박힌 기본값)
+      // v8.8.9: EMBEDDED_DEFAULTS에서도 복구 (빌드 파일 자체에 박힌 기본값)
       try{
         if(typeof EMBEDDED_DEFAULTS!=='undefined' && EMBEDDED_DEFAULTS){
           const curRev = localStorage.getItem('sudataxi_daily_rev');
@@ -5395,6 +5284,10 @@ function initMic() {
     const btnMicEl = document.getElementById('btn-mic');
     const inputRevEl = document.getElementById('input-rev');
     if (!btnMicEl || !inputRevEl) return;
+    // v8.8.9: 버전 체크로 재바인딩 허용
+    if (btnMicEl._micBound && btnMicEl._micBoundVersion === 'v8.8.9') return;
+    btnMicEl._micBound = true;
+    btnMicEl._micBoundVersion = 'v8.8.9';
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     
@@ -5402,6 +5295,7 @@ function initMic() {
     let audioChunks = [];
     let audioStream = null;
     let isRecording = false;
+    let isSwitchingMode = false;
     let recordingTimer = null;
     let recordingSeconds = 0;
     let recognition = null;
@@ -5410,7 +5304,7 @@ function initMic() {
 
     function parseSmallKorean(str){ 
       if(!str) return 0; 
-      const numMap={'일':1,'이':2,'삼':3,'사':4,'오':5,'육':6,'칠':7,'팔':8,'구':9,'하나':1,'둘':2,'셋':3,'넷':4,'영':0,'공':0}; 
+      const numMap={'일':1,'이':2,'삼':3,'사':4,'오':5,'육':6,'륙':6,'칠':7,'팔':8,'구':9,'하나':1,'한':1,'둘':2,'두':2,'셋':3,'세':3,'넷':4,'네':4,'영':0,'공':0}; 
       let total=0; let num=0; 
       str=str.replace(/\s+/g,''); 
       for(let i=0;i<str.length;i++){ 
@@ -5419,26 +5313,28 @@ function initMic() {
         else if(ch==='십'){ if(num===0) num=1; total+=num*10; num=0;} 
         else if(ch==='백'){ if(num===0) num=1; total+=num*100; num=0;} 
         else if(ch==='천'){ if(num===0) num=1; total+=num*1000; num=0;} 
-        else if(/[0-9]/.test(ch)){ let numStr=''; while(i<str.length && /[0-9]/.test(str[i])){ numStr+=str[i]; i++; } i--; num=parseInt(numStr);} 
+        else if(/[0-9]/.test(ch)){ let numStr=''; while(i<str.length && /[0-9]/.test(str[i])){ numStr+=str[i]; i++; } i--; num=parseInt(numStr, 10);} 
       } 
       total+=num; 
       return total; 
     }
     function parseKoreanMoney(text){ 
       if(!text) return 0; 
-      let t=text.replace(/원|\s|,|만원/g,'만').replace(/천원/g,'천').trim(); 
-      if(/^[0-9]+$/.test(t)) return parseInt(t); 
+      let t = String(text).replace(/[,\s]/g, '').replace(/만원/g, '만').replace(/천원/g, '천').replace(/백원/g, '백').replace(/원$/g, '').replace(/원/g, '').trim(); 
+      if(!t) return 0;
+      if(/^[0-9]+$/.test(t)) {
+        const rawNum = parseInt(t, 10);
+        return (rawNum > 0 && rawNum < 100) ? rawNum * 10000 : rawNum;
+      }
       let total=0; 
       if(t.includes('만')){
         const parts=t.split('만'); 
         let manPart=parts[0]; 
-        let restPart=parts.slice(1).join('만'); 
+        let restPart=parts.slice(1).join(''); 
         let manVal=0; 
         if(!manPart) manVal=1; 
-        else if(/[0-9]+/.test(manPart)){ 
-          const m=manPart.match(/[0-9]+/); manVal=parseInt(m[0]); 
-          const koreanRem=manPart.replace(/[0-9]+/g,''); 
-          if(koreanRem) manVal=manVal+parseSmallKorean(koreanRem)||manVal; 
+        else if(/^[0-9]+$/.test(manPart)){ 
+          manVal=parseInt(manPart, 10); 
         } else { 
           manVal=parseSmallKorean(manPart); 
           if(manVal===0) manVal=1; 
@@ -5447,12 +5343,9 @@ function initMic() {
         t=restPart; 
       } 
       if(!t) return total; 
-      if(/[천백십]/.test(t) || /[0-9]/.test(t)){
-        if(/[천백십]/.test(t) || isNaN(parseInt(t))){
-          total+=parseSmallKorean(t);
-        } else {
-          total+=parseInt(t.replace(/[^0-9]/g,''))||0;
-        }
+      if(/^[0-9]+$/.test(t)){
+        const remNum = parseInt(t, 10) || 0;
+        total += (remNum > 0 && remNum < 10 && total >= 10000) ? remNum * 1000 : remNum;
       } else {
         total+=parseSmallKorean(t);
       }
@@ -5512,120 +5405,48 @@ function initMic() {
           <button onclick="quickAmountSelect(1000)" style="background:#1F2937; color:#9CA3AF; border:1px solid #374151; border-radius:8px; padding:6px; font-size:11px;">+1천</button>
           <button onclick="quickAmountSelect(5000)" style="background:#1F2937; color:#9CA3AF; border:1px solid #374151; border-radius:8px; padding:6px; font-size:11px;">+5천</button>
           <button onclick="quickAmountSelect(-10000)" style="background:#7F1D1D; color:#FCA5A5; border:1px solid #991B1B; border-radius:8px; padding:6px; font-size:11px;">-1만</button>
-          <button onclick="quickAmountSelect(0); document.getElementById('input-rev').value='0'; calculateDailyRevenue(); localStorage.setItem('sudataxi_daily_rev','0'); showToast('0원으로 초기화');" style="background:#1F2937; color:#F87171; border:1px solid #374151; border-radius:8px; padding:6px; font-size:11px;">초기화</button>
+          <button onclick="quickAmountSelect(0); document.getElementById('input-rev').value='0'; calculateDailyRevenue(); localStorage.setItem('sudataxi_daily_rev','0'); try{saveToAllStorages('sudataxi_daily_rev','0');}catch(e){} showToast('0원으로 초기화');" style="background:#1F2937; color:#6B7280; border:1px solid #374151; border-radius:8px; padding:6px; font-size:11px;">초기화</button>
         </div>
-        <div style="display:flex; gap:6px;">
-          <button onclick="document.getElementById('quick-amount-overlay').remove()" style="flex:1; background:#111827; color:#9CA3AF; border:1px solid #374151; border-radius:8px; padding:8px; font-size:12px;">닫기</button>
-          <button onclick="setupWhisperKey()" style="flex:1; background:#7C3AED; color:#FFFFFF; border:1px solid #6D28D9; border-radius:8px; padding:8px; font-size:12px; font-weight:800;">🤖 Whisper 키</button>
-        </div>
-        <div style="color:#6B7280; font-size:10px; text-align:center;">💡 팁: 음성인식보다 버튼이 더 빨라요. 5만+3만=8만처럼 누적됩니다.</div>
+        <button onclick="document.getElementById('quick-amount-overlay').remove()" style="background:transparent; color:#9CA3AF; border:none; font-size:11px; padding:4px;">닫기 ✕</button>
       `;
       document.body.appendChild(overlay);
-      setTimeout(()=>{ const el=document.getElementById('quick-amount-overlay'); if(el) el.remove(); }, 10000);
+      setTimeout(()=>{ const ov=document.getElementById('quick-amount-overlay'); if(ov) ov.remove(); }, 8000);
     }
 
     window.quickAmountSelect = function(amount){
       const inputEl = document.getElementById('input-rev');
       if(!inputEl) return;
-      if(amount===0){
-        inputEl.value='0';
-      } else if(amount<0){
-        const cur = parseInt(inputEl.value||'0')||0;
-        inputEl.value = Math.max(0, cur + amount).toString();
-      } else {
-        const cur = parseInt(inputEl.value||'0')||0;
-        // 1만 단위 버튼은 누적, 1천/5천도 누적
-        inputEl.value = (cur + amount).toString();
-      }
+      let current = parseInt(inputEl.value||'0')||0;
+      let next;
+      if(amount===0){ next=0; }
+      else if(amount<0){ next=Math.max(0, current+amount); }
+      else if(amount>=1000 && amount<10000){ next=current+amount; }
+      else { next=amount; }
+      inputEl.value = next.toString();
       try{ calculateDailyRevenue(); }catch(e){}
-      try{ localStorage.setItem('sudataxi_daily_rev', inputEl.value); }catch(e){}
-      try{ saveToAllStorages('sudataxi_daily_rev', inputEl.value); }catch(e){}
+      try{ localStorage.setItem('sudataxi_daily_rev', next.toString()); saveToAllStorages('sudataxi_daily_rev', next.toString()); }catch(e){}
       try{ if(typeof executeAutoBackup==='function') executeAutoBackup(); }catch(e){}
-      if(typeof showToast==='function'){
-        const total = parseInt(inputEl.value||'0')||0;
-        showToast(`💰 총 ${total.toLocaleString()}원`);
-      }
-    };
-
-    window.setupWhisperKey = function(){
-      const cur = localStorage.getItem('sudataxi_openai_key')||'';
-      const key = prompt('OpenAI API 키를 입력하면 Whisper 고정확도 음성인식을 사용합니다.\n없으면 취소.\n\n현재: ' + (cur ? cur.substring(0,12)+'...' : '없음'), cur);
-      if(key!==null){
-        if(key.trim()){
-          localStorage.setItem('sudataxi_openai_key', key.trim());
-          try{ saveToAllStorages('sudataxi_openai_key', key.trim()); }catch(e){}
-          if(typeof showToast==='function') showToast('🤖 Whisper 키 저장됨');
-        } else {
-          localStorage.removeItem('sudataxi_openai_key');
-          try{ localStorage.removeItem('sudataxi_openai_key'); }catch(e){}
-          if(typeof showToast==='function') showToast('Whisper 해제됨');
-        }
-      }
-      const overlay = document.getElementById('quick-amount-overlay');
-      if(overlay) overlay.remove();
+      if(typeof showToast==='function') showToast(`💰 ${next.toLocaleString()}원 입력됨`);
+      const ov=document.getElementById('quick-amount-overlay'); if(ov) ov.remove();
     };
 
     async function stopMediaRecordingAndShowQuick(){
-      if(!isRecording) return;
+      try{
+        if(mediaRecorder && mediaRecorder.state!=='inactive'){
+          mediaRecorder.stop();
+        }
+      }catch(e){}
       isRecording = false;
       if(recordingTimer){ clearInterval(recordingTimer); recordingTimer=null; }
-      if(speechTimeout){ clearTimeout(speechTimeout); speechTimeout=null; }
-      
-      if(mediaRecorder && mediaRecorder.state!=='inactive'){
-        try{ mediaRecorder.stop(); }catch(e){}
-        await new Promise(r=>setTimeout(r,300));
-      }
-      if(audioStream){ try{ audioStream.getTracks().forEach(t=>t.stop()); }catch(e){} audioStream=null; }
-      
       btnMicEl.classList.remove('recording');
+      btnMicEl.style.background = '';
       btnMicEl.innerHTML = '<span style="font-size:20px;">🎤</span>';
-      
-      // Whisper 시도 (키가 있을 때만)
-      if(audioChunks.length>0){
-        const audioBlob = new Blob(audioChunks, {type: mediaRecorder ? mediaRecorder.mimeType : 'audio/webm'});
-        if(audioBlob.size>1500){
-          const apiKey = localStorage.getItem('sudataxi_openai_key') || getFromAnyStorage('sudataxi_openai_key');
-          if(apiKey){
-            try{
-              if(typeof showToast==='function') showToast('🤖 Whisper 변환중...');
-              const formData = new FormData();
-              formData.append('file', audioBlob, 'rec.webm');
-              formData.append('model','whisper-1');
-              formData.append('language','ko');
-              const res = await fetch('https://api.openai.com/v1/audio/transcriptions',{
-                method:'POST',
-                headers:{'Authorization':'Bearer '+apiKey},
-                body:formData
-              });
-              if(res.ok){
-                const data = await res.json();
-                const text = data.text||'';
-                const parsed = parseKoreanMoney(text);
-                if(parsed>0){
-                  const inputEl = document.getElementById('input-rev');
-                  if(inputEl){
-                    inputEl.value = parsed.toString();
-                    try{ calculateDailyRevenue(); }catch(e){}
-                    try{ localStorage.setItem('sudataxi_daily_rev', parsed.toString()); saveToAllStorages('sudataxi_daily_rev', parsed.toString()); }catch(e){}
-                    if(typeof showToast==='function') showToast(`🤖 Whisper: ${parsed.toLocaleString()}원 (${text})`);
-                    audioChunks=[];
-                    return;
-                  }
-                }
-              }
-            }catch(e){ console.warn('whisper fail', e); }
-          }
-        }
-      }
-      
-      audioChunks=[];
-      // 최종 fallback: 빠른 금액 버튼
+      if(audioStream){ try{ audioStream.getTracks().forEach(t=>t.stop()); }catch(e){} audioStream=null; }
       showQuickAmountButtons(false);
     }
 
     function startSpeechRecognitionOnly(){
       if(!SpeechRecognition){
-        // 음성인식 미지원이면 바로 MediaRecorder로
         startMediaRecorderOnly();
         return;
       }
@@ -5645,7 +5466,6 @@ function initMic() {
           btnMicEl.classList.add('recording');
           btnMicEl.style.background = '#22C55E';
           if(typeof showToast==='function') showToast('🎤 듣는중... "오만원" 말해보세요 (4초)');
-          // 4.5초 타임아웃 - 인식 안되면 MediaRecorder로 전환
           speechTimeout = setTimeout(()=>{
             if(!gotResult){
               try{ recognition.abort(); }catch(e){}
@@ -5681,7 +5501,7 @@ function initMic() {
               const num = parseInt(fallback);
               inputEl.value = num.toString();
               try{ calculateDailyRevenue(); }catch(e){}
-              try{ localStorage.setItem('sudataxi_daily_rev', num.toString()); }catch(e){}
+              try{ localStorage.setItem('sudataxi_daily_rev', num.toString()); saveToAllStorages('sudataxi_daily_rev', num.toString()); }catch(e){}
               if(typeof showToast==='function') showToast(`🎤 ${num.toLocaleString()}원 입력됨`);
             } else {
               if(typeof showToast==='function') showToast(`"${transcript}" 금액 변환 실패 - 버튼으로 선택해주세요`);
@@ -5694,23 +5514,22 @@ function initMic() {
         recognition.onerror=(e)=>{
           console.log('speech error', e.error);
           if(speechTimeout){ clearTimeout(speechTimeout); speechTimeout=null; }
-          if(e.error==='aborted' || e.error==='no-speech' || e.error==='audio-capture'){
-            // 실패 시 MediaRecorder로 전환
-            if(typeof showToast==='function') showToast('🎤 인식 실패, 녹음 모드로 전환중...');
-            setTimeout(()=>{ startMediaRecorderOnly(); }, 300);
-          } else if(e.error==='not-allowed' || e.error==='permission-denied'){
-            if(typeof showToast==='function') showToast('🎤 마이크 권한 필요 - 설정 > Safari > 마이크 허용');
+          if(e.error==='not-allowed' || e.error==='permission-denied' || e.error==='service-not-allowed'){
+            isSwitchingMode = true;
             cleanupAll();
+            isSwitchingMode = false;
+            if(typeof showToast==='function') showToast('🎤 브라우저 음성인식 제한됨 - 빠른 금액 선택창을 엽니다');
+            showQuickAmountButtons(true);
           } else {
-            // 기타 오류도 MediaRecorder로 전환
-            startMediaRecorderOnly();
+            isSwitchingMode = true;
+            if(typeof showToast==='function') showToast('🎤 음성인식 미감지 - 녹음/빠른입력 모드로 전환합니다');
+            setTimeout(()=>{ isSwitchingMode = false; startMediaRecorderOnly(); }, 250);
           }
         };
         
         recognition.onend=()=>{
           if(speechTimeout){ clearTimeout(speechTimeout); speechTimeout=null; }
-          if(!gotResult){
-            // 결과 없이 종료되면 MediaRecorder로 전환하지 않고 그냥 종료 (사용자가 취소)
+          if(!gotResult && !isSwitchingMode && !isRecording){
             cleanupAll();
           }
         };
@@ -5729,18 +5548,16 @@ function initMic() {
         const stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true, noiseSuppression:true, sampleRate:16000}});
         audioStream = stream;
         audioChunks = [];
-        
-        let mimeType = 'audio/webm;codecs=opus';
-        if(!MediaRecorder.isTypeSupported(mimeType)){
-          mimeType = 'audio/mp4';
-          if(!MediaRecorder.isTypeSupported(mimeType)){
-            mimeType = 'audio/webm';
-            if(!MediaRecorder.isTypeSupported(mimeType)) mimeType='';
-          }
+     
+        let mimeType = '';
+        const candidates = ['audio/mp4','audio/webm','audio/webm;codecs=opus','audio/ogg;codecs=opus'];
+        for(const c of candidates){
+          try{ if(MediaRecorder.isTypeSupported(c)){ mimeType=c; break; } }catch(e){}
         }
         
         mediaRecorder = mimeType ? new MediaRecorder(stream, {mimeType: mimeType}) : new MediaRecorder(stream);
         mediaRecorder.ondataavailable = (ev)=>{ if(ev.data && ev.data.size>0) audioChunks.push(ev.data); };
+        mediaRecorder.onstop = ()=>{ };
         mediaRecorder.start(100);
         isRecording = true;
         recordingSeconds = 0;
@@ -5758,26 +5575,26 @@ function initMic() {
       }
     }
 
-    btnMicEl.addEventListener('click', async (e)=>{
-      e.preventDefault();
-      e.stopPropagation();
+    const bindMicEvents = ()=>{
+      btnMicEl.addEventListener('touchend', async (e)=>{
+        e.preventDefault(); e.stopPropagation();
+        if(isRecording){ await stopMediaRecordingAndShowQuick(); return; }
+        if(recognition && btnMicEl.classList.contains('recording')){ cleanupAll(); return; }
+        if(Date.now() - lastStartTime < 800) return;
+        startSpeechRecognitionOnly();
+      }, {passive:false});
       
-      if(isRecording){
-        await stopMediaRecordingAndShowQuick();
-        return;
-      }
-      
-      if(recognition && btnMicEl.classList.contains('recording')){
-        // 음성인식 중이면 중지
-        cleanupAll();
-        return;
-      }
-      
-      if(Date.now() - lastStartTime < 800) return;
-      
-      // 1차: 음성인식 시도 (마이크 충돌 없이 단독으로)
-      startSpeechRecognitionOnly();
-    });
+      btnMicEl.addEventListener('click', async (e)=>{
+        if(Date.now() - lastStartTime < 800 && btnMicEl.classList.contains('recording')) return;
+        e.preventDefault(); e.stopPropagation();
+        if(isRecording){ await stopMediaRecordingAndShowQuick(); return; }
+        if(recognition && btnMicEl.classList.contains('recording')){ cleanupAll(); return; }
+        if(Date.now() - lastStartTime < 800) return;
+        startSpeechRecognitionOnly();
+      });
+    };
+    
+    bindMicEvents();
   }
 
 
@@ -6263,7 +6080,7 @@ function initMic() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.8.6</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.8.9</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
@@ -6516,13 +6333,84 @@ document.addEventListener('DOMContentLoaded', function() {
       if(typeof searchRestrooms==='function') searchRestrooms();
     });
   }
+// v8.8.9: 하단 5개 버튼 통합 바인딩 - 원본 디자인 유지, 기능만 강화
+  function initBottomBarV889(){
+    try{ if(typeof bindClock==='function') bindClock(); }catch(e){}
+    try{ if(typeof bindSearch==='function') bindSearch(); }catch(e){}
+    try{ if(typeof bindRestroomSearch==='function') bindRestroomSearch(); }catch(e){}
+    try{ if(typeof bindBottom==='function') bindBottom(); }catch(e){}
+    try{ if(typeof initMic==='function') initMic(); }catch(e){}
+    const clockEl = document.getElementById('btn-bottom-clock');
+    const searchEl = document.getElementById('btn-bottom-search');
+    const boardEl = document.getElementById('btn-bottom-board');
+    const alightEl = document.getElementById('btn-bottom-alight');
+    const restEl = document.getElementById('btn-bottom-restroom-search');
+    
+    if(clockEl && !clockEl._v889){
+      clockEl._v889 = true;
+      const h = function(e){ e.preventDefault(); e.stopPropagation(); try{ if(typeof setTimerPreset==='function') setTimerPreset(5); if(typeof startTimerInternal==='function') startTimerInternal(); }catch(err){} };
+      clockEl.addEventListener('touchend', h, {passive:false});
+      clockEl.addEventListener('click', h);
+    }
+    if(searchEl && !searchEl._v889){
+      searchEl._v889 = true;
+      const h = function(e){ e.preventDefault(); e.stopPropagation(); try{ window.scrollTo({top:0, behavior:'smooth'}); }catch(err){} if(typeof executeSearch==='function') executeSearch(); };
+      searchEl.addEventListener('touchend', h, {passive:false});
+      searchEl.addEventListener('click', h);
+    }
+    if(boardEl && !boardEl._v889_extra){
+      boardEl._v889_extra = true;
+      boardEl.addEventListener('click', function(e){
+        if(boardEl._b62) return;
+        e.preventDefault(); e.stopPropagation();
+        if(typeof handleBoarding==='function') handleBoarding(e, false);
+      });
+    }
+    if(alightEl && !alightEl._v889_extra){
+      alightEl._v889_extra = true;
+      const h = function(e){ e.preventDefault(); e.stopPropagation(); if(window.handleAlighting) window.handleAlighting(e); };
+      alightEl.addEventListener('touchend', h, {passive:false});
+      alightEl.addEventListener('click', h);
+    }
+  }
+
+  // v8.8.9: 대시보드 영속화 + 하단바 통합 초기화
+  try{ requestPersistentStorage(); }catch(e){}
+  try{
+    restoreFromIndexedDB(function(restored){
+      if(restored){
+        console.log('v8.8.9: IndexedDB에서 복원됨');
+        try{
+          const rev = localStorage.getItem('sudataxi_daily_rev');
+          const el = document.getElementById('input-rev');
+          if(rev && el) el.value = rev;
+          if(typeof calculateDailyRevenue==='function') calculateDailyRevenue();
+          if(typeof initSimulator==='function') initSimulator();
+        }catch(e){}
+      }
+    });
+  }catch(e){}
+
+  try{
+    const autoSaveAll = function(){
+      try{
+        const revEl = document.getElementById('input-rev');
+        if(revEl && revEl.value) saveToAllStorages('sudataxi_daily_rev', revEl.value);
+        if(typeof executeAutoBackup==='function') executeAutoBackup();
+      }catch(e){}
+    };
+    window.addEventListener('beforeunload', autoSaveAll);
+    document.addEventListener('visibilitychange', function(){ if(document.hidden) autoSaveAll(); });
+  }catch(e){}
+
+  initBottomBarV889();
   bindClock(); bindSearch(); bindRestroomSearch();
-  setTimeout(function(){ bindClock(); bindSearch(); bindRestroomSearch(); }, 1000);
-  setTimeout(function(){ bindClock(); bindSearch(); bindRestroomSearch(); }, 2500);
+  setTimeout(function(){ initBottomBarV889(); bindClock(); bindSearch(); bindRestroomSearch(); if(typeof initMic==='function') initMic(); }, 1000);
+  setTimeout(function(){ initBottomBarV889(); bindClock(); bindSearch(); bindRestroomSearch(); }, 2500);
   const tc = document.querySelector('.timer-cell');
   if(tc) tc.style.display='none';
 });
 </script>
 
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
 </html>
