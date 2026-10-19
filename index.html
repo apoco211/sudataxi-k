@@ -71,7 +71,7 @@
   const EMBEDDED_DEFAULTS = {
     daily_rev: 0,
     sim_data: {target:4000000, current:0, restDates:[]},
-    version: 'v8.9.9'
+    version: 'v8.9.10'
   };
 </script>
 <style>
@@ -300,7 +300,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v8.9.9</title>
+  <title>수다택시 K v8.9.10</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1807,6 +1807,11 @@ body {
           <span style="font-size: 14px;" id="kpi-feedback-icon">⚠️</span> 
           <span id="kpi-feedback-text">운행 데이터가 부족합니다.</span>
         </div>
+        <!-- v8.9.10: 시간당 평균매출 -->
+        <div class="hourly-rev-box" style="margin-top:10px; padding:10px 12px; background: rgba(255,200,0,0.08); border: 1px solid rgba(255,200,0,0.25); border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:11px; font-weight:800; color: var(--stat-label); letter-spacing:-0.3px;">💰 시간당 평균매출</span>
+          <span id="kpi-hourly-rev" style="font-size:13px; font-weight:900; color:#FFC800;">-</span>
+        </div>
       </div>
 
       <!-- 오늘 실매출 입력 UI -->
@@ -1983,7 +1988,7 @@ body {
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v8.9.9";
+  const BUILD_VERSION = "v8.9.10";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2595,7 +2600,7 @@ body {
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
         date_str: new Date().toLocaleDateString('ko-KR'),
-        version: 'v8.9.9'
+        version: 'v8.9.10'
       };
       // v8.9.5: 매출 상세도 함께 전송 (손님탑승처럼 시트에 바로 기록되게)
       try{
@@ -2643,7 +2648,7 @@ body {
         monthly_target: sim.target||0,
         monthly_current: sim.current||0,
         rest_dates: (sim.restDates||[]).join(','),
-        version: 'v8.9.9'
+        version: 'v8.9.10'
       };
       fetch(url, {
         method: 'POST',
@@ -2673,7 +2678,7 @@ body {
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.9.9'
+        version: 'v8.9.10'
       };
       
       // auto_backup은 항상 최신으로 갱신 (가벼운 백업) - 다중 저장소
@@ -5157,6 +5162,41 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     document.getElementById('kpi-today-rate').style.color = getBarColor(todayBoardPct);
     document.getElementById('kpi-today-fill').style.width = `${Math.min(todayBoardPct, 100)}%`;
     document.getElementById('kpi-today-fill').style.background = getBarColor(todayBoardPct);
+    
+    // v8.9.10: 시간당 평균매출 = 오늘실매출 / 총운행시간
+    try{
+      let dailyRevRaw = null;
+      try{ dailyRevRaw = getFromAnyStorage('sudataxi_daily_rev'); }catch(e){}
+      if(!dailyRevRaw) dailyRevRaw = localStorage.getItem('sudataxi_daily_rev');
+      const dailyRev = parseInt(String(dailyRevRaw||'0').replace(/[^0-9]/g,'')||'0');
+      const totalSec = todayTotal || 0; // 총운행시간 (휴식 제외, 순수 운행)
+      const hourlyEl = document.getElementById('kpi-hourly-rev');
+      if(hourlyEl){
+        if(dailyRev > 0 && totalSec >= 60){
+          const hours = totalSec / 3600;
+          const hourly = Math.floor(dailyRev / hours);
+          // 1만원 이상은 만원 단위로도 표시
+          if(hourly >= 10000){
+            hourlyEl.innerText = `${hourly.toLocaleString()}원 (시간당)`;
+          }else if(hourly > 0){
+            hourlyEl.innerText = `${hourly.toLocaleString()}원`;
+          }else{
+            hourlyEl.innerText = `${hourly.toLocaleString()}원`;
+          }
+          // 색상: 2.5만원 이상이면 초록, 2만원 이상 노랑, 이하 빨강
+          if(hourly >= 25000) hourlyEl.style.color = '#22C55E';
+          else if(hourly >= 20000) hourlyEl.style.color = '#FFC800';
+          else hourlyEl.style.color = '#EF4444';
+        }else if(dailyRev > 0 && totalSec < 60){
+          hourlyEl.innerText = `${dailyRev.toLocaleString()}원 (운행시작전)`;
+          hourlyEl.style.color = '#A3A3A3';
+        }else{
+          hourlyEl.innerText = `-`;
+          hourlyEl.style.color = '#A3A3A3';
+        }
+      }
+    }catch(e){ try{ document.getElementById('kpi-hourly-rev').innerText='-'; }catch(err){} }
+
     const feedbackIcon = document.getElementById('kpi-feedback-icon');
     const feedbackText = document.getElementById('kpi-feedback-text');
     if (todayTotal < 1800) {
@@ -6651,7 +6691,7 @@ function initMic() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.9</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.10</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
