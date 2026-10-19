@@ -21,7 +21,18 @@
 :where(code, pre, kbd, samp) {
   font-family: "Optimistic Mono", ui-monospace, monospace;
 }
-</style><style>
+</style>
+
+<script id="embedded-defaults">
+  // v8.8.6: 빌드 시에도 살아남는 기본값 (사용자가 직접 수정 가능)
+  // 빌드 전에 여기에 현재 대시보드 값을 넣어두면, localStorage가 날아가도 복구됨
+  const EMBEDDED_DEFAULTS = {
+    daily_rev: 0,
+    sim_data: {target:4000000, current:0, restDates:[]},
+    version: 'v8.8.6'
+  };
+</script>
+<style>
 @font-face {
   font-family: "Optimistic";
   font-style: normal;
@@ -247,7 +258,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v8.8.5</title>
+  <title>수다택시 K v8.8.6</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1887,7 +1898,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v8.8.5";
+  const BUILD_VERSION = "v8.8.6";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2307,7 +2318,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
     } catch(e) {}
   }
 
-    // v8.8.5: 다중 저장소 영구 보관 (localStorage가 빌드 시 날아가도 쿠키에서 복구)
+    // v8.8.6: 다중 저장소 영구 보관 (localStorage가 빌드 시 날아가도 쿠키에서 복구)
   function setPersistentCookie(name, value, days=365){
     try{
       const expires = new Date();
@@ -2398,7 +2409,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.8.5'
+        version: 'v8.8.6'
       };
       await fetch(url, {
         method: 'POST',
@@ -2431,7 +2442,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.8.5'
+        version: 'v8.8.6'
       };
       
       // auto_backup은 항상 최신으로 갱신 (가벼운 백업) - 다중 저장소
@@ -5249,10 +5260,10 @@ function initDailyRevenue() {
     } catch(e) { console.error('initDailyRevenue error', e); }
   }
 
-  // 대시보드 전체 숫자 자동 복구 (빌드 후에도 유지) - v8.8.5 강화
+  // 대시보드 전체 숫자 자동 복구 (빌드 후에도 유지) - v8.8.6 강화
   function autoRestoreAllDashboardData() {
     try {
-      // v8.8.5: localStorage가 비었으면 쿠키, 세션, IndexedDB에서도 복구 시도
+      // v8.8.6: localStorage가 비었으면 쿠키, 세션, IndexedDB에서도 복구 시도
       let safeRaw = getFromAnyStorage('sudataxi_safe_backup') || localStorage.getItem('sudataxi_safe_backup');
       let autoRaw = getFromAnyStorage('sudataxi_auto_backup') || localStorage.getItem('sudataxi_auto_backup');
       // 쿠키에서 직접 daily_rev, sim_data도 시도
@@ -5264,6 +5275,24 @@ function initDailyRevenue() {
       try{ auto = autoRaw ? JSON.parse(autoRaw) : null; }catch(e){}
       const backup = safe || auto;
       
+      // v8.8.6: EMBEDDED_DEFAULTS에서도 복구 (빌드 파일 자체에 박힌 기본값)
+      try{
+        if(typeof EMBEDDED_DEFAULTS!=='undefined' && EMBEDDED_DEFAULTS){
+          const curRev = localStorage.getItem('sudataxi_daily_rev');
+          const curSim = localStorage.getItem('sudataxi_sim_data');
+          if((!curRev || curRev==='0') && EMBEDDED_DEFAULTS.daily_rev && EMBEDDED_DEFAULTS.daily_rev>0){
+            localStorage.setItem('sudataxi_daily_rev', EMBEDDED_DEFAULTS.daily_rev.toString());
+            const el = document.getElementById('input-rev');
+            if(el) el.value = EMBEDDED_DEFAULTS.daily_rev.toString();
+            console.log('임베디드 기본값에서 일매출 복구', EMBEDDED_DEFAULTS.daily_rev);
+          }
+          if((!curSim || curSim==='null' || curSim==='{}') && EMBEDDED_DEFAULTS.sim_data && EMBEDDED_DEFAULTS.sim_data.target){
+            localStorage.setItem('sudataxi_sim_data', JSON.stringify(EMBEDDED_DEFAULTS.sim_data));
+            console.log('임베디드 기본값에서 sim_data 복구');
+          }
+        }
+      }catch(e){}
+
       // 쿠키에만 데이터가 있고 백업이 없을 때도 복구
       if(!backup && (cookieRev || cookieSim)){
         try{
@@ -5361,6 +5390,7 @@ function initDailyRevenue() {
 
 
 
+
 function initMic() {
     const btnMicEl = document.getElementById('btn-mic');
     const inputRevEl = document.getElementById('input-rev');
@@ -5376,7 +5406,7 @@ function initMic() {
     let recordingSeconds = 0;
     let recognition = null;
     let lastStartTime = 0;
-    let failCount = 0;
+    let speechTimeout = null;
 
     function parseSmallKorean(str){ 
       if(!str) return 0; 
@@ -5431,16 +5461,18 @@ function initMic() {
 
     function cleanupAll(){
       isRecording = false;
-      if (recordingTimer) { clearInterval(recordingTimer); recordingTimer=null; }
-      if (mediaRecorder && mediaRecorder.state!=='inactive') { try{ mediaRecorder.stop(); }catch(e){} }
-      if (audioStream) { try{ audioStream.getTracks().forEach(t=>t.stop()); }catch(e){} audioStream=null; }
-      if (recognition) { 
+      if(recordingTimer){ clearInterval(recordingTimer); recordingTimer=null; }
+      if(speechTimeout){ clearTimeout(speechTimeout); speechTimeout=null; }
+      if(mediaRecorder && mediaRecorder.state!=='inactive'){ try{ mediaRecorder.stop(); }catch(e){} }
+      if(audioStream){ try{ audioStream.getTracks().forEach(t=>t.stop()); }catch(e){} audioStream=null; }
+      if(recognition){
         try{ recognition.onstart=null; recognition.onresult=null; recognition.onend=null; recognition.onerror=null; }catch(e){}
-        try{ recognition.abort(); }catch(e){} 
-        recognition=null; 
+        try{ recognition.abort(); }catch(e){}
+        recognition=null;
       }
       btnMicEl.classList.remove('recording');
       btnMicEl.style.background = '';
+      btnMicEl.innerHTML = '<span style="font-size:20px;">🎤</span>';
       audioChunks = [];
       recordingSeconds = 0;
     }
@@ -5451,184 +5483,181 @@ function initMic() {
       const secs = recordingSeconds%60;
       const timeStr = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
       if(typeof showToast==='function'){
-        // 기존 토스트 제거하고 새로 표시 (깜빡임 방지 위해 1초마다 갱신)
-        const existing = document.getElementById('toast-banner');
-        if(existing && existing.style.display!=='none'){
-          existing.innerText = `🔴 녹음중 ${timeStr} - 다시 누르면 종료`;
-        } else {
-          showToast(`🔴 녹음중 ${timeStr} - "오만원" 말하고 종료`);
-        }
+        showToast(`🔴 녹음중 ${timeStr} - 다시 누르면 종료 (최대 5초)`);
       }
-      btnMicEl.innerHTML = `<span style="font-size:18px;">🔴</span>`;
-      // 4초 자동 종료
-      if(recordingSeconds>=4){
-        stopRecordingAndTranscribe();
+      if(recordingSeconds>=5){
+        stopMediaRecordingAndShowQuick();
       }
     }
 
-    async function transcribeWithWhisper(audioBlob){
-      const apiKey = localStorage.getItem('sudataxi_openai_key');
-      if(!apiKey) return null;
-      try{
-        const formData = new FormData();
-        formData.append('file', audioBlob, 'recording.webm');
-        formData.append('model', 'whisper-1');
-        formData.append('language', 'ko');
-        const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${apiKey}` },
-          body: formData
-        });
-        if(!res.ok){
-          console.warn('whisper fail', await res.text());
-          return null;
-        }
-        const data = await res.json();
-        return data.text || null;
-      }catch(e){
-        console.warn('whisper error', e);
-        return null;
-      }
-    }
-
-    function showQuickAmountButtons(){
-      // 녹음은 됐는데 인식 실패 시 빠른 금액 버튼 표시
+    function showQuickAmountButtons(isFromSpeechFail=false){
       const existing = document.getElementById('quick-amount-overlay');
       if(existing) existing.remove();
       
+      const title = isFromSpeechFail ? '🎤 인식 실패 - 금액을 선택하세요' : '🎙️ 녹음됨 - 금액을 선택하세요';
       const overlay = document.createElement('div');
       overlay.id = 'quick-amount-overlay';
-      overlay.style.cssText = 'position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#1F2937; border:2px solid #374151; border-radius:16px; padding:12px; z-index:9999; display:flex; flex-direction:column; gap:8px; box-shadow:0 8px 32px rgba(0,0,0,0.8); max-width:90%;';
+      overlay.style.cssText = 'position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#1F2937; border:2px solid #374151; border-radius:16px; padding:14px; z-index:9999; display:flex; flex-direction:column; gap:10px; box-shadow:0 8px 32px rgba(0,0,0,0.8); max-width:92%; min-width:280px;';
       overlay.innerHTML = `
-        <div style="color:#F3F4F6; font-size:12px; font-weight:800; text-align:center; margin-bottom:4px;">🎤 녹음됨 - 금액을 선택하세요</div>
-        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">
-          <button onclick="quickAmountSelect(10000)" style="background:#374151; color:#F3F4F6; border:1px solid #4B5563; border-radius:8px; padding:8px; font-size:12px; font-weight:800;">1만</button>
-          <button onclick="quickAmountSelect(20000)" style="background:#374151; color:#F3F4F6; border:1px solid #4B5563; border-radius:8px; padding:8px; font-size:12px; font-weight:800;">2만</button>
-          <button onclick="quickAmountSelect(30000)" style="background:#374151; color:#F3F4F6; border:1px solid #4B5563; border-radius:8px; padding:8px; font-size:12px; font-weight:800;">3만</button>
-          <button onclick="quickAmountSelect(50000)" style="background:#22C55E; color:#FFFFFF; border:1px solid #16A34A; border-radius:8px; padding:8px; font-size:12px; font-weight:900;">5만</button>
-          <button onclick="quickAmountSelect(70000)" style="background:#374151; color:#F3F4F6; border:1px solid #4B5563; border-radius:8px; padding:8px; font-size:12px; font-weight:800;">7만</button>
-          <button onclick="quickAmountSelect(100000)" style="background:#3B82F6; color:#FFFFFF; border:1px solid #2563EB; border-radius:8px; padding:8px; font-size:12px; font-weight:900;">10만</button>
+        <div style="color:#F3F4F6; font-size:13px; font-weight:900; text-align:center;">${title}</div>
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;">
+          <button onclick="quickAmountSelect(10000)" style="background:#374151; color:#F3F4F6; border:1px solid #4B5563; border-radius:10px; padding:10px; font-size:13px; font-weight:800;">1만</button>
+          <button onclick="quickAmountSelect(20000)" style="background:#374151; color:#F3F4F6; border:1px solid #4B5563; border-radius:10px; padding:10px; font-size:13px; font-weight:800;">2만</button>
+          <button onclick="quickAmountSelect(30000)" style="background:#374151; color:#F3F4F6; border:1px solid #4B5563; border-radius:10px; padding:10px; font-size:13px; font-weight:800;">3만</button>
+          <button onclick="quickAmountSelect(50000)" style="background:#22C55E; color:#FFFFFF; border:1px solid #16A34A; border-radius:10px; padding:12px; font-size:14px; font-weight:900;">5만</button>
+          <button onclick="quickAmountSelect(70000)" style="background:#374151; color:#F3F4F6; border:1px solid #4B5563; border-radius:10px; padding:10px; font-size:13px; font-weight:800;">7만</button>
+          <button onclick="quickAmountSelect(100000)" style="background:#3B82F6; color:#FFFFFF; border:1px solid #2563EB; border-radius:10px; padding:12px; font-size:14px; font-weight:900;">10만</button>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px;">
+          <button onclick="quickAmountSelect(1000)" style="background:#1F2937; color:#9CA3AF; border:1px solid #374151; border-radius:8px; padding:6px; font-size:11px;">+1천</button>
+          <button onclick="quickAmountSelect(5000)" style="background:#1F2937; color:#9CA3AF; border:1px solid #374151; border-radius:8px; padding:6px; font-size:11px;">+5천</button>
+          <button onclick="quickAmountSelect(-10000)" style="background:#7F1D1D; color:#FCA5A5; border:1px solid #991B1B; border-radius:8px; padding:6px; font-size:11px;">-1만</button>
+          <button onclick="quickAmountSelect(0); document.getElementById('input-rev').value='0'; calculateDailyRevenue(); localStorage.setItem('sudataxi_daily_rev','0'); showToast('0원으로 초기화');" style="background:#1F2937; color:#F87171; border:1px solid #374151; border-radius:8px; padding:6px; font-size:11px;">초기화</button>
         </div>
         <div style="display:flex; gap:6px;">
-          <button onclick="document.getElementById('quick-amount-overlay').remove()" style="flex:1; background:#1F2937; color:#9CA3AF; border:1px solid #374151; border-radius:8px; padding:6px; font-size:11px;">닫기</button>
-          <button onclick="setupWhisperKey()" style="flex:1; background:#7C3AED; color:#FFFFFF; border:1px solid #6D28D9; border-radius:8px; padding:6px; font-size:11px; font-weight:800;">🤖 Whisper 설정</button>
+          <button onclick="document.getElementById('quick-amount-overlay').remove()" style="flex:1; background:#111827; color:#9CA3AF; border:1px solid #374151; border-radius:8px; padding:8px; font-size:12px;">닫기</button>
+          <button onclick="setupWhisperKey()" style="flex:1; background:#7C3AED; color:#FFFFFF; border:1px solid #6D28D9; border-radius:8px; padding:8px; font-size:12px; font-weight:800;">🤖 Whisper 키</button>
         </div>
+        <div style="color:#6B7280; font-size:10px; text-align:center;">💡 팁: 음성인식보다 버튼이 더 빨라요. 5만+3만=8만처럼 누적됩니다.</div>
       `;
       document.body.appendChild(overlay);
-      setTimeout(()=>{ if(overlay.parentNode) overlay.remove(); }, 8000);
+      setTimeout(()=>{ const el=document.getElementById('quick-amount-overlay'); if(el) el.remove(); }, 10000);
     }
 
     window.quickAmountSelect = function(amount){
       const inputEl = document.getElementById('input-rev');
-      if(inputEl){
+      if(!inputEl) return;
+      if(amount===0){
+        inputEl.value='0';
+      } else if(amount<0){
         const cur = parseInt(inputEl.value||'0')||0;
+        inputEl.value = Math.max(0, cur + amount).toString();
+      } else {
+        const cur = parseInt(inputEl.value||'0')||0;
+        // 1만 단위 버튼은 누적, 1천/5천도 누적
         inputEl.value = (cur + amount).toString();
-        try{ calculateDailyRevenue(); }catch(e){}
-        try{ localStorage.setItem('sudataxi_daily_rev', inputEl.value); }catch(e){}
-        try{ if(typeof executeAutoBackup==='function') executeAutoBackup(); }catch(e){}
-        if(typeof showToast==='function') showToast(`💰 ${amount.toLocaleString()}원 추가됨 (총 ${parseInt(inputEl.value).toLocaleString()}원)`);
       }
-      const overlay = document.getElementById('quick-amount-overlay');
-      if(overlay) overlay.remove();
+      try{ calculateDailyRevenue(); }catch(e){}
+      try{ localStorage.setItem('sudataxi_daily_rev', inputEl.value); }catch(e){}
+      try{ saveToAllStorages('sudataxi_daily_rev', inputEl.value); }catch(e){}
+      try{ if(typeof executeAutoBackup==='function') executeAutoBackup(); }catch(e){}
+      if(typeof showToast==='function'){
+        const total = parseInt(inputEl.value||'0')||0;
+        showToast(`💰 총 ${total.toLocaleString()}원`);
+      }
     };
 
     window.setupWhisperKey = function(){
       const cur = localStorage.getItem('sudataxi_openai_key')||'';
-      const key = prompt('OpenAI API 키를 입력하면 Whisper 음성인식(고정확도)을 사용합니다.\n키가 없으면 취소하세요. (sk-...)\n\n현재: ' + (cur ? cur.substring(0,10)+'...' : '없음'), cur);
+      const key = prompt('OpenAI API 키를 입력하면 Whisper 고정확도 음성인식을 사용합니다.\n없으면 취소.\n\n현재: ' + (cur ? cur.substring(0,12)+'...' : '없음'), cur);
       if(key!==null){
         if(key.trim()){
           localStorage.setItem('sudataxi_openai_key', key.trim());
-          if(typeof showToast==='function') showToast('🤖 Whisper 키 저장됨 - 다음 녹음부터 고정확도 인식');
+          try{ saveToAllStorages('sudataxi_openai_key', key.trim()); }catch(e){}
+          if(typeof showToast==='function') showToast('🤖 Whisper 키 저장됨');
         } else {
           localStorage.removeItem('sudataxi_openai_key');
-          if(typeof showToast==='function') showToast('Whisper 연동 해제됨');
+          try{ localStorage.removeItem('sudataxi_openai_key'); }catch(e){}
+          if(typeof showToast==='function') showToast('Whisper 해제됨');
         }
       }
       const overlay = document.getElementById('quick-amount-overlay');
       if(overlay) overlay.remove();
     };
 
-    async function stopRecordingAndTranscribe(){
+    async function stopMediaRecordingAndShowQuick(){
       if(!isRecording) return;
       isRecording = false;
       if(recordingTimer){ clearInterval(recordingTimer); recordingTimer=null; }
+      if(speechTimeout){ clearTimeout(speechTimeout); speechTimeout=null; }
       
-      let audioBlob = null;
       if(mediaRecorder && mediaRecorder.state!=='inactive'){
-        // stop()은 onstop에서 blob 생성
-        try{
-          mediaRecorder.stop();
-        }catch(e){}
-        // onstop이 비동기로 호출되므로 약간 대기
-        await new Promise(r=>setTimeout(r,200));
+        try{ mediaRecorder.stop(); }catch(e){}
+        await new Promise(r=>setTimeout(r,300));
       }
-      
-      if(audioChunks.length>0){
-        audioBlob = new Blob(audioChunks, {type: mediaRecorder ? mediaRecorder.mimeType : 'audio/webm'});
-      }
-      
-      if(audioStream){
-        try{ audioStream.getTracks().forEach(t=>t.stop()); }catch(e){}
-        audioStream=null;
-      }
+      if(audioStream){ try{ audioStream.getTracks().forEach(t=>t.stop()); }catch(e){} audioStream=null; }
       
       btnMicEl.classList.remove('recording');
-      btnMicEl.innerHTML = `<span style="font-size:20px;">🎤</span>`;
-      btnMicEl.style.background = '';
+      btnMicEl.innerHTML = '<span style="font-size:20px;">🎤</span>';
       
-      // 이미 SpeechRecognition으로 인식 성공했으면 종료
-      if(lastStartTime && Date.now()-lastStartTime < 5000 && !failCount){
-        // 최근에 성공한 경우 - 아무것도 안 함 (이미 입력됨)
-        audioChunks = [];
-        return;
-      }
-      
-      // Whisper로 재시도 (키가 있으면)
-      if(audioBlob && audioBlob.size>1000){
-        if(typeof showToast==='function') showToast('🤖 Whisper로 변환중...');
-        const whisperText = await transcribeWithWhisper(audioBlob);
-        if(whisperText){
-          const parsed = parseKoreanMoney(whisperText);
-          if(parsed>0){
-            const inputEl = document.getElementById('input-rev');
-            if(inputEl){
-              inputEl.value = parsed.toString();
-              try{ calculateDailyRevenue(); }catch(e){}
-              try{ localStorage.setItem('sudataxi_daily_rev', parsed.toString()); }catch(e){}
-              try{ if(typeof executeAutoBackup==='function') executeAutoBackup(); }catch(e){}
-              if(typeof showToast==='function') showToast(`🤖 Whisper: ${parsed.toLocaleString()}원 (${whisperText})`);
-              audioChunks = [];
-              if(recognition){ try{ recognition.abort(); }catch(e){} recognition=null; }
-              return;
-            }
-          } else {
-            if(typeof showToast==='function') showToast(`🤖 인식: "${whisperText}" - 금액 변환 실패`);
+      // Whisper 시도 (키가 있을 때만)
+      if(audioChunks.length>0){
+        const audioBlob = new Blob(audioChunks, {type: mediaRecorder ? mediaRecorder.mimeType : 'audio/webm'});
+        if(audioBlob.size>1500){
+          const apiKey = localStorage.getItem('sudataxi_openai_key') || getFromAnyStorage('sudataxi_openai_key');
+          if(apiKey){
+            try{
+              if(typeof showToast==='function') showToast('🤖 Whisper 변환중...');
+              const formData = new FormData();
+              formData.append('file', audioBlob, 'rec.webm');
+              formData.append('model','whisper-1');
+              formData.append('language','ko');
+              const res = await fetch('https://api.openai.com/v1/audio/transcriptions',{
+                method:'POST',
+                headers:{'Authorization':'Bearer '+apiKey},
+                body:formData
+              });
+              if(res.ok){
+                const data = await res.json();
+                const text = data.text||'';
+                const parsed = parseKoreanMoney(text);
+                if(parsed>0){
+                  const inputEl = document.getElementById('input-rev');
+                  if(inputEl){
+                    inputEl.value = parsed.toString();
+                    try{ calculateDailyRevenue(); }catch(e){}
+                    try{ localStorage.setItem('sudataxi_daily_rev', parsed.toString()); saveToAllStorages('sudataxi_daily_rev', parsed.toString()); }catch(e){}
+                    if(typeof showToast==='function') showToast(`🤖 Whisper: ${parsed.toLocaleString()}원 (${text})`);
+                    audioChunks=[];
+                    return;
+                  }
+                }
+              }
+            }catch(e){ console.warn('whisper fail', e); }
           }
         }
       }
       
-      // Whisper도 실패했거나 키가 없으면 빠른 금액 버튼 표시
-      if(!audioBlob || audioBlob.size<1000){
-        if(typeof showToast==='function') showToast('🎤 녹음이 너무 짧습니다');
-      } else {
-        showQuickAmountButtons();
-      }
-      
-      audioChunks = [];
-      if(recognition){ try{ recognition.abort(); }catch(e){} recognition=null; }
+      audioChunks=[];
+      // 최종 fallback: 빠른 금액 버튼
+      showQuickAmountButtons(false);
     }
 
-    function startSpeechRecognitionParallel(){
-      if(!SpeechRecognition) return;
+    function startSpeechRecognitionOnly(){
+      if(!SpeechRecognition){
+        // 음성인식 미지원이면 바로 MediaRecorder로
+        startMediaRecorderOnly();
+        return;
+      }
+      
       try{
         if(recognition){ try{ recognition.abort(); }catch(e){} }
         recognition = new SpeechRecognition();
         recognition.lang='ko-KR';
-        recognition.interimResults=false;
         recognition.maxAlternatives=5;
         recognition.continuous=false;
+        recognition.interimResults=false;
+        
+        let gotResult = false;
+        
+        recognition.onstart=()=>{
+          lastStartTime = Date.now();
+          btnMicEl.classList.add('recording');
+          btnMicEl.style.background = '#22C55E';
+          if(typeof showToast==='function') showToast('🎤 듣는중... "오만원" 말해보세요 (4초)');
+          // 4.5초 타임아웃 - 인식 안되면 MediaRecorder로 전환
+          speechTimeout = setTimeout(()=>{
+            if(!gotResult){
+              try{ recognition.abort(); }catch(e){}
+              if(typeof showToast==='function') showToast('🎤 인식 시간초과, 녹음 모드로 전환');
+              startMediaRecorderOnly();
+            }
+          }, 4500);
+        };
         
         recognition.onresult=(event)=>{
+          gotResult = true;
+          if(speechTimeout){ clearTimeout(speechTimeout); speechTimeout=null; }
           let bestTranscript='';
           let bestValue=0;
           for(let i=0;i<event.results[0].length;i++){
@@ -5643,55 +5672,61 @@ function initMic() {
           if(parsed>0 && inputEl){
             inputEl.value = parsed.toString();
             try{ calculateDailyRevenue(); }catch(e){}
-            try{ localStorage.setItem('sudataxi_daily_rev', parsed.toString()); }catch(e){}
+            try{ localStorage.setItem('sudataxi_daily_rev', parsed.toString()); saveToAllStorages('sudataxi_daily_rev', parsed.toString()); }catch(e){}
             try{ if(typeof executeAutoBackup==='function') executeAutoBackup(); }catch(e){}
             if(typeof showToast==='function') showToast(`🎤 ${parsed.toLocaleString()}원 입력됨 (${transcript})`);
-            lastStartTime = Date.now();
-            failCount = 0;
-            // 성공하면 녹음 중지
-            if(isRecording){
-              stopRecordingAndTranscribe();
+          } else {
+            const fallback = transcript.replace(/[^0-9]/g,'');
+            if(fallback && inputEl){
+              const num = parseInt(fallback);
+              inputEl.value = num.toString();
+              try{ calculateDailyRevenue(); }catch(e){}
+              try{ localStorage.setItem('sudataxi_daily_rev', num.toString()); }catch(e){}
+              if(typeof showToast==='function') showToast(`🎤 ${num.toLocaleString()}원 입력됨`);
+            } else {
+              if(typeof showToast==='function') showToast(`"${transcript}" 금액 변환 실패 - 버튼으로 선택해주세요`);
+              showQuickAmountButtons(true);
             }
           }
+          cleanupAll();
         };
         
         recognition.onerror=(e)=>{
-          console.log('speech parallel error', e.error);
-          if(e.error==='aborted'){
-            // 조용히 무시 - MediaRecorder가 백업
-            return;
+          console.log('speech error', e.error);
+          if(speechTimeout){ clearTimeout(speechTimeout); speechTimeout=null; }
+          if(e.error==='aborted' || e.error==='no-speech' || e.error==='audio-capture'){
+            // 실패 시 MediaRecorder로 전환
+            if(typeof showToast==='function') showToast('🎤 인식 실패, 녹음 모드로 전환중...');
+            setTimeout(()=>{ startMediaRecorderOnly(); }, 300);
+          } else if(e.error==='not-allowed' || e.error==='permission-denied'){
+            if(typeof showToast==='function') showToast('🎤 마이크 권한 필요 - 설정 > Safari > 마이크 허용');
+            cleanupAll();
+          } else {
+            // 기타 오류도 MediaRecorder로 전환
+            startMediaRecorderOnly();
           }
         };
         
         recognition.onend=()=>{
-          // 병렬 인식 종료 - MediaRecorder는 계속 녹음 중일 수 있음
+          if(speechTimeout){ clearTimeout(speechTimeout); speechTimeout=null; }
+          if(!gotResult){
+            // 결과 없이 종료되면 MediaRecorder로 전환하지 않고 그냥 종료 (사용자가 취소)
+            cleanupAll();
+          }
         };
         
         recognition.start();
-      }catch(e){
-        console.warn('parallel speech fail', e);
+        
+      }catch(ex){
+        console.warn('speech start fail', ex);
+        startMediaRecorderOnly();
       }
     }
 
-    btnMicEl.addEventListener('click', async (e)=>{
-      e.preventDefault();
-      e.stopPropagation();
-      
-      if(isRecording){
-        await stopRecordingAndTranscribe();
-        return;
-      }
-      
-      if(Date.now() - lastStartTime < 800){
-        return;
-      }
-      
+    async function startMediaRecorderOnly(){
+      cleanupAll();
       try{
-        const stream = await navigator.mediaDevices.getUserMedia({audio:{
-          echoCancellation:true,
-          noiseSuppression:true,
-          sampleRate:16000
-        }});
+        const stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true, noiseSuppression:true, sampleRate:16000}});
         audioStream = stream;
         audioChunks = [];
         
@@ -5700,84 +5735,51 @@ function initMic() {
           mimeType = 'audio/mp4';
           if(!MediaRecorder.isTypeSupported(mimeType)){
             mimeType = 'audio/webm';
-            if(!MediaRecorder.isTypeSupported(mimeType)){
-              mimeType = '';
-            }
+            if(!MediaRecorder.isTypeSupported(mimeType)) mimeType='';
           }
         }
         
         mediaRecorder = mimeType ? new MediaRecorder(stream, {mimeType: mimeType}) : new MediaRecorder(stream);
-        
-        mediaRecorder.ondataavailable = (ev)=>{
-          if(ev.data && ev.data.size>0) audioChunks.push(ev.data);
-        };
-        
-        mediaRecorder.onstop = ()=>{
-          // onstop은 stopRecordingAndTranscribe에서 처리
-        };
-        
+        mediaRecorder.ondataavailable = (ev)=>{ if(ev.data && ev.data.size>0) audioChunks.push(ev.data); };
         mediaRecorder.start(100);
         isRecording = true;
         recordingSeconds = 0;
         btnMicEl.classList.add('recording');
         btnMicEl.style.background = '#EF4444';
+        btnMicEl.innerHTML = '<span style="font-size:16px;">🔴</span>';
         recordingTimer = setInterval(updateRecordingUI, 1000);
         updateRecordingUI();
         
-        // 병렬로 Web Speech API도 시도 (빠른 인식을 위해)
-        startSpeechRecognitionParallel();
-        
       }catch(err){
-        console.error('mic getUserMedia fail', err);
-        // getUserMedia 실패 시 기존 Web Speech API로 폴백
-        if(SpeechRecognition){
-          if(typeof showToast==='function') showToast('🎤 마이크 녹음 실패, 음성인식으로 전환');
-          try{
-            if(recognition){ try{ recognition.abort(); }catch(e){} }
-            recognition = new SpeechRecognition();
-            recognition.lang='ko-KR';
-            recognition.maxAlternatives=5;
-            recognition.continuous=false;
-            recognition.onresult=(event)=>{
-              let bestTranscript='';
-              let bestValue=0;
-              for(let i=0;i<event.results[0].length;i++){
-                const tr = event.results[0][i].transcript;
-                const pv = parseKoreanMoney(tr);
-                if(pv>bestValue){ bestValue=pv; bestTranscript=tr; }
-                if(!bestTranscript) bestTranscript=tr;
-              }
-              const transcript = bestTranscript || event.results[0][0].transcript;
-              const parsed = bestValue || parseKoreanMoney(transcript);
-              const inputEl = document.getElementById('input-rev');
-              if(parsed>0 && inputEl){
-                inputEl.value = parsed.toString();
-                try{ calculateDailyRevenue(); }catch(e){}
-                try{ localStorage.setItem('sudataxi_daily_rev', parsed.toString()); }catch(e){}
-                if(typeof showToast==='function') showToast(`🎤 ${parsed.toLocaleString()}원 입력됨 (${transcript})`);
-              }
-            };
-            recognition.onerror=(e)=>{
-              if(e.error==='not-allowed'){
-                if(typeof showToast==='function') showToast('🎤 마이크 권한 필요 - 설정에서 허용');
-              }
-            };
-            recognition.start();
-          }catch(e2){
-            if(typeof showToast==='function') showToast('🎤 음성인식 시작 실패');
-          }
-        } else {
-          if(typeof showToast==='function') showToast('🎤 이 브라우저는 음성인식을 지원하지 않습니다');
-        }
+        console.error('getUserMedia fail', err);
+        if(typeof showToast==='function') showToast('🎤 마이크를 사용할 수 없습니다. 권한을 확인해주세요.');
+        cleanupAll();
+        showQuickAmountButtons(true);
       }
-    });
-    
-    // 더블클릭으로 Whisper 키 설정
-    btnMicEl.addEventListener('dblclick', (e)=>{
+    }
+
+    btnMicEl.addEventListener('click', async (e)=>{
       e.preventDefault();
-      if(typeof window.setupWhisperKey==='function') window.setupWhisperKey();
+      e.stopPropagation();
+      
+      if(isRecording){
+        await stopMediaRecordingAndShowQuick();
+        return;
+      }
+      
+      if(recognition && btnMicEl.classList.contains('recording')){
+        // 음성인식 중이면 중지
+        cleanupAll();
+        return;
+      }
+      
+      if(Date.now() - lastStartTime < 800) return;
+      
+      // 1차: 음성인식 시도 (마이크 충돌 없이 단독으로)
+      startSpeechRecognitionOnly();
     });
   }
+
 
 
 
@@ -6261,7 +6263,7 @@ function initMic() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.8.5</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.8.6</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
