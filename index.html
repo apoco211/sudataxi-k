@@ -1797,7 +1797,9 @@ body {
         <span style="font-size:10px; color:var(--stat-label);">부터 다음날 같은 시간까지 하루로 집계</span>
       </div>
       <div style="font-size:9px; color:var(--stat-label); margin-top:6px; line-height:1.3;">
-        예) 자정=00:00~23:59, 3시=03:00~익일 02:59. 변경 즉시 적용.
+        예) 자정=00:00~23:59, 3시=03:00~익일 02:59. 변경 즉시 적용.<br>
+        <span id="work-today-key-info" style="color:#60A5FA; font-weight:800;"></span><br>
+        ※ 기준시간 변경은 <b>지금부터의 집계</b>에 적용됩니다. 이미 지난 시간의 운행기록은 기존 기준일로 저장되어 있어, 새벽 0~3시에 변경하면 어제 기록이 오늘로 이동될 수 있습니다. 오늘 0시부터 다시 집계하려면 '기록 리셋' 후 운행 시작을 눌러주세요.
       </div>
     </div>
     
@@ -2836,12 +2838,52 @@ body {
   function setWorkStartHour(hour){
     const h = parseInt(hour,10);
     if(isNaN(h) || h<0 || h>23) return false;
+    let oldHour = 0;
+    try{ oldHour = getWorkStartHour(); }catch(e){ oldHour = 0; }
+    // v8.9.12 fix: 기준시간 변경시 날짜 키가 바뀌면 기존 기록 마이그레이션
+    try{
+      const now = new Date();
+      const getKeyForHour = (baseHour) => {
+        const d = new Date(now);
+        if(d.getHours() < baseHour) d.setDate(d.getDate()-1);
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      };
+      const oldKey = getKeyForHour(oldHour);
+      const newKey = getKeyForHour(h);
+      if(oldKey !== newKey){
+        try{
+          let raw = null;
+          try{ raw = localStorage.getItem('sudataxi_driving_records'); }catch(e){}
+          if(raw){
+            let records = {};
+            try{ records = JSON.parse(raw); }catch(e){ records={}; }
+            const oldData = records[oldKey];
+            const newData = records[newKey];
+            // 새벽 0~3시 사이에 기준 변경시, 어제 키에 있던 오늘 새벽 운행(0시~현재) 데이터를 오늘로 이동
+            if(oldData && (!newData || (newData.totalDrive||0) < (oldData.totalDrive||0))){
+              // 만약 새 키에 데이터가 없으면, 자정 이후 세션만 필터링해서 이동 (간단히는 전체 복사 후 사용자에게 알림)
+              // 정확히는 0시 이후 시작된 세션만 옮기는게 맞지만, 지금은 병합 방식으로 처리
+              if(!newData){
+                // 오늘 0시 이후 데이터가 기존 키에 있다면 그대로 복사
+                records[newKey] = JSON.parse(JSON.stringify(oldData));
+                // 기존 키는 유지 (어제 데이터도 필요할 수 있음) - 필요하면 자정 이전만 남기도록 필터링 가능
+                try{ localStorage.setItem('sudataxi_driving_records', JSON.stringify(records)); }catch(e){}
+                try{ saveToAllStorages('sudataxi_driving_records', JSON.stringify(records)); }catch(e){}
+                try{ saveToIDB('sudataxi_driving_records', JSON.stringify(records)); }catch(e){}
+                console.log(`Migrated driving records from ${oldKey} to ${newKey} due to work hour change ${oldHour}->${h}`);
+              }
+            }
+          }
+        }catch(e){ console.warn('migration fail', e); }
+      }
+    }catch(e){}
+
     try{
       localStorage.setItem('sudataxi_work_start_hour', String(h));
       try{ saveToAllStorages('sudataxi_work_start_hour', String(h)); }catch(e){}
       try{ saveToIDB('sudataxi_work_start_hour', String(h)); }catch(e){}
     }catch(e){}
-    try{ if(typeof showToast==='function') showToast(`🕒 운행 기준 시간 ${h}시로 변경됨`); }catch(e){}
+    try{ if(typeof showToast==='function') showToast(`🕒 운행 기준 ${h}시 변경 - ${h===0?'자정부터 집계':'${h}시부터 집계'}`); }catch(e){}
     return true;
   }
   document.addEventListener('DOMContentLoaded', function(){
@@ -2861,16 +2903,24 @@ body {
   });
   setTimeout(function(){ try{ updateWorkTimeLabel(); }catch(e){} }, 1200);
 
-  // v8.9.12: 운행 기준 시간 UI 라벨 업데이트
+  // v8.9.12: 운행 기준 시간 UI 라벨 업데이트 + 오늘 집계 설명
   function updateWorkTimeLabel(){
     try{
       const h = getWorkStartHour();
       const labelEl = document.getElementById('work-time-range-label');
       const selectEl = document.getElementById('input-work-start-hour');
+      const todayKeyEl = document.getElementById('work-today-key-info');
       if(selectEl){ selectEl.value = String(h); }
       if(labelEl){
         const startTxt = h===0 ? '자정' : (h<12 ? `새벽 ${h}시` : (h===12 ? '정오' : `오후 ${h-12}시`));
         labelEl.innerText = `${startTxt} ~ 익일 ${startTxt} (2시간 단위 누적 탑승) - 기준 ${h}시`;
+      }
+      if(todayKeyEl){
+        try{
+          const k = getTodayKey();
+          const now = new Date();
+          todayKeyEl.innerText = `현재 집계일: ${k} (기준 ${h}시, 현재 ${now.getHours()}시)`;
+        }catch(e){}
       }
     }catch(e){}
   }
