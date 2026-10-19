@@ -71,7 +71,7 @@
   const EMBEDDED_DEFAULTS = {
     daily_rev: 0,
     sim_data: {target:4000000, current:0, restDates:[]},
-    version: 'v8.9.7'
+    version: 'v8.9.9'
   };
 </script>
 <style>
@@ -300,7 +300,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v8.9.7</title>
+  <title>수다택시 K v8.9.9</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1983,7 +1983,7 @@ body {
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v8.9.7";
+  const BUILD_VERSION = "v8.9.9";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2439,23 +2439,105 @@ body {
     return null;
   }
 
+  // v8.9.9: 아이폰 영구 저장 - IndexedDB + 영구 저장소
+  let _idbDB = null;
+  function getIDB(){
+    return new Promise((resolve, reject) => {
+      if(_idbDB) return resolve(_idbDB);
+      try{
+        const req = indexedDB.open('sudataxi_db_v2', 2);
+        req.onupgradeneeded = function(ev){
+          const db = ev.target.result;
+          if(!db.objectStoreNames.contains('keyvalue')) db.createObjectStore('keyvalue');
+          if(!db.objectStoreNames.contains('dashboard')) db.createObjectStore('dashboard');
+        };
+        req.onsuccess = function(ev){ _idbDB = ev.target.result; resolve(_idbDB); };
+        req.onerror = function(){ reject(); };
+      }catch(e){ reject(); }
+    });
+  }
+  function saveToIDB(key, value){
+    try{
+      getIDB().then(db => {
+        try{
+          const tx = db.transaction(['keyvalue','dashboard'], 'readwrite');
+          tx.objectStore('keyvalue').put(value, key);
+          if(key.includes('daily_rev') || key.includes('sim_data') || key.includes('driving_records') || key.includes('driving_state')){
+            tx.objectStore('dashboard').put(value, key);
+          }
+        }catch(e){}
+      }).catch(()=>{});
+    }catch(e){}
+  }
+  function loadFromIDB(key){
+    return new Promise((resolve) => {
+      try{
+        getIDB().then(db => {
+          try{
+            const tx = db.transaction('keyvalue', 'readonly');
+            const req = tx.objectStore('keyvalue').get(key);
+            req.onsuccess = function(){ resolve(req.result || null); };
+            req.onerror = function(){ resolve(null); };
+          }catch(e){ resolve(null); }
+        }).catch(()=>resolve(null));
+      }catch(e){ resolve(null); }
+    });
+  }
+  try{
+    if(navigator.storage && navigator.storage.persist){
+      navigator.storage.persist().then(g=>console.log('Persistent:',g)).catch(()=>{});
+    }
+  }catch(e){}
+  async function restoreAllFromIDB(){
+    try{
+      const keys = ['sudataxi_daily_rev','sudataxi_sim_data','sudataxi_driving_records','sudataxi_driving_state','sudataxi_call_logs'];
+      for(const key of keys){
+        let idbVal = await loadFromIDB(key);
+        if(idbVal && idbVal!=='null' && idbVal!=='{}' && String(idbVal).trim()!==''){
+          let cur=null; try{ cur=localStorage.getItem(key); }catch(e){}
+          if(!cur || cur==='null' || cur==='{}' || (cur==='0' && key!=='sudataxi_daily_rev')){
+            try{ localStorage.setItem(key, idbVal); }catch(e){}
+            try{ setPersistentCookie(key, idbVal, 365); }catch(e){}
+          }
+        }
+      }
+      try{ if(typeof initDailyRevenue==='function') setTimeout(()=>initDailyRevenue(), 100); }catch(e){}
+      try{ if(typeof initSimulator==='function') setTimeout(()=>initSimulator(), 200); }catch(e){}
+      try{ if(typeof renderDrivingLogStats==='function' && typeof activeTab!=='undefined' && activeTab===4) renderDrivingLogStats(); }catch(e){}
+    }catch(e){}
+  }
+  function forceSaveAllDashboard(){
+    try{
+      const revEl=document.getElementById('input-rev');
+      if(revEl){ const v=String(revEl.value||'').replace(/[^0-9]/g,''); localStorage.setItem('sudataxi_daily_rev',v); try{saveToAllStorages('sudataxi_daily_rev',v);}catch(e){} try{saveToIDB('sudataxi_daily_rev',v);}catch(e){} }
+    }catch(e){}
+    try{
+      const t=document.getElementById('input-sim-target'); const c=document.getElementById('input-sim-current');
+      if(t&&c){ const restEls=document.querySelectorAll('.cal-day.rest-day'); let arr=[]; restEls.forEach(el=>{const n=parseInt(el.innerText); if(!isNaN(n)) arr.push(n);}); const js=JSON.stringify({target:parseInt(String(t.value||'').replace(/[^0-9]/g,'')||'0'), current:parseInt(String(c.value||'').replace(/[^0-9]/g,'')||'0'), restDates:arr}); localStorage.setItem('sudataxi_sim_data',js); try{saveToAllStorages('sudataxi_sim_data',js);}catch(e){} try{saveToIDB('sudataxi_sim_data',js);}catch(e){} }
+    }catch(e){}
+    try{ const dr=localStorage.getItem('sudataxi_driving_records'); if(dr){ try{saveToAllStorages('sudataxi_driving_records',dr);}catch(e){} try{saveToIDB('sudataxi_driving_records',dr);}catch(e){} } }catch(e){}
+    try{ const ds=localStorage.getItem('sudataxi_driving_state'); if(ds){ try{saveToAllStorages('sudataxi_driving_state',ds);}catch(e){} try{saveToIDB('sudataxi_driving_state',ds);}catch(e){} } }catch(e){}
+  }
+  try{
+    document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(restoreAllFromIDB, 80); });
+    window.addEventListener('load', ()=>{ setTimeout(restoreAllFromIDB, 150); });
+    document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') forceSaveAllDashboard(); });
+    window.addEventListener('pagehide', forceSaveAllDashboard);
+    window.addEventListener('beforeunload', forceSaveAllDashboard);
+    window.addEventListener('blur', forceSaveAllDashboard);
+  }catch(e){}
+
+
   function saveToAllStorages(key, value){
     try{ localStorage.setItem(key, value); }catch(e){}
     try{ sessionStorage.setItem(key, value); }catch(e){}
     try{ setPersistentCookie(key, value, 365); }catch(e){}
-    // IndexedDB에도 저장 시도 (비동기)
+    try{ saveToIDB(key, value); }catch(e){}
     try{
       if(window.indexedDB){
         const req = indexedDB.open('sudataxi_db', 1);
-        req.onupgradeneeded = function(ev){ 
-          const db = ev.target.result;
-          if(!db.objectStoreNames.contains('keyvalue')) db.createObjectStore('keyvalue');
-        };
-        req.onsuccess = function(ev){
-          const db = ev.target.result;
-          const tx = db.transaction('keyvalue','readwrite');
-          tx.objectStore('keyvalue').put(value, key);
-        };
+        req.onupgradeneeded = function(ev){ const db=ev.target.result; if(!db.objectStoreNames.contains('keyvalue')) db.createObjectStore('keyvalue'); };
+        req.onsuccess = function(ev){ const db=ev.target.result; const tx=db.transaction('keyvalue','readwrite'); tx.objectStore('keyvalue').put(value, key); };
       }
     }catch(e){}
   }
@@ -2513,7 +2595,7 @@ body {
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
         date_str: new Date().toLocaleDateString('ko-KR'),
-        version: 'v8.9.7'
+        version: 'v8.9.9'
       };
       // v8.9.5: 매출 상세도 함께 전송 (손님탑승처럼 시트에 바로 기록되게)
       try{
@@ -2561,7 +2643,7 @@ body {
         monthly_target: sim.target||0,
         monthly_current: sim.current||0,
         rest_dates: (sim.restDates||[]).join(','),
-        version: 'v8.9.7'
+        version: 'v8.9.9'
       };
       fetch(url, {
         method: 'POST',
@@ -2591,7 +2673,7 @@ body {
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.9.7'
+        version: 'v8.9.9'
       };
       
       // auto_backup은 항상 최신으로 갱신 (가벼운 백업) - 다중 저장소
@@ -6569,7 +6651,7 @@ function initMic() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.7</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.9</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
