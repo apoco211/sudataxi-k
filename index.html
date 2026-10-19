@@ -45,12 +45,12 @@
 </style>
 
 <script id="embedded-defaults">
-  // v8.8.8: 빌드 시에도 살아남는 기본값 (사용자가 직접 수정 가능)
+  // v8.8.9: 빌드 시에도 살아남는 기본값 (사용자가 직접 수정 가능)
   // 빌드 전에 여기에 현재 대시보드 값을 넣어두면, localStorage가 날아가도 복구됨
   const EMBEDDED_DEFAULTS = {
     daily_rev: 0,
     sim_data: {target:4000000, current:0, restDates:[]},
-    version: 'v8.8.8'
+    version: 'v8.8.9'
   };
 </script>
 <style>
@@ -279,7 +279,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v8.8.8</title>
+  <title>수다택시 K v8.8.9</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1919,7 +1919,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v8.8.8";
+  const BUILD_VERSION = "v8.8.9";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2339,7 +2339,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
     } catch(e) {}
   }
 
-    // v8.8.8: 다중 저장소 영구 보관 (localStorage가 빌드 시 날아가도 쿠키에서 복구)
+    // v8.8.9: 다중 저장소 영구 보관 (localStorage가 빌드 시 날아가도 쿠키에서 복구)
   function setPersistentCookie(name, value, days=365){
     try{
       const expires = new Date();
@@ -2436,7 +2436,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.8.8'
+        version: 'v8.8.9'
       };
       await fetch(url, {
         method: 'POST',
@@ -2469,7 +2469,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.8.8'
+        version: 'v8.8.9'
       };
       
       // auto_backup은 항상 최신으로 갱신 (가벼운 백업) - 다중 저장소
@@ -2750,7 +2750,9 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
   let _boardingLockUntil = 0;
   let _lastBoardingAction = 0;
   let _globalScrollYAtTouchStart = 0;
-  function handleBoarding(e, isHighValue = false) {
+
+  // v8.8.9 분리: 하단 승차 = 위치저장+승차, 대시보드 승차 = 시간만 체크
+  function handleBoardingTimeOnly(e, isHighValue = false) {
     try { if (e) { e.preventDefault(); e.stopPropagation(); } } catch(err) {}
     const now = Date.now();
     if (now < _boardingLockUntil) return;
@@ -2767,7 +2769,44 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
     const bottomBoardBtn = document.getElementById('btn-bottom-board');
     if (bottomBoardBtn) { bottomBoardBtn.style.pointerEvents = 'none'; }
 
-    // 고객 탑승 위치 저장 (일반 탑승 / 고액콜)
+    // 대시보드 승차는 위치 저장 없이 시간만 체크
+    try{
+      drivingState.isPassengerBoarded = true; 
+      drivingState.isBreak = false;
+      drivingState.stateStartTime = Date.now();
+      if(typeof updateDrivingUI==='function') updateDrivingUI(); 
+      if(typeof saveDrivingState==='function') saveDrivingState();
+      if(typeof showToast==='function') showToast(isHighValue ? '🔥 고단가 콜 승차 (시간만)' : '🙋 승차 - 시간 체크됨');
+    }catch(err){ console.error('boarding time only fail', err); }
+
+    document.body.classList.remove('out-of-bounds-alert');
+    setTimeout(() => { 
+      _boardingLockUntil = 0; 
+      if (boardBtn) { boardBtn.style.pointerEvents = ''; }
+      if (bottomBoardBtn) { bottomBoardBtn.style.pointerEvents = ''; }
+      try{ if(typeof updateDrivingUI==='function') updateDrivingUI(); }catch(e){}
+    }, 700);
+  }
+
+  function handleBoarding(e, isHighValue = false) {
+    // 하단 승차 = 위치 저장 + 승차 (기존 로직 유지)
+    try { if (e) { e.preventDefault(); e.stopPropagation(); } } catch(err) {}
+    const now = Date.now();
+    if (now < _boardingLockUntil) return;
+    if (now - _lastBoardingAction < 800) return;
+    _lastBoardingAction = now;
+    _boardingLockUntil = now + 600;
+    if (!drivingState.isDriving && typeof toggleDriving === 'function') {
+      toggleDriving();
+    }
+    if (drivingState.isBreak) { _boardingLockUntil = 0; return; }
+    if (drivingState.isPassengerBoarded) { showToast('이미 승차 중입니다.'); _boardingLockUntil = 0; return; }
+    const boardBtn = document.getElementById('btn-board');
+    if (boardBtn) { boardBtn.disabled = true; boardBtn.style.pointerEvents = 'none'; }
+    const bottomBoardBtn = document.getElementById('btn-bottom-board');
+    if (bottomBoardBtn) { bottomBoardBtn.style.pointerEvents = 'none'; }
+
+    // 하단 승차만 고객 탑승 위치 저장
     if (typeof saveCurrentCallLocation === 'function') {
       saveCurrentCallLocation(isHighValue);
     } else {
@@ -2784,6 +2823,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
       if (bottomBoardBtn) bottomBoardBtn.style.pointerEvents = '';
     }, 700);
   }
+
 
   let _alightingLockUntil = 0;
   function handleAlighting(e) {
@@ -4898,7 +4938,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     const daysInMonth = new Date(curYear, curMonth, 0).getDate();
     function getSimDataForChart() {
       try {
-        const simRaw = localStorage.getItem('sudataxi_sim_data');
+        let simRaw = null; try{ simRaw = getFromAnyStorage('sudataxi_sim_data'); }catch(e){} if(!simRaw) simRaw = localStorage.getItem('sudataxi_sim_data');
         const sim = simRaw ? JSON.parse(simRaw) : {target:4000000, current:0, restDates:[]};
         const target = Number(sim.target) || 4000000;
         const current = Number(sim.current) || 0;
@@ -5172,7 +5212,7 @@ function renderGoldenTimeInsights() {
 
   function getDynamicDailyTarget() {
     try {
-      const simRaw = localStorage.getItem('sudataxi_sim_data');
+      let simRaw = null; try{ simRaw = getFromAnyStorage('sudataxi_sim_data'); }catch(e){} if(!simRaw) simRaw = localStorage.getItem('sudataxi_sim_data');
       const sim = simRaw ? JSON.parse(simRaw) : {target:4000000, current:0, restDates:[]};
       const target = Number(sim.target) || 4000000;
       const current = Number(sim.current) || 0;
@@ -5257,7 +5297,8 @@ function renderGoldenTimeInsights() {
       }
     } catch(e){}
 
-    try { localStorage.setItem('sudataxi_daily_rev', current.toString()); } catch(e){}
+    try { localStorage.setItem('sudataxi_daily_rev', current.toString()); saveToAllStorages('sudataxi_daily_rev', current.toString()); } catch(e){}
+    try{ if(typeof executeAutoBackup==='function') executeAutoBackup(); }catch(e){}
     
     } catch(e) { 
       console.error('calcRevenue error', e); 
@@ -5281,23 +5322,31 @@ function initDailyRevenue() {
     const inputRevEl = document.getElementById('input-rev');
     if(!inputRevEl) return;
 
-    // 자동 복구: localStorage가 비어있으면 safe_backup/auto_backup에서 복구
-    let savedRev = getFromAnyStorage('sudataxi_daily_rev') || localStorage.getItem('sudataxi_daily_rev');
-    if (!savedRev || savedRev === '0' || savedRev === 'null') {
+    // v8.8.9 Fix: '0'도 유효값으로 유지 - 시간/탑승위치처럼 수정 전까지 그대로 유지
+    let savedRev = null;
+    try{ savedRev = getFromAnyStorage('sudataxi_daily_rev'); }catch(e){}
+    if(savedRev === null || savedRev === undefined || savedRev === 'null' || savedRev === 'undefined' || String(savedRev).trim() === ''){
+      savedRev = localStorage.getItem('sudataxi_daily_rev');
+    }
+    // '0'은 유효값이므로 복구 대상으로 보지 않음 - null/빈값일 때만 백업에서 복구
+    if (savedRev === null || savedRev === undefined || savedRev === '' || savedRev === 'null' || savedRev === 'undefined') {
       try {
         const safe = JSON.parse(localStorage.getItem('sudataxi_safe_backup') || 'null');
         const auto = JSON.parse(localStorage.getItem('sudataxi_auto_backup') || 'null');
         const backup = safe || auto;
-        if (backup && backup.daily_rev && backup.daily_rev > 0) {
+        if (backup && backup.daily_rev !== undefined && backup.daily_rev !== null && backup.daily_rev !== '') {
           savedRev = backup.daily_rev.toString();
-          localStorage.setItem('sudataxi_daily_rev', savedRev);
+          try{ localStorage.setItem('sudataxi_daily_rev', savedRev); saveToAllStorages('sudataxi_daily_rev', savedRev); }catch(e){}
           console.log('대시보드 매출 자동 복구:', savedRev);
         }
       } catch(e){ console.warn('daily_rev auto restore fail', e); }
     }
 
-    if (savedRev) {
+    if (savedRev !== null && savedRev !== undefined && String(savedRev).trim() !== '') {
       inputRevEl.value = savedRev;
+    } else {
+      // 저장된 값이 없으면 0으로 유지 (덮어쓰지 않음)
+      if(!inputRevEl.value) inputRevEl.value = '0';
     }
     calculateDailyRevenue();
     inputRevEl.removeEventListener('input', calculateDailyRevenue);
@@ -5315,10 +5364,10 @@ function initDailyRevenue() {
     } catch(e) { console.error('initDailyRevenue error', e); }
   }
 
-  // 대시보드 전체 숫자 자동 복구 (빌드 후에도 유지) - v8.8.8 강화
+  // 대시보드 전체 숫자 자동 복구 (빌드 후에도 유지) - v8.8.9 강화
   function autoRestoreAllDashboardData() {
     try {
-      // v8.8.8: localStorage가 비었으면 쿠키, 세션, IndexedDB에서도 복구 시도
+      // v8.8.9: localStorage가 비었으면 쿠키, 세션, IndexedDB에서도 복구 시도
       let safeRaw = getFromAnyStorage('sudataxi_safe_backup') || localStorage.getItem('sudataxi_safe_backup');
       let autoRaw = getFromAnyStorage('sudataxi_auto_backup') || localStorage.getItem('sudataxi_auto_backup');
       // 쿠키에서 직접 daily_rev, sim_data도 시도
@@ -5330,7 +5379,7 @@ function initDailyRevenue() {
       try{ auto = autoRaw ? JSON.parse(autoRaw) : null; }catch(e){}
       const backup = safe || auto;
       
-      // v8.8.8: EMBEDDED_DEFAULTS에서도 복구 (빌드 파일 자체에 박힌 기본값)
+      // v8.8.9: EMBEDDED_DEFAULTS에서도 복구 (빌드 파일 자체에 박힌 기본값)
       try{
         if(typeof EMBEDDED_DEFAULTS!=='undefined' && EMBEDDED_DEFAULTS){
           const curRev = localStorage.getItem('sudataxi_daily_rev');
@@ -5760,7 +5809,18 @@ function initMic() {
         calGrid.innerHTML += `<div></div>`;
     }
     
-    let simulatorData = JSON.parse(localStorage.getItem('sudataxi_sim_data') || '{"target":4000000, "current":0, "restDates":[]}');
+    // v8.8.9 Fix: sim_data도 다중 저장소에서 복구 - 시간/위치처럼 유지
+    let simRaw = null;
+    try{ simRaw = getFromAnyStorage('sudataxi_sim_data'); }catch(e){}
+    if(!simRaw || simRaw==='null' || simRaw==='undefined' || simRaw.trim()===''){
+      simRaw = localStorage.getItem('sudataxi_sim_data');
+    }
+    let simulatorData;
+    try{
+      simulatorData = simRaw ? JSON.parse(simRaw) : {target:4000000, current:0, restDates:[]};
+    }catch(e){
+      simulatorData = {target:4000000, current:0, restDates:[]};
+    }
 
     for(let i=1; i<=daysInMonth; i++) {
         const div = document.createElement('div');
@@ -5804,9 +5864,12 @@ function initMic() {
     let activeRestDates = [];
     restElements.forEach(el => activeRestDates.push(parseInt(el.innerText)));
 
-    localStorage.setItem('sudataxi_sim_data', JSON.stringify({
+    const simToSave = JSON.stringify({
       target: target, current: current, restDates: activeRestDates
-    }));
+    });
+    try{ localStorage.setItem('sudataxi_sim_data', simToSave); }catch(e){}
+    try{ saveToAllStorages('sudataxi_sim_data', simToSave); }catch(e){}
+    try{ if(typeof executeAutoBackup==='function') executeAutoBackup(); }catch(e){}
 
     const today = new Date();
     const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
@@ -6003,10 +6066,12 @@ function initMic() {
 
     document.getElementById('btn-drive-toggle').addEventListener('click', toggleDriving);
     document.getElementById('btn-break-toggle').addEventListener('click', toggleBreak);
-    // === 탑승/하차 버튼 - v8.8.8 Fix: 대시보드 승차 정상화 ===
+    // === 탑승/하차 버튼 - v8.8.9 분리: 하단=위치저장, 대시보드=시간만 ===
     (function(){
       const boardEl = document.getElementById('btn-board');
       const alightEl = document.getElementById('btn-alight');
+      const bottomBoardEl = document.getElementById('btn-bottom-board');
+      const bottomAlightEl = document.getElementById('btn-bottom-alight');
       function createSimpleHandler(btn, handler){
         if(!btn || btn._fixed_v888) return;
         btn._fixed_v888 = true;
@@ -6040,16 +6105,34 @@ function initMic() {
           handler(e, false);
         });
       }
-      if(boardEl) createSimpleHandler(boardEl, handleBoarding);
+      // 대시보드 승차 = 시간만 체크 (위치 저장 안함)
+      if(boardEl) createSimpleHandler(boardEl, handleBoardingTimeOnly);
+      // 대시보드 하차 = 기존 하차
       if(alightEl) createSimpleHandler(alightEl, handleAlighting);
+      // 하단 승차 = 위치 저장 + 승차
+      if(bottomBoardEl) {
+        // 기존 _b62_fixed 플래그 제거하고 새로 바인딩
+        try{ bottomBoardEl._b62_fixed = true; bottomBoardEl._fixed_v888 = false; }catch(e){}
+        createSimpleHandler(bottomBoardEl, handleBoarding);
+      }
+      // 하단 하차
+      if(bottomAlightEl) {
+        try{ bottomAlightEl._b60_fixed = true; bottomAlightEl._fixed_v888 = false; }catch(e){}
+        createSimpleHandler(bottomAlightEl, handleAlighting);
+      }
       function forceEnableBoard(){
         const b=document.getElementById('btn-board');
         const a=document.getElementById('btn-alight');
+        const bb=document.getElementById('btn-bottom-board');
+        const ba=document.getElementById('btn-bottom-alight');
         if(b){ b.style.pointerEvents='auto'; b.style.touchAction='manipulation'; }
         if(a){ a.style.pointerEvents='auto'; a.style.touchAction='manipulation'; }
+        if(bb){ bb.style.pointerEvents='auto'; bb.style.touchAction='manipulation'; }
+        if(ba){ ba.style.pointerEvents='auto'; ba.style.touchAction='manipulation'; }
       }
       setTimeout(forceEnableBoard, 500);
       setTimeout(forceEnableBoard, 1500);
+      document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible') setTimeout(forceEnableBoard, 200); });
     })();
 
     
@@ -6221,7 +6304,7 @@ function initMic() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.8.8</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.8.9</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
@@ -6484,25 +6567,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
 <script id="v888-boarding-fix">
-// v8.8.8 대시보드 승차 + 하단 승차 연동 보장
+// v8.8.9 분리 최종: 하단=위치저장, 대시보드=시간만 - 다른 버튼 간섭 없음
 (function(){
   function ensureBoardingLink(){
     try{
-      // 하단 승차 버튼이 대시보드 승차와 동일한 handleBoarding을 호출하도록 보장
-      const bottomBoard = document.getElementById('btn-bottom-board');
-      const dashBoard = document.getElementById('btn-board');
-      if(bottomBoard && !bottomBoard._linked_v888){
-        bottomBoard._linked_v888 = true;
-        // 기존 바인딩이 있으면 유지, 없으면 새로 바인딩
-        bottomBoard.addEventListener('click', function(e){
-          try{ e.preventDefault(); e.stopPropagation(); }catch(err){}
-          if(typeof handleBoarding==='function') handleBoarding(e, false);
-        });
-      }
-      if(dashBoard){
-        dashBoard.style.pointerEvents='auto';
-        dashBoard.style.touchAction='manipulation';
-      }
+      const ids = ['btn-board','btn-alight','btn-bottom-board','btn-bottom-alight','btn-mode1','btn-mode2','btn-mode3','btn-mode4','btn-search','btn-mic'];
+      ids.forEach(function(id){
+        const el=document.getElementById(id);
+        if(el){ el.style.pointerEvents='auto'; el.style.touchAction='manipulation'; }
+      });
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(ensureBoardingLink, 300); setTimeout(ensureBoardingLink, 1200); });
