@@ -50,7 +50,7 @@
   const EMBEDDED_DEFAULTS = {
     daily_rev: 0,
     sim_data: {target:4000000, current:0, restDates:[]},
-    version: 'v8.9.15'
+    version: 'v8.9.16'
   };
 </script>
 <style>
@@ -174,7 +174,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v8.9.15</title>
+  <title>수다택시 K v8.9.16</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1745,7 +1745,7 @@ body {
         <div class="rev-bottom-row">
           <div class="rev-bottom-label">
             <span class="rev-bottom-main">🕒 추가 운행 필요</span>
-            <span class="rev-bottom-sub">(시간당 2.5만 기준)</span>
+            <span class="rev-bottom-sub">(시간당 평균 기준)</span>
           </div>
           <div class="rev-bottom-val" id="val-time">-</div>
         </div>
@@ -1890,7 +1890,7 @@ body {
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v8.9.15";
+  const BUILD_VERSION = "v8.9.16";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2502,7 +2502,7 @@ body {
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
         date_str: new Date().toLocaleDateString('ko-KR'),
-        version: 'v8.9.15'
+        version: 'v8.9.16'
       };
       // v8.9.5: 매출 상세도 함께 전송 (손님탑승처럼 시트에 바로 기록되게)
       try{
@@ -2550,7 +2550,7 @@ body {
         monthly_target: sim.target||0,
         monthly_current: sim.current||0,
         rest_dates: (sim.restDates||[]).join(','),
-        version: 'v8.9.15'
+        version: 'v8.9.16'
       };
       fetch(url, {
         method: 'POST',
@@ -2580,7 +2580,7 @@ body {
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.9.15'
+        version: 'v8.9.16'
       };
       
       // auto_backup은 항상 최신으로 갱신 (가벼운 백업) - 다중 저장소
@@ -5505,15 +5505,56 @@ function renderGoldenTimeInsights() {
           valTimeEl.innerText = "목표 달성 완료! 🎉";
           valTimeEl.style.color = "#FFC800";
         } else {
-          let hrs = remain / 25000;
+          // v8.9.16: 시간당 평균매출 기준으로 추가 운행 필요 시간 계산
+          let effectiveHourly = 25000; // fallback
+          try {
+            let dailyRevForHourly = current;
+            let totalSecForHourly = 0;
+            try {
+              const todayData = getTodayDrivingData();
+              totalSecForHourly = todayData.totalDrive || 0;
+            } catch(e2) {}
+            // drivingState가 있으면 현재 진행중인 운행도 포함 (최신 totalDrive)
+            try {
+              if(typeof drivingState !== 'undefined' && drivingState && drivingState.isDriving && drivingState.stateStartTime){
+                const nowTs = Date.now();
+                const elapsed = Math.floor((nowTs - drivingState.stateStartTime)/1000);
+                // totalDrive는 저장된 값 + 현재 진행중
+                // 간단하게 totalSecForHourly에 elapsed를 더하지 않고, getTodayDrivingData가 최신이면 충분
+              }
+            } catch(e2) {}
+            if(dailyRevForHourly > 0 && totalSecForHourly >= 60){
+              const hours = totalSecForHourly / 3600;
+              const hourlyCalc = Math.floor(dailyRevForHourly / hours);
+              if(hourlyCalc >= 1000 && isFinite(hourlyCalc)){
+                effectiveHourly = hourlyCalc;
+              }
+            }
+          } catch(eHourly){}
+          
+          let hrs = remain / effectiveHourly;
           let h = Math.floor(hrs);
           let m = Math.round((hrs - h) * 60);
+          // 60분 넘으면 시간 올림
+          if(m >= 60){ h += 1; m = 0; }
           let tStr = "약 ";
           if(h > 0) tStr += h + "시간 ";
           if(m > 0) tStr += m + "분";
           if(tStr==="약 ") tStr = "1시간 미만";
           valTimeEl.innerText = tStr;
           valTimeEl.style.color = "#4ADE80";
+          
+          // 라벨 업데이트: 시간당 평균 기준으로 표시
+          try {
+            const subEl = document.querySelector('.rev-bottom-sub');
+            if(subEl){
+              if(effectiveHourly !== 25000){
+                subEl.innerText = `(시간당 ${effectiveHourly.toLocaleString()}원 기준)`;
+              } else {
+                subEl.innerText = `(시간당 ${effectiveHourly.toLocaleString()}원 기준)`;
+              }
+            }
+          } catch(eLabel){}
         }
       }
     } catch(e){}
@@ -6638,7 +6679,7 @@ function initMic() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.15</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.16</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
