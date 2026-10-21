@@ -42,15 +42,36 @@
 :where(code, pre, kbd, samp) {
   font-family: "Optimistic Mono", ui-monospace, monospace;
 }
+</style><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
 </style>
 
 <script id="embedded-defaults">
-  // v8.9.22: 빌드 시에도 살아남는 기본값 (사용자가 직접 수정 가능)
+  // v8.9.33: 빌드 시에도 살아남는 기본값 (사용자가 직접 수정 가능)
   // 빌드 전에 여기에 현재 대시보드 값을 넣어두면, localStorage가 날아가도 복구됨
   const EMBEDDED_DEFAULTS = {
     daily_rev: 0,
     sim_data: {target:4000000, current:0, restDates:[]},
-    version: 'v8.9.22'
+    version: 'v8.9.33'
   };
 </script>
 <style>
@@ -174,7 +195,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>수다택시 K v8.9.22</title>
+  <title>sudataxi-k v8.9.34</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1229,6 +1250,15 @@ body {
 .bottom-bar .alight-btn { background: #FF6B00 !important; color: #FFFFFF !important; }
 .bottom-bar .restroom-btn { background: #3B82F6 !important; color: #FFFFFF !important; }
 .bottom-bar .bb-btn .bb-label { font-size: 13px !important; font-weight: 900 !important; line-height: 1 !important; }
+    /* v8.9.33: 주야간 모두 보이는 고대비 테두리 - 검+흰 이중 링 */
+    .bottom-bar .bb-btn.active-board { border: 4px solid #000 !important; box-shadow: 0 0 0 3px #fff, 0 0 0 6px #000 !important; }
+    .bottom-bar .bb-btn.active-alight { border: 4px solid #fff !important; box-shadow: 0 0 0 3px #000, 0 0 0 6px #fff !important; }
+    .bottom-bar .bb-btn.active-rest { border: 4px solid #fff !important; box-shadow: 0 0 0 3px #000, 0 0 0 6px #3B82F6 !important; }
+    body.theme-day .bottom-bar .bb-btn.active-board { border-color: #000 !important; box-shadow: 0 0 0 3px #fff, 0 0 0 6px #000 !important; }
+    body.theme-day .bottom-bar .bb-btn.active-alight { border-color: #000 !important; box-shadow: 0 0 0 3px #fff, 0 0 0 6px #000 !important; }
+    body.theme-day .bottom-bar .bb-btn.active-rest { border-color: #000 !important; box-shadow: 0 0 0 3px #fff, 0 0 0 6px #000 !important; }
+    .bottom-bar { overflow: visible !important; }
+
 
 /* 3. 주간 모드 (body.theme-day) - 선명한 노란 테두리(#FFC800)와 둥근 모서리 완벽 유지! */
 body.theme-day .bottom-bar {
@@ -1432,7 +1462,7 @@ body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important
 
 
 <style id="v899-screen-down-optimize">
-/* v8.9.22 전체 화면 아래로 최적화 - 위로 올라간 현상 수정, 하단 레이아웃은 원본 유지, 배경 비침 차단 */
+/* v8.9.33 전체 화면 아래로 최적화 - 위로 올라간 현상 수정, 하단 레이아웃은 원본 유지, 배경 비침 차단 */
 html {
   padding-top: env(safe-area-inset-top, 0px) !important;
 }
@@ -1475,7 +1505,7 @@ body {
 
 
 <style id="v822-day-fix-strong">
-/* v8.9.22 same build - 주간모드 가시성 최종 강제 오버라이드 */
+/* v8.9.33 same build - 주간모드 가시성 최종 강제 오버라이드 */
 body.theme-day .calc-result-box {
   background: #FFFBEB !important;
   border-color: #FDE68A !important;
@@ -1618,7 +1648,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         <div style="font-size: 10px; font-weight: 800; color: #A855F7; margin: 4px 0 2px 0;">📍 나만의 핫플 목록</div>
         <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 2px;"></div>
         
-        <button class="restroom-search-btn" id="btn-search-restroom-realtime" style="width:100%; height:34px; background:rgba(59,130,246,0.12); color:#1D4ED8; border:1px solid #3B82F6; font-weight:900; font-size:11px; border-radius:6px; cursor:pointer; margin-top:8px;">🔍 주변 화장실/주유소 실시간 찾기</button>
+        <!-- v8.9.33 삭제: 실시간 찾기 버튼 -->
         <button class="add-custom-restroom-btn" id="btn-add-custom-restroom">⭐ 현재 위치 '나만의 화장실' 등록</button>
         <div style="font-size: 10px; font-weight: 800; color: #3B82F6; margin: 4px 0 2px 0;">🚻 나만의 화장실 목록</div>
         <div id="custom-restrooms-list" style="display: flex; flex-direction: column; gap: 2px;"></div>
@@ -1758,7 +1788,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
           <span style="font-size: 14px;" id="kpi-feedback-icon">⚠️</span> 
           <span id="kpi-feedback-text">운행 데이터가 부족합니다.</span>
         </div>
-        <!-- v8.9.22: 시간당 평균매출 - 주간 가독성 개선 -->
+        <!-- v8.9.33: 시간당 평균매출 - 주간 가독성 개선 -->
         <div class="hourly-rev-box" id="hourly-rev-box" style="margin-top:10px; padding:10px 12px; background: rgba(255,200,0,0.08); border: 1px solid rgba(255,200,0,0.25); border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
           <span style="font-size:11px; font-weight:800; color: var(--stat-label); letter-spacing:-0.3px;">💰 시간당 평균매출</span>
           <span id="kpi-hourly-rev" style="font-size:13px; font-weight:900; color:var(--stat-strong, #4B5563);">-</span>
@@ -1939,14 +1969,14 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v8.9.22";
+  const BUILD_VERSION = "v8.9.33";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
   let currentMode = 1;
   let activeTab = 1;
   let drivingState = { isDriving: false, isPassengerBoarded: false, isBreak: false, currentStatus: 'idle', startTime: null, lastTickTime: null, stateStartTime: null }
-  // v8.9.22: 대시보드 운행상태 복구 (localStorage 날아가도 복구)
+  // v8.9.33: 대시보드 운행상태 복구 (localStorage 날아가도 복구)
   try{
     let savedState = null;
     try{ savedState = localStorage.getItem('sudataxi_driving_state'); }catch(e){}
@@ -2367,7 +2397,9 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       }
 
       if(isCurGunpo) return `${prefix} (군포시)`;
-      return `${prefix} (호계동)`;
+      var _curReg = (typeof currentRegionName !== 'undefined' ? currentRegionName : '') || '';
+      if(_curReg){ var _p=_curReg.trim().split(/\s+/); var _l=_p[_p.length-1]||_curReg; return `${prefix} (${_l})`; }
+      return `${prefix} (현위치 인근)`;
   }
 
   function requestNotificationPermission() {
@@ -2419,7 +2451,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     } catch(e) {}
   }
 
-    // v8.9.22: 다중 저장소 영구 보관 (localStorage가 빌드 시 날아가도 쿠키에서 복구)
+    // v8.9.33: 다중 저장소 영구 보관 (localStorage가 빌드 시 날아가도 쿠키에서 복구)
   function setPersistentCookie(name, value, days=365){
     try{
       const expires = new Date();
@@ -2440,7 +2472,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     return null;
   }
 
-  // v8.9.22: 아이폰 영구 저장 - IndexedDB + 영구 저장소
+  // v8.9.33: 아이폰 영구 저장 - IndexedDB + 영구 저장소
   let _idbDB = null;
   function getIDB(){
     return new Promise((resolve, reject) => {
@@ -2596,9 +2628,9 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
         date_str: new Date().toLocaleDateString('ko-KR'),
-        version: 'v8.9.22'
+        version: 'v8.9.33'
       };
-      // v8.9.22: 매출 상세도 함께 전송 (손님탑승처럼 시트에 바로 기록되게)
+      // v8.9.33: 매출 상세도 함께 전송 (손님탑승처럼 시트에 바로 기록되게)
       try{
         const today = new Date();
         const daysInMonth = new Date(today.getFullYear(), today.getMonth()+1, 0).getDate();
@@ -2625,7 +2657,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     }
   }
 
-  // v8.9.22: 손님탑승처럼 매출도 개별 로그로 구글시트에 즉시 저장
+  // v8.9.33: 손님탑승처럼 매출도 개별 로그로 구글시트에 즉시 저장
   async function syncRevenueLogToSheets(logType) {
     const url = getGoogleSheetsUrl();
     if (!url) return;
@@ -2644,7 +2676,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         monthly_target: sim.target||0,
         monthly_current: sim.current||0,
         rest_dates: (sim.restDates||[]).join(','),
-        version: 'v8.9.22'
+        version: 'v8.9.33'
       };
       fetch(url, {
         method: 'POST',
@@ -2674,7 +2706,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.9.22'
+        version: 'v8.9.33'
       };
       
       // auto_backup은 항상 최신으로 갱신 (가벼운 백업) - 다중 저장소
@@ -2780,7 +2812,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         if(!isNaN(n) && n>=0 && n<=23) return n;
       }
     }catch(e){}
-    return 0; // v8.9.22: 기본값 자정(0시) - 기존 3시에서 변경
+    return 0; // v8.9.33: 기본값 자정(0시) - 기존 3시에서 변경
   }
   function getWorkDate(dateObj) {
     const d = new Date(dateObj);
@@ -2816,7 +2848,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
   });
   setTimeout(function(){ try{ updateWorkTimeLabel(); }catch(e){} }, 1200);
 
-  // v8.9.22: 운행 기준 시간 UI 라벨 업데이트
+  // v8.9.33: 운행 기준 시간 UI 라벨 업데이트
   function updateWorkTimeLabel(){
     try{
       const h = getWorkStartHour();
@@ -2960,7 +2992,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
 
   function getTodayDrivingData() {
     const key = getTodayKey();
-    // v8.9.22: 대시보드 3중 저장에서 복구 (localStorage 날아가도 쿠키/세션에서 복구)
+    // v8.9.33: 대시보드 3중 저장에서 복구 (localStorage 날아가도 쿠키/세션에서 복구)
     let raw = null;
     try{ raw = localStorage.getItem('sudataxi_driving_records'); }catch(e){}
     if(!raw || raw==='null' || raw==='undefined' || raw.trim()==='' || raw==='{}'){
@@ -2988,7 +3020,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     try{ localStorage.setItem('sudataxi_driving_records', jsonStr); }catch(e){}
     try{ saveToAllStorages('sudataxi_driving_records', jsonStr); }catch(e){}
     try{ if(typeof executeAutoBackup==='function') executeAutoBackup(); }catch(e){}
-    // v8.9.22: 대시보드 운행기록도 구글시트에 즉시 저장 (손님탑승처럼)
+    // v8.9.33: 대시보드 운행기록도 구글시트에 즉시 저장 (손님탑승처럼)
     try{ if(typeof syncRevenueLogToSheets==='function') syncRevenueLogToSheets('driving_data'); }catch(e){}
     try{ if(typeof syncToGoogleSheets==='function') syncToGoogleSheets(false); }catch(e){}
   }
@@ -3041,7 +3073,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
   let _lastBoardingAction = 0;
   let _globalScrollYAtTouchStart = 0;
 
-  // v8.9.22 분리: 하단=위치저장, 대시보드=시간만 - 원본 레이아웃 유지
+  // v8.9.33 분리: 하단=위치저장, 대시보드=시간만 + 자동 운행시작
   function handleBoardingTimeOnly(e, isHighValue = false) {
     try { if (e) { e.preventDefault(); e.stopPropagation(); } } catch(err) {}
     const now = Date.now();
@@ -3049,10 +3081,11 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     if (now - _lastBoardingAction < 800) return;
     _lastBoardingAction = now;
     _boardingLockUntil = now + 600;
+    // v8.9.33: 운행시작 안했어도 승차 누르면 자동 운행시작
     if (!drivingState.isDriving && typeof toggleDriving === 'function') {
       toggleDriving();
     }
-    // v8.9.22: 휴식모드에서도 바로 승차로 전환
+    // v8.9.33: 휴식모드에서도 바로 승차로 전환
     if (drivingState.isBreak) {
       drivingState.isBreak = false;
       drivingState.stateStartTime = Date.now();
@@ -3088,10 +3121,11 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     if (now - _lastBoardingAction < 800) return;
     _lastBoardingAction = now;
     _boardingLockUntil = now + 600;
+    // v8.9.33: 운행시작 안했어도 승차 누르면 자동 운행시작
     if (!drivingState.isDriving && typeof toggleDriving === 'function') {
       toggleDriving();
     }
-    // v8.9.22: 휴식모드에서도 바로 승차로 전환 + 위치저장 보장
+    // v8.9.33: 휴식모드에서도 바로 승차로 전환 + 위치저장 보장
     if (drivingState.isBreak) {
       drivingState.isBreak = false;
       drivingState.stateStartTime = Date.now();
@@ -3209,7 +3243,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       driveBtn.innerText = '⏹️ 운행 종료'; driveBtn.className = 'drive-control-btn btn-red'; breakBtn.disabled = false;
       if (drivingState.isBreak) {
         breakBtn.innerText = '▶️ 휴식 종료'; breakBtn.className = 'drive-control-btn btn-purple';
-        // v8.9.22: 휴식 중에도 승차 가능하게 (바로 전환)
+        // v8.9.33: 휴식 중에도 승차 가능하게 (바로 전환)
         boardBtn.disabled = false; boardBtn.className = 'drive-control-btn btn-accent';
         alightBtn.disabled = true; alightBtn.className = 'drive-control-btn btn-idle';
         if(bottomBoardBtn) { bottomBoardBtn.disabled = false; bottomBoardBtn.style.opacity = '1'; }
@@ -3237,6 +3271,34 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       if(bottomAlightBtn) bottomAlightBtn.disabled = true;
     }
     renderCurrentStateTime(Date.now());
+    try{
+      var _bbs=document.querySelectorAll('.bottom-bar .bb-btn');
+      for(var _i=0;_i<_bbs.length;_i++){
+        _bbs[_i].classList.remove('active-board');
+        _bbs[_i].classList.remove('active-alight');
+        _bbs[_i].classList.remove('active-rest');
+        _bbs[_i].classList.remove('active-state');
+        _bbs[_i].style.removeProperty('border');
+        _bbs[_i].style.removeProperty('border-width');
+        _bbs[_i].style.removeProperty('border-color');
+        _bbs[_i].style.removeProperty('border-style');
+        _bbs[_i].style.removeProperty('box-shadow');
+        _bbs[_i].style.removeProperty('outline');
+      }
+      if(drivingState.isDriving){
+        var _t=null;
+        if(drivingState.isBreak){
+          _t=document.getElementById('btn-bottom-restroom-search');
+          if(_t){ _t.classList.add('active-rest'); _t.style.setProperty('border','4px solid #fff','important'); _t.style.setProperty('box-shadow','0 0 0 3px #000, 0 0 0 6px #3B82F6','important'); }
+        } else if(drivingState.isPassengerBoarded){
+          _t=document.getElementById('btn-bottom-board');
+          if(_t){ _t.classList.add('active-board'); _t.style.setProperty('border','4px solid #000','important'); _t.style.setProperty('box-shadow','0 0 0 3px #fff, 0 0 0 6px #000','important'); }
+        } else {
+          _t=document.getElementById('btn-bottom-alight');
+          if(_t){ _t.classList.add('active-alight'); _t.style.setProperty('border','4px solid #fff','important'); _t.style.setProperty('box-shadow','0 0 0 3px #000, 0 0 0 6px #fff','important'); }
+        }
+      }
+    }catch(e){}
   }
 
   function setTimerPreset(min) {
@@ -4727,9 +4789,10 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     if (nearPool.length > 0) selectedCandidates.push(nearPool[0]);
 
     scoredPool.sort((a, b) => b.score - a.score || a.dist - b.dist);
+    var maxCandidateCount = targetBoundaryCardData ? 3 : 4; // v8.9.33 4번째 복귀지점 고정
     for (let candidate of scoredPool) {
       if (!isDuplicatePlace(candidate.name, candidate.lat, candidate.lng, selectedCandidates)) selectedCandidates.push(candidate);
-      if (selectedCandidates.length === 4) break;
+      if (selectedCandidates.length === maxCandidateCount) break;
     }
     selectedCandidates.sort((a, b) => a.dist - b.dist);
 
@@ -4741,8 +4804,8 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     }
 
     currentRouteData = [{ name: "현재 위치", lat: currentPos.lat, lng: currentPos.lng, isCurrent: true }, ...selectedCandidates];
-    // v7.9.29: DB 없는 지역(isAutoRegion)이면 복귀점 숨김, 일반 관외(성남 등)는 복귀 과정 원칙 유지하므로 복귀점 항상 표시 (멀어도 과정에 있는 핫스팟 안내가 목적)
-    if (!isAutoRegion && targetBoundaryCardData) {
+    // v8.9.33: DB 없는 지역이어도 복귀점 항상 표시
+    if (targetBoundaryCardData) {
       currentRouteData.push(targetBoundaryCardData);
     }
     
@@ -4754,9 +4817,9 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     
     // v7.9.27 로그 개선
     if (isAutoRegion) {
-      if (logEl) logEl.innerHTML = `📍 [${currentRegionName || '관외'}] 주변 5km 내 DB 부족 → 실시간 ${allLiveHotspots.length}곳으로 대체 탐색 (복귀 경로 숨김)`;
+      if (logEl) logEl.innerHTML = `📍 [${currentRegionName || '관외'}] 주변 5km 내 DB 부족 → 실시간 ${allLiveHotspots.length}곳 + 복귀지점(4번째)`;
     }
-    renderCards(selectedCandidates, referenceHubs, isAutoRegion ? null : targetBoundaryCardData);
+    renderCards(selectedCandidates, referenceHubs, targetBoundaryCardData); // v8.9.33
     // v7.9.23 자주가는 곳 렌더링
     try { renderFrequentPresets(); } catch(e) {}
   }
@@ -5032,7 +5095,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
   }
 
   async function saveCurrentCallLocation(isHighValue = false) {
-    // v8.9.22: 하단 승차 전용 - 위치 저장 반드시 보장 + 휴식→승차 자동전환
+    // v8.9.33: 하단 승차 전용 - 위치 저장 반드시 보장 + 휴식→승차 자동전환
     let posAvailable = !!currentPos;
     if (!currentPos) {
       try{
@@ -5047,10 +5110,10 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
         posAvailable = false;
       }
     }
-    // v8.9.22 fix: GPS 실패시 마지막 로그 재사용 금지 (범계 루프 방지)
+    // v8.9.33 fix: GPS 실패시 마지막 로그 재사용 금지 (범계 루프 방지)
     if(!posAvailable || !currentPos){
       if(typeof showToast==='function') showToast('⚠️ GPS 신호 없음 - 위치 저장 건너뜀 (위치 허용 확인)');
-      console.warn('GPS unavailable, skip saving to avoid Beomgye loop - v8.9.22');
+      console.warn('GPS unavailable, skip saving to avoid Beomgye loop - v8.9.33');
       return;
     }
     let smartName = await getSmartLocationName(currentPos.lat, currentPos.lng, '📍 탑승기록');
@@ -5067,7 +5130,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     });
     localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
     try{ saveToAllStorages('sudataxi_call_logs', JSON.stringify(logs)); }catch(e){}
-    // v8.9.22 fix: 저장 즉시 최근목록 UI 갱신
+    // v8.9.33 fix: 저장 즉시 최근목록 UI 갱신
     try{ if(typeof updateCallLogStats==='function') updateCallLogStats(); }catch(e){}
     try{ if(typeof renderCallMapView==='function' && typeof activeTab!=='undefined' && activeTab===3) renderCallMapView(); }catch(e){}
     drivingState.isPassengerBoarded = true;
@@ -5135,7 +5198,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     if (!list) return;
     const custom = JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]');
     if (custom.length === 0) { list.innerHTML = `<div style="font-size:9px; color:var(--stat-label); text-align:center;">등록된 장소가 없습니다.</div>`; return; }
-    // v8.9.22: 최근 3개만 표시 (중복방지 이미 되어있으므로 최신순 3개)
+    // v8.9.33: 최근 3개만 표시 (중복방지 이미 되어있으므로 최신순 3개)
     const recent = custom.slice(-3).reverse();
     list.innerHTML = recent.map(item => `
       <div class="recent-log-item">
@@ -5215,7 +5278,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     document.getElementById('kpi-today-fill').style.width = `${Math.min(todayBoardPct, 100)}%`;
     document.getElementById('kpi-today-fill').style.background = getBarColor(todayBoardPct);
     
-    // v8.9.22: 시간당 평균매출 = 오늘실매출 / 총운행시간
+    // v8.9.33: 시간당 평균매출 = 오늘실매출 / 총운행시간
     try{
       let dailyRevRaw = null;
       try{ dailyRevRaw = getFromAnyStorage('sudataxi_daily_rev'); }catch(e){}
@@ -5680,7 +5743,7 @@ function initDailyRevenue() {
     const inputRevEl = document.getElementById('input-rev');
     if(!inputRevEl) return;
 
-    // v8.9.22 Fix: 앱 닫아도 유지되게 - localStorage 우선, 0도 유효값
+    // v8.9.33 Fix: 앱 닫아도 유지되게 - localStorage 우선, 0도 유효값
     let savedRev = null;
     try{ savedRev = localStorage.getItem('sudataxi_daily_rev'); }catch(e){}
     if(savedRev === null || savedRev === undefined || savedRev === 'null' || savedRev === 'undefined'){
@@ -5734,10 +5797,10 @@ function initDailyRevenue() {
     } catch(e) { console.error('initDailyRevenue error', e); }
   }
 
-  // 대시보드 전체 숫자 자동 복구 (빌드 후에도 유지) - v8.9.22 강화
+  // 대시보드 전체 숫자 자동 복구 (빌드 후에도 유지) - v8.9.33 강화
   function autoRestoreAllDashboardData() {
     try {
-      // v8.9.22: localStorage가 비었으면 쿠키, 세션, IndexedDB에서도 복구 시도
+      // v8.9.33: localStorage가 비었으면 쿠키, 세션, IndexedDB에서도 복구 시도
       let safeRaw = getFromAnyStorage('sudataxi_safe_backup') || localStorage.getItem('sudataxi_safe_backup');
       let autoRaw = getFromAnyStorage('sudataxi_auto_backup') || localStorage.getItem('sudataxi_auto_backup');
       // 쿠키에서 직접 daily_rev, sim_data도 시도
@@ -5749,7 +5812,7 @@ function initDailyRevenue() {
       try{ auto = autoRaw ? JSON.parse(autoRaw) : null; }catch(e){}
       const backup = safe || auto;
       
-      // v8.9.22: EMBEDDED_DEFAULTS에서도 복구 (빌드 파일 자체에 박힌 기본값)
+      // v8.9.33: EMBEDDED_DEFAULTS에서도 복구 (빌드 파일 자체에 박힌 기본값)
       try{
         if(typeof EMBEDDED_DEFAULTS!=='undefined' && EMBEDDED_DEFAULTS){
           const curRev = localStorage.getItem('sudataxi_daily_rev');
@@ -6264,7 +6327,7 @@ function initMic() {
         calGrid.innerHTML += `<div></div>`;
     }
     
-    // v8.9.22 Fix: sim_data도 localStorage 우선, 0도 유효
+    // v8.9.33 Fix: sim_data도 localStorage 우선, 0도 유효
     let simRaw = null;
     try{ simRaw = localStorage.getItem('sudataxi_sim_data'); }catch(e){}
     if(!simRaw || simRaw==='null' || simRaw==='undefined' || String(simRaw).trim()===''){
@@ -6300,7 +6363,7 @@ function initMic() {
     if(inpTarget) inpTarget.value = (simulatorData.target !== undefined && simulatorData.target !== null && String(simulatorData.target).trim() !== '') ? simulatorData.target : 4000000;
     if(inpCurr) inpCurr.value = (simulatorData.current !== undefined && simulatorData.current !== null && String(simulatorData.current).trim() !== '') ? simulatorData.current : 0;
     calculateSimulatorTargets();
-    // v8.9.22: 닫기 전 강제 저장
+    // v8.9.33: 닫기 전 강제 저장
     try{
       const forceSaveSim = () => {
         try{
@@ -6523,7 +6586,7 @@ function initMic() {
     document.getElementById('btn-import-open').addEventListener('click', () => document.getElementById('import-file-input').click());
     document.getElementById('import-file-input').addEventListener('change', importCallLogs);
     document.getElementById('btn-add-custom').addEventListener('click', addCustomHotspotPrompt);
-    // v8.9.22: 나만의 화장실 관련 버튼
+    // v8.9.33: 나만의 화장실 관련 버튼
     try{
       const btnAddRest = document.getElementById('btn-add-custom-restroom');
       if(btnAddRest) btnAddRest.addEventListener('click', () => { if(typeof saveCurrentRestroomLocation==='function') saveCurrentRestroomLocation(); });
@@ -6541,7 +6604,7 @@ function initMic() {
     try { setTimeout(() => renderFrequentPresets(), 800); } catch(e) {}
 
     
-    // v8.9.22 fix: 하드코딩된 범계 덮어쓰기 제거
+    // v8.9.33 fix: 하드코딩된 범계 덮어쓰기 제거
     // const b1 = DEFAULT_MASTER_HOTSPOTS.find(h => h.id === 'hs_g_anyang_2');
     // if(b1) { b1.lat = 37.38965; b1.lng = 126.95061; b1.name = "범계역 로데오거리"; }
     // const b2 = MAJOR_HUBS.find(h => h.name.includes("범계역"));
@@ -6549,7 +6612,7 @@ function initMic() {
 
     document.getElementById('btn-drive-toggle').addEventListener('click', toggleDriving);
     document.getElementById('btn-break-toggle').addEventListener('click', toggleBreak);
-    // === 탑승/하차 버튼 - v8.9.22 확정: 하단=위치저장 O, 대시보드=시간만 X ===
+    // === 탑승/하차 버튼 - v8.9.33 확정: 하단=위치저장 O, 대시보드=시간만 X ===
     (function(){
       const boardEl = document.getElementById('btn-board');
       const alightEl = document.getElementById('btn-alight');
@@ -6763,7 +6826,7 @@ function initMic() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.22</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.33</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
@@ -6904,7 +6967,7 @@ function initMic() {
   }
 
   function bindBottom(){
-    // v8.9.22: 하단 승차는 이미 createSimpleHandler에서 handleBoarding(위치저장)으로 바인딩됨 - 중복 방지 위해 여기선 바인딩 안함
+    // v8.9.33: 하단 승차는 이미 createSimpleHandler에서 handleBoarding(위치저장)으로 바인딩됨 - 중복 방지 위해 여기선 바인딩 안함
     // 대시보드 승차는 시간만, 하단 승차만 위치저장 구조 유지
     var alight = document.getElementById('btn-bottom-alight');
     if(alight && !alight._b60){
@@ -7005,7 +7068,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   function bindRestroomSearch() {
-    // v8.9.22 fix: 하단 휴식버튼 - 짧게=휴식토글 + 대시보드 자동 이동, 길게=화장실 저장
+    // v8.9.33 fix: 하단 휴식버튼 - 짧게=휴식토글 + 대시보드 자동 이동, 길게=화장실 저장
     const el = document.getElementById('btn-bottom-restroom-search');
     if (!el || el._bound) return; el._bound=true;
     let longTimer=null; let isLong=false;
@@ -7040,7 +7103,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});)();</script>
 <script id="v891-fix">
 (function(){
-  // v8.9.22: 입력 즉시 저장, 포커스 전체선택, 앱 종료시 강제 저장
+  // v8.9.33: 입력 즉시 저장, 포커스 전체선택, 앱 종료시 강제 저장
   document.addEventListener('focusin', function(e){
     if(e.target && (e.target.id==='input-rev' || e.target.id==='input-sim-target' || e.target.id==='input-sim-current')){
       try{ e.target.select(); }catch(err){}
@@ -7068,5 +7131,5 @@ document.addEventListener('DOMContentLoaded', function() {
   }catch(e){}
 })();
 </script>
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
 </html>
