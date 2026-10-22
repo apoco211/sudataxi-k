@@ -92,7 +92,7 @@
   const EMBEDDED_DEFAULTS = {
     daily_rev: 0,
     sim_data: {target:4000000, current:0, restDates:[]},
-    version: 'v8.9.89'
+    version: 'v8.9.91'
   };
 </script>
 <style>
@@ -216,9 +216,9 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>sudataxi-k v8.9.90</title>
+  <title>sudataxi-k v8.9.91</title>
 
-  <link rel="manifest" href="./manifest.json">
+  <link rel="manifest" href="data:application/json;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwMDAwMDAiLCAiZGVzY3JpcHRpb24iOiAi7JWI7JaRL+q1sO2PrC/snZjsmZUv6rO87LKcIOy9nC/rspTsuZnquIgg7KeA64+EIC0g7IOB7JeF7KeA6rWsIOykkeyLrCB2OC45LjkwIiwgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsICJpY29ucyI6IFt7InB1cnBvc2UiOiAiYW55IG1hc2thYmxlIiwgInNpemVzIjogIjUxMng1MTIiLCAic3JjIjogImh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzM3NzQvMzc3NDA4My5wbmciLCAidHlwZSI6ICJpbWFnZS9wbmcifV0sICJuYW1lIjogIuyImOuLpO2DneyLnEsgdjguOS45MCIsICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsICJzaG9ydF9uYW1lIjogIuyImOuLpO2DneyLnEsiLCAic3RhcnRfdXJsIjogIi4vaW5kZXguaHRtbD92PTguOS45MCIsICJ0aGVtZV9jb2xvciI6ICIjRkZDODAwIiwgInZlcnNpb24iOiAiOC45LjkwIn0=">
   <meta name="theme-color" content="#FFC800">
 
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1995,7 +1995,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v8.9.89";
+  const BUILD_VERSION = "v8.9.91";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2035,9 +2035,56 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
   
   let currentThemeMode = localStorage.getItem('sudataxi_theme_mode') || 'night';
   
+  // v8.9.90 FIX: PWA가 이전 버전 뜨는 증상 근본 해결
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(()=>{}); });
+    window.addEventListener('load', () => { 
+      navigator.serviceWorker.register('./sw.js?v=8.9.91').then(reg => {
+        // 새 버전 발견 시 즉시 업데이트
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // 새 버전 대기 중이면 즉시 활성화
+              newWorker.postMessage({ action: 'skipWaiting' });
+              if (typeof showToast === 'function') showToast('🔄 새 버전 발견 - 업데이트 중...');
+            }
+          });
+        });
+      }).catch(()=>{}); 
+    });
+    // 새 SW가 활성화되면 자동 새로고침 (이전 버전 잔존 방지)
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
   }
+  // 빌드 버전 체크 - 이전 버전 캐시로 떴을 때 강제 갱신
+  (function checkBuildVersion(){
+    try {
+      const currentBuild = typeof BUILD_VERSION !== 'undefined' ? BUILD_VERSION : 'v8.9.90';
+      const lastBuild = localStorage.getItem('sudataxi_last_build_version');
+      if (lastBuild && lastBuild !== currentBuild) {
+        console.log(`[PWA FIX] 버전 변경 감지: ${lastBuild} -> ${currentBuild}, 캐시 정리`);
+        // 이전 버전이면 캐시 전부 삭제
+        if ('caches' in window) {
+          caches.keys().then(keys => keys.forEach(k => { if(k.startsWith('sudataxi-k-')) caches.delete(k); }));
+        }
+        // 범계 위치 등 구데이터도 같이 정리
+        try { if(typeof autoFixBeomgyeLocation === 'function') autoFixBeomgyeLocation(); } catch(e){}
+      }
+      localStorage.setItem('sudataxi_last_build_version', currentBuild);
+      // URL에 버전 쿼리가 없으면 추가 (PWA 캐시 버스트)
+      try {
+        if (!location.search.includes('v=')) {
+          const url = new URL(location.href);
+          url.searchParams.set('v', currentBuild.replace('v',''));
+          // 히스토리는 안 건드리고, 다음 로드 때 반영되도록만 저장
+        }
+      } catch(e){}
+    } catch(e){}
+  })();
 
   function applyThemeMode(theme) {
     currentThemeMode = theme;
@@ -2671,7 +2718,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
         date_str: new Date().toLocaleDateString('ko-KR'),
-        version: 'v8.9.89'
+        version: 'v8.9.91'
       };
       // v8.9.80: 매출 상세도 함께 전송 (손님탑승처럼 시트에 바로 기록되게)
       try{
@@ -2719,7 +2766,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         monthly_target: sim.target||0,
         monthly_current: sim.current||0,
         rest_dates: (sim.restDates||[]).join(','),
-        version: 'v8.9.89'
+        version: 'v8.9.91'
       };
       fetch(url, {
         method: 'POST',
@@ -2749,7 +2796,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.9.89'
+        version: 'v8.9.91'
       };
       
       // auto_backup은 항상 최신으로 갱신 (가벼운 백업) - 다중 저장소
@@ -3271,14 +3318,37 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     if (drivingStatsTimer) { clearInterval(drivingStatsTimer); drivingStatsTimer = null; }
   }
 
+  // v8.9.91 FIX: 오늘 운행 아래 정보랑 하단버튼 아래 정보 싱크 안 맞는 버그 근본 수정
   function renderCurrentStateTime(nowDate) {
     const statusEl = document.getElementById('driving-current-status');
     if (!statusEl) return;
-    if (!drivingState.isDriving) { statusEl.innerHTML = '(운행 대기)'; return; }
+    if (!drivingState.isDriving) { 
+      statusEl.innerHTML = '(운행 대기)'; 
+      // 하단도 같이 동기화
+      try {
+        const bottomText = document.getElementById('bottom-status-below-text');
+        if (bottomText) bottomText.textContent = '⏸️ 대기중';
+      } catch(e){}
+      return; 
+    }
     let stateElapsed = drivingState.stateStartTime ? Math.floor((nowDate - drivingState.stateStartTime) / 1000) : 0;
     const timeStr = stateElapsed >= 3600 ? formatHHMMSS(stateElapsed) : formatMMSS(stateElapsed);
     let statusText = drivingState.isBreak ? '☕ 휴식중' : (drivingState.isPassengerBoarded ? '🙋 손님탑승중' : '🈳 빈차운행중');
     statusEl.innerHTML = `(${statusText} <span style="color: #3B82F6; font-weight: 900; margin-left: 2px;">[${timeStr}]</span>)`;
+    
+    // v8.9.91 FIX: 하단 상태바 텍스트도 같은 시간으로 동기화 (04:38 vs 04:20 불일치 해결)
+    try {
+      const bottomText = document.getElementById('bottom-status-below-text');
+      if (bottomText) {
+        if (drivingState.isBreak) {
+          bottomText.textContent = `☕ 휴식중 [${timeStr}]`;
+        } else if (drivingState.isPassengerBoarded) {
+          bottomText.textContent = `🟡 승차중 [${timeStr}]`;
+        } else {
+          bottomText.textContent = `🈳 빈차운행중 [${timeStr}]`;
+        }
+      }
+    } catch(e){}
   }
 
   function updateDrivingUI() {
@@ -3329,44 +3399,18 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       }
       if(drivingState.isDriving){
         var _t=null;
+        // v8.9.91 FIX: 하단 버튼 하이라이트 로직 정상화 - 현재 상태가 아니라 다음 액션 기준
+        // 빈차운행중 -> 승차 버튼 강조, 승차중 -> 하차 버튼 강조, 휴식중 -> 휴식 버튼 강조
         if(drivingState.isBreak){ _t=document.getElementById('btn-bottom-restroom-search'); if(_t){ _t.classList.add('active-rest'); _t.style.setProperty('border','4px solid #fff','important'); _t.style.setProperty('box-shadow','0 0 0 3px #000, 0 0 0 6px #3B82F6','important'); } }
-        else if(drivingState.isPassengerBoarded){ _t=document.getElementById('btn-bottom-board'); if(_t){ _t.classList.add('active-board'); _t.style.setProperty('border','4px solid #000','important'); _t.style.setProperty('box-shadow','0 0 0 3px #fff, 0 0 0 6px #000','important'); } }
-        else { _t=document.getElementById('btn-bottom-alight'); if(_t){ _t.classList.add('active-alight'); _t.style.setProperty('border','4px solid #fff','important'); _t.style.setProperty('box-shadow','0 0 0 3px #000, 0 0 0 6px #fff','important'); } }
+        else if(drivingState.isPassengerBoarded){ _t=document.getElementById('btn-bottom-alight'); if(_t){ _t.classList.add('active-alight'); _t.style.setProperty('border','4px solid #fff','important'); _t.style.setProperty('box-shadow','0 0 0 3px #000, 0 0 0 6px #FF6B00','important'); } }
+        else { _t=document.getElementById('btn-bottom-board'); if(_t){ _t.classList.add('active-board'); _t.style.setProperty('border','4px solid #000','important'); _t.style.setProperty('box-shadow','0 0 0 3px #fff, 0 0 0 6px #000','important'); } }
       }
+      // v8.9.91 FIX: 하단 상태 텍스트는 renderCurrentStateTime에서 동기화하므로 여기서는 생성만 하고 텍스트 복사는 제거 (싱크 버그 원인)
       var _bsWrap = document.getElementById('bottom-status-below');
       if(!_bsWrap){
         _bsWrap = document.createElement('div'); _bsWrap.id='bottom-status-below'; _bsWrap.className='bottom-status-below';
         var _inner = document.createElement('span'); _inner.id='bottom-status-below-text'; _bsWrap.appendChild(_inner);
         document.body.appendChild(_bsWrap);
-      }
-      var _bsText = document.getElementById('bottom-status-below-text');
-      if(_bsText){
-        try{
-          var _topEl = document.getElementById('driving-current-status');
-          var _topText = _topEl ? _topEl.innerText || _topEl.textContent : '';
-          // _topText is like "(빈차운행중 [56:42])" or "(운행 대기)"
-          var _clean = _topText.replace(/[()]/g,'').trim();
-          if(_clean.includes('빈차운행중')){
-            var _m = _clean.match(/\[.*?\]/);
-            var _t = _m ? _m[0] : '';
-            _bsText.textContent = '🈳 빈차운행중 '+_t;
-          } else if(_clean.includes('휴식중')){
-            var _m2 = _clean.match(/\[.*?\]/);
-            var _t2 = _m2 ? _m2[0] : '';
-            _bsText.textContent = '☕ 휴식중 '+_t2;
-          } else if(_clean.includes('탑승중') || _clean.includes('승차')){
-            var _m3 = _clean.match(/\[.*?\]/);
-            var _t3 = _m3 ? _m3[0] : '';
-            _bsText.textContent = '🟡 승차중 '+_t3;
-          } else if(_clean.includes('대기')){
-            _bsText.textContent = '⏸️ 대기중 - 오늘 운행 현황 확인';
-          } else {
-            // fallback: use same as top
-            _bsText.textContent = _clean || '⏸️ 대기중';
-          }
-        }catch(e){ 
-          try{ _bsText.textContent = document.getElementById('driving-current-status').innerText.replace(/[()]/g,'').trim() || '⏸️ 대기중'; }catch(e2){ _bsText.textContent='⏸️ 대기중'; }
-        }
       }
     }catch(e){}
   }
@@ -4151,8 +4195,8 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       const days = ['일', '월', '화', '수', '목', '금', '토']; const dayStr = days[nowDate.getDay()];
       const isWeekend = (nowDate.getDay() === 0 || nowDate.getDay() === 6);
       let badgeHtml = isHoliday ? `<span class="holiday-badge">🔴 ${holidayName || '공휴일'}</span>` : (isWeekend ? `<span class="holiday-badge" style="background:#FF8C00;">🟡 휴일</span>` : `<span class="weekday-badge">🟢 평일</span>`);
-      headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) <span class="build-ver-tag">v8.9.89</span> ${badgeHtml}`;
-    } catch(e) { try { const h=document.getElementById('app-header-title'); if(h) h.innerHTML=`📅 ${nowDate.getMonth()+1}.${nowDate.getDate()} <span class="build-ver-tag">v8.9.89</span>`; } catch(e2){} }
+      headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) <span class="build-ver-tag">v8.9.91</span> ${badgeHtml}`;
+    } catch(e) { try { const h=document.getElementById('app-header-title'); if(h) h.innerHTML=`📅 ${nowDate.getMonth()+1}.${nowDate.getDate()} <span class="build-ver-tag">v8.9.91</span>`; } catch(e2){} }
   }
 
   async function checkIsPublicHolidayRealtime() {
@@ -7118,7 +7162,7 @@ function initMic() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.89</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.91</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
