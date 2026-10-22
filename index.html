@@ -92,7 +92,7 @@
   const EMBEDDED_DEFAULTS = {
     daily_rev: 0,
     sim_data: {target:4000000, current:0, restDates:[]},
-    version: 'v8.9.80'
+    version: 'v8.9.86'
   };
 </script>
 <style>
@@ -1995,7 +1995,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v8.9.80";
+  const BUILD_VERSION = "v8.9.86";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2549,15 +2549,30 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
   }catch(e){}
   async function restoreAllFromIDB(){
     try{
-      const keys = ['sudataxi_daily_rev','sudataxi_sim_data','sudataxi_driving_records','sudataxi_driving_state','sudataxi_call_logs'];
+      // v8.9.84 FIX: 마스터 DB도 복구 목록에 포함 - 고객탑승정보와 동일 방식
+      const keys = ['sudataxi_daily_rev','sudataxi_sim_data','sudataxi_driving_records','sudataxi_driving_state','sudataxi_call_logs','sudataxi_master_hotspots','sudataxi_custom_hotspots','sudataxi_custom_restrooms'];
       for(const key of keys){
         let idbVal = await loadFromIDB(key);
         if(idbVal && idbVal!=='null' && idbVal!=='{}' && String(idbVal).trim()!==''){
           let cur=null; try{ cur=localStorage.getItem(key); }catch(e){}
-          if(!cur || cur==='null' || cur==='{}' || (cur==='0' && key!=='sudataxi_daily_rev')){
+          // 마스터/커스텀은 빈 배열 '[]'도 유효하므로 길이 체크
+          const isEmptyArray = (cur === '[]' && (key.includes('master') || key.includes('custom')));
+          if(!cur || cur==='null' || cur==='{}' || isEmptyArray || (cur==='0' && key!=='sudataxi_daily_rev')){
             try{ localStorage.setItem(key, idbVal); }catch(e){}
             try{ setPersistentCookie(key, idbVal, 365); }catch(e){}
+            try{ sessionStorage.setItem(key, idbVal); }catch(e){}
           }
+        } else {
+          // IDB에 없으면 쿠키/세션에서 localStorage로 복구
+          try{
+            let anyVal = getFromAnyStorage(key);
+            if(anyVal && anyVal!=='null' && anyVal!=='{}' && String(anyVal).trim()!=='' && anyVal!=='[]'){
+              let cur=null; try{ cur=localStorage.getItem(key); }catch(e){}
+              if(!cur || cur==='null' || cur==='{}' || cur==='[]'){
+                try{ localStorage.setItem(key, anyVal); }catch(e){}
+              }
+            }
+          }catch(e){}
         }
       }
       try{ if(typeof initDailyRevenue==='function') setTimeout(()=>initDailyRevenue(), 100); }catch(e){}
@@ -2576,6 +2591,10 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     }catch(e){}
     try{ const dr=localStorage.getItem('sudataxi_driving_records'); if(dr){ try{saveToAllStorages('sudataxi_driving_records',dr);}catch(e){} try{saveToIDB('sudataxi_driving_records',dr);}catch(e){} } }catch(e){}
     try{ const ds=localStorage.getItem('sudataxi_driving_state'); if(ds){ try{saveToAllStorages('sudataxi_driving_state',ds);}catch(e){} try{saveToIDB('sudataxi_driving_state',ds);}catch(e){} } }catch(e){}
+    // v8.9.84 FIX: 마스터/커스텀 DB도 영구 저장
+    try{ const mh=localStorage.getItem('sudataxi_master_hotspots'); if(mh && mh!=='[]'){ try{saveToAllStorages('sudataxi_master_hotspots',mh);}catch(e){} try{saveToIDB('sudataxi_master_hotspots',mh);}catch(e){} } }catch(e){}
+    try{ const ch=localStorage.getItem('sudataxi_custom_hotspots'); if(ch){ try{saveToAllStorages('sudataxi_custom_hotspots',ch);}catch(e){} try{saveToIDB('sudataxi_custom_hotspots',ch);}catch(e){} } }catch(e){}
+    try{ const cr=localStorage.getItem('sudataxi_custom_restrooms'); if(cr){ try{saveToAllStorages('sudataxi_custom_restrooms',cr);}catch(e){} try{saveToIDB('sudataxi_custom_restrooms',cr);}catch(e){} } }catch(e){}
   }
   try{
     document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(restoreAllFromIDB, 80); });
@@ -2652,7 +2671,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
         date_str: new Date().toLocaleDateString('ko-KR'),
-        version: 'v8.9.80'
+        version: 'v8.9.86'
       };
       // v8.9.80: 매출 상세도 함께 전송 (손님탑승처럼 시트에 바로 기록되게)
       try{
@@ -2700,7 +2719,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         monthly_target: sim.target||0,
         monthly_current: sim.current||0,
         rest_dates: (sim.restDates||[]).join(','),
-        version: 'v8.9.80'
+        version: 'v8.9.86'
       };
       fetch(url, {
         method: 'POST',
@@ -2730,7 +2749,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.9.80'
+        version: 'v8.9.86'
       };
       
       // auto_backup은 항상 최신으로 갱신 (가벼운 백업) - 다중 저장소
@@ -3492,14 +3511,34 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     { name: "과천 주암/선바위 경계 (서울/강남 방면)", lat: 37.4520, lng: 127.0050, address: "과천동", isWisu: true }
   ];
 
+  // v8.9.84 FIX: 마스터 DB도 3중 영구 저장으로 - localStorage 날아가도 복구
   function getMasterHotspotsFromStorage() {
     let savedList = [];
-    const saved = localStorage.getItem('sudataxi_master_hotspots');
-    if (saved) { try { const parsed = JSON.parse(saved); if (Array.isArray(parsed)) savedList = parsed; } catch(e) {} }
+    try {
+      // 3중 저장에서 복구 시도
+      let saved = null;
+      try { saved = getFromAnyStorage('sudataxi_master_hotspots'); } catch(e) {}
+      if (!saved) { try { saved = localStorage.getItem('sudataxi_master_hotspots'); } catch(e) {} }
+      if (saved) { 
+        try { 
+          const parsed = JSON.parse(saved); 
+          if (Array.isArray(parsed)) savedList = parsed; 
+        } catch(e) {} 
+      }
+    } catch(e) {}
     const mergedMap = new Map();
     DEFAULT_MASTER_HOTSPOTS.forEach(item => mergedMap.set(item.id || item.name, item));
     savedList.forEach(item => mergedMap.set(item.id || item.name, item));
     return Array.from(mergedMap.values());
+  }
+  function saveMasterHotspotsPersistent(list){
+    try {
+      const json = JSON.stringify(list);
+      try { saveToAllStorages('sudataxi_master_hotspots', json); } catch(e) {}
+      try { localStorage.setItem('sudataxi_master_hotspots', json); } catch(e) {}
+      // 백업에도 저장
+      try { if(typeof executeAutoBackup==='function') executeAutoBackup(); } catch(e) {}
+    } catch(e) {}
   }
 
   // === v7.9.23 NEW: 자주가는 곳 프리셋 ===
@@ -4063,8 +4102,8 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       const days = ['일', '월', '화', '수', '목', '금', '토']; const dayStr = days[nowDate.getDay()];
       const isWeekend = (nowDate.getDay() === 0 || nowDate.getDay() === 6);
       let badgeHtml = isHoliday ? `<span class="holiday-badge">🔴 ${holidayName || '공휴일'}</span>` : (isWeekend ? `<span class="holiday-badge" style="background:#FF8C00;">🟡 휴일</span>` : `<span class="weekday-badge">🟢 평일</span>`);
-      headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) <span class="build-ver-tag">${BUILD_VERSION}</span> ${badgeHtml}`;
-    } catch(e) { try { const h=document.getElementById('app-header-title'); if(h) h.innerHTML=`📅 ${nowDate.getMonth()+1}.${nowDate.getDate()} <span class="build-ver-tag">${BUILD_VERSION}</span>`; } catch(e2){} }
+      headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) <span class="build-ver-tag">v8.9.86</span> ${badgeHtml}`;
+    } catch(e) { try { const h=document.getElementById('app-header-title'); if(h) h.innerHTML=`📅 ${nowDate.getMonth()+1}.${nowDate.getDate()} <span class="build-ver-tag">v8.9.86</span>`; } catch(e2){} }
   }
 
   async function checkIsPublicHolidayRealtime() {
@@ -6944,7 +6983,7 @@ function initMic() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.80</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.86</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
