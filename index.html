@@ -92,7 +92,7 @@
   const EMBEDDED_DEFAULTS = {
     daily_rev: 0,
     sim_data: {target:4000000, current:0, restDates:[]},
-    version: 'v8.9.86'
+    version: 'v8.9.89'
   };
 </script>
 <style>
@@ -216,7 +216,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>sudataxi-k v8.9.87</title>
+  <title>sudataxi-k v8.9.90</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1995,7 +1995,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v8.9.86";
+  const BUILD_VERSION = "v8.9.89";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2671,7 +2671,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
         date_str: new Date().toLocaleDateString('ko-KR'),
-        version: 'v8.9.86'
+        version: 'v8.9.89'
       };
       // v8.9.80: 매출 상세도 함께 전송 (손님탑승처럼 시트에 바로 기록되게)
       try{
@@ -2719,7 +2719,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         monthly_target: sim.target||0,
         monthly_current: sim.current||0,
         rest_dates: (sim.restDates||[]).join(','),
-        version: 'v8.9.86'
+        version: 'v8.9.89'
       };
       fetch(url, {
         method: 'POST',
@@ -2749,7 +2749,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.9.86'
+        version: 'v8.9.89'
       };
       
       // auto_backup은 항상 최신으로 갱신 (가벼운 백업) - 다중 저장소
@@ -3428,7 +3428,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
 
   const WISU_HOTSPOTS_V79 = [
 
-    { "id": "wisu_anyang_01", "name": "범계역 로데오거리", "lat": 37.38965, "lng": 126.95061, "address": "범계역", "type": "subway_nightlife", "region": "anyang", "isWisu": true, "peakHours": [18,19,20,21,22,23,0,1], "peakWeekdays": [4,5,6], "weather": { "rain": 15, "cold": 10 }, "baseScore": 30, "desc": "평일 저녁 학원가 + 주말 밤 유흥" },
+    { "id": "wisu_anyang_01", "name": "범계역 로데오거리", "lat": 37.3912, "lng": 126.9498, "address": "범계역", "type": "subway_nightlife", "region": "anyang", "isWisu": true, "peakHours": [18,19,20,21,22,23,0,1], "peakWeekdays": [4,5,6], "weather": { "rain": 15, "cold": 10 }, "baseScore": 30, "desc": "평일 저녁 학원가 + 주말 밤 유흥" },
     { "id": "wisu_anyang_02", "name": "평촌역 먹자골목 & 한림대병원", "lat": 37.3942, "lng": 126.9638, "address": "평촌역", "type": "subway_hospital", "region": "anyang", "isWisu": true, "peakHours": [11,12,13,17,18,19,20], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 40, "cold": 20 }, "baseScore": 35, "desc": "병원 퇴원 + 직장인 점심/퇴근" },
     { "id": "wisu_anyang_03", "name": "안양역 일번가", "lat": 37.4013, "lng": 126.9222, "address": "안양역", "type": "subway_nightlife", "region": "anyang", "isWisu": true, "peakHours": [19,20,21,22,23,0], "peakWeekdays": [4,5,6,0], "weather": { "rain": 20, "cold": 15 }, "baseScore": 25 },
     { "id": "wisu_anyang_04", "name": "인덕원역 환승거점", "lat": 37.4048, "lng": 126.9767, "address": "인덕원역", "type": "subway", "region": "anyang", "isWisu": true, "peakHours": [7,8,9,18,19,20,23,0], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 50, "cold": 25 }, "baseScore": 40, "desc": "막차 23:40 집중" },
@@ -3469,13 +3469,13 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     { "id": "hs_s_yeouido_1", "name": "여의도역 및 증권가 상권", "lat": 37.5216, "lng": 126.9242, "address": "여의도동", "type": "office_nightlife", "region": "seoul", "isWisu": false },
     { "id": "hs_g_gwacheon_1", "name": "정부과천청사역 중심상가 및 로데오", "lat": 37.4262, "lng": 126.9898, "address": "정부과천청사역", "type": "subway_nightlife", "region": "gwacheon", "isWisu": true },
     { "id": "hs_g_anyang_1", "name": "평촌역 먹자골목 및 한림대병원", "lat": 37.3942, "lng": 126.9638, "address": "평촌역", "type": "subway_hospital", "region": "anyang", "isWisu": true },
-    { "id": "hs_g_anyang_2", "name": "범계역 로데오거리 및 학원가", "lat": 37.38965, "lng": 126.95061, "address": "범계역", "type": "subway_academy", "region": "anyang", "isWisu": true },
+    { "id": "hs_g_anyang_2", "name": "범계역 로데오거리 및 학원가", "lat": 37.3912, "lng": 126.9498, "address": "범계역", "type": "subway_academy", "region": "anyang", "isWisu": true },
     { "id": "hs_g_anyang_4", "name": "안양역 일번가 및 메디컬타운", "lat": 37.4013, "lng": 126.9222, "address": "안양역", "type": "subway_hospital", "region": "anyang", "isWisu": true },
     { "id": "hs_g_anyang_5", "name": "산본역 중심상가 및 원광대병원", "lat": 37.3554, "lng": 126.9331, "address": "산본역", "type": "subway_hospital", "region": "gunpo", "isWisu": true },
     { "id": "hs_s_01", "name": "강남역 상업지구 및 병원거리", "lat": 37.4981, "lng": 127.0276, "address": "강남역", "type": "subway_hospital", "region": "seoul", "isWisu": false }
   ,
 
-    { "id": "wisu_anyang_01", "name": "범계역 로데오거리", "lat": 37.38965, "lng": 126.95061, "address": "범계역", "type": "subway_nightlife", "region": "anyang", "isWisu": true, "peakHours": [18,19,20,21,22,23,0,1], "peakWeekdays": [4,5,6], "weather": { "rain": 15, "cold": 10 }, "baseScore": 30, "desc": "평일 저녁 학원가 + 주말 밤 유흥" },
+    { "id": "wisu_anyang_01", "name": "범계역 로데오거리", "lat": 37.3912, "lng": 126.9498, "address": "범계역", "type": "subway_nightlife", "region": "anyang", "isWisu": true, "peakHours": [18,19,20,21,22,23,0,1], "peakWeekdays": [4,5,6], "weather": { "rain": 15, "cold": 10 }, "baseScore": 30, "desc": "평일 저녁 학원가 + 주말 밤 유흥" },
     { "id": "wisu_anyang_02", "name": "평촌역 먹자골목 & 한림대병원", "lat": 37.3942, "lng": 126.9638, "address": "평촌역", "type": "subway_hospital", "region": "anyang", "isWisu": true, "peakHours": [11,12,13,17,18,19,20], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 40, "cold": 20 }, "baseScore": 35, "desc": "병원 퇴원 + 직장인 점심/퇴근" },
     { "id": "wisu_anyang_03", "name": "안양역 일번가", "lat": 37.4013, "lng": 126.9222, "address": "안양역", "type": "subway_nightlife", "region": "anyang", "isWisu": true, "peakHours": [19,20,21,22,23,0], "peakWeekdays": [4,5,6,0], "weather": { "rain": 20, "cold": 15 }, "baseScore": 25 },
     { "id": "wisu_anyang_04", "name": "인덕원역 환승거점", "lat": 37.4048, "lng": 126.9767, "address": "인덕원역", "type": "subway", "region": "anyang", "isWisu": true, "peakHours": [7,8,9,18,19,20,23,0], "peakWeekdays": [1,2,3,4,5], "weather": { "rain": 50, "cold": 25 }, "baseScore": 40, "desc": "막차 23:40 집중" },
@@ -3535,6 +3535,55 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     try {
       const json = JSON.stringify(list);
       try { saveToAllStorages('sudataxi_master_hotspots', json); } catch(e) {}
+
+  // v8.9.89 FIX: 범계 로데오 위치 오류 자동 수정 - 수십번 요청된 버그 근본 해결
+  // 정확한 위치: 롯데백화점 평촌점 앞 로데오거리 중심 37.3912,126.9498 (범계역 2번출구)
+  function autoFixBeomgyeLocation() {
+    try {
+      const correctLat = 37.3912;
+      const correctLng = 126.9498;
+      let totalFixed = 0;
+      // 1) custom hotspots
+      try {
+        let custom = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
+        let fixed = 0;
+        custom = custom.map(item => {
+          if (item.name && item.name.includes('범계')) {
+            const lat = Number(item.lat); const lng = Number(item.lng);
+            // 산쪽(관모봉)이나 구좌표면 수정
+            if (lat > 37.395 || lng < 126.94 || Math.abs(lat - 37.3912) < 0.002) {
+              fixed++; return { ...item, lat: correctLat, lng: correctLng, _fixed:true, _fixedFrom: `${item.lat},${item.lng}` };
+            }
+          }
+          return item;
+        });
+        if (fixed>0) { localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(custom)); try{saveToAllStorages('sudataxi_custom_hotspots', JSON.stringify(custom));}catch(e){} totalFixed+=fixed; }
+      } catch(e){}
+      // 2) call_logs
+      try {
+        let logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+        let fixed=0;
+        logs = logs.map(l=>{ if(l.name&&l.name.includes('범계')&&l.lat&&l.lng){ const lat=Number(l.lat); const lng=Number(l.lng); if(lat>37.395||lng<126.94){fixed++; return {...l, lat:correctLat, lng:correctLng}; } } return l; });
+        if(fixed>0){ localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs)); totalFixed+=fixed; }
+      } catch(e){}
+      // 3) master hotspots localStorage
+      try {
+        let masters = JSON.parse(localStorage.getItem('sudataxi_master_hotspots') || '[]');
+        let fixed=0;
+        masters = masters.map(m=>{ if(m.name&&m.name.includes('범계')){ const lat=Number(m.lat); const lng=Number(m.lng); if(Math.abs(lat-37.3912)<0.002||lat>37.395||lng<126.94){fixed++; return {...m, lat:correctLat, lng:correctLng}; } } return m; });
+        if(fixed>0){ localStorage.setItem('sudataxi_master_hotspots', JSON.stringify(masters)); try{saveMasterHotspotsPersistent(masters);}catch(e){} totalFixed+=fixed; }
+      } catch(e){}
+      if(totalFixed>0){
+        console.log(`[v8.9.89] 범계 로데오 위치 ${totalFixed}곳 자동 수정 -> ${correctLat},${correctLng}`);
+        try{ if(typeof showToast==='function') showToast(`📍 범계 로데오 위치 ${totalFixed}곳 수정 완료 (롯데백화점 앞 정확한 위치)`); }catch(e){}
+      }
+      return totalFixed;
+    } catch(e){ console.warn('autoFixBeomgye fail', e); return 0; }
+  }
+  // 페이지 로드 후 1초 뒤 자동 실행
+  setTimeout(()=>{ try{ autoFixBeomgyeLocation(); }catch(e){} }, 1000);
+
+
       try { localStorage.setItem('sudataxi_master_hotspots', json); } catch(e) {}
       // 백업에도 저장
       try { if(typeof executeAutoBackup==='function') executeAutoBackup(); } catch(e) {}
@@ -4056,7 +4105,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
   const MAJOR_HUBS = [
     { name: "인덕원역 환승 거점", lat: 37.4048, lng: 126.9767, address: "인덕원역", type: "subway", isWisu: true },
     { name: "평촌역 먹자골목 및 한림대병원", lat: 37.3942, lng: 126.9638, address: "평촌역", type: "subway_hospital", isWisu: true },
-    { name: "범계역 로데오거리 및 학원가", lat: 37.38965, lng: 126.95061, address: "범계역", type: "subway_academy", isWisu: true },
+    { name: "범계역 로데오거리 및 학원가", lat: 37.3912, lng: 126.9498, address: "범계역", type: "subway_academy", isWisu: true },
     { name: "안양역 일번가", lat: 37.4013, lng: 126.9222, address: "안양역", type: "subway_hospital", isWisu: true },
     { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331, address: "산본역", type: "subway_hospital", isWisu: true }
   ];
@@ -4102,8 +4151,8 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       const days = ['일', '월', '화', '수', '목', '금', '토']; const dayStr = days[nowDate.getDay()];
       const isWeekend = (nowDate.getDay() === 0 || nowDate.getDay() === 6);
       let badgeHtml = isHoliday ? `<span class="holiday-badge">🔴 ${holidayName || '공휴일'}</span>` : (isWeekend ? `<span class="holiday-badge" style="background:#FF8C00;">🟡 휴일</span>` : `<span class="weekday-badge">🟢 평일</span>`);
-      headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) <span class="build-ver-tag">v8.9.86</span> ${badgeHtml}`;
-    } catch(e) { try { const h=document.getElementById('app-header-title'); if(h) h.innerHTML=`📅 ${nowDate.getMonth()+1}.${nowDate.getDate()} <span class="build-ver-tag">v8.9.86</span>`; } catch(e2){} }
+      headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) <span class="build-ver-tag">v8.9.89</span> ${badgeHtml}`;
+    } catch(e) { try { const h=document.getElementById('app-header-title'); if(h) h.innerHTML=`📅 ${nowDate.getMonth()+1}.${nowDate.getDate()} <span class="build-ver-tag">v8.9.89</span>`; } catch(e2){} }
   }
 
   async function checkIsPublicHolidayRealtime() {
@@ -4218,7 +4267,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
           places = [{ name: "산본역 중심상가 상업지구", lat: 37.3554, lng: 126.9331 }, { name: "금정역 환승 상업지구", lat: 37.3720, lng: 126.9435 }, { name: "군포시청 원광대병원 업체밀집", lat: 37.3620, lng: 126.9330 }, { name: "평촌스마트스퀘어 오피스", lat: 37.3942, lng: 126.9638 }];
         } else {
           // v8.9.86 FIX: 상업지구/업체밀집 중심으로 4곳 이상
-          places = [{ name: "범계역 로데오거리 상업지구", lat: 37.38965, lng: 126.95061 }, { name: "평촌역 먹자골목 업체밀집", lat: 37.3942, lng: 126.9638 }, { name: "안양역 일번가 상업지구", lat: 37.4013, lng: 126.9222 }, { name: "인덕원역 환승 상업지구", lat: 37.4048, lng: 126.9767 }, { name: "평촌스마트스퀘어 오피스밀집", lat: 37.3920, lng: 126.9570 }];
+          places = [{ name: "범계역 로데오거리 상업지구", lat: 37.3912, lng: 126.9498 }, { name: "평촌역 먹자골목 업체밀집", lat: 37.3942, lng: 126.9638 }, { name: "안양역 일번가 상업지구", lat: 37.4013, lng: 126.9222 }, { name: "인덕원역 환승 상업지구", lat: 37.4048, lng: 126.9767 }, { name: "평촌스마트스퀘어 오피스밀집", lat: 37.3920, lng: 126.9570 }];
         }
       }
       return { 
@@ -4237,7 +4286,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
         { name: "과천 지식정보타운 업체밀집", lat: 37.4144, lng: 126.9856 }, 
         { name: "안양 평촌스마트스퀘어 오피스밀집", lat: 37.3920, lng: 126.9570 },
         { name: "정부과천청사역 오피스상권", lat: 37.4262, lng: 126.9898 },
-        { name: "범계역 로데오거리 상업지구", lat: 37.38965, lng: 126.95061 },
+        { name: "범계역 로데오거리 상업지구", lat: 37.3912, lng: 126.9498 },
         { name: "인덕원역 IT밸리 업체밀집", lat: 37.4048, lng: 126.9767 }
       ];
       
@@ -4272,7 +4321,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
         if(curRegion.includes('군포') || curRegion.includes('Gunpo')){
           places = [{ name: "산본역 중심상가 상업지구", lat: 37.3554, lng: 126.9331 }, { name: "금정역 환승 상업지구", lat: 37.3720, lng: 126.9435 }, { name: "산본 로데오거리", lat: 37.3554, lng: 126.9331 }, { name: "군포시청 먹자골목", lat: 37.3620, lng: 126.9330 }];
         } else {
-          places = [{ name: "범계역 로데오거리 상업지구", lat: 37.38965, lng: 126.95061 }, { name: "평촌역 먹자골목 상업지구", lat: 37.3942, lng: 126.9638 }, { name: "안양역 일번가 상업지구", lat: 37.4013, lng: 126.9222 }, { name: "산본역 중심상가 상업지구", lat: 37.3554, lng: 126.9331 }, { name: "인덕원역 먹자골목", lat: 37.4048, lng: 126.9767 }];
+          places = [{ name: "범계역 로데오거리 상업지구", lat: 37.3912, lng: 126.9498 }, { name: "평촌역 먹자골목 상업지구", lat: 37.3942, lng: 126.9638 }, { name: "안양역 일번가 상업지구", lat: 37.4013, lng: 126.9222 }, { name: "산본역 중심상가 상업지구", lat: 37.3554, lng: 126.9331 }, { name: "인덕원역 먹자골목", lat: 37.4048, lng: 126.9767 }];
         }
       }
       
@@ -4288,7 +4337,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       if (isSuwon) places = [{ name: "성대역 먹자골목 상업지구", lat: 37.2995, lng: 126.9710 }, { name: "수원시청역 상업지구", lat: 37.2608, lng: 127.0287 }, { name: "인계동 나혜석거리", lat: 37.2635, lng: 127.0322 }];
       else if (isAnsan) places = [{ name: "중앙역 로데오거리", lat: 37.3186, lng: 126.8385 }, { name: "상록수역 상업지구", lat: 37.3025, lng: 126.8654 }];
       else if (isSeoul) places = [{ name: "강남역 상업지구", lat: 37.4981, lng: 127.0276 }, { name: "사당역 상업지구", lat: 37.4765, lng: 126.9816 }];
-      else places = [{ name: "범계역 로데오거리 상업지구", lat: 37.38965, lng: 126.95061 }, { name: "평촌역 먹자골목 상업지구", lat: 37.3942, lng: 126.9638 }, { name: "안양역 일번가 상업지구", lat: 37.4013, lng: 126.9222 }, { name: "선바위역 (과천-서울 경계)", lat: 37.4520, lng: 127.0050 }, { name: "석수역 (안양-서울 경계)", lat: 37.4355, lng: 126.9022 }];
+      else places = [{ name: "범계역 로데오거리 상업지구", lat: 37.3912, lng: 126.9498 }, { name: "평촌역 먹자골목 상업지구", lat: 37.3942, lng: 126.9638 }, { name: "안양역 일번가 상업지구", lat: 37.4013, lng: 126.9222 }, { name: "선바위역 (과천-서울 경계)", lat: 37.4520, lng: 127.0050 }, { name: "석수역 (안양-서울 경계)", lat: 37.4355, lng: 126.9022 }];
       
       return { 
         title: "심야 할증 및 장거리 피크 - 상업지구+경계", 
@@ -4319,7 +4368,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       { name: "가산디지털단지 업체밀집", lat: 37.4812, lng: 126.8821 }
     ];
     else defaultPlaces = [
-      { name: "범계역 로데오거리 상업지구", lat: 37.38965, lng: 126.95061 }, 
+      { name: "범계역 로데오거리 상업지구", lat: 37.3912, lng: 126.9498 }, 
       { name: "평촌역 먹자골목 업체밀집", lat: 37.3942, lng: 126.9638 },
       { name: "안양역 일번가 상업지구", lat: 37.4013, lng: 126.9222 },
       { name: "인덕원역 환승 상업지구", lat: 37.4048, lng: 126.9767 },
@@ -4346,15 +4395,49 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     if (cardsList) {
       cardsList.innerHTML = '<div style="text-align:center; padding:10px; font-size:11px; color:var(--stat-label);">전략 타겟 거리를 계산 중입니다...</div>';
       
-      if (strategy.places.length === 0 || !currentPos) {
+      if (strategy.places.length === 0) {
          cardsList.innerHTML = '<div style="text-align:center; padding:10px; font-size:11px; color:var(--stat-label);">현재 시간대에 추천되는 특정 거점이 없습니다.</div>';
          return;
       }
 
-      let scoredPool = await Promise.all(strategy.places.map(async (item) => {
-        let road = await fetchKakaoRoadRoute(currentPos.lat, currentPos.lng, item.lat, item.lng);
-        return { ...item, dist: road.distanceKm, estimatedTimeMin: road.durationMin, isStrategy: true };
-      }));
+      // v8.9.87 FIX: GPS 대기 중이어도 카드가 떠야 함 - currentPos 없어도 렌더
+      let posForCalc = currentPos;
+      if (!posForCalc) {
+        try {
+          // 마지막 콜 로그 위치나 저장된 위치에서 복구
+          const lastLogs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]');
+          if (lastLogs.length > 0) {
+            const last = lastLogs[lastLogs.length - 1];
+            if (last.lat && last.lng) posForCalc = { lat: last.lat, lng: last.lng };
+          }
+          if (!posForCalc) {
+            const savedLast = localStorage.getItem('sudataxi_last_pos');
+            if (savedLast) {
+              const parsed = JSON.parse(savedLast);
+              if (parsed.lat && parsed.lng) posForCalc = parsed;
+            }
+          }
+          // 그래도 없으면 범계역 중심으로 fallback - 범계 근처라면 바로 뜨게
+          if (!posForCalc) posForCalc = { lat: 37.3912, lng: 126.9498 };
+        } catch(e) {
+          posForCalc = { lat: 37.3912, lng: 126.9498 };
+        }
+      }
+
+      let scoredPool;
+      if (currentPos) {
+        // GPS 있으면 실제 도로 거리로 계산
+        scoredPool = await Promise.all(strategy.places.map(async (item) => {
+          let road = await fetchKakaoRoadRoute(posForCalc.lat, posForCalc.lng, item.lat, item.lng);
+          return { ...item, dist: road.distanceKm, estimatedTimeMin: road.durationMin, isStrategy: true, isGpsLive: true };
+        }));
+      } else {
+        // v8.9.87 FIX: GPS 대기 중이면 직선거리로라도 계산해서 카드 표시
+        scoredPool = strategy.places.map(item => {
+          let straight = getStraightDistanceKm(posForCalc.lat, posForCalc.lng, item.lat, item.lng);
+          return { ...item, dist: straight, estimatedTimeMin: Math.round(straight * 3), isStrategy: true, isGpsLive: false };
+        });
+      }
 
       scoredPool.sort((a, b) => a.dist - b.dist);
       
@@ -4365,6 +4448,8 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
         card.style.border = '1.5px solid #22C55E';
         card.style.boxShadow = '0 0 10px rgba(34, 197, 94, 0.15)';
         
+        const distText = item.isGpsLive ? `${item.dist.toFixed(1)}km (${item.estimatedTimeMin}분)` : `약 ${item.dist.toFixed(1)}km (GPS 대기 중 직선거리)`;
+        
         card.innerHTML = `
           <div class="card-main-content">
             <div class="card-compact-row">
@@ -4372,7 +4457,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
                 <div class="num-badge" style="background:#22C55E; color:#FFF;">${index+1}</div>
                 <div class="place-info">
                   <div class="place-name" style="color:#22C55E;">${item.name}</div>
-                  <div class="score-dist">${item.dist.toFixed(1)}km (${item.estimatedTimeMin}분) · 타겟 거점</div>
+                  <div class="score-dist">${distText} · 타겟 거점</div>
                 </div>
               </div>
               <button type="button" class="right-navi-btn" style="background:#22C55E !important; color:#FFF !important; box-shadow: 0 1px 4px rgba(34, 197, 94, 0.4);" onclick="openKakaoNaviApp('${item.name.replace(/'/g, "\\'")}', ${item.lat}, ${item.lng})"><span>🚗내비</span></button>
@@ -4380,6 +4465,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
           </div>
           <div class="tag-group">
             <span class="tag near" style="background:#F0FDF4; color:#16A34A; border-color:#22C55E;">#시간대_운행전략추천</span>
+            ${!item.isGpsLive ? '<span class="tag" style="background:#FEF3C7; color:#92400E; border-color:#FBBF24;">GPS 대기 중</span>' : ''}
           </div>
         `;
         fragment.appendChild(card);
@@ -4712,19 +4798,68 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     }
   }
 
+  // v8.9.88 FIX: 실시간 GPS 추적 - 위치 달라지면 그 위치 상황 반영
+  let gpsWatchId = null;
+  let lastGpsUpdateTime = 0;
+  let lastGpsPos = null;
+  let lastRegionNameForWatch = "";
+
+  function startGpsWatcher() {
+    if (gpsWatchId !== null) return;
+    if (!navigator.geolocation) return;
+    try {
+      gpsWatchId = navigator.geolocation.watchPosition(async (pos) => {
+        const newPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        const now = Date.now();
+        if (lastGpsPos) {
+          try {
+            const d = (typeof getStraightDistanceKm === 'function') ? getStraightDistanceKm(lastGpsPos.lat, lastGpsPos.lng, newPos.lat, newPos.lng) : 0;
+            if (d < 0.1 && (now - lastGpsUpdateTime) < 10000) return;
+          } catch(e) {}
+        }
+        currentPos = newPos;
+        lastGpsPos = { ...newPos };
+        lastGpsUpdateTime = now;
+        try { localStorage.setItem('sudataxi_last_pos', JSON.stringify(newPos)); } catch(e) {}
+        try { if(typeof saveToAllStorages === 'function') saveToAllStorages('sudataxi_last_pos', JSON.stringify(newPos)); } catch(e) {}
+        try {
+          const inWisu = await checkIsInsideWisuRealtime(newPos.lat, newPos.lng);
+          currentMode = inWisu ? 1 : 2;
+          document.body.className = `mode-${currentMode}` + (currentThemeMode === 'day' ? ' theme-day' : '');
+          const locText = document.getElementById('loc-text');
+          if (locText) {
+            const regionChanged = (currentRegionName !== lastRegionNameForWatch);
+            locText.innerText = `📍 ${currentRegionName || newPos.lat.toFixed(4)} (${inWisu ? '관내 수익 극대화' : '관외 경유지 우선 복귀'})${regionChanged ? ' [지역 변경]' : ' [실시간 추적 중]'}`;
+            lastRegionNameForWatch = currentRegionName || "";
+          }
+        } catch(e) {}
+        try {
+          if (typeof activeTab !== 'undefined' && activeTab === 2) {
+            renderStrategyTab();
+          }
+        } catch(e) {}
+      }, (err) => { console.warn('GPS watch error', err); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 });
+    } catch(e) { console.warn('watchPosition not supported', e); }
+  }
+
   function executeSearch() {
     const locText = document.getElementById('loc-text');
     if (locText) locText.innerText = '📍 실시간 GPS 수신 중...';
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(async (pos) => {
       currentPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      lastGpsPos = { ...currentPos };
+      lastGpsUpdateTime = Date.now();
+      try { localStorage.setItem('sudataxi_last_pos', JSON.stringify(currentPos)); } catch(e) {}
+      try { if(typeof saveToAllStorages === 'function') saveToAllStorages('sudataxi_last_pos', JSON.stringify(currentPos)); } catch(e) {}
       const inWisu = await checkIsInsideWisuRealtime(currentPos.lat, currentPos.lng);
       currentMode = inWisu ? 1 : 2; document.body.className = `mode-${currentMode}` + (currentThemeMode === 'day' ? ' theme-day' : '');
       if (locText) locText.innerText = `📍 ${currentRegionName || currentPos.lat.toFixed(4)} (${inWisu ? '관내 수익 극대화' : '관외 경유지 우선 복귀'})`;
+      lastRegionNameForWatch = currentRegionName || "";
       if (activeTab === 1) calculateAndRender();
       if (activeTab === 2) renderStrategyTab();
-      // v8.1: 도착 지역 1곳만 서울 혼잡도 호출
       try { if(typeof checkSeoulArrivalAndFetch === 'function') checkSeoulArrivalAndFetch(); } catch(e) {}
+      try { startGpsWatcher(); } catch(e) {}
     }, (err) => { showToast("📍 위치 권한 오류"); }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 3000 });
   }
 
@@ -6763,9 +6898,9 @@ function initMic() {
     
     // v8.9.80 fix: 하드코딩된 범계 덮어쓰기 제거
     // const b1 = DEFAULT_MASTER_HOTSPOTS.find(h => h.id === 'hs_g_anyang_2');
-    // if(b1) { b1.lat = 37.38965; b1.lng = 126.95061; b1.name = "범계역 로데오거리"; }
+    // if(b1) { b1.lat = 37.3912; b1.lng = 126.9498; b1.name = "범계역 로데오거리"; }
     // const b2 = MAJOR_HUBS.find(h => h.name.includes("범계역"));
-    // if(b2) { b2.lat = 37.38965; b2.lng = 126.95061; b2.name = "범계역 로데오거리"; }
+    // if(b2) { b2.lat = 37.3912; b2.lng = 126.9498; b2.name = "범계역 로데오거리"; }
 
     document.getElementById('btn-drive-toggle').addEventListener('click', toggleDriving);
     document.getElementById('btn-break-toggle').addEventListener('click', toggleBreak);
@@ -6983,7 +7118,7 @@ function initMic() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.86</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.89</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
