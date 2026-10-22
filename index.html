@@ -87,12 +87,12 @@
 </style>
 
 <script id="embedded-defaults">
-  // v8.9.81: 빌드 시에도 살아남는 기본값 (사용자가 직접 수정 가능)
+  // v8.9.82: 빌드 시에도 살아남는 기본값 (사용자가 직접 수정 가능)
   // 빌드 전에 여기에 현재 대시보드 값을 넣어두면, localStorage가 날아가도 복구됨
   const EMBEDDED_DEFAULTS = {
     daily_rev: 0,
     sim_data: {target:4000000, current:0, restDates:[]},
-    version: 'v8.9.81'
+    version: 'v8.9.84'
   };
 </script>
 <style>
@@ -216,7 +216,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>sudataxi-k v8.9.82</title>
+  <title>sudataxi-k v8.9.85</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1995,7 +1995,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v8.9.81";
+  const BUILD_VERSION = "v8.9.84";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2549,15 +2549,30 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
   }catch(e){}
   async function restoreAllFromIDB(){
     try{
-      const keys = ['sudataxi_daily_rev','sudataxi_sim_data','sudataxi_driving_records','sudataxi_driving_state','sudataxi_call_logs'];
+      // v8.9.84 FIX: 마스터 DB도 복구 목록에 포함 - 고객탑승정보와 동일 방식
+      const keys = ['sudataxi_daily_rev','sudataxi_sim_data','sudataxi_driving_records','sudataxi_driving_state','sudataxi_call_logs','sudataxi_master_hotspots','sudataxi_custom_hotspots','sudataxi_custom_restrooms'];
       for(const key of keys){
         let idbVal = await loadFromIDB(key);
         if(idbVal && idbVal!=='null' && idbVal!=='{}' && String(idbVal).trim()!==''){
           let cur=null; try{ cur=localStorage.getItem(key); }catch(e){}
-          if(!cur || cur==='null' || cur==='{}' || (cur==='0' && key!=='sudataxi_daily_rev')){
+          // 마스터/커스텀은 빈 배열 '[]'도 유효하므로 길이 체크
+          const isEmptyArray = (cur === '[]' && (key.includes('master') || key.includes('custom')));
+          if(!cur || cur==='null' || cur==='{}' || isEmptyArray || (cur==='0' && key!=='sudataxi_daily_rev')){
             try{ localStorage.setItem(key, idbVal); }catch(e){}
             try{ setPersistentCookie(key, idbVal, 365); }catch(e){}
+            try{ sessionStorage.setItem(key, idbVal); }catch(e){}
           }
+        } else {
+          // IDB에 없으면 쿠키/세션에서 localStorage로 복구
+          try{
+            let anyVal = getFromAnyStorage(key);
+            if(anyVal && anyVal!=='null' && anyVal!=='{}' && String(anyVal).trim()!=='' && anyVal!=='[]'){
+              let cur=null; try{ cur=localStorage.getItem(key); }catch(e){}
+              if(!cur || cur==='null' || cur==='{}' || cur==='[]'){
+                try{ localStorage.setItem(key, anyVal); }catch(e){}
+              }
+            }
+          }catch(e){}
         }
       }
       try{ if(typeof initDailyRevenue==='function') setTimeout(()=>initDailyRevenue(), 100); }catch(e){}
@@ -2576,6 +2591,10 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     }catch(e){}
     try{ const dr=localStorage.getItem('sudataxi_driving_records'); if(dr){ try{saveToAllStorages('sudataxi_driving_records',dr);}catch(e){} try{saveToIDB('sudataxi_driving_records',dr);}catch(e){} } }catch(e){}
     try{ const ds=localStorage.getItem('sudataxi_driving_state'); if(ds){ try{saveToAllStorages('sudataxi_driving_state',ds);}catch(e){} try{saveToIDB('sudataxi_driving_state',ds);}catch(e){} } }catch(e){}
+    // v8.9.84 FIX: 마스터/커스텀 DB도 영구 저장
+    try{ const mh=localStorage.getItem('sudataxi_master_hotspots'); if(mh && mh!=='[]'){ try{saveToAllStorages('sudataxi_master_hotspots',mh);}catch(e){} try{saveToIDB('sudataxi_master_hotspots',mh);}catch(e){} } }catch(e){}
+    try{ const ch=localStorage.getItem('sudataxi_custom_hotspots'); if(ch){ try{saveToAllStorages('sudataxi_custom_hotspots',ch);}catch(e){} try{saveToIDB('sudataxi_custom_hotspots',ch);}catch(e){} } }catch(e){}
+    try{ const cr=localStorage.getItem('sudataxi_custom_restrooms'); if(cr){ try{saveToAllStorages('sudataxi_custom_restrooms',cr);}catch(e){} try{saveToIDB('sudataxi_custom_restrooms',cr);}catch(e){} } }catch(e){}
   }
   try{
     document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(restoreAllFromIDB, 80); });
@@ -3478,14 +3497,34 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     { name: "과천 주암/선바위 경계 (서울/강남 방면)", lat: 37.4520, lng: 127.0050, address: "과천동", isWisu: true }
   ];
 
+  // v8.9.84 FIX: 마스터 DB도 3중 영구 저장으로 - localStorage 날아가도 복구
   function getMasterHotspotsFromStorage() {
     let savedList = [];
-    const saved = localStorage.getItem('sudataxi_master_hotspots');
-    if (saved) { try { const parsed = JSON.parse(saved); if (Array.isArray(parsed)) savedList = parsed; } catch(e) {} }
+    try {
+      // 3중 저장에서 복구 시도
+      let saved = null;
+      try { saved = getFromAnyStorage('sudataxi_master_hotspots'); } catch(e) {}
+      if (!saved) { try { saved = localStorage.getItem('sudataxi_master_hotspots'); } catch(e) {} }
+      if (saved) { 
+        try { 
+          const parsed = JSON.parse(saved); 
+          if (Array.isArray(parsed)) savedList = parsed; 
+        } catch(e) {} 
+      }
+    } catch(e) {}
     const mergedMap = new Map();
     DEFAULT_MASTER_HOTSPOTS.forEach(item => mergedMap.set(item.id || item.name, item));
     savedList.forEach(item => mergedMap.set(item.id || item.name, item));
     return Array.from(mergedMap.values());
+  }
+  function saveMasterHotspotsPersistent(list){
+    try {
+      const json = JSON.stringify(list);
+      try { saveToAllStorages('sudataxi_master_hotspots', json); } catch(e) {}
+      try { localStorage.setItem('sudataxi_master_hotspots', json); } catch(e) {}
+      // 백업에도 저장
+      try { if(typeof executeAutoBackup==='function') executeAutoBackup(); } catch(e) {}
+    } catch(e) {}
   }
 
   // === v7.9.23 NEW: 자주가는 곳 프리셋 ===
@@ -3812,8 +3851,11 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
 
   async function fetchAndAutoUpdateForUnknownRegion(lat, lng, regionName) {
     if (isAutoRegionSearching) return [];
-    if (autoRegionCache.has(`${lat.toFixed(3)}_${lng.toFixed(3)}`)) {
-      return autoRegionCache.get(`${lat.toFixed(3)}_${lng.toFixed(3)}`);
+    const cacheKey = `${lat.toFixed(3)}_${lng.toFixed(3)}`;
+    if (autoRegionCache.has(cacheKey)) {
+      const cached = autoRegionCache.get(cacheKey);
+      // v8.9.81 FIX: 빈 배열은 캐시로 인정 안함 - 재시도 허용
+      if (cached && cached.length > 0) return cached;
     }
     isAutoRegionSearching = true;
     let generated = [];
@@ -3823,30 +3865,33 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         return [];
       }
       const places = new kakao.maps.services.Places();
+      // v8.9.81 FIX: 카테고리 확대 + 반경 5km로 확대 (기존 3km)
       const categories = [
         { code: kakao.maps.services.CATEGORY_CODE.FOOD, label: '맛집' },
         { code: kakao.maps.services.CATEGORY_CODE.CAFE, label: '카페' },
         { code: kakao.maps.services.CATEGORY_CODE.HOSPITAL, label: '병원' },
-        { code: kakao.maps.services.CATEGORY_CODE.CS2, label: '편의점' }
+        { code: kakao.maps.services.CATEGORY_CODE.CS2, label: '편의점' },
+        { code: kakao.maps.services.CATEGORY_CODE.MT1, label: '마트' },
+        { code: kakao.maps.services.CATEGORY_CODE.AT4, label: '관광' },
+        { code: kakao.maps.services.CATEGORY_CODE.SW8, label: '지하철' }
       ];
       const allResults = [];
 
-      // 카테고리 병렬 검색 (반경 3000m)
       const promises = categories.map(cat => new Promise(res => {
         places.categorySearch(cat.code, (data, status) => {
           if (status === kakao.maps.services.Status.OK && data) {
-            res(data.slice(0,6).map(d => ({ ...d, _catLabel: cat.label })));
+            res(data.slice(0,8).map(d => ({ ...d, _catLabel: cat.label })));
           } else res([]);
-        }, { location: new kakao.maps.LatLng(lat, lng), radius: 3000, sort: kakao.maps.services.SortBy.DISTANCE });
+        }, { location: new kakao.maps.LatLng(lat, lng), radius: 5000, sort: kakao.maps.services.SortBy.DISTANCE });
       }));
 
-      // 키워드 검색 추가: 택시 수요 높은 키워드
-      const keywordList = ['택시승강장', '역', '버스터미널', '대학병원'];
+      // 키워드 검색 추가: 택시 수요 높은 키워드 - 반경 5km
+      const keywordList = ['택시승강장', '역', '버스터미널', '대학병원', '백화점', '대형마트', '터미널'];
       const kwPromises = keywordList.map(kw => new Promise(res => {
         places.keywordSearch(kw, (data, status) => {
-          if (status === kakao.maps.services.Status.OK && data) res(data.slice(0,3));
+          if (status === kakao.maps.services.Status.OK && data) res(data.slice(0,4));
           else res([]);
-        }, { location: new kakao.maps.LatLng(lat, lng), radius: 3000 });
+        }, { location: new kakao.maps.LatLng(lat, lng), radius: 5000 });
       }));
 
       const resultsArrays = await Promise.all([...promises, ...kwPromises]);
@@ -3876,13 +3921,18 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         }
       });
 
-      generated = deduped.slice(0,15);
-      autoRegionCache.set(`${lat.toFixed(3)}_${lng.toFixed(3)}`, generated);
+      generated = deduped.slice(0,18);
+      // v8.9.81 FIX: 결과 있을 때만 캐시
+      if (generated.length > 0) {
+        autoRegionCache.set(cacheKey, generated);
+      } else {
+        autoRegionCache.delete(cacheKey);
+      }
 
       // UI 알림
       if (generated.length > 0) {
         const logEl = document.getElementById('pipeline-log');
-        if (logEl) logEl.innerHTML = `⚡ [${regionName}] DB 없는 지역 감지 · 실시간 ${generated.length}곳 자동 생성 <button onclick="saveAutoRegionToMaster()" style="margin-left:6px; background:#FBBF24; color:#000; border:none; border-radius:6px; padding:2px 6px; font-size:10px; font-weight:900;">마스터에 저장</button>`;
+        if (logEl) logEl.innerHTML = `⚡ [${regionName}] 실시간 ${generated.length}곳 자동 생성 <button onclick="saveAutoRegionToMaster()" style="margin-left:6px; background:#FBBF24; color:#000; border:none; border-radius:6px; padding:2px 6px; font-size:10px; font-weight:900;">마스터에 저장</button>`;
       }
 
     } catch(e) {
@@ -3897,18 +3947,25 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       let lastGenerated = [];
       // 캐시에서 마지막 검색 결과 가져오기
       for (let v of autoRegionCache.values()) { lastGenerated = v; }
+      if (lastGenerated.length === 0) { 
+        // autoGeneratedGlobal에서도 시도
+        try { if(typeof autoGeneratedGlobal !== 'undefined' && autoGeneratedGlobal.length>0) lastGenerated = autoGeneratedGlobal; } catch(e) {}
+      }
       if (lastGenerated.length === 0) { showToast('저장할 데이터 없음'); return; }
-      const saved = localStorage.getItem('sudataxi_master_hotspots');
+      let savedRaw = null;
+      try { savedRaw = getFromAnyStorage('sudataxi_master_hotspots'); } catch(e) {}
+      if (!savedRaw) { try { savedRaw = localStorage.getItem('sudataxi_master_hotspots'); } catch(e) {} }
       let existing = [];
-      if (saved) { try { existing = JSON.parse(saved); } catch(e) {} }
+      if (savedRaw) { try { existing = JSON.parse(savedRaw); } catch(e) {} }
       let merged = [...existing];
       lastGenerated.forEach(g => {
         if (!merged.some(m => m.id === g.id || getStraightDistanceKm(m.lat, m.lng, g.lat, g.lng) < 0.2)) {
           merged.push({ id: g.id, name: g.name, lat: g.lat, lng: g.lng, address: g.address, type: g.type, region: g.region, isWisu: false, baseScore: g.baseScore });
         }
       });
-      localStorage.setItem('sudataxi_master_hotspots', JSON.stringify(merged));
-      showToast(`📦 ${lastGenerated.length}곳 마스터 DB에 저장됨`);
+      // v8.9.84 FIX: 3중 영구 저장 (쿠키+세션+IndexedDB+localStorage) - 고객탑승정보와 동일 방식
+      try { saveMasterHotspotsPersistent(merged); } catch(e) { try { localStorage.setItem('sudataxi_master_hotspots', JSON.stringify(merged)); } catch(e2){} }
+      showToast(`📦 ${lastGenerated.length}곳 마스터 DB에 영구 저장됨 (삭제 안됨)`);
     } catch(e) { showToast('저장 실패'); }
   }
 
@@ -4664,7 +4721,9 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     let allLiveHotspots = [...liveKakaoHotspots];
 
     // v7.9.27 NEW: DB 없는 지역 자동 검색 - 개선
+    // v8.9.84 FIX: DB부족 모드와 실시간 보강 모드 분리
     let isAutoRegion = false;
+    let isSupplementMode = false;
     let autoGeneratedGlobal = [];
     const customHotspots = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
     const activeMasterHotspots = getMasterHotspotsFromStorage();
@@ -4672,13 +4731,51 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       const activeMasters = activeMasterHotspots;
       let nearbyMasterCount = activeMasters.filter(m => getStraightDistanceKm(currentPos.lat, currentPos.lng, m.lat, m.lng) <= 5.0).length;
       let nearbyLiveCount = allLiveHotspots.filter(h => getStraightDistanceKm(currentPos.lat, currentPos.lng, h.lat, h.lng) <= 3.0).length;
-      // 조건 완화: 마스터 3개 미만 또는 라이브 5개 미만이면 DB 없는 지역으로 판단 (용인/수원 외곽 등)
-      if (nearbyMasterCount < 3 || nearbyLiveCount < 3) {
+      const isCoreWisu = (currentRegionName||'').includes('안양') || (currentRegionName||'').includes('과천') || (currentRegionName||'').includes('군포') || (currentRegionName||'').includes('의왕');
+      
+      // 1) 진짜 DB 부족 모드: 마스터 0 && 라이브 0 - 관외 외곽에서만
+      let shouldTriggerAuto = false;
+      if (!isCoreWisu) {
+        shouldTriggerAuto = (nearbyMasterCount === 0 && nearbyLiveCount < 1);
+      } else {
+        shouldTriggerAuto = (nearbyMasterCount === 0 && nearbyLiveCount === 0);
+      }
+      
+      if (shouldTriggerAuto) {
         isAutoRegion = true;
         let autoGenerated = await fetchAndAutoUpdateForUnknownRegion(currentPos.lat, currentPos.lng, currentRegionName || '관외지역');
         if (autoGenerated && autoGenerated.length > 0) {
           allLiveHotspots = [...allLiveHotspots, ...autoGenerated];
           autoGeneratedGlobal = autoGenerated;
+        } else {
+          if (nearbyMasterCount > 0 || nearbyLiveCount > 0 || isCoreWisu) isAutoRegion = false;
+        }
+      } else {
+        // 2) 실시간 보강 모드: DB는 있지만 부족하거나 업데이트 필요할 때 - 중심가에서도 동작
+        // 관내: 마스터 5개 미만이면 주변 3km 실시간 5곳 보강
+        // 관외: 마스터 3개 미만이면 보강
+        let shouldSupplement = false;
+        if (isCoreWisu) {
+          shouldSupplement = (nearbyMasterCount < 5);
+        } else {
+          shouldSupplement = (nearbyMasterCount < 3);
+        }
+        if (shouldSupplement) {
+          isSupplementMode = true;
+          try {
+            let supplement = await fetchAndAutoUpdateForUnknownRegion(currentPos.lat, currentPos.lng, currentRegionName || '관외지역');
+            if (supplement && supplement.length > 0) {
+              // 보강 모드에서는 5곳만 추가 (효율)
+              let limited = supplement.slice(0, 5);
+              // 중복 제거 후 추가
+              limited.forEach(s => {
+                if (!allLiveHotspots.some(h => getStraightDistanceKm(h.lat, h.lng, s.lat, s.lng) < 0.3)) {
+                  allLiveHotspots.push(s);
+                }
+              });
+              autoGeneratedGlobal = limited;
+            }
+          } catch(e) { console.warn('supplement fail', e); }
         }
       }
     } catch(e) { console.warn('auto region check fail', e); }
@@ -4725,10 +4822,10 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
 
     let rawPool;
     if (isAutoRegion) {
-      // DB 없는 지역: 5km 이내만 사용, MAJOR_HUBS 예외 제거 - 안양 등 먼 곳 차단
+      // v8.9.82 FIX: 5km -> 3km로 축소 - 5km까지 나가야 하는 비효율 해결
       rawPool = [...userCallCandidates, ...allLiveHotspots, ...customHotspots, ...activeMasterHotspots].filter(item => {
         let d = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
-        return d <= 5.0;
+        return d <= 3.0;
       });
     } else {
       rawPool = [...userCallCandidates, ...allLiveHotspots, ...customHotspots, ...activeMasterHotspots].filter(item => {
@@ -4760,11 +4857,11 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       }
 
       if (isAutoRegion) {
-        // v7.9.29 DB 없는 지역: 복귀 경로 없이 가까운 곳만 - 용인/수원 외곽 대응
+        // v8.9.82 FIX: 3km 내 가까운 곳만 - 5km 비효율 해결, 1km 이내 최우선
         if (straightDist <= 1.0) preliminaryScore += 80;
-        else if (straightDist <= 2.5) preliminaryScore += 50;
-        else if (straightDist <= 5.0) preliminaryScore += 20;
-        // 5km 초과는 이미 rawPool에서 제외됨
+        else if (straightDist <= 2.0) preliminaryScore += 50;
+        else if (straightDist <= 3.0) preliminaryScore += 20;
+        // 3km 초과는 이미 rawPool에서 제외됨
       } else if (!inWisu && targetBoundaryCardData) {
         // v7.9.29 모드2 원칙 강화: 복귀지점까지 과정에 있는 핫스팟만
         // 현재→복귀점 직선 경로를 기준으로 크로스트랙/각도/우회거리 엄격 필터
@@ -4851,9 +4948,19 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     // v8.1: 연산 완료 후 도착지 혼잡도 1곳만 호출 (백그라운드)
     try { if(typeof checkSeoulArrivalAndFetch === 'function') setTimeout(()=>checkSeoulArrivalAndFetch(), 800); } catch(e) {}
     
-    // v7.9.27 로그 개선
+    // v8.9.84 FIX: DB부족과 실시간보강 분리 - 로그 개선
     if (isAutoRegion) {
-      if (logEl) logEl.innerHTML = `📍 [${currentRegionName || '관외'}] 주변 5km 내 DB 부족 → 실시간 ${allLiveHotspots.length}곳 + 복귀지점(4번째)`;
+      if (logEl) {
+        if (autoGeneratedGlobal && autoGeneratedGlobal.length > 0) {
+          logEl.innerHTML = `📍 [${currentRegionName || '관외'}] 주변 DB 부족 → 실시간 탐색(3km) ${autoGeneratedGlobal.length}곳으로 대체 <button onclick="saveAutoRegionToMaster()" style="margin-left:6px; background:#FBBF24; color:#000; border:none; border-radius:6px; padding:2px 6px; font-size:10px; font-weight:900;">마스터에 저장</button>`;
+        } else {
+          logEl.innerHTML = `📍 [${currentRegionName || '관외'}] 주변 DB 확인 중...`;
+        }
+      }
+    } else if (isSupplementMode) {
+      if (logEl && autoGeneratedGlobal && autoGeneratedGlobal.length > 0) {
+        logEl.innerHTML = `📍 [${currentRegionName || '관외'}] 기존 DB ${allLiveHotspots.length - autoGeneratedGlobal.length}곳 + 실시간 보강 ${autoGeneratedGlobal.length}곳 <button onclick="saveAutoRegionToMaster()" style="margin-left:6px; background:#22C55E; color:#FFF; border:none; border-radius:6px; padding:2px 6px; font-size:10px; font-weight:900;">저장</button>`;
+      }
     }
     renderCards(selectedCandidates, referenceHubs, targetBoundaryCardData);
     // v7.9.23 자주가는 곳 렌더링
@@ -5122,6 +5229,9 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       }
 
       if (needSave) {
+        try{ saveToAllStorages('sudataxi_custom_restrooms', JSON.stringify(customRestrooms)); }catch(e){}
+        try{ saveToAllStorages('sudataxi_call_logs', JSON.stringify(logs)); }catch(e){}
+        try{ saveToAllStorages('sudataxi_custom_hotspots', JSON.stringify(customHotspots)); }catch(e){}
         localStorage.setItem('sudataxi_custom_restrooms', JSON.stringify(customRestrooms));
         localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
         localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(customHotspots));
@@ -5196,14 +5306,16 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       savedAt: new Date().toISOString()
     });
     
+    try{ saveToAllStorages('sudataxi_custom_hotspots', JSON.stringify(custom)); }catch(e){}
     localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(custom));
     updateCustomHotspotUI();
     if (activeTab === 1) calculateAndRender();
-    showToast(`📍 ${smartName}\n등록 완료!`);
+    showToast(`📍 ${smartName}\n영구 저장 완료!`);
   }
 
   function deleteCustomHotspot(id) {
     let custom = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]').filter(i => i.id !== id);
+    try{ saveToAllStorages('sudataxi_custom_hotspots', JSON.stringify(custom)); }catch(e){}
     localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(custom));
     updateCustomHotspotUI();
     if (activeTab === 1) calculateAndRender();
@@ -5211,6 +5323,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
 
   function deleteCustomRestroom(id) {
     let custom = JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]').filter(i => i.id !== id);
+    try{ saveToAllStorages('sudataxi_custom_restrooms', JSON.stringify(custom)); }catch(e){}
     localStorage.setItem('sudataxi_custom_restrooms', JSON.stringify(custom));
     updateCustomRestroomUI();
   }
@@ -6863,7 +6976,7 @@ function initMic() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.81</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.84</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
