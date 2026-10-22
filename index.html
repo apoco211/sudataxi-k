@@ -87,12 +87,12 @@
 </style>
 
 <script id="embedded-defaults">
-  // v8.9.82: 빌드 시에도 살아남는 기본값 (사용자가 직접 수정 가능)
+  // v8.9.80: 빌드 시에도 살아남는 기본값 (사용자가 직접 수정 가능)
   // 빌드 전에 여기에 현재 대시보드 값을 넣어두면, localStorage가 날아가도 복구됨
   const EMBEDDED_DEFAULTS = {
     daily_rev: 0,
     sim_data: {target:4000000, current:0, restDates:[]},
-    version: 'v8.9.84'
+    version: 'v8.9.80'
   };
 </script>
 <style>
@@ -216,7 +216,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>sudataxi-k v8.9.85</title>
+  <title>sudataxi-k v8.9.87</title>
 
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFC800">
@@ -1995,7 +1995,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v8.9.84";
+  const BUILD_VERSION = "v8.9.80";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2549,30 +2549,15 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
   }catch(e){}
   async function restoreAllFromIDB(){
     try{
-      // v8.9.84 FIX: 마스터 DB도 복구 목록에 포함 - 고객탑승정보와 동일 방식
-      const keys = ['sudataxi_daily_rev','sudataxi_sim_data','sudataxi_driving_records','sudataxi_driving_state','sudataxi_call_logs','sudataxi_master_hotspots','sudataxi_custom_hotspots','sudataxi_custom_restrooms'];
+      const keys = ['sudataxi_daily_rev','sudataxi_sim_data','sudataxi_driving_records','sudataxi_driving_state','sudataxi_call_logs'];
       for(const key of keys){
         let idbVal = await loadFromIDB(key);
         if(idbVal && idbVal!=='null' && idbVal!=='{}' && String(idbVal).trim()!==''){
           let cur=null; try{ cur=localStorage.getItem(key); }catch(e){}
-          // 마스터/커스텀은 빈 배열 '[]'도 유효하므로 길이 체크
-          const isEmptyArray = (cur === '[]' && (key.includes('master') || key.includes('custom')));
-          if(!cur || cur==='null' || cur==='{}' || isEmptyArray || (cur==='0' && key!=='sudataxi_daily_rev')){
+          if(!cur || cur==='null' || cur==='{}' || (cur==='0' && key!=='sudataxi_daily_rev')){
             try{ localStorage.setItem(key, idbVal); }catch(e){}
             try{ setPersistentCookie(key, idbVal, 365); }catch(e){}
-            try{ sessionStorage.setItem(key, idbVal); }catch(e){}
           }
-        } else {
-          // IDB에 없으면 쿠키/세션에서 localStorage로 복구
-          try{
-            let anyVal = getFromAnyStorage(key);
-            if(anyVal && anyVal!=='null' && anyVal!=='{}' && String(anyVal).trim()!=='' && anyVal!=='[]'){
-              let cur=null; try{ cur=localStorage.getItem(key); }catch(e){}
-              if(!cur || cur==='null' || cur==='{}' || cur==='[]'){
-                try{ localStorage.setItem(key, anyVal); }catch(e){}
-              }
-            }
-          }catch(e){}
         }
       }
       try{ if(typeof initDailyRevenue==='function') setTimeout(()=>initDailyRevenue(), 100); }catch(e){}
@@ -2591,10 +2576,6 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     }catch(e){}
     try{ const dr=localStorage.getItem('sudataxi_driving_records'); if(dr){ try{saveToAllStorages('sudataxi_driving_records',dr);}catch(e){} try{saveToIDB('sudataxi_driving_records',dr);}catch(e){} } }catch(e){}
     try{ const ds=localStorage.getItem('sudataxi_driving_state'); if(ds){ try{saveToAllStorages('sudataxi_driving_state',ds);}catch(e){} try{saveToIDB('sudataxi_driving_state',ds);}catch(e){} } }catch(e){}
-    // v8.9.84 FIX: 마스터/커스텀 DB도 영구 저장
-    try{ const mh=localStorage.getItem('sudataxi_master_hotspots'); if(mh && mh!=='[]'){ try{saveToAllStorages('sudataxi_master_hotspots',mh);}catch(e){} try{saveToIDB('sudataxi_master_hotspots',mh);}catch(e){} } }catch(e){}
-    try{ const ch=localStorage.getItem('sudataxi_custom_hotspots'); if(ch){ try{saveToAllStorages('sudataxi_custom_hotspots',ch);}catch(e){} try{saveToIDB('sudataxi_custom_hotspots',ch);}catch(e){} } }catch(e){}
-    try{ const cr=localStorage.getItem('sudataxi_custom_restrooms'); if(cr){ try{saveToAllStorages('sudataxi_custom_restrooms',cr);}catch(e){} try{saveToIDB('sudataxi_custom_restrooms',cr);}catch(e){} } }catch(e){}
   }
   try{
     document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(restoreAllFromIDB, 80); });
@@ -3273,32 +3254,12 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
 
   function renderCurrentStateTime(nowDate) {
     const statusEl = document.getElementById('driving-current-status');
-    const nowMs = (nowDate instanceof Date) ? nowDate.getTime() : nowDate;
-    const calcElapsed = drivingState.stateStartTime ? Math.floor((nowMs - drivingState.stateStartTime) / 1000) : 0;
-    const timeStr = calcElapsed >= 3600 ? formatHHMMSS(calcElapsed) : formatMMSS(calcElapsed);
-    if (statusEl) {
-      if (!drivingState.isDriving) { statusEl.innerHTML = '(운행 대기)'; }
-      else {
-        let statusText = drivingState.isBreak ? '☕ 휴식중' : (drivingState.isPassengerBoarded ? '🙋 손님탑승중' : '🈳 빈차운행중');
-        statusEl.innerHTML = `(${statusText} <span style="color: #3B82F6; font-weight: 900; margin-left: 2px;">[${timeStr}]</span>)`;
-      }
-    }
-    // v8.9.81 FIX: 오늘 운행현황과 하단 버튼 아래 시간 실시간 동기화
-    try {
-      let _bsWrap = document.getElementById('bottom-status-below');
-      if (!_bsWrap) {
-        _bsWrap = document.createElement('div'); _bsWrap.id='bottom-status-below'; _bsWrap.className='bottom-status-below';
-        let _inner = document.createElement('span'); _inner.id='bottom-status-below-text'; _bsWrap.appendChild(_inner);
-        document.body.appendChild(_bsWrap);
-      }
-      const _bsText = document.getElementById('bottom-status-below-text');
-      if (_bsText) {
-        if (!drivingState.isDriving) _bsText.textContent = '⏸️ 대기중 - 오늘 운행 현황 확인';
-        else if (drivingState.isBreak) _bsText.textContent = '☕ 휴식중 ['+timeStr+']';
-        else if (drivingState.isPassengerBoarded) _bsText.textContent = '🟡 승차중 ['+timeStr+']';
-        else _bsText.textContent = '🈳 빈차운행중 ['+timeStr+']';
-      }
-    } catch(e) {}
+    if (!statusEl) return;
+    if (!drivingState.isDriving) { statusEl.innerHTML = '(운행 대기)'; return; }
+    let stateElapsed = drivingState.stateStartTime ? Math.floor((nowDate - drivingState.stateStartTime) / 1000) : 0;
+    const timeStr = stateElapsed >= 3600 ? formatHHMMSS(stateElapsed) : formatMMSS(stateElapsed);
+    let statusText = drivingState.isBreak ? '☕ 휴식중' : (drivingState.isPassengerBoarded ? '🙋 손님탑승중' : '🈳 빈차운행중');
+    statusEl.innerHTML = `(${statusText} <span style="color: #3B82F6; font-weight: 900; margin-left: 2px;">[${timeStr}]</span>)`;
   }
 
   function updateDrivingUI() {
@@ -3353,7 +3314,41 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         else if(drivingState.isPassengerBoarded){ _t=document.getElementById('btn-bottom-board'); if(_t){ _t.classList.add('active-board'); _t.style.setProperty('border','4px solid #000','important'); _t.style.setProperty('box-shadow','0 0 0 3px #fff, 0 0 0 6px #000','important'); } }
         else { _t=document.getElementById('btn-bottom-alight'); if(_t){ _t.classList.add('active-alight'); _t.style.setProperty('border','4px solid #fff','important'); _t.style.setProperty('box-shadow','0 0 0 3px #000, 0 0 0 6px #fff','important'); } }
       }
-      // v8.9.81 FIX: bottom-status-below 갱신은 renderCurrentStateTime에서 처리 (실시간 동기화)
+      var _bsWrap = document.getElementById('bottom-status-below');
+      if(!_bsWrap){
+        _bsWrap = document.createElement('div'); _bsWrap.id='bottom-status-below'; _bsWrap.className='bottom-status-below';
+        var _inner = document.createElement('span'); _inner.id='bottom-status-below-text'; _bsWrap.appendChild(_inner);
+        document.body.appendChild(_bsWrap);
+      }
+      var _bsText = document.getElementById('bottom-status-below-text');
+      if(_bsText){
+        try{
+          var _topEl = document.getElementById('driving-current-status');
+          var _topText = _topEl ? _topEl.innerText || _topEl.textContent : '';
+          // _topText is like "(빈차운행중 [56:42])" or "(운행 대기)"
+          var _clean = _topText.replace(/[()]/g,'').trim();
+          if(_clean.includes('빈차운행중')){
+            var _m = _clean.match(/\[.*?\]/);
+            var _t = _m ? _m[0] : '';
+            _bsText.textContent = '🈳 빈차운행중 '+_t;
+          } else if(_clean.includes('휴식중')){
+            var _m2 = _clean.match(/\[.*?\]/);
+            var _t2 = _m2 ? _m2[0] : '';
+            _bsText.textContent = '☕ 휴식중 '+_t2;
+          } else if(_clean.includes('탑승중') || _clean.includes('승차')){
+            var _m3 = _clean.match(/\[.*?\]/);
+            var _t3 = _m3 ? _m3[0] : '';
+            _bsText.textContent = '🟡 승차중 '+_t3;
+          } else if(_clean.includes('대기')){
+            _bsText.textContent = '⏸️ 대기중 - 오늘 운행 현황 확인';
+          } else {
+            // fallback: use same as top
+            _bsText.textContent = _clean || '⏸️ 대기중';
+          }
+        }catch(e){ 
+          try{ _bsText.textContent = document.getElementById('driving-current-status').innerText.replace(/[()]/g,'').trim() || '⏸️ 대기중'; }catch(e2){ _bsText.textContent='⏸️ 대기중'; }
+        }
+      }
     }catch(e){}
   }
 
@@ -3497,34 +3492,14 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     { name: "과천 주암/선바위 경계 (서울/강남 방면)", lat: 37.4520, lng: 127.0050, address: "과천동", isWisu: true }
   ];
 
-  // v8.9.84 FIX: 마스터 DB도 3중 영구 저장으로 - localStorage 날아가도 복구
   function getMasterHotspotsFromStorage() {
     let savedList = [];
-    try {
-      // 3중 저장에서 복구 시도
-      let saved = null;
-      try { saved = getFromAnyStorage('sudataxi_master_hotspots'); } catch(e) {}
-      if (!saved) { try { saved = localStorage.getItem('sudataxi_master_hotspots'); } catch(e) {} }
-      if (saved) { 
-        try { 
-          const parsed = JSON.parse(saved); 
-          if (Array.isArray(parsed)) savedList = parsed; 
-        } catch(e) {} 
-      }
-    } catch(e) {}
+    const saved = localStorage.getItem('sudataxi_master_hotspots');
+    if (saved) { try { const parsed = JSON.parse(saved); if (Array.isArray(parsed)) savedList = parsed; } catch(e) {} }
     const mergedMap = new Map();
     DEFAULT_MASTER_HOTSPOTS.forEach(item => mergedMap.set(item.id || item.name, item));
     savedList.forEach(item => mergedMap.set(item.id || item.name, item));
     return Array.from(mergedMap.values());
-  }
-  function saveMasterHotspotsPersistent(list){
-    try {
-      const json = JSON.stringify(list);
-      try { saveToAllStorages('sudataxi_master_hotspots', json); } catch(e) {}
-      try { localStorage.setItem('sudataxi_master_hotspots', json); } catch(e) {}
-      // 백업에도 저장
-      try { if(typeof executeAutoBackup==='function') executeAutoBackup(); } catch(e) {}
-    } catch(e) {}
   }
 
   // === v7.9.23 NEW: 자주가는 곳 프리셋 ===
@@ -3851,11 +3826,8 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
 
   async function fetchAndAutoUpdateForUnknownRegion(lat, lng, regionName) {
     if (isAutoRegionSearching) return [];
-    const cacheKey = `${lat.toFixed(3)}_${lng.toFixed(3)}`;
-    if (autoRegionCache.has(cacheKey)) {
-      const cached = autoRegionCache.get(cacheKey);
-      // v8.9.81 FIX: 빈 배열은 캐시로 인정 안함 - 재시도 허용
-      if (cached && cached.length > 0) return cached;
+    if (autoRegionCache.has(`${lat.toFixed(3)}_${lng.toFixed(3)}`)) {
+      return autoRegionCache.get(`${lat.toFixed(3)}_${lng.toFixed(3)}`);
     }
     isAutoRegionSearching = true;
     let generated = [];
@@ -3865,33 +3837,30 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         return [];
       }
       const places = new kakao.maps.services.Places();
-      // v8.9.81 FIX: 카테고리 확대 + 반경 5km로 확대 (기존 3km)
       const categories = [
         { code: kakao.maps.services.CATEGORY_CODE.FOOD, label: '맛집' },
         { code: kakao.maps.services.CATEGORY_CODE.CAFE, label: '카페' },
         { code: kakao.maps.services.CATEGORY_CODE.HOSPITAL, label: '병원' },
-        { code: kakao.maps.services.CATEGORY_CODE.CS2, label: '편의점' },
-        { code: kakao.maps.services.CATEGORY_CODE.MT1, label: '마트' },
-        { code: kakao.maps.services.CATEGORY_CODE.AT4, label: '관광' },
-        { code: kakao.maps.services.CATEGORY_CODE.SW8, label: '지하철' }
+        { code: kakao.maps.services.CATEGORY_CODE.CS2, label: '편의점' }
       ];
       const allResults = [];
 
+      // 카테고리 병렬 검색 (반경 3000m)
       const promises = categories.map(cat => new Promise(res => {
         places.categorySearch(cat.code, (data, status) => {
           if (status === kakao.maps.services.Status.OK && data) {
-            res(data.slice(0,8).map(d => ({ ...d, _catLabel: cat.label })));
+            res(data.slice(0,6).map(d => ({ ...d, _catLabel: cat.label })));
           } else res([]);
-        }, { location: new kakao.maps.LatLng(lat, lng), radius: 5000, sort: kakao.maps.services.SortBy.DISTANCE });
+        }, { location: new kakao.maps.LatLng(lat, lng), radius: 3000, sort: kakao.maps.services.SortBy.DISTANCE });
       }));
 
-      // 키워드 검색 추가: 택시 수요 높은 키워드 - 반경 5km
-      const keywordList = ['택시승강장', '역', '버스터미널', '대학병원', '백화점', '대형마트', '터미널'];
+      // 키워드 검색 추가: 택시 수요 높은 키워드
+      const keywordList = ['택시승강장', '역', '버스터미널', '대학병원'];
       const kwPromises = keywordList.map(kw => new Promise(res => {
         places.keywordSearch(kw, (data, status) => {
-          if (status === kakao.maps.services.Status.OK && data) res(data.slice(0,4));
+          if (status === kakao.maps.services.Status.OK && data) res(data.slice(0,3));
           else res([]);
-        }, { location: new kakao.maps.LatLng(lat, lng), radius: 5000 });
+        }, { location: new kakao.maps.LatLng(lat, lng), radius: 3000 });
       }));
 
       const resultsArrays = await Promise.all([...promises, ...kwPromises]);
@@ -3921,18 +3890,13 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         }
       });
 
-      generated = deduped.slice(0,18);
-      // v8.9.81 FIX: 결과 있을 때만 캐시
-      if (generated.length > 0) {
-        autoRegionCache.set(cacheKey, generated);
-      } else {
-        autoRegionCache.delete(cacheKey);
-      }
+      generated = deduped.slice(0,15);
+      autoRegionCache.set(`${lat.toFixed(3)}_${lng.toFixed(3)}`, generated);
 
       // UI 알림
       if (generated.length > 0) {
         const logEl = document.getElementById('pipeline-log');
-        if (logEl) logEl.innerHTML = `⚡ [${regionName}] 실시간 ${generated.length}곳 자동 생성 <button onclick="saveAutoRegionToMaster()" style="margin-left:6px; background:#FBBF24; color:#000; border:none; border-radius:6px; padding:2px 6px; font-size:10px; font-weight:900;">마스터에 저장</button>`;
+        if (logEl) logEl.innerHTML = `⚡ [${regionName}] DB 없는 지역 감지 · 실시간 ${generated.length}곳 자동 생성 <button onclick="saveAutoRegionToMaster()" style="margin-left:6px; background:#FBBF24; color:#000; border:none; border-radius:6px; padding:2px 6px; font-size:10px; font-weight:900;">마스터에 저장</button>`;
       }
 
     } catch(e) {
@@ -3947,25 +3911,18 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       let lastGenerated = [];
       // 캐시에서 마지막 검색 결과 가져오기
       for (let v of autoRegionCache.values()) { lastGenerated = v; }
-      if (lastGenerated.length === 0) { 
-        // autoGeneratedGlobal에서도 시도
-        try { if(typeof autoGeneratedGlobal !== 'undefined' && autoGeneratedGlobal.length>0) lastGenerated = autoGeneratedGlobal; } catch(e) {}
-      }
       if (lastGenerated.length === 0) { showToast('저장할 데이터 없음'); return; }
-      let savedRaw = null;
-      try { savedRaw = getFromAnyStorage('sudataxi_master_hotspots'); } catch(e) {}
-      if (!savedRaw) { try { savedRaw = localStorage.getItem('sudataxi_master_hotspots'); } catch(e) {} }
+      const saved = localStorage.getItem('sudataxi_master_hotspots');
       let existing = [];
-      if (savedRaw) { try { existing = JSON.parse(savedRaw); } catch(e) {} }
+      if (saved) { try { existing = JSON.parse(saved); } catch(e) {} }
       let merged = [...existing];
       lastGenerated.forEach(g => {
         if (!merged.some(m => m.id === g.id || getStraightDistanceKm(m.lat, m.lng, g.lat, g.lng) < 0.2)) {
           merged.push({ id: g.id, name: g.name, lat: g.lat, lng: g.lng, address: g.address, type: g.type, region: g.region, isWisu: false, baseScore: g.baseScore });
         }
       });
-      // v8.9.84 FIX: 3중 영구 저장 (쿠키+세션+IndexedDB+localStorage) - 고객탑승정보와 동일 방식
-      try { saveMasterHotspotsPersistent(merged); } catch(e) { try { localStorage.setItem('sudataxi_master_hotspots', JSON.stringify(merged)); } catch(e2){} }
-      showToast(`📦 ${lastGenerated.length}곳 마스터 DB에 영구 저장됨 (삭제 안됨)`);
+      localStorage.setItem('sudataxi_master_hotspots', JSON.stringify(merged));
+      showToast(`📦 ${lastGenerated.length}곳 마스터 DB에 저장됨`);
     } catch(e) { showToast('저장 실패'); }
   }
 
@@ -4213,34 +4170,41 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
 
     if (nowHour >= 16 && nowHour < 18) {
       let places = [];
-      if (isSuwon) places = [{ name: "수원역 환승거점", lat: 37.2662, lng: 127.0001 }, { name: "인계동 나혜석거리", lat: 37.2635, lng: 127.0322 }, { name: "영통역 중심상가", lat: 37.2515, lng: 127.0714 }];
-      else if (isAnsan) places = [{ name: "중앙역 로데오거리", lat: 37.3186, lng: 126.8385 }, { name: "고잔역 법조타운", lat: 37.3168, lng: 126.8232 }];
-      else if (isSeoul) places = [{ name: "강남역 상업지구", lat: 37.4981, lng: 127.0276 }, { name: "여의도역", lat: 37.5216, lng: 126.9242 }];
+      if (isSuwon) places = [{ name: "수원역 환승거점", lat: 37.2662, lng: 127.0001 }, { name: "인계동 나혜석거리 상업지구", lat: 37.2635, lng: 127.0322 }, { name: "영통역 중심상가", lat: 37.2515, lng: 127.0714 }, { name: "광교테크노밸리 업체밀집", lat: 37.2928, lng: 127.0456 }];
+      else if (isAnsan) places = [{ name: "중앙역 로데오거리 상업지구", lat: 37.3186, lng: 126.8385 }, { name: "고잔역 법조타운 업체밀집", lat: 37.3168, lng: 126.8232 }, { name: "상록수역 먹자골목", lat: 37.3025, lng: 126.8654 }];
+      else if (isSeoul) places = [{ name: "강남역 상업지구", lat: 37.4981, lng: 127.0276 }, { name: "여의도역 금융지구", lat: 37.5216, lng: 126.9242 }, { name: "홍대입구 상권", lat: 37.5573, lng: 126.9247 }];
       else {
         const curRegion = (typeof currentRegionName !== 'undefined' ? currentRegionName : '') || '';
         if(curRegion.includes('군포') || curRegion.includes('Gunpo')){
-          places = [{ name: "산본역 중심상가", lat: 37.3554, lng: 126.9331 }, { name: "금정역 환승", lat: 37.3720, lng: 126.9435 }, { name: "군포시청 원광대병원", lat: 37.3620, lng: 126.9330 }];
+          places = [{ name: "산본역 중심상가 상업지구", lat: 37.3554, lng: 126.9331 }, { name: "금정역 환승 상업지구", lat: 37.3720, lng: 126.9435 }, { name: "군포시청 원광대병원 업체밀집", lat: 37.3620, lng: 126.9330 }, { name: "평촌스마트스퀘어 오피스", lat: 37.3942, lng: 126.9638 }];
         } else {
-          places = [{ name: "범계역 로데오거리", lat: 37.38965, lng: 126.95061 }, { name: "평촌역 먹자골목", lat: 37.3942, lng: 126.9638 }];
+          // v8.9.86 FIX: 상업지구/업체밀집 중심으로 4곳 이상
+          places = [{ name: "범계역 로데오거리 상업지구", lat: 37.38965, lng: 126.95061 }, { name: "평촌역 먹자골목 업체밀집", lat: 37.3942, lng: 126.9638 }, { name: "안양역 일번가 상업지구", lat: 37.4013, lng: 126.9222 }, { name: "인덕원역 환승 상업지구", lat: 37.4048, lng: 126.9767 }, { name: "평촌스마트스퀘어 오피스밀집", lat: 37.3920, lng: 126.9570 }];
         }
       }
       return { 
         title: "주간 방어 및 수락률 확보", 
-        desc: "콜 발생 빈도가 낮은 시간입니다. <b>수락률(AR) 방어</b>를 위해 단거리 콜도 기꺼이 수락하며, 현재 지역의 <b>환승거점과 중심상가</b>에서 대기하세요. 누적 수락률 60% 이상을 확보하면 야간 피크에 유리합니다.",
+        desc: "콜 발생 빈도가 낮은 시간입니다. <b>수락률(AR) 방어</b>를 위해 <b>범계/평촌/안양역 상업지구와 오피스 밀집지역</b>을 순환하며 단거리 콜도 수락하세요. 누적 수락률 60% 이상을 확보하면 야간 피크에 유리합니다.",
         places: places 
       };
     }
 
     if (nowHour >= 18 && nowHour < 20) {
       let places = [];
-      if (isSuwon) places = [{ name: "삼성디지털시티 (영통)", lat: 37.2570, lng: 127.0540 }, { name: "광교테크노밸리", lat: 37.2928, lng: 127.0456 }];
-      else if (isAnsan) places = [{ name: "반월국가산업단지", lat: 37.3150, lng: 126.7770 }, { name: "고잔동 법조타운", lat: 37.3168, lng: 126.8232 }];
-      else if (isSeoul) places = [{ name: "강남역 상업지구", lat: 37.4981, lng: 127.0276 }, { name: "여의도역 환승거점", lat: 37.5216, lng: 126.9242 }];
-      else places = [{ name: "과천 지식정보타운", lat: 37.4144, lng: 126.9856 }, { name: "안양 평촌스마트스퀘어", lat: 37.3942, lng: 126.9638 }];
+      if (isSuwon) places = [{ name: "삼성디지털시티 (영통) 업체밀집", lat: 37.2570, lng: 127.0540 }, { name: "광교테크노밸리 업체밀집", lat: 37.2928, lng: 127.0456 }, { name: "수원역 환승거점", lat: 37.2662, lng: 127.0001 }];
+      else if (isAnsan) places = [{ name: "반월국가산업단지 업체밀집", lat: 37.3150, lng: 126.7770 }, { name: "고잔동 법조타운 업체밀집", lat: 37.3168, lng: 126.8232 }, { name: "중앙역 상업지구", lat: 37.3186, lng: 126.8385 }];
+      else if (isSeoul) places = [{ name: "강남역 상업지구", lat: 37.4981, lng: 127.0276 }, { name: "여의도역 환승거점", lat: 37.5216, lng: 126.9242 }, { name: "가산디지털단지 업체밀집", lat: 37.4812, lng: 126.8821 }];
+      else places = [
+        { name: "과천 지식정보타운 업체밀집", lat: 37.4144, lng: 126.9856 }, 
+        { name: "안양 평촌스마트스퀘어 오피스밀집", lat: 37.3920, lng: 126.9570 },
+        { name: "정부과천청사역 오피스상권", lat: 37.4262, lng: 126.9898 },
+        { name: "범계역 로데오거리 상업지구", lat: 37.38965, lng: 126.95061 },
+        { name: "인덕원역 IT밸리 업체밀집", lat: 37.4048, lng: 126.9767 }
+      ];
       
       return { 
-        title: "퇴근 피크 타임", 
-        desc: "현재 지역의 <b>주요 업무지구 및 환승 거점</b>에 진입하여 중장거리 콜을 유도하고 정체 할증을 노리세요.",
+        title: "퇴근 피크 타임 - 오피스/상업지구 집중", 
+        desc: "퇴근 시간입니다. <b>과천 지식정보타운, 평촌스마트스퀘어, 정부과천청사 등 오피스 밀집지역</b>에 진입하여 중장거리 콜을 유도하고 정체 할증을 노리세요. 업체 퇴근 수요가 폭발합니다.",
         places: places
       };
     }
@@ -4261,48 +4225,72 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
 
     if (nowHour >= 21 && nowHour < 23) {
       let places = [];
-      if (isSuwon) places = [{ name: "인계동 나혜석거리", lat: 37.2635, lng: 127.0322 }, { name: "수원역 로데오거리", lat: 37.2662, lng: 127.0001 }];
-      else if (isAnsan) places = [{ name: "중앙역 로데오거리", lat: 37.3186, lng: 126.8385 }, { name: "상록수역 먹자골목", lat: 37.3025, lng: 126.8654 }];
-      else if (isSeoul) places = [{ name: "사당역 먹자골목", lat: 37.4765, lng: 126.9816 }, { name: "강남역 번화가", lat: 37.4981, lng: 127.0276 }];
+      if (isSuwon) places = [{ name: "인계동 나혜석거리 상업지구", lat: 37.2635, lng: 127.0322 }, { name: "수원역 로데오거리 상업지구", lat: 37.2662, lng: 127.0001 }, { name: "영통역 중심상가", lat: 37.2515, lng: 127.0714 }];
+      else if (isAnsan) places = [{ name: "중앙역 로데오거리 상업지구", lat: 37.3186, lng: 126.8385 }, { name: "상록수역 먹자골목 상업지구", lat: 37.3025, lng: 126.8654 }, { name: "고잔역 먹자골목", lat: 37.3168, lng: 126.8232 }];
+      else if (isSeoul) places = [{ name: "사당역 먹자골목 상업지구", lat: 37.4765, lng: 126.9816 }, { name: "강남역 번화가 상업지구", lat: 37.4981, lng: 127.0276 }, { name: "홍대입구 상권", lat: 37.5573, lng: 126.9247 }];
       else {
         const curRegion = (typeof currentRegionName !== 'undefined' ? currentRegionName : '') || '';
         if(curRegion.includes('군포') || curRegion.includes('Gunpo')){
-          places = [{ name: "산본역 중심상가", lat: 37.3554, lng: 126.9331 }, { name: "금정역 환승", lat: 37.3720, lng: 126.9435 }, { name: "군포시청", lat: 37.3620, lng: 126.9330 }];
+          places = [{ name: "산본역 중심상가 상업지구", lat: 37.3554, lng: 126.9331 }, { name: "금정역 환승 상업지구", lat: 37.3720, lng: 126.9435 }, { name: "산본 로데오거리", lat: 37.3554, lng: 126.9331 }, { name: "군포시청 먹자골목", lat: 37.3620, lng: 126.9330 }];
         } else {
-          places = [{ name: "범계역 로데오거리", lat: 37.38965, lng: 126.95061 }, { name: "평촌 학원가", lat: 37.3821, lng: 126.9582 }, { name: "산본역 중심상가", lat: 37.3554, lng: 126.9331 }];
+          places = [{ name: "범계역 로데오거리 상업지구", lat: 37.38965, lng: 126.95061 }, { name: "평촌역 먹자골목 상업지구", lat: 37.3942, lng: 126.9638 }, { name: "안양역 일번가 상업지구", lat: 37.4013, lng: 126.9222 }, { name: "산본역 중심상가 상업지구", lat: 37.3554, lng: 126.9331 }, { name: "인덕원역 먹자골목", lat: 37.4048, lng: 126.9767 }];
         }
       }
       
       return { 
-        title: "야간 상권 / 회전율 극대화", 
-        desc: "현재 지역의 <b>핵심 상권 및 로데오거리</b> 일대에서 짧은 이동 거리로 콜 회전율(시간당 3~4콜)을 극대화하세요.",
+        title: "야간 상권 / 회전율 극대화 - 상업지구 순환", 
+        desc: "야간 피크입니다. <b>범계 로데오, 평촌 먹자골목, 안양 일번가, 산본 중심상가 등 핵심 상업지구</b>를 1~2km 간격으로 순환하며 콜 회전율(시간당 3~4콜)을 극대화하세요. 업체 밀집지역이 골든스팟입니다.",
         places: places
       };
     }
 
     if (nowHour >= 23 || nowHour < 2) {
       let places = [];
-      if (isSuwon) places = [{ name: "성대역 먹자골목", lat: 37.2995, lng: 126.9710 }, { name: "수원시청역", lat: 37.2608, lng: 127.0287 }];
-      else if (isAnsan) places = [{ name: "중앙역", lat: 37.3186, lng: 126.8385 }, { name: "상록수역", lat: 37.3025, lng: 126.8654 }];
-      else if (isSeoul) places = [{ name: "강남역", lat: 37.4981, lng: 127.0276 }, { name: "사당역", lat: 37.4765, lng: 126.9816 }];
-      else places = [{ name: "선바위역 (과천-서울 경계)", lat: 37.4520, lng: 127.0050 }, { name: "석수역 (안양-서울 경계)", lat: 37.4355, lng: 126.9022 }];
+      if (isSuwon) places = [{ name: "성대역 먹자골목 상업지구", lat: 37.2995, lng: 126.9710 }, { name: "수원시청역 상업지구", lat: 37.2608, lng: 127.0287 }, { name: "인계동 나혜석거리", lat: 37.2635, lng: 127.0322 }];
+      else if (isAnsan) places = [{ name: "중앙역 로데오거리", lat: 37.3186, lng: 126.8385 }, { name: "상록수역 상업지구", lat: 37.3025, lng: 126.8654 }];
+      else if (isSeoul) places = [{ name: "강남역 상업지구", lat: 37.4981, lng: 127.0276 }, { name: "사당역 상업지구", lat: 37.4765, lng: 126.9816 }];
+      else places = [{ name: "범계역 로데오거리 상업지구", lat: 37.38965, lng: 126.95061 }, { name: "평촌역 먹자골목 상업지구", lat: 37.3942, lng: 126.9638 }, { name: "안양역 일번가 상업지구", lat: 37.4013, lng: 126.9222 }, { name: "선바위역 (과천-서울 경계)", lat: 37.4520, lng: 127.0050 }, { name: "석수역 (안양-서울 경계)", lat: 37.4355, lng: 126.9022 }];
       
       return { 
-        title: "심야 할증 및 장거리 피크", 
-        desc: "황금 시간대입니다. 높은 수락률을 무기로 <b>인접 시 경계 및 주요 번화가</b>에서 외곽행 콜을 골라 복합 할증을 노리세요.",
+        title: "심야 할증 및 장거리 피크 - 상업지구+경계", 
+        desc: "황금 시간대입니다. <b>범계/평촌/안양 상업지구에서 대기하다 서울 경계(선바위/석수역)로 이동</b>하여 외곽행 콜을 골라 복합 할증을 노리세요. 업체 마감시간이 핵심입니다.",
         places: places
       };
     }
 
+    // v8.9.86 FIX: 기본(주간 평시/새벽)도 상업지구/업체밀집 5~6곳으로 전면 개편 - 역 2개 꼴랑 제안 금지
     let defaultPlaces = [];
-    if (isSuwon) defaultPlaces = [{ name: "수원역 환승거점", lat: 37.2662, lng: 127.0001 }, { name: "영통역", lat: 37.2515, lng: 127.0714 }];
-    else if (isAnsan) defaultPlaces = [{ name: "중앙역", lat: 37.3186, lng: 126.8385 }, { name: "고잔역", lat: 37.3168, lng: 126.8232 }];
-    else if (isSeoul) defaultPlaces = [{ name: "여의도역", lat: 37.5216, lng: 126.9242 }, { name: "강남역", lat: 37.4981, lng: 127.0276 }];
-    else defaultPlaces = [{ name: "인덕원역 환승 거점", lat: 37.4048, lng: 126.9767 }, { name: "안양역 일번가", lat: 37.4013, lng: 126.9222 }];
+    if (isSuwon) defaultPlaces = [
+      { name: "수원역 환승거점 상업지구", lat: 37.2662, lng: 127.0001 }, 
+      { name: "인계동 나혜석거리 상업지구", lat: 37.2635, lng: 127.0322 },
+      { name: "영통역 중심상가 업체밀집", lat: 37.2515, lng: 127.0714 },
+      { name: "광교테크노밸리 업체밀집", lat: 37.2928, lng: 127.0456 },
+      { name: "성대역 먹자골목 상업지구", lat: 37.2995, lng: 126.9710 }
+    ];
+    else if (isAnsan) defaultPlaces = [
+      { name: "중앙역 로데오거리 상업지구", lat: 37.3186, lng: 126.8385 }, 
+      { name: "고잔역 법조타운 업체밀집", lat: 37.3168, lng: 126.8232 },
+      { name: "상록수역 먹자골목 상업지구", lat: 37.3025, lng: 126.8654 },
+      { name: "안산 고잔동 상업지구", lat: 37.3168, lng: 126.8232 }
+    ];
+    else if (isSeoul) defaultPlaces = [
+      { name: "강남역 상업지구", lat: 37.4981, lng: 127.0276 }, 
+      { name: "여의도역 금융지구 업체밀집", lat: 37.5216, lng: 126.9242 },
+      { name: "사당역 먹자골목 상업지구", lat: 37.4765, lng: 126.9816 },
+      { name: "가산디지털단지 업체밀집", lat: 37.4812, lng: 126.8821 }
+    ];
+    else defaultPlaces = [
+      { name: "범계역 로데오거리 상업지구", lat: 37.38965, lng: 126.95061 }, 
+      { name: "평촌역 먹자골목 업체밀집", lat: 37.3942, lng: 126.9638 },
+      { name: "안양역 일번가 상업지구", lat: 37.4013, lng: 126.9222 },
+      { name: "인덕원역 환승 상업지구", lat: 37.4048, lng: 126.9767 },
+      { name: "산본역 중심상가 상업지구", lat: 37.3554, lng: 126.9331 },
+      { name: "과천 지식정보타운 업체밀집", lat: 37.4144, lng: 126.9856 }
+    ];
     
     return { 
-      title: "주간 평시 / 새벽 연비 운행", 
-      desc: "도심 내 단거리 및 역 주변 수요가 꾸준합니다. 상업지구와 환승역을 오가며 배터리 프리컨디셔닝 등 연비 위주의 운행을 하세요.",
+      title: "주간 평시 / 새벽 연비 운행 - 상업지구 중심", 
+      desc: "도심 내 단거리 수요가 꾸준합니다. <b>범계 로데오, 평촌 먹자골목, 안양 일번가, 인덕원/산본 상업지구와 과천 지식정보타운 등 업체 밀집지역</b>을 중심으로 순환하며 연비 위주 운행을 하세요. 상업지구가 콜 발생의 핵심입니다.",
       places: defaultPlaces
     };
   }
@@ -4721,9 +4709,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     let allLiveHotspots = [...liveKakaoHotspots];
 
     // v7.9.27 NEW: DB 없는 지역 자동 검색 - 개선
-    // v8.9.84 FIX: DB부족 모드와 실시간 보강 모드 분리
     let isAutoRegion = false;
-    let isSupplementMode = false;
     let autoGeneratedGlobal = [];
     const customHotspots = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]');
     const activeMasterHotspots = getMasterHotspotsFromStorage();
@@ -4731,51 +4717,13 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       const activeMasters = activeMasterHotspots;
       let nearbyMasterCount = activeMasters.filter(m => getStraightDistanceKm(currentPos.lat, currentPos.lng, m.lat, m.lng) <= 5.0).length;
       let nearbyLiveCount = allLiveHotspots.filter(h => getStraightDistanceKm(currentPos.lat, currentPos.lng, h.lat, h.lng) <= 3.0).length;
-      const isCoreWisu = (currentRegionName||'').includes('안양') || (currentRegionName||'').includes('과천') || (currentRegionName||'').includes('군포') || (currentRegionName||'').includes('의왕');
-      
-      // 1) 진짜 DB 부족 모드: 마스터 0 && 라이브 0 - 관외 외곽에서만
-      let shouldTriggerAuto = false;
-      if (!isCoreWisu) {
-        shouldTriggerAuto = (nearbyMasterCount === 0 && nearbyLiveCount < 1);
-      } else {
-        shouldTriggerAuto = (nearbyMasterCount === 0 && nearbyLiveCount === 0);
-      }
-      
-      if (shouldTriggerAuto) {
+      // 조건 완화: 마스터 3개 미만 또는 라이브 5개 미만이면 DB 없는 지역으로 판단 (용인/수원 외곽 등)
+      if (nearbyMasterCount < 3 || nearbyLiveCount < 3) {
         isAutoRegion = true;
         let autoGenerated = await fetchAndAutoUpdateForUnknownRegion(currentPos.lat, currentPos.lng, currentRegionName || '관외지역');
         if (autoGenerated && autoGenerated.length > 0) {
           allLiveHotspots = [...allLiveHotspots, ...autoGenerated];
           autoGeneratedGlobal = autoGenerated;
-        } else {
-          if (nearbyMasterCount > 0 || nearbyLiveCount > 0 || isCoreWisu) isAutoRegion = false;
-        }
-      } else {
-        // 2) 실시간 보강 모드: DB는 있지만 부족하거나 업데이트 필요할 때 - 중심가에서도 동작
-        // 관내: 마스터 5개 미만이면 주변 3km 실시간 5곳 보강
-        // 관외: 마스터 3개 미만이면 보강
-        let shouldSupplement = false;
-        if (isCoreWisu) {
-          shouldSupplement = (nearbyMasterCount < 5);
-        } else {
-          shouldSupplement = (nearbyMasterCount < 3);
-        }
-        if (shouldSupplement) {
-          isSupplementMode = true;
-          try {
-            let supplement = await fetchAndAutoUpdateForUnknownRegion(currentPos.lat, currentPos.lng, currentRegionName || '관외지역');
-            if (supplement && supplement.length > 0) {
-              // 보강 모드에서는 5곳만 추가 (효율)
-              let limited = supplement.slice(0, 5);
-              // 중복 제거 후 추가
-              limited.forEach(s => {
-                if (!allLiveHotspots.some(h => getStraightDistanceKm(h.lat, h.lng, s.lat, s.lng) < 0.3)) {
-                  allLiveHotspots.push(s);
-                }
-              });
-              autoGeneratedGlobal = limited;
-            }
-          } catch(e) { console.warn('supplement fail', e); }
         }
       }
     } catch(e) { console.warn('auto region check fail', e); }
@@ -4822,7 +4770,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
 
     let rawPool;
     if (isAutoRegion) {
-      // v8.9.82 FIX: 5km -> 3km로 축소 - 5km까지 나가야 하는 비효율 해결
+      // v8.9.86 FIX: 5km -> 3km 효율화 + 상업지구 전략 유지
       rawPool = [...userCallCandidates, ...allLiveHotspots, ...customHotspots, ...activeMasterHotspots].filter(item => {
         let d = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
         return d <= 3.0;
@@ -4832,6 +4780,27 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
         if (!inWisu && !MAJOR_HUBS.some(h => item.name.includes(h.name.substring(0,2)))) return !item.isWisu;
         return true;
       });
+      // v8.9.86 FIX: 모드2(관외 복귀)일 때도 전략탭 상업지구/업체밀집 지역을 주변 검색에 포함
+      if (!inWisu) {
+        try {
+          const strategyForMode2 = getDynamicStrategyText(nowHour, currentRegionName);
+          if (strategyForMode2 && strategyForMode2.places) {
+            strategyForMode2.places.forEach(sp => {
+              if (!rawPool.some(rp => getStraightDistanceKm(rp.lat, rp.lng, sp.lat, sp.lng) < 0.5)) {
+                rawPool.push({ ...sp, isStrategyCandidate: true, baseScore: 30, type: 'commercial_strategy' });
+              }
+            });
+          }
+          // 현재 위치 주변 3km 내 실시간 상업지구 보강 결과도 모드2에 포함 (DB화 된 것)
+          if (autoGeneratedGlobal && autoGeneratedGlobal.length > 0) {
+            autoGeneratedGlobal.forEach(ag => {
+              if (!rawPool.some(rp => getStraightDistanceKm(rp.lat, rp.lng, ag.lat, ag.lng) < 0.3)) {
+                rawPool.push({ ...ag, isAutoGenerated: true });
+              }
+            });
+          }
+        } catch(e) { console.warn('mode2 strategy inject fail', e); }
+      }
     }
 
     let preFiltered = [];
@@ -4857,10 +4826,15 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       }
 
       if (isAutoRegion) {
-        // v8.9.82 FIX: 3km 내 가까운 곳만 - 5km 비효율 해결, 1km 이내 최우선
+        // v8.9.86 FIX: 3km 내 가까운 곳만 + 상업지구 가산점
         if (straightDist <= 1.0) preliminaryScore += 80;
         else if (straightDist <= 2.0) preliminaryScore += 50;
         else if (straightDist <= 3.0) preliminaryScore += 20;
+        // 상업지구/업체밀집이면 추가 가산
+        const nameCheck = (item.name||'') + (item.type||'');
+        if (nameCheck.includes('상업지구') || nameCheck.includes('업체밀집') || nameCheck.includes('오피스') || nameCheck.includes('로데오') || nameCheck.includes('중심상가')) {
+          preliminaryScore += 50;
+        }
         // 3km 초과는 이미 rawPool에서 제외됨
       } else if (!inWisu && targetBoundaryCardData) {
         // v7.9.29 모드2 원칙 강화: 복귀지점까지 과정에 있는 핫스팟만
@@ -4898,6 +4872,17 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
         // 우회 적으면 가산
         if (detourKm <= 1.0) preliminaryScore += 25;
         else if (detourKm <= 2.0) preliminaryScore += 10;
+
+        // v8.9.86 FIX: 모드2에서도 상업지구/업체밀집 가산점 - 전략탭 중심
+        const nameForCheck = (item.name||'') + (item.type||'');
+        if (nameForCheck.includes('상업지구') || nameForCheck.includes('업체밀집') || nameForCheck.includes('오피스') || nameForCheck.includes('로데오') || nameForCheck.includes('먹자골목') || nameForCheck.includes('중심상가') || item.type==='commercial_strategy') {
+          preliminaryScore += 60;
+          if (item.isStrategyCandidate) preliminaryScore += 20;
+        }
+        // 실시간 DB화 된 상업지구 보강
+        if (item.isAutoGenerated || item.isLiveKakao) {
+          preliminaryScore += 30;
+        }
 
       } else if (straightDist <= 2.5) { preliminaryScore += 40; }
 
@@ -4948,19 +4933,9 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     // v8.1: 연산 완료 후 도착지 혼잡도 1곳만 호출 (백그라운드)
     try { if(typeof checkSeoulArrivalAndFetch === 'function') setTimeout(()=>checkSeoulArrivalAndFetch(), 800); } catch(e) {}
     
-    // v8.9.84 FIX: DB부족과 실시간보강 분리 - 로그 개선
+    // v7.9.27 로그 개선
     if (isAutoRegion) {
-      if (logEl) {
-        if (autoGeneratedGlobal && autoGeneratedGlobal.length > 0) {
-          logEl.innerHTML = `📍 [${currentRegionName || '관외'}] 주변 DB 부족 → 실시간 탐색(3km) ${autoGeneratedGlobal.length}곳으로 대체 <button onclick="saveAutoRegionToMaster()" style="margin-left:6px; background:#FBBF24; color:#000; border:none; border-radius:6px; padding:2px 6px; font-size:10px; font-weight:900;">마스터에 저장</button>`;
-        } else {
-          logEl.innerHTML = `📍 [${currentRegionName || '관외'}] 주변 DB 확인 중...`;
-        }
-      }
-    } else if (isSupplementMode) {
-      if (logEl && autoGeneratedGlobal && autoGeneratedGlobal.length > 0) {
-        logEl.innerHTML = `📍 [${currentRegionName || '관외'}] 기존 DB ${allLiveHotspots.length - autoGeneratedGlobal.length}곳 + 실시간 보강 ${autoGeneratedGlobal.length}곳 <button onclick="saveAutoRegionToMaster()" style="margin-left:6px; background:#22C55E; color:#FFF; border:none; border-radius:6px; padding:2px 6px; font-size:10px; font-weight:900;">저장</button>`;
-      }
+      if (logEl) logEl.innerHTML = `📍 [${currentRegionName || '관외'}] 주변 5km 내 DB 부족 → 실시간 ${allLiveHotspots.length}곳 + 복귀지점(4번째)`;
     }
     renderCards(selectedCandidates, referenceHubs, targetBoundaryCardData);
     // v7.9.23 자주가는 곳 렌더링
@@ -5229,9 +5204,6 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       }
 
       if (needSave) {
-        try{ saveToAllStorages('sudataxi_custom_restrooms', JSON.stringify(customRestrooms)); }catch(e){}
-        try{ saveToAllStorages('sudataxi_call_logs', JSON.stringify(logs)); }catch(e){}
-        try{ saveToAllStorages('sudataxi_custom_hotspots', JSON.stringify(customHotspots)); }catch(e){}
         localStorage.setItem('sudataxi_custom_restrooms', JSON.stringify(customRestrooms));
         localStorage.setItem('sudataxi_call_logs', JSON.stringify(logs));
         localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(customHotspots));
@@ -5306,16 +5278,14 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       savedAt: new Date().toISOString()
     });
     
-    try{ saveToAllStorages('sudataxi_custom_hotspots', JSON.stringify(custom)); }catch(e){}
     localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(custom));
     updateCustomHotspotUI();
     if (activeTab === 1) calculateAndRender();
-    showToast(`📍 ${smartName}\n영구 저장 완료!`);
+    showToast(`📍 ${smartName}\n등록 완료!`);
   }
 
   function deleteCustomHotspot(id) {
     let custom = JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]').filter(i => i.id !== id);
-    try{ saveToAllStorages('sudataxi_custom_hotspots', JSON.stringify(custom)); }catch(e){}
     localStorage.setItem('sudataxi_custom_hotspots', JSON.stringify(custom));
     updateCustomHotspotUI();
     if (activeTab === 1) calculateAndRender();
@@ -5323,7 +5293,6 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
 
   function deleteCustomRestroom(id) {
     let custom = JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]').filter(i => i.id !== id);
-    try{ saveToAllStorages('sudataxi_custom_restrooms', JSON.stringify(custom)); }catch(e){}
     localStorage.setItem('sudataxi_custom_restrooms', JSON.stringify(custom));
     updateCustomRestroomUI();
   }
@@ -5410,8 +5379,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
            if (!s.start) return;
            const sTime = fTime(s.start); const eTime = fTime(s.end);
            const sittingSec = (s.total || 0) + (s.break || 0);
-           // v8.9.81 FIX: 진행중 세션은 초 단위 실시간 표시, 완료 세션은 HH:MM
-           const durationStr = s.end ? formatHHMMSS(sittingSec).substring(0, 5) : formatHHMMSS(sittingSec);
+           const durationStr = formatHHMMSS(sittingSec).substring(0, 5); 
            sessionHtml += `<div class="session-item"><div class="session-time"><span style="color:#8A8A8A; margin-right:4px;">${idx+1}.</span> ${sTime} ~ ${eTime} <span class="session-duration">[${durationStr}]</span></div>${s.end ? `<button class="session-del-btn" onclick="deleteSession(${s.id})">❌취소</button>` : `<span style="font-size:9px; color:#22C55E; font-weight:900;">진행중</span>`}</div>`;
        });
        if (sessionHtml) { sessionListEl.innerHTML = sessionHtml; } else { sessionListEl.innerHTML = '<div style="font-size:11px; color:#8A8A8A; text-align:center; padding:8px;">운행 기록 없음</div>'; }
@@ -6976,7 +6944,7 @@ function initMic() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.84</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.80</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
