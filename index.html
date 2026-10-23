@@ -92,7 +92,7 @@
   const EMBEDDED_DEFAULTS = {
     daily_rev: 0,
     sim_data: {target:4000000, current:0, restDates:[]},
-    version: 'v8.9.91'
+    version: 'v8.9.93'
   };
 </script>
 <style>
@@ -216,7 +216,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>sudataxi-k v8.9.91</title>
+  <title>sudataxi-k v8.9.93</title>
 
   <link rel="manifest" href="data:application/json;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwMDAwMDAiLCAiZGVzY3JpcHRpb24iOiAi7JWI7JaRL+q1sO2PrC/snZjsmZUv6rO87LKcIOy9nC/rspTsuZnquIgg7KeA64+EIC0g7IOB7JeF7KeA6rWsIOykkeyLrCB2OC45LjkwIiwgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsICJpY29ucyI6IFt7InB1cnBvc2UiOiAiYW55IG1hc2thYmxlIiwgInNpemVzIjogIjUxMng1MTIiLCAic3JjIjogImh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzM3NzQvMzc3NDA4My5wbmciLCAidHlwZSI6ICJpbWFnZS9wbmcifV0sICJuYW1lIjogIuyImOuLpO2DneyLnEsgdjguOS45MCIsICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsICJzaG9ydF9uYW1lIjogIuyImOuLpO2DneyLnEsiLCAic3RhcnRfdXJsIjogIi4vaW5kZXguaHRtbD92PTguOS45MCIsICJ0aGVtZV9jb2xvciI6ICIjRkZDODAwIiwgInZlcnNpb24iOiAiOC45LjkwIn0=">
   <meta name="theme-color" content="#FFC800">
@@ -1995,7 +1995,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v8.9.91";
+  const BUILD_VERSION = "v8.9.93";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2038,7 +2038,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
   // v8.9.90 FIX: PWA가 이전 버전 뜨는 증상 근본 해결
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => { 
-      navigator.serviceWorker.register('./sw.js?v=8.9.91').then(reg => {
+      navigator.serviceWorker.register('./sw.js?v=8.9.93').then(reg => {
         // 새 버전 발견 시 즉시 업데이트
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
@@ -2365,7 +2365,14 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       let secondClosestHp = null; let secondMinDist = 0.5;
       let absoluteClosestHp = null; let absoluteMinDist = Infinity;
       
-      const searchPool = [...activeMasterHotspots, ...customHotspots];
+      const outsideHotspotsForName = [
+        { name: "광명역", lat: 37.4784, lng: 126.8644 },
+        { name: "광명사거리역", lat: 37.4756, lng: 126.8690 },
+        { name: "철산역", lat: 37.4772, lng: 126.8645 },
+        { name: "석수역", lat: 37.4296, lng: 126.9025 },
+        { name: "금천구청역", lat: 37.4567, lng: 126.8956 }
+      ];
+      const searchPool = [...activeMasterHotspots, ...customHotspots, ...outsideHotspotsForName];
       searchPool.forEach(hp => {
           let d = getStraightDistanceKm(lat, lng, hp.lat, hp.lng);
           if (d < minDist) { minDist = d; closestHp = hp; }
@@ -2718,7 +2725,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
         date_str: new Date().toLocaleDateString('ko-KR'),
-        version: 'v8.9.91'
+        version: 'v8.9.93'
       };
       // v8.9.80: 매출 상세도 함께 전송 (손님탑승처럼 시트에 바로 기록되게)
       try{
@@ -2766,7 +2773,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         monthly_target: sim.target||0,
         monthly_current: sim.current||0,
         rest_dates: (sim.restDates||[]).join(','),
-        version: 'v8.9.91'
+        version: 'v8.9.93'
       };
       fetch(url, {
         method: 'POST',
@@ -2796,7 +2803,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.9.91'
+        version: 'v8.9.93'
       };
       
       // auto_backup은 항상 최신으로 갱신 (가벼운 백업) - 다중 저장소
@@ -4103,7 +4110,11 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
             }
         });
 
-        if (lat >= 37.435) {
+        // v8.9.92 FIX: 광명역이 관내로 뜨는 버그 - 광명 명시적 체크
+        const distToGwangmyeong = getStraightDistanceKm(lat, lng, 37.4784, 126.8644);
+        if (distToGwangmyeong < 4.0) {
+            isWisu = false; currentRegionName = "광명역 (GPS 자체추정)";
+        } else if (lat >= 37.435) {
             isWisu = false; currentRegionName = "서울 (GPS 자체추정)";
         } else if (minOutsideDist < minWisuDist) {
             isWisu = false; currentRegionName = currentOutsideRegion + " (GPS 자체추정)";
@@ -4195,8 +4206,8 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       const days = ['일', '월', '화', '수', '목', '금', '토']; const dayStr = days[nowDate.getDay()];
       const isWeekend = (nowDate.getDay() === 0 || nowDate.getDay() === 6);
       let badgeHtml = isHoliday ? `<span class="holiday-badge">🔴 ${holidayName || '공휴일'}</span>` : (isWeekend ? `<span class="holiday-badge" style="background:#FF8C00;">🟡 휴일</span>` : `<span class="weekday-badge">🟢 평일</span>`);
-      headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) <span class="build-ver-tag">v8.9.91</span> ${badgeHtml}`;
-    } catch(e) { try { const h=document.getElementById('app-header-title'); if(h) h.innerHTML=`📅 ${nowDate.getMonth()+1}.${nowDate.getDate()} <span class="build-ver-tag">v8.9.91</span>`; } catch(e2){} }
+      headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) <span class="build-ver-tag">v8.9.93</span> ${badgeHtml}`;
+    } catch(e) { try { const h=document.getElementById('app-header-title'); if(h) h.innerHTML=`📅 ${nowDate.getMonth()+1}.${nowDate.getDate()} <span class="build-ver-tag">v8.9.93</span>`; } catch(e2){} }
   }
 
   async function checkIsPublicHolidayRealtime() {
@@ -4299,12 +4310,14 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     let isSuwon = r.includes("수원") || r.includes("용인") || r.includes("화성");
     let isAnsan = r.includes("안산") || r.includes("시흥");
     let isSeoul = r.includes("서울");
+    let isGwangmyeong = r.includes("광명") || r.includes("철산") || r.includes("하안");
 
     if (nowHour >= 16 && nowHour < 18) {
       let places = [];
       if (isSuwon) places = [{ name: "수원역 환승거점", lat: 37.2662, lng: 127.0001 }, { name: "인계동 나혜석거리 상업지구", lat: 37.2635, lng: 127.0322 }, { name: "영통역 중심상가", lat: 37.2515, lng: 127.0714 }, { name: "광교테크노밸리 업체밀집", lat: 37.2928, lng: 127.0456 }];
       else if (isAnsan) places = [{ name: "중앙역 로데오거리 상업지구", lat: 37.3186, lng: 126.8385 }, { name: "고잔역 법조타운 업체밀집", lat: 37.3168, lng: 126.8232 }, { name: "상록수역 먹자골목", lat: 37.3025, lng: 126.8654 }];
       else if (isSeoul) places = [{ name: "강남역 상업지구", lat: 37.4981, lng: 127.0276 }, { name: "여의도역 금융지구", lat: 37.5216, lng: 126.9242 }, { name: "홍대입구 상권", lat: 37.5573, lng: 126.9247 }];
+      else if (isGwangmyeong) places = [{ name: "광명사거리역 상업지구", lat: 37.4756, lng: 126.8690 }, { name: "철산역 로데오거리 상업지구", lat: 37.4772, lng: 126.8645 }, { name: "하안동 상업지구 업체밀집", lat: 37.4690, lng: 126.8610 }, { name: "KTX 광명역 환승거점", lat: 37.4165, lng: 126.8847 }, { name: "광명전통시장 상업지구", lat: 37.4740, lng: 126.8670 }];
       else {
         const curRegion = (typeof currentRegionName !== 'undefined' ? currentRegionName : '') || '';
         if(curRegion.includes('군포') || curRegion.includes('Gunpo')){
@@ -4346,6 +4359,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       if (isSuwon) places = [{ name: "수원월드컵경기장 (휴식/충전)", lat: 37.2863, lng: 127.0368 }, { name: "광교호수공원 주차장", lat: 37.2801, lng: 127.0673 }];
       else if (isAnsan) places = [{ name: "안산와스타디움", lat: 37.3178, lng: 126.8184 }, { name: "화랑유원지 주차장", lat: 37.3200, lng: 126.8144 }];
       else if (isSeoul) places = [{ name: "반포한강공원 주차장", lat: 37.5100, lng: 126.9950 }];
+      else if (isGwangmyeong) places = [{ name: "광명동굴 주차장", lat: 37.4245, lng: 126.8700 }, { name: "KTX 광명역 주차장", lat: 37.4165, lng: 126.8847 }];
       else places = [{ name: "안양 농수산물시장 E-pit", lat: 37.3820, lng: 126.9749 }, { name: "피트인 안양 (배터리 교체)", lat: 37.3826, lng: 126.9388 }];
       
       return { 
@@ -4360,6 +4374,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       if (isSuwon) places = [{ name: "인계동 나혜석거리 상업지구", lat: 37.2635, lng: 127.0322 }, { name: "수원역 로데오거리 상업지구", lat: 37.2662, lng: 127.0001 }, { name: "영통역 중심상가", lat: 37.2515, lng: 127.0714 }];
       else if (isAnsan) places = [{ name: "중앙역 로데오거리 상업지구", lat: 37.3186, lng: 126.8385 }, { name: "상록수역 먹자골목 상업지구", lat: 37.3025, lng: 126.8654 }, { name: "고잔역 먹자골목", lat: 37.3168, lng: 126.8232 }];
       else if (isSeoul) places = [{ name: "사당역 먹자골목 상업지구", lat: 37.4765, lng: 126.9816 }, { name: "강남역 번화가 상업지구", lat: 37.4981, lng: 127.0276 }, { name: "홍대입구 상권", lat: 37.5573, lng: 126.9247 }];
+      else if (isGwangmyeong) places = [{ name: "광명사거리역 먹자골목 상업지구", lat: 37.4756, lng: 126.8690 }, { name: "철산역 로데오거리 상업지구", lat: 37.4772, lng: 126.8645 }, { name: "하안동 먹자골목", lat: 37.4690, lng: 126.8610 }, { name: "광명전통시장 상업지구", lat: 37.4740, lng: 126.8670 }, { name: "소하동 상업지구", lat: 37.4550, lng: 126.8640 }];
       else {
         const curRegion = (typeof currentRegionName !== 'undefined' ? currentRegionName : '') || '';
         if(curRegion.includes('군포') || curRegion.includes('Gunpo')){
@@ -4381,6 +4396,7 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       if (isSuwon) places = [{ name: "성대역 먹자골목 상업지구", lat: 37.2995, lng: 126.9710 }, { name: "수원시청역 상업지구", lat: 37.2608, lng: 127.0287 }, { name: "인계동 나혜석거리", lat: 37.2635, lng: 127.0322 }];
       else if (isAnsan) places = [{ name: "중앙역 로데오거리", lat: 37.3186, lng: 126.8385 }, { name: "상록수역 상업지구", lat: 37.3025, lng: 126.8654 }];
       else if (isSeoul) places = [{ name: "강남역 상업지구", lat: 37.4981, lng: 127.0276 }, { name: "사당역 상업지구", lat: 37.4765, lng: 126.9816 }];
+      else if (isGwangmyeong) places = [{ name: "광명사거리역 상업지구", lat: 37.4756, lng: 126.8690 }, { name: "철산역 로데오거리 상업지구", lat: 37.4772, lng: 126.8645 }, { name: "하안동 먹자골목 상업지구", lat: 37.4690, lng: 126.8610 }, { name: "KTX 광명역 (경계)", lat: 37.4165, lng: 126.8847 }, { name: "석수역 (광명-안양 경계)", lat: 37.4355, lng: 126.9022 }];
       else places = [{ name: "범계역 로데오거리 상업지구", lat: 37.3912, lng: 126.9498 }, { name: "평촌역 먹자골목 상업지구", lat: 37.3942, lng: 126.9638 }, { name: "안양역 일번가 상업지구", lat: 37.4013, lng: 126.9222 }, { name: "선바위역 (과천-서울 경계)", lat: 37.4520, lng: 127.0050 }, { name: "석수역 (안양-서울 경계)", lat: 37.4355, lng: 126.9022 }];
       
       return { 
@@ -4410,6 +4426,13 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       { name: "여의도역 금융지구 업체밀집", lat: 37.5216, lng: 126.9242 },
       { name: "사당역 먹자골목 상업지구", lat: 37.4765, lng: 126.9816 },
       { name: "가산디지털단지 업체밀집", lat: 37.4812, lng: 126.8821 }
+    ];
+    else if (isGwangmyeong) defaultPlaces = [
+      { name: "광명사거리역 상업지구", lat: 37.4756, lng: 126.8690 }, 
+      { name: "철산역 로데오거리 상업지구", lat: 37.4772, lng: 126.8645 },
+      { name: "하안동 상업지구 업체밀집", lat: 37.4690, lng: 126.8610 },
+      { name: "광명전통시장 상업지구", lat: 37.4740, lng: 126.8670 },
+      { name: "KTX 광명역 환승거점", lat: 37.4165, lng: 126.8847 }
     ];
     else defaultPlaces = [
       { name: "범계역 로데오거리 상업지구", lat: 37.3912, lng: 126.9498 }, 
@@ -7162,7 +7185,7 @@ function initMic() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.91</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.93</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });

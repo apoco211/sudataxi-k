@@ -1,5 +1,5 @@
-// sudataxi-k PWA Service Worker v8.9.91 - Network-first for index.html to prevent old version
-const CACHE_VERSION = 'v8.9.91';
+// sudataxi-k PWA Service Worker v8.9.93 - Network-first for index.html to prevent old version
+const CACHE_VERSION = 'v8.9.93';
 const CACHE_NAME = `sudataxi-k-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   './',
