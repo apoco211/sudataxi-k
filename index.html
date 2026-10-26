@@ -111,7 +111,7 @@
   const EMBEDDED_DEFAULTS = {
     daily_rev: 0,
     sim_data: {target:4000000, current:0, restDates:[]},
-    version: 'v8.9.97'
+    version: 'v8.9.98'
   };
 </script>
 <style>
@@ -235,7 +235,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>sudataxi-k v8.9.97</title>
+  <title>sudataxi-k v8.9.98</title>
 
   <link rel="manifest" href="data:application/json;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwMDAwMDAiLCAiZGVzY3JpcHRpb24iOiAi7JWI7JaRL+q1sO2PrC/snZjsmZUv6rO87LKcIOy9nC/rspTsuZnquIgg7KeA64+EIC0g7IOB7JeF7KeA6rWsIOykkeyLrCB2OC45LjkwIiwgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsICJpY29ucyI6IFt7InB1cnBvc2UiOiAiYW55IG1hc2thYmxlIiwgInNpemVzIjogIjUxMng1MTIiLCAic3JjIjogImh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzM3NzQvMzc3NDA4My5wbmciLCAidHlwZSI6ICJpbWFnZS9wbmcifV0sICJuYW1lIjogIuyImOuLpO2DneyLnEsgdjguOS45MCIsICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsICJzaG9ydF9uYW1lIjogIuyImOuLpO2DneyLnEsiLCAic3RhcnRfdXJsIjogIi4vaW5kZXguaHRtbD92PTguOS45MCIsICJ0aGVtZV9jb2xvciI6ICIjRkZDODAwIiwgInZlcnNpb24iOiAiOC45LjkwIn0=">
   <meta name="theme-color" content="#FFC800">
@@ -1592,12 +1592,12 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
   
   <div class="sticky-top-area" style="padding-bottom: 6px; box-shadow: 0 -20px 0 20px var(--main-bg);">
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 2px;">
-      <div class="header" id="app-header-title" style="margin-bottom: 0; flex: 1;">📅 2026.10.26(월) <span class="build-ver-tag">v8.9.97</span> <span class="weekday-badge">🟢 평일</span></div>
+      <div class="header" id="app-header-title" style="margin-bottom: 0; flex: 1;">📅 2026.10.26(월) <span class="build-ver-tag">v8.9.98</span> <span class="weekday-badge">🟢 평일</span></div>
       <button id="btn-theme-toggle" onclick="toggleTheme()" class="btn-idle" style="border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 900; cursor: pointer; white-space: nowrap; flex-shrink: 0; border: 1px solid var(--theme-border); color: var(--theme-accent);">☀️ 주간</button>
     </div>
   <button class="big-btn" id="btn-search" style="margin-bottom: 2px; display: none;">
       <span>📍 주변 콜/동선 탐색 (AI 엔진)</span>
-    </button></div><div class="loc-bar" id="loc-bar" style="margin-top: 6px; display: none;">
+    </button></div><div class="loc-bar" id="loc-bar" style="margin-top: 6px; display: flex;">
     <span id="loc-text">📍 실시간 GPS 위치 수신 대기 중...</span>
     <button class="refresh-btn" id="btn-refresh">⟳</button>
   </div>
@@ -1698,7 +1698,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     </div>
   </div>
 
-  <div id="tab2-extras" style="display: none;">
+  <div id="tab2-extras" style="display: block;">
     <div class="strategy-box">
       <div class="strategy-title">💡 <span id="strategy-time-title">15시 - 주간 평시 / 새벽 연비 운행 - 상업지구 중심</span></div>
       <div class="strategy-content" id="strategy-text">도심 내 단거리 수요가 꾸준합니다. <b>범계 로데오, 평촌 먹자골목, 안양 일번가, 인덕원/산본 상업지구와 과천 지식정보타운 등 업체 밀집지역</b>을 중심으로 순환하며 연비 위주 운행을 하세요. 상업지구가 콜 발생의 핵심입니다.</div>
@@ -1852,7 +1852,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     </div>
   </div>
 
-  <div id="tab4-extras" style="display: block;">
+  <div id="tab4-extras" style="display: none;">
     <div class="backup-section" style="margin-top: 0;">
       <div class="backup-title" style="margin-bottom: 10px;">🚘 실시간 운행 제어</div>
       <div style="display: flex; gap: 6px; margin-bottom: 8px;">
@@ -1897,7 +1897,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         </div>
       </div>
       <div id="driving-time-range" style="display:none;">⏰ 운행 시간: 데이터 없음</div>
-      <div id="driving-session-list" style="display: flex; flex-direction: column; margin-bottom: 10px;"><div style="font-size:11px; color:#8A8A8A; text-align:center; padding:8px;">운행 기록 없음</div></div>
+      <div id="driving-session-list" style="display: flex; flex-direction: column; margin-bottom: 10px;"></div>
       <div class="stat-grid">
         <div class="stat-box">
           <div class="stat-label-text">🚗 총 운행:</div>
@@ -1921,21 +1921,21 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       <div class="kpi-container">
         <div class="kpi-header">
           <span class="kpi-title">📈 생산성 지표 (탑승률)</span>
-          <span class="kpi-rate" id="kpi-today-rate" style="color: rgb(239, 68, 68);">0.0%</span>
+          <span class="kpi-rate" id="kpi-today-rate">0.0%</span>
         </div>
         <div class="progress-track">
           <div class="progress-target-line"></div>
           <div class="progress-target-label">목표 50%</div>
-          <div class="progress-fill" id="kpi-today-fill" style="width: 0%; background: rgb(239, 68, 68);"></div>
+          <div class="progress-fill" id="kpi-today-fill" style="width: 0%; background: var(--color-low);"></div>
         </div>
         <div class="feedback-text">
-          <span style="font-size: 14px;" id="kpi-feedback-icon">ℹ️</span> 
-          <span id="kpi-feedback-text">아직 운행 데이터가 충분하지 않습니다.</span>
+          <span style="font-size: 14px;" id="kpi-feedback-icon">⚠️</span> 
+          <span id="kpi-feedback-text">운행 데이터가 부족합니다.</span>
         </div>
         <!-- v8.9.80: 시간당 평균매출 - 주간 가독성 개선 -->
         <div class="hourly-rev-box" id="hourly-rev-box" style="margin-top:10px; padding:10px 12px; background: rgba(255,200,0,0.08); border: 1px solid rgba(255,200,0,0.25); border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
           <span style="font-size:11px; font-weight:800; color: var(--stat-label); letter-spacing:-0.3px;">💰 시간당 평균매출</span>
-          <span id="kpi-hourly-rev" style="font-size: 13px; font-weight: 900; color: rgb(163, 163, 163);">-</span>
+          <span id="kpi-hourly-rev" style="font-size:13px; font-weight:900; color:var(--stat-strong, #4B5563);">-</span>
         </div>
       </div>
 
@@ -1981,77 +1981,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       <div class="backup-title" style="margin-bottom: 4px;">📊 주간 퍼포먼스 (이번 주)</div>
       <div style="font-size: 10px; color: var(--stat-label); text-align: center;">상단: 운행시간 / 막대: 예상매출 / 숫자: 탑승률(KPI)</div>
       <div class="chart-wrapper">
-        <div class="chart-container" id="weekly-chart" style="display: block;"><div id="weekly-target-info" style="display: block; width: 100%; font-size: 10px; color: rgb(255, 200, 0); text-align: center; margin-bottom: 8px; font-weight: 800; line-height: 1.3;">실재 기준: 일일필요 <span style="color:#FFF;">666,667원</span> (남은 4,000,000원 / 6일)</div><div id="weekly-bars-wrapper" style="display: flex; justify-content: space-between; align-items: flex-end; gap: 2px; width: 100%;">
-          <div class="chart-col" style="flex:1;min-width:0;">
-            <div class="chart-time-text">-</div>
-            <div class="chart-bar-bg" style="position:relative;">
-              <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;">
-                <span class="chart-bar-text"></span>
-              </div>
-            </div>
-            <span class="chart-label">월</span>
-          </div>
-        
-          <div class="chart-col" style="flex:1;min-width:0;">
-            <div class="chart-time-text">-</div>
-            <div class="chart-bar-bg" style="position:relative;">
-              <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;">
-                <span class="chart-bar-text"></span>
-              </div>
-            </div>
-            <span class="chart-label">화</span>
-          </div>
-        
-          <div class="chart-col" style="flex:1;min-width:0;">
-            <div class="chart-time-text">-</div>
-            <div class="chart-bar-bg" style="position:relative;">
-              <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;">
-                <span class="chart-bar-text"></span>
-              </div>
-            </div>
-            <span class="chart-label">수</span>
-          </div>
-        
-          <div class="chart-col" style="flex:1;min-width:0;">
-            <div class="chart-time-text">-</div>
-            <div class="chart-bar-bg" style="position:relative;">
-              <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;">
-                <span class="chart-bar-text"></span>
-              </div>
-            </div>
-            <span class="chart-label">목</span>
-          </div>
-        
-          <div class="chart-col" style="flex:1;min-width:0;">
-            <div class="chart-time-text">-</div>
-            <div class="chart-bar-bg" style="position:relative;">
-              <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;">
-                <span class="chart-bar-text"></span>
-              </div>
-            </div>
-            <span class="chart-label">금</span>
-          </div>
-        
-          <div class="chart-col" style="flex:1;min-width:0;">
-            <div class="chart-time-text">-</div>
-            <div class="chart-bar-bg" style="position:relative;">
-              <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;">
-                <span class="chart-bar-text"></span>
-              </div>
-            </div>
-            <span class="chart-label">토</span>
-          </div>
-        
-          <div class="chart-col" style="flex:1;min-width:0;">
-            <div class="chart-time-text">-</div>
-            <div class="chart-bar-bg" style="position:relative;">
-              <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;">
-                <span class="chart-bar-text"></span>
-              </div>
-            </div>
-            <span class="chart-label">일</span>
-          </div>
-        </div></div>
+        <div class="chart-container" id="weekly-chart"></div>
       </div>
     </div>
 
@@ -2059,58 +1989,8 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       <div class="backup-title" style="margin-bottom: 4px;">📅 월간 퍼포먼스 (이번 달)</div>
       <div style="font-size: 10px; color: var(--stat-label); text-align: center;">주차별 평균 탑승률 및 매출 추이</div>
       <div class="chart-wrapper">
-        <div class="chart-container" id="monthly-chart" style="padding: 0px 20px; display: flex; justify-content: space-around;">
-          <div class="chart-col">
-            <div class="chart-time-text">-</div>
-            <div class="chart-bar-bg" style="max-width: 40px; height: 80px; position:relative;">
-              <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;">
-                <span class="chart-bar-text" style="font-size:11px;"></span>
-              </div>
-            </div>
-            <span class="chart-label" style="margin-top: 4px; font-size:10px; line-height:1.1;">1주차<br><span style="font-size:8px;color:#888;">1~4일 (4일)</span></span>
-          </div>
-        
-          <div class="chart-col">
-            <div class="chart-time-text">-</div>
-            <div class="chart-bar-bg" style="max-width: 40px; height: 80px; position:relative;">
-              <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;">
-                <span class="chart-bar-text" style="font-size:11px;"></span>
-              </div>
-            </div>
-            <span class="chart-label" style="margin-top: 4px; font-size:10px; line-height:1.1;">2주차<br><span style="font-size:8px;color:#888;">5~11일 (5일)</span></span>
-          </div>
-        
-          <div class="chart-col">
-            <div class="chart-time-text">-</div>
-            <div class="chart-bar-bg" style="max-width: 40px; height: 80px; position:relative;">
-              <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;">
-                <span class="chart-bar-text" style="font-size:11px;"></span>
-              </div>
-            </div>
-            <span class="chart-label" style="margin-top: 4px; font-size:10px; line-height:1.1;">3주차<br><span style="font-size:8px;color:#888;">12~18일 (5일)</span></span>
-          </div>
-        
-          <div class="chart-col">
-            <div class="chart-time-text">-</div>
-            <div class="chart-bar-bg" style="max-width: 40px; height: 80px; position:relative;">
-              <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;">
-                <span class="chart-bar-text" style="font-size:11px;"></span>
-              </div>
-            </div>
-            <span class="chart-label" style="margin-top: 4px; font-size:10px; line-height:1.1;">4주차<br><span style="font-size:8px;color:#888;">19~25일 (5일)</span></span>
-          </div>
-        
-          <div class="chart-col">
-            <div class="chart-time-text">-</div>
-            <div class="chart-bar-bg" style="max-width: 40px; height: 80px; position:relative;">
-              <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;">
-                <span class="chart-bar-text" style="font-size:11px;"></span>
-              </div>
-            </div>
-            <span class="chart-label" style="margin-top: 4px; font-size:10px; line-height:1.1;">5주차<br><span style="font-size:8px;color:#888;">26~31일 (5일)</span></span>
-          </div>
-        </div>
-      <div id="monthly-target-info" class="monthly-target-info-dup" style="font-size: 9px; color: rgb(163, 163, 163); text-align: center; margin-top: 8px; display: block; width: 100%;">기준: 일일필요 666,667원 × 근무일 (기본 5일, 첫/막주는 일수만큼) / 남은 4,000,000원</div></div>
+        <div class="chart-container" id="monthly-chart" style="padding: 0 20px;"></div>
+      </div>
     </div>
 
     <!-- 요일/시간대별 콜 발생 통계 인사이트 -->
@@ -2123,7 +2003,9 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         </div>
       </div>
       <div style="font-size: 10px; color: var(--stat-label); margin-bottom: 8px; text-align: center;" id="work-time-range-label">자정 ~ 익일 자정 (2시간 단위 누적 탑승) - 기준 0시</div>
-      <div id="golden-time-chart" class="golden-chart-container"><div style="width:100%; font-size:11px; color:var(--stat-label); text-align:center; padding: 40px 0;">탑승 기록이 없습니다.</div></div>
+      <div id="golden-time-chart" class="golden-chart-container">
+        <!-- JS로 렌더링 -->
+      </div>
     </div>
 
     <!-- 월간 목표 시뮬레이터 (계산기) -->
@@ -2174,9 +2056,9 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
   
   <div class="mode-container bottom-mode-dock" id="bottom-mode-dock">
     <button class="mode-pill" id="btn-mode1">⚡ 추천/콜찾기</button>
-    <button class="mode-pill" id="btn-mode2">🧠 운행 전략</button>
+    <button class="mode-pill active" id="btn-mode2">🧠 운행 전략</button>
     <button class="mode-pill" id="btn-mode3">📊 콜/범칙금 지도</button>
-    <button class="mode-pill active" id="btn-mode4">🚘 대시보드</button>
+    <button class="mode-pill" id="btn-mode4">🚘 대시보드</button>
   </div>
 
   <div class="bottom-bar" id="bottom-bar-v7961">
@@ -2232,7 +2114,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v8.9.97";
+  const BUILD_VERSION = "v8.9.98";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2256,7 +2138,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
 ;
   let drivingStatsTimer = null;
 
-  // v8.9.97 NEW: 2시간 휴식 안내 - 운행시작/휴식종료 기준 1회성 세팅 (디자인 훼손 없음)
+  // v8.9.98 NEW: 2시간 휴식 안내 - 운행시작/휴식종료 기준 1회성 세팅 (디자인 훼손 없음)
   const REST_ALERT_INTERVAL_MS = 2 * 60 * 60 * 1000; // 2시간
   let restAlertState = { nextAlertAt: null, hasFired: false, timeoutId: null };
   try {
@@ -2275,7 +2157,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     restAlertState.nextAlertAt = now + REST_ALERT_INTERVAL_MS;
     restAlertState.hasFired = false;
     saveRestAlertState();
-    try{ console.log('[v8.9.97 휴식타이머] 세팅 - 기준:', new Date(now).toLocaleTimeString(), '다음알림:', new Date(restAlertState.nextAlertAt).toLocaleTimeString()); }catch(e){}
+    try{ console.log('[v8.9.98 휴식타이머] 세팅 - 기준:', new Date(now).toLocaleTimeString(), '다음알림:', new Date(restAlertState.nextAlertAt).toLocaleTimeString()); }catch(e){}
     try{ updateRestCountdownUI(); }catch(e){}
     try{
       restAlertState.timeoutId = setTimeout(function(){
@@ -2287,17 +2169,11 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
   }
   function updateRestCountdownUI(){
     try{
-      // v8.9.97 B안 FIX: 운행중인데 타이머가 없으면 자동 복구 (휴식으로 사라진 버그 수정)
+      // v8.9.98 A안 FIX: 운행중인데 타이머가 없으면 자동 복구 (이전 B안 버그로 사라진 경우)
       if(drivingState && drivingState.isDriving && !drivingState.isBreak){
-        if(!restAlertState.nextAlertAt || restAlertState.hasFired){
-          // 이미 알림이 울렸으면 숨김 유지 (B안: 운행시작 기준 1회만)
-          if(restAlertState.hasFired){
-            // hasFired면 숨김 - 다음 운행시작까지 대기
-          } else {
-            // null이면 지금부터 2시간으로 자동 복구
-            if(typeof scheduleRestAlertFromNow==='function'){
-              scheduleRestAlertFromNow();
-            }
+        if(!restAlertState.nextAlertAt && !restAlertState.hasFired){
+          if(typeof scheduleRestAlertFromNow==='function'){
+            scheduleRestAlertFromNow();
           }
         }
       }
@@ -2314,7 +2190,8 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
               const base = restAlertState.nextAlertAt ? new Date(restAlertState.nextAlertAt - REST_ALERT_INTERVAL_MS) : null;
               const baseStr = base ? String(base.getHours()).padStart(2,'0')+':'+String(base.getMinutes()).padStart(2,'0') : '없음';
               const nextStr = restAlertState.nextAlertAt ? String(new Date(restAlertState.nextAlertAt).getHours()).padStart(2,'0')+':'+String(new Date(restAlertState.nextAlertAt).getMinutes()).padStart(2,'0') : '없음';
-              alert('현재 휴식 타이머(B안) 정보\n기준시각(운행시작): '+baseStr+'\n다음알림: '+nextStr+'\n남은시간: '+ (restAlertState.nextAlertAt ? Math.floor((restAlertState.nextAlertAt-Date.now())/60000)+'분' : '없음')+'\n\nB안: 운행시작 기준 고정 2시간, 휴식해도 유지');
+              const remainMin = restAlertState.nextAlertAt ? Math.floor((restAlertState.nextAlertAt-Date.now())/60000) : 0;
+              alert('현재 휴식 타이머(A안) 정보\n기준시각(운행시작 또는 휴식종료): '+baseStr+'\n다음알림: '+nextStr+'\n남은시간: '+remainMin+'분 ('+Math.floor(remainMin/60)+'시간 '+remainMin%60+'분)\n\nA안: 운행시작 또는 휴식종료부터 2시간 후 1회 알림');
             }catch(e){}
           });
           let pressTimer=null;
@@ -2330,7 +2207,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       }
       if(drivingState.isBreak){
         badge.style.display='inline-block';
-        badge.textContent = '☕ 휴식중 - 운행시작 기준 2시간 유지';
+        badge.textContent = '☕ 휴식중 - 종료 시 2시간 타이머 재세팅';
         badge.style.background = 'rgba(45,212,191,0.15)';
         badge.style.borderColor = 'rgba(45,212,191,0.35)';
         badge.style.color = '#5EEAD4';
@@ -2373,6 +2250,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     }catch(e){}
   }
 
+
   function triggerRestAlert(){
     if(restAlertState.hasFired) return;
     restAlertState.hasFired = true;
@@ -2390,7 +2268,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     try{ if(typeof showToast === 'function') showToast('⏰ 2시간 경과! 15분 휴식을 권장합니다.'); }catch(e){}
     try{
       if(typeof showCustomConfirm === 'function'){
-        showCustomConfirm('⏰ <b>2시간 연속 운행 경과!</b><br><br>안전을 위해 <b>15분 휴식</b>을 권장합니다.<br>휴식 버튼을 눌러주세요.<br><br><span style="font-size:11px;color:#888;">운행 시작 후 2시간 고정 (휴식해도 유지).</span>', function(){
+        showCustomConfirm('⏰ <b>2시간 연속 운행 경과!</b><br><br>안전을 위해 <b>15분 휴식</b>을 권장합니다.<br>휴식 버튼을 눌러주세요.<br><br><span style="font-size:11px;color:#888;">휴식 종료 시 다음 2시간 타이머가 다시 세팅됩니다.</span>', function(){
           try{ if(typeof toggleBreak === 'function' && drivingState.isDriving && !drivingState.isBreak){ toggleBreak(); } }catch(e){}
         });
         const yesBtn = document.getElementById('confirm-yes-btn');
@@ -3126,7 +3004,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
         date_str: new Date().toLocaleDateString('ko-KR'),
-        version: 'v8.9.97'
+        version: 'v8.9.98'
       };
       // v8.9.80: 매출 상세도 함께 전송 (손님탑승처럼 시트에 바로 기록되게)
       try{
@@ -3174,7 +3052,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         monthly_target: sim.target||0,
         monthly_current: sim.current||0,
         rest_dates: (sim.restDates||[]).join(','),
-        version: 'v8.9.97'
+        version: 'v8.9.98'
       };
       fetch(url, {
         method: 'POST',
@@ -3204,7 +3082,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.9.97'
+        version: 'v8.9.98'
       };
       
       // auto_backup은 항상 최신으로 갱신 (가벼운 백업) - 다중 저장소
@@ -3488,7 +3366,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
           if(drivingState.isDriving) startDrivingTimer();
           updateDrivingUI();
           try{
-            // v8.9.97: 복구 시 휴식 타이머 상태 복구
+            // v8.9.98: 복구 시 휴식 타이머 상태 복구
             if(drivingState.isDriving && !drivingState.isBreak){
               if(!restAlertState.nextAlertAt){
                 if(typeof scheduleRestAlertFromNow==='function') scheduleRestAlertFromNow();
@@ -3588,17 +3466,14 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         setTab(4);
       }
     }catch(e){}
-    // v8.9.97 B안 FIX: 휴식은 타이머에 영향 없음 - 운행시작 기준 고정 2시간, 사라진 타이머 자동 복구
+    // v8.9.98 A안 최종: 휴식 시작 시 기존 타이머 취소(휴식중 알림 방지), 종료 시 2시간 후 1회 재세팅
     try{
-      if(!drivingState.isBreak){
-        // 휴식 종료 시 타이머가 없으면 복구 (이전 버전에서 clear된 경우)
-        if(!restAlertState.nextAlertAt && !restAlertState.hasFired){
-          if(typeof scheduleRestAlertFromNow==='function') scheduleRestAlertFromNow();
-        }
-        // 시간이 이미 지났으면 즉시 알림
-        if(restAlertState.nextAlertAt && !restAlertState.hasFired && Date.now() >= restAlertState.nextAlertAt){
-          triggerRestAlert();
-        }
+      if(drivingState.isBreak){
+        // 휴식 시작 - 기존 예약 취소
+        if(typeof clearRestAlertSchedule==='function') clearRestAlertSchedule();
+      } else {
+        // 휴식 종료 - 종료 시점부터 2시간 후 1회 알림 세팅 + 남은시간 표시
+        if(typeof scheduleRestAlertFromNow==='function') scheduleRestAlertFromNow();
       }
       if(typeof updateRestCountdownUI==='function') updateRestCountdownUI();
     }catch(e){}
@@ -4638,8 +4513,8 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       const days = ['일', '월', '화', '수', '목', '금', '토']; const dayStr = days[nowDate.getDay()];
       const isWeekend = (nowDate.getDay() === 0 || nowDate.getDay() === 6);
       let badgeHtml = isHoliday ? `<span class="holiday-badge">🔴 ${holidayName || '공휴일'}</span>` : (isWeekend ? `<span class="holiday-badge" style="background:#FF8C00;">🟡 휴일</span>` : `<span class="weekday-badge">🟢 평일</span>`);
-      headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) <span class="build-ver-tag">v8.9.97</span> ${badgeHtml}`;
-    } catch(e) { try { const h=document.getElementById('app-header-title'); if(h) h.innerHTML=`📅 ${nowDate.getMonth()+1}.${nowDate.getDate()} <span class="build-ver-tag">v8.9.97</span>`; } catch(e2){} }
+      headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) <span class="build-ver-tag">v8.9.98</span> ${badgeHtml}`;
+    } catch(e) { try { const h=document.getElementById('app-header-title'); if(h) h.innerHTML=`📅 ${nowDate.getMonth()+1}.${nowDate.getDate()} <span class="build-ver-tag">v8.9.98</span>`; } catch(e2){} }
   }
 
   async function checkIsPublicHolidayRealtime() {
@@ -7617,7 +7492,7 @@ function initMic() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.97</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.98</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
