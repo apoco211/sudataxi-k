@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head><style>
+<html lang="ko"><head><style>
 @font-face {
   font-family: "Optimistic";
   font-style: normal;
@@ -113,7 +111,7 @@
   const EMBEDDED_DEFAULTS = {
     daily_rev: 0,
     sim_data: {target:4000000, current:0, restDates:[]},
-    version: 'v8.9.96'
+    version: 'v8.9.97'
   };
 </script>
 <style>
@@ -253,9 +251,9 @@
   <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
-  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=7ee80d17f027cf99b9634ae13731a6a9&libraries=services"></script>
+  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=7ee80d17f027cf99b9634ae13731a6a9&amp;libraries=services"></script>
   <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
 
   <style>
@@ -1592,22 +1590,22 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
 </head>
 <body class="mode-1">
   
-  <div class="sticky-top-area">
+  <div class="sticky-top-area" style="padding-bottom: 6px; box-shadow: 0 -20px 0 20px var(--main-bg);">
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 2px;">
-      <div class="header" id="app-header-title" style="margin-bottom: 0; flex: 1;">📅 날짜 수신 대기 중...</div>
+      <div class="header" id="app-header-title" style="margin-bottom: 0; flex: 1;">📅 2026.10.26(월) <span class="build-ver-tag">v8.9.97</span> <span class="weekday-badge">🟢 평일</span></div>
       <button id="btn-theme-toggle" onclick="toggleTheme()" class="btn-idle" style="border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 900; cursor: pointer; white-space: nowrap; flex-shrink: 0; border: 1px solid var(--theme-border); color: var(--theme-accent);">☀️ 주간</button>
     </div>
-  </div>
-
-  <div class="loc-bar" id="loc-bar">
+  <button class="big-btn" id="btn-search" style="margin-bottom: 2px; display: none;">
+      <span>📍 주변 콜/동선 탐색 (AI 엔진)</span>
+    </button></div><div class="loc-bar" id="loc-bar" style="margin-top: 6px; display: none;">
     <span id="loc-text">📍 실시간 GPS 위치 수신 대기 중...</span>
     <button class="refresh-btn" id="btn-refresh">⟳</button>
   </div>
+
   
-  <div class="btn-group-main" id="main-btn-group">
-    <button class="big-btn" id="btn-search">
-      <span>📍 주변 콜/동선 탐색 (AI 엔진)</span>
-    </button>
+  
+  <div class="btn-group-main" id="main-btn-group" style="display: none;">
+    
     <div style="display: flex; gap: 6px;">
       <button class="map-btn" id="btn-show-map" style="display: none; flex: 2;">
         <span>🗺️ 동선 지도 보기</span>
@@ -1618,10 +1616,10 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     </div>
   </div>
   
-  <div class="pipeline-log" id="pipeline-log">대기 중 · 데이터 결합 연산 준비</div>
-  <div class="card-list" id="card-list"></div>
+  <div class="pipeline-log" id="pipeline-log" style="display: none;">대기 중 · 데이터 결합 연산 준비</div>
+  <div class="card-list" id="card-list" style="display: none;"></div>
 
-  <div id="frequent-presets-section" class="frequent-presets-section">
+  <div id="frequent-presets-section" class="frequent-presets-section" style="display: none;">
     <div class="frequent-header" style="flex-wrap:nowrap;">
       <div class="frequent-header-left" style="flex-wrap:nowrap;">
         <span style="font-size:12px; font-weight:900; color:inherit; white-space:nowrap;">📌 자주가는 곳</span>
@@ -1631,7 +1629,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       </div>
     </div>
     <div id="frequent-presets-list" style="display:flex; flex-direction:column; gap:6px;"></div>
-    <div id="frequent-presets-empty" style="font-size:11px; color:#64748B; text-align:center; padding:14px; display:none;">등록된 자주가는 곳이 없습니다.<br>현재 위치에서 + 등록 (예: 집, 회사)</div>
+    <div id="frequent-presets-empty" style="font-size: 11px; color: rgb(100, 116, 139); text-align: center; padding: 14px; display: block;">등록된 자주가는 곳이 없습니다.<br>현재 위치에서 + 등록 (예: 집, 회사)</div>
   </div>
 
   <!-- v7.9.23 자주가는 곳 검색 모달 -->
@@ -1656,7 +1654,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
   </div>
 
 
-  <div id="tab1-extras">
+  <div id="tab1-extras" style="display: none;">
     <!-- 새롭게 추가된 공공데이터 상태 모니터링 패널 -->
     <div class="backup-section" style="margin-bottom: 12px; border-color: var(--theme-accent);">
       <div class="backup-header">
@@ -1672,7 +1670,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
 
     <div class="backup-section">
       <div class="backup-header">
-        <span class="backup-title" style="font-size:12px;">📊 데이터 관리 & 백업</span>
+        <span class="backup-title" style="font-size:12px;">📊 데이터 관리 &amp; 백업</span>
         <span class="backup-count" id="log-count-text">저장 기록: 0개</span>
       </div>
       <div class="backup-btn-group">
@@ -1684,29 +1682,131 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       
       <div style="margin-top: 6px; border-top: 1px dashed var(--stat-border); padding-top: 4px;">
         <div style="font-size: 10px; font-weight: 800; color: var(--stat-label); margin-bottom: 2px;">🕒 최근 저장 목록</div>
-        <div id="recent-logs-list" style="display: flex; flex-direction: column; gap: 2px;"></div>
+        <div id="recent-logs-list" style="display: flex; flex-direction: column; gap: 2px;"><div style="font-size:9px; color:var(--stat-label); text-align:center;">기록이 없습니다.</div></div>
       </div>
       
       <div class="custom-section">
         <button class="add-custom-btn" id="btn-add-custom">⭐ 현재 위치 '나만의 핫플' 등록</button>
         <div style="font-size: 10px; font-weight: 800; color: #A855F7; margin: 4px 0 2px 0;">📍 나만의 핫플 목록</div>
-        <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 2px;"></div>
+        <div id="custom-hotspots-list" style="display: flex; flex-direction: column; gap: 2px;"><div style="font-size:9px; color:var(--stat-label); text-align:center;">등록된 장소가 없습니다.</div></div>
         
         <!-- removed -->
         <button class="add-custom-restroom-btn" id="btn-add-custom-restroom">⭐ 현재 위치 '나만의 화장실' 등록</button>
         <div style="font-size: 10px; font-weight: 800; color: #3B82F6; margin: 4px 0 2px 0;">🚻 나만의 화장실 목록</div>
-        <div id="custom-restrooms-list" style="display: flex; flex-direction: column; gap: 2px;"></div>
+        <div id="custom-restrooms-list" style="display: flex; flex-direction: column; gap: 2px;"><div style="font-size:9px; color:var(--stat-label); text-align:center;">등록된 장소가 없습니다.</div></div>
       </div>
     </div>
   </div>
 
   <div id="tab2-extras" style="display: none;">
     <div class="strategy-box">
-      <div class="strategy-title">💡 <span id="strategy-time-title">시간대 분석 중...</span></div>
-      <div class="strategy-content" id="strategy-text">실시간 전략 데이터를 불러오고 있습니다.</div>
+      <div class="strategy-title">💡 <span id="strategy-time-title">15시 - 주간 평시 / 새벽 연비 운행 - 상업지구 중심</span></div>
+      <div class="strategy-content" id="strategy-text">도심 내 단거리 수요가 꾸준합니다. <b>범계 로데오, 평촌 먹자골목, 안양 일번가, 인덕원/산본 상업지구와 과천 지식정보타운 등 업체 밀집지역</b>을 중심으로 순환하며 연비 위주 운행을 하세요. 상업지구가 콜 발생의 핵심입니다.</div>
     </div>
-    <div id="strategy-cards-list" class="card-list" style="margin-bottom: 8px;"></div>
-    <details style="margin-top: 8px; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 1.4;" open>
+    <div id="strategy-cards-list" class="card-list" style="margin-bottom: 8px;"><div class="card" style="border: 1.5px solid rgb(34, 197, 94); box-shadow: rgba(34, 197, 94, 0.15) 0px 0px 10px;">
+          <div class="card-main-content">
+            <div class="card-compact-row">
+              <div class="card-title-group">
+                <div class="num-badge" style="background:#22C55E; color:#FFF;">1</div>
+                <div class="place-info">
+                  <div class="place-name" style="color:#22C55E;">범계역 로데오거리 상업지구</div>
+                  <div class="score-dist">약 0.0km (GPS 대기 중 직선거리) · 타겟 거점</div>
+                </div>
+              </div>
+              <button type="button" class="right-navi-btn" style="background:#22C55E !important; color:#FFF !important; box-shadow: 0 1px 4px rgba(34, 197, 94, 0.4);" onclick="openKakaoNaviApp('범계역 로데오거리 상업지구', 37.3912, 126.9498)"><span>🚗내비</span></button>
+            </div>
+          </div>
+          <div class="tag-group">
+            <span class="tag near" style="background:#F0FDF4; color:#16A34A; border-color:#22C55E;">#시간대_운행전략추천</span>
+            <span class="tag" style="background:#FEF3C7; color:#92400E; border-color:#FBBF24;">GPS 대기 중</span>
+          </div>
+        </div><div class="card" style="border: 1.5px solid rgb(34, 197, 94); box-shadow: rgba(34, 197, 94, 0.15) 0px 0px 10px;">
+          <div class="card-main-content">
+            <div class="card-compact-row">
+              <div class="card-title-group">
+                <div class="num-badge" style="background:#22C55E; color:#FFF;">2</div>
+                <div class="place-info">
+                  <div class="place-name" style="color:#22C55E;">평촌역 먹자골목 업체밀집</div>
+                  <div class="score-dist">약 1.3km (GPS 대기 중 직선거리) · 타겟 거점</div>
+                </div>
+              </div>
+              <button type="button" class="right-navi-btn" style="background:#22C55E !important; color:#FFF !important; box-shadow: 0 1px 4px rgba(34, 197, 94, 0.4);" onclick="openKakaoNaviApp('평촌역 먹자골목 업체밀집', 37.3942, 126.9638)"><span>🚗내비</span></button>
+            </div>
+          </div>
+          <div class="tag-group">
+            <span class="tag near" style="background:#F0FDF4; color:#16A34A; border-color:#22C55E;">#시간대_운행전략추천</span>
+            <span class="tag" style="background:#FEF3C7; color:#92400E; border-color:#FBBF24;">GPS 대기 중</span>
+          </div>
+        </div><div class="card" style="border: 1.5px solid rgb(34, 197, 94); box-shadow: rgba(34, 197, 94, 0.15) 0px 0px 10px;">
+          <div class="card-main-content">
+            <div class="card-compact-row">
+              <div class="card-title-group">
+                <div class="num-badge" style="background:#22C55E; color:#FFF;">3</div>
+                <div class="place-info">
+                  <div class="place-name" style="color:#22C55E;">안양역 일번가 상업지구</div>
+                  <div class="score-dist">약 2.7km (GPS 대기 중 직선거리) · 타겟 거점</div>
+                </div>
+              </div>
+              <button type="button" class="right-navi-btn" style="background:#22C55E !important; color:#FFF !important; box-shadow: 0 1px 4px rgba(34, 197, 94, 0.4);" onclick="openKakaoNaviApp('안양역 일번가 상업지구', 37.4013, 126.9222)"><span>🚗내비</span></button>
+            </div>
+          </div>
+          <div class="tag-group">
+            <span class="tag near" style="background:#F0FDF4; color:#16A34A; border-color:#22C55E;">#시간대_운행전략추천</span>
+            <span class="tag" style="background:#FEF3C7; color:#92400E; border-color:#FBBF24;">GPS 대기 중</span>
+          </div>
+        </div><div class="card" style="border: 1.5px solid rgb(34, 197, 94); box-shadow: rgba(34, 197, 94, 0.15) 0px 0px 10px;">
+          <div class="card-main-content">
+            <div class="card-compact-row">
+              <div class="card-title-group">
+                <div class="num-badge" style="background:#22C55E; color:#FFF;">4</div>
+                <div class="place-info">
+                  <div class="place-name" style="color:#22C55E;">인덕원역 환승 상업지구</div>
+                  <div class="score-dist">약 2.8km (GPS 대기 중 직선거리) · 타겟 거점</div>
+                </div>
+              </div>
+              <button type="button" class="right-navi-btn" style="background:#22C55E !important; color:#FFF !important; box-shadow: 0 1px 4px rgba(34, 197, 94, 0.4);" onclick="openKakaoNaviApp('인덕원역 환승 상업지구', 37.4048, 126.9767)"><span>🚗내비</span></button>
+            </div>
+          </div>
+          <div class="tag-group">
+            <span class="tag near" style="background:#F0FDF4; color:#16A34A; border-color:#22C55E;">#시간대_운행전략추천</span>
+            <span class="tag" style="background:#FEF3C7; color:#92400E; border-color:#FBBF24;">GPS 대기 중</span>
+          </div>
+        </div><div class="card" style="border: 1.5px solid rgb(34, 197, 94); box-shadow: rgba(34, 197, 94, 0.15) 0px 0px 10px;">
+          <div class="card-main-content">
+            <div class="card-compact-row">
+              <div class="card-title-group">
+                <div class="num-badge" style="background:#22C55E; color:#FFF;">5</div>
+                <div class="place-info">
+                  <div class="place-name" style="color:#22C55E;">과천 지식정보타운 업체밀집</div>
+                  <div class="score-dist">약 4.1km (GPS 대기 중 직선거리) · 타겟 거점</div>
+                </div>
+              </div>
+              <button type="button" class="right-navi-btn" style="background:#22C55E !important; color:#FFF !important; box-shadow: 0 1px 4px rgba(34, 197, 94, 0.4);" onclick="openKakaoNaviApp('과천 지식정보타운 업체밀집', 37.4144, 126.9856)"><span>🚗내비</span></button>
+            </div>
+          </div>
+          <div class="tag-group">
+            <span class="tag near" style="background:#F0FDF4; color:#16A34A; border-color:#22C55E;">#시간대_운행전략추천</span>
+            <span class="tag" style="background:#FEF3C7; color:#92400E; border-color:#FBBF24;">GPS 대기 중</span>
+          </div>
+        </div><div class="card" style="border: 1.5px solid rgb(34, 197, 94); box-shadow: rgba(34, 197, 94, 0.15) 0px 0px 10px;">
+          <div class="card-main-content">
+            <div class="card-compact-row">
+              <div class="card-title-group">
+                <div class="num-badge" style="background:#22C55E; color:#FFF;">6</div>
+                <div class="place-info">
+                  <div class="place-name" style="color:#22C55E;">산본역 중심상가 상업지구</div>
+                  <div class="score-dist">약 4.2km (GPS 대기 중 직선거리) · 타겟 거점</div>
+                </div>
+              </div>
+              <button type="button" class="right-navi-btn" style="background:#22C55E !important; color:#FFF !important; box-shadow: 0 1px 4px rgba(34, 197, 94, 0.4);" onclick="openKakaoNaviApp('산본역 중심상가 상업지구', 37.3554, 126.9331)"><span>🚗내비</span></button>
+            </div>
+          </div>
+          <div class="tag-group">
+            <span class="tag near" style="background:#F0FDF4; color:#16A34A; border-color:#22C55E;">#시간대_운행전략추천</span>
+            <span class="tag" style="background:#FEF3C7; color:#92400E; border-color:#FBBF24;">GPS 대기 중</span>
+          </div>
+        </div></div>
+    <details style="margin-top: 8px; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 1.4;" open="">
       <summary style="font-weight: 800; color: var(--theme-accent); cursor: pointer;">📌 복귀 경로 알고리즘 안내</summary>
       <div style="margin-top: 6px; color: var(--stat-label); display: flex; flex-direction: column; gap: 8px; font-size: 10px;">
         <div>관외 지역(성남, 안산, 안양 등)에서 빈 차로 복귀 시, 반경 2.5km 내의 핫플레이스나 번화가를 <b>우선 경유지</b>로 강력 추천하여 손님을 태우고 복귀할 확률을 높여줍니다. (복귀 방향이 다소 어긋나더라도 탑승 확률을 우선시합니다)</div>
@@ -1752,16 +1852,16 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     </div>
   </div>
 
-  <div id="tab4-extras" style="display: none;">
+  <div id="tab4-extras" style="display: block;">
     <div class="backup-section" style="margin-top: 0;">
       <div class="backup-title" style="margin-bottom: 10px;">🚘 실시간 운행 제어</div>
       <div style="display: flex; gap: 6px; margin-bottom: 8px;">
         <button id="btn-drive-toggle" class="drive-control-btn btn-green">▶️ 운행 시작</button>
-        <button id="btn-break-toggle" class="drive-control-btn btn-idle" disabled>☕ 휴식 시작</button>
+        <button id="btn-break-toggle" class="drive-control-btn btn-idle" disabled="">☕ 휴식 시작</button>
       </div>
       <div style="display: flex; gap: 6px;">
-        <button id="btn-board" class="drive-control-btn btn-idle" disabled>🙋‍♂️ 승차</button>
-        <button id="btn-alight" class="drive-control-btn btn-idle" disabled>👋 하차</button>
+        <button id="btn-board" class="drive-control-btn btn-idle" disabled="">🙋‍♂️ 승차</button>
+        <button id="btn-alight" class="drive-control-btn btn-idle" disabled="">👋 하차</button>
       </div>
     </div>
 
@@ -1790,14 +1890,14 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap; flex: 1; min-width: 0;">
           <span style="white-space: nowrap;">⏱️ 오늘 운행 현황</span>
           <span id="driving-current-status" style="color: var(--stat-label); font-size: 13px; font-weight: 800; white-space: nowrap;">(운행 대기)</span>
-        </div>
+        <span id="rest-countdown-badge" style="display: none; margin-left: 6px; padding: 1px 6px; border-radius: 8px; background: rgba(255, 200, 0, 0.18); border: 1px solid rgba(255, 200, 0, 0.35); color: rgb(255, 200, 0); font-size: 10px; font-weight: 900; white-space: nowrap; vertical-align: middle; cursor: pointer;" title="클릭하면 상세, 길게 누르면 리셋"></span></div>
         <div style="display: flex; flex-direction: column; gap: 4px; flex-shrink: 0;">
           <button id="btn-restore-today" style="background:#E0E7FF; color:#4338CA; border:1px solid #818CF8; border-radius:4px; padding:3px 6px; font-size:10px; font-weight:800; cursor:pointer; width: 64px; text-align: center; line-height: 1.1;" onclick="restoreTodayRecordFromBackup()">직전 복구</button>
           <button id="btn-reset-today" style="background:#FEE2E2; color:#DC2626; border:1px solid #F87171; border-radius:4px; padding:3px 6px; font-size:10px; font-weight:800; cursor:pointer; width: 64px; text-align: center; line-height: 1.1;">기록 리셋</button>
         </div>
       </div>
       <div id="driving-time-range" style="display:none;">⏰ 운행 시간: 데이터 없음</div>
-      <div id="driving-session-list" style="display: flex; flex-direction: column; margin-bottom: 10px;"></div>
+      <div id="driving-session-list" style="display: flex; flex-direction: column; margin-bottom: 10px;"><div style="font-size:11px; color:#8A8A8A; text-align:center; padding:8px;">운행 기록 없음</div></div>
       <div class="stat-grid">
         <div class="stat-box">
           <div class="stat-label-text">🚗 총 운행:</div>
@@ -1821,30 +1921,30 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       <div class="kpi-container">
         <div class="kpi-header">
           <span class="kpi-title">📈 생산성 지표 (탑승률)</span>
-          <span class="kpi-rate" id="kpi-today-rate">0.0%</span>
+          <span class="kpi-rate" id="kpi-today-rate" style="color: rgb(239, 68, 68);">0.0%</span>
         </div>
         <div class="progress-track">
           <div class="progress-target-line"></div>
           <div class="progress-target-label">목표 50%</div>
-          <div class="progress-fill" id="kpi-today-fill" style="width: 0%; background: var(--color-low);"></div>
+          <div class="progress-fill" id="kpi-today-fill" style="width: 0%; background: rgb(239, 68, 68);"></div>
         </div>
         <div class="feedback-text">
-          <span style="font-size: 14px;" id="kpi-feedback-icon">⚠️</span> 
-          <span id="kpi-feedback-text">운행 데이터가 부족합니다.</span>
+          <span style="font-size: 14px;" id="kpi-feedback-icon">ℹ️</span> 
+          <span id="kpi-feedback-text">아직 운행 데이터가 충분하지 않습니다.</span>
         </div>
         <!-- v8.9.80: 시간당 평균매출 - 주간 가독성 개선 -->
         <div class="hourly-rev-box" id="hourly-rev-box" style="margin-top:10px; padding:10px 12px; background: rgba(255,200,0,0.08); border: 1px solid rgba(255,200,0,0.25); border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
           <span style="font-size:11px; font-weight:800; color: var(--stat-label); letter-spacing:-0.3px;">💰 시간당 평균매출</span>
-          <span id="kpi-hourly-rev" style="font-size:13px; font-weight:900; color:var(--stat-strong, #4B5563);">-</span>
+          <span id="kpi-hourly-rev" style="font-size: 13px; font-weight: 900; color: rgb(163, 163, 163);">-</span>
         </div>
       </div>
 
       <!-- 오늘 실매출 입력 UI -->
       <div class="revenue-box">
         <div class="top-row">
-          <div class="label">💰 오늘 실매출</div>
+          <div class="label">💰 오늘 실매출 <span style="font-size:11px; color:#FFC800; font-weight:800;">(일일필요 666,667원)</span></div>
           <div class="input-group">
-            <button class="btn-mic" id="btn-mic" title="음성 입력">🎤</button>
+            <button class="btn-mic" id="btn-mic" title="음성 입력" data-mic-init="1">🎤</button>
             <button class="btn-mic" id="btn-sheet-pull" title="오늘 실매출" onclick="promptFetchDailyRev()" style="background:#0F766E;">☁️</button>
             <input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" id="input-rev" oninput="calculateDailyRevenue()" class="input-rev" value="0" placeholder="0">
             <span class="input-unit">원</span>
@@ -1857,21 +1957,21 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
 
         <div class="rev-stats-grid">
           <div class="rev-stat-item">
-            <span class="rev-stat-title">목표 일일필요 달성률</span>
-            <span class="rev-stat-value" id="val-pct">0%</span>
+            <span class="rev-stat-title">목표 666,667원 달성률</span>
+            <span class="rev-stat-value" id="val-pct">0.0%</span>
           </div>
           <div class="rev-stat-item" style="text-align: right;">
             <span class="rev-stat-title">남은 목표액</span>
-            <span class="rev-stat-value" id="val-remain">0 원</span>
+            <span class="rev-stat-value" id="val-remain">666,667 원</span>
           </div>
         </div>
 
         <div class="rev-bottom-row">
           <div class="rev-bottom-label">
             <span class="rev-bottom-main">🕒 추가 운행 필요</span>
-            <span class="rev-bottom-sub">(시간당 평균 기준)</span>
+            <span class="rev-bottom-sub">(시간당 25,000원 기준)</span>
           </div>
-          <div class="rev-bottom-val" id="val-time">-</div>
+          <div class="rev-bottom-val" id="val-time" style="color: rgb(74, 222, 128);">약 26시간 40분</div>
         </div>
       </div>
     </div>
@@ -1881,7 +1981,77 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       <div class="backup-title" style="margin-bottom: 4px;">📊 주간 퍼포먼스 (이번 주)</div>
       <div style="font-size: 10px; color: var(--stat-label); text-align: center;">상단: 운행시간 / 막대: 예상매출 / 숫자: 탑승률(KPI)</div>
       <div class="chart-wrapper">
-        <div class="chart-container" id="weekly-chart"></div>
+        <div class="chart-container" id="weekly-chart" style="display: block;"><div id="weekly-target-info" style="display: block; width: 100%; font-size: 10px; color: rgb(255, 200, 0); text-align: center; margin-bottom: 8px; font-weight: 800; line-height: 1.3;">실재 기준: 일일필요 <span style="color:#FFF;">666,667원</span> (남은 4,000,000원 / 6일)</div><div id="weekly-bars-wrapper" style="display: flex; justify-content: space-between; align-items: flex-end; gap: 2px; width: 100%;">
+          <div class="chart-col" style="flex:1;min-width:0;">
+            <div class="chart-time-text">-</div>
+            <div class="chart-bar-bg" style="position:relative;">
+              <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;">
+                <span class="chart-bar-text"></span>
+              </div>
+            </div>
+            <span class="chart-label">월</span>
+          </div>
+        
+          <div class="chart-col" style="flex:1;min-width:0;">
+            <div class="chart-time-text">-</div>
+            <div class="chart-bar-bg" style="position:relative;">
+              <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;">
+                <span class="chart-bar-text"></span>
+              </div>
+            </div>
+            <span class="chart-label">화</span>
+          </div>
+        
+          <div class="chart-col" style="flex:1;min-width:0;">
+            <div class="chart-time-text">-</div>
+            <div class="chart-bar-bg" style="position:relative;">
+              <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;">
+                <span class="chart-bar-text"></span>
+              </div>
+            </div>
+            <span class="chart-label">수</span>
+          </div>
+        
+          <div class="chart-col" style="flex:1;min-width:0;">
+            <div class="chart-time-text">-</div>
+            <div class="chart-bar-bg" style="position:relative;">
+              <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;">
+                <span class="chart-bar-text"></span>
+              </div>
+            </div>
+            <span class="chart-label">목</span>
+          </div>
+        
+          <div class="chart-col" style="flex:1;min-width:0;">
+            <div class="chart-time-text">-</div>
+            <div class="chart-bar-bg" style="position:relative;">
+              <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;">
+                <span class="chart-bar-text"></span>
+              </div>
+            </div>
+            <span class="chart-label">금</span>
+          </div>
+        
+          <div class="chart-col" style="flex:1;min-width:0;">
+            <div class="chart-time-text">-</div>
+            <div class="chart-bar-bg" style="position:relative;">
+              <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;">
+                <span class="chart-bar-text"></span>
+              </div>
+            </div>
+            <span class="chart-label">토</span>
+          </div>
+        
+          <div class="chart-col" style="flex:1;min-width:0;">
+            <div class="chart-time-text">-</div>
+            <div class="chart-bar-bg" style="position:relative;">
+              <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;">
+                <span class="chart-bar-text"></span>
+              </div>
+            </div>
+            <span class="chart-label">일</span>
+          </div>
+        </div></div>
       </div>
     </div>
 
@@ -1889,8 +2059,58 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       <div class="backup-title" style="margin-bottom: 4px;">📅 월간 퍼포먼스 (이번 달)</div>
       <div style="font-size: 10px; color: var(--stat-label); text-align: center;">주차별 평균 탑승률 및 매출 추이</div>
       <div class="chart-wrapper">
-        <div class="chart-container" id="monthly-chart" style="padding: 0 20px;"></div>
-      </div>
+        <div class="chart-container" id="monthly-chart" style="padding: 0px 20px; display: flex; justify-content: space-around;">
+          <div class="chart-col">
+            <div class="chart-time-text">-</div>
+            <div class="chart-bar-bg" style="max-width: 40px; height: 80px; position:relative;">
+              <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;">
+                <span class="chart-bar-text" style="font-size:11px;"></span>
+              </div>
+            </div>
+            <span class="chart-label" style="margin-top: 4px; font-size:10px; line-height:1.1;">1주차<br><span style="font-size:8px;color:#888;">1~4일 (4일)</span></span>
+          </div>
+        
+          <div class="chart-col">
+            <div class="chart-time-text">-</div>
+            <div class="chart-bar-bg" style="max-width: 40px; height: 80px; position:relative;">
+              <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;">
+                <span class="chart-bar-text" style="font-size:11px;"></span>
+              </div>
+            </div>
+            <span class="chart-label" style="margin-top: 4px; font-size:10px; line-height:1.1;">2주차<br><span style="font-size:8px;color:#888;">5~11일 (5일)</span></span>
+          </div>
+        
+          <div class="chart-col">
+            <div class="chart-time-text">-</div>
+            <div class="chart-bar-bg" style="max-width: 40px; height: 80px; position:relative;">
+              <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;">
+                <span class="chart-bar-text" style="font-size:11px;"></span>
+              </div>
+            </div>
+            <span class="chart-label" style="margin-top: 4px; font-size:10px; line-height:1.1;">3주차<br><span style="font-size:8px;color:#888;">12~18일 (5일)</span></span>
+          </div>
+        
+          <div class="chart-col">
+            <div class="chart-time-text">-</div>
+            <div class="chart-bar-bg" style="max-width: 40px; height: 80px; position:relative;">
+              <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;">
+                <span class="chart-bar-text" style="font-size:11px;"></span>
+              </div>
+            </div>
+            <span class="chart-label" style="margin-top: 4px; font-size:10px; line-height:1.1;">4주차<br><span style="font-size:8px;color:#888;">19~25일 (5일)</span></span>
+          </div>
+        
+          <div class="chart-col">
+            <div class="chart-time-text">-</div>
+            <div class="chart-bar-bg" style="max-width: 40px; height: 80px; position:relative;">
+              <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;">
+                <span class="chart-bar-text" style="font-size:11px;"></span>
+              </div>
+            </div>
+            <span class="chart-label" style="margin-top: 4px; font-size:10px; line-height:1.1;">5주차<br><span style="font-size:8px;color:#888;">26~31일 (5일)</span></span>
+          </div>
+        </div>
+      <div id="monthly-target-info" class="monthly-target-info-dup" style="font-size: 9px; color: rgb(163, 163, 163); text-align: center; margin-top: 8px; display: block; width: 100%;">기준: 일일필요 666,667원 × 근무일 (기본 5일, 첫/막주는 일수만큼) / 남은 4,000,000원</div></div>
     </div>
 
     <!-- 요일/시간대별 콜 발생 통계 인사이트 -->
@@ -1902,10 +2122,8 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
           <button class="golden-toggle-btn" id="btn-golden-weekend" onclick="window.goldenTimeFilter='weekend'; document.getElementById('btn-golden-weekend').classList.add('active'); document.getElementById('btn-golden-weekday').classList.remove('active'); renderGoldenTimeInsights();">주말·휴일</button>
         </div>
       </div>
-      <div style="font-size: 10px; color: var(--stat-label); margin-bottom: 8px; text-align: center;" id="work-time-range-label">자정 ~ 익일 자정 (2시간 단위 누적 탑승) - 기준시간 설정 가능</div>
-      <div id="golden-time-chart" class="golden-chart-container">
-        <!-- JS로 렌더링 -->
-      </div>
+      <div style="font-size: 10px; color: var(--stat-label); margin-bottom: 8px; text-align: center;" id="work-time-range-label">자정 ~ 익일 자정 (2시간 단위 누적 탑승) - 기준 0시</div>
+      <div id="golden-time-chart" class="golden-chart-container"><div style="width:100%; font-size:11px; color:var(--stat-label); text-align:center; padding: 40px 0;">탑승 기록이 없습니다.</div></div>
     </div>
 
     <!-- 월간 목표 시뮬레이터 (계산기) -->
@@ -1927,7 +2145,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         </div>
       </div>
 
-      <button class="btn-rest-day" id="btn-open-calendar" onclick="window.openCalendarModal && window.openCalendarModal();">
+      <button class="btn-rest-day" id="btn-open-calendar" onclick="window.openCalendarModal &amp;&amp; window.openCalendarModal();">
         <span>🗓️ 남은 휴무일 (말일까지)</span>
         <span id="rest-day-count-badge">0일 선택됨</span>
       </button>
@@ -1935,38 +2153,38 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       <div class="calc-result-box">
         <div class="calc-result-row">
           <span class="calc-result-label">남은 실제 근무일</span>
-          <span class="calc-result-val"><span id="res-sim-days">0</span> 일</span>
+          <span class="calc-result-val"><span id="res-sim-days">6</span> 일</span>
         </div>
         <div class="calc-result-row">
           <span class="calc-result-label">남은 목표 금액</span>
-          <span class="calc-result-val"><span id="res-sim-remain-money">0</span> 원</span>
+          <span class="calc-result-val"><span id="res-sim-remain-money">4,000,000</span> 원</span>
         </div>
         <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 10px 0;"></div>
         <div class="calc-result-row">
           <span class="calc-result-label" style="color: #FFF;">📌 일일 목표 매출</span>
-          <span class="calc-result-val highlight"><span id="res-sim-daily-target">0</span> 원</span>
+          <span class="calc-result-val highlight"><span id="res-sim-daily-target">666,667</span> 원</span>
         </div>
         <div class="calc-result-row" style="margin-bottom: 0;">
           <span class="calc-result-label" style="font-size: 10px;">🕒 필요 운행 시간 (시간당 2.5만)</span>
-          <span class="calc-result-val green"><span id="res-sim-daily-hours">-</span></span>
+          <span class="calc-result-val green"><span id="res-sim-daily-hours" style="color: rgb(74, 222, 128);">약 26시간 40분</span></span>
         </div>
       </div>
     </div>
   </div>
   
   <div class="mode-container bottom-mode-dock" id="bottom-mode-dock">
-    <button class="mode-pill active" id="btn-mode1">⚡ 추천/콜찾기</button>
+    <button class="mode-pill" id="btn-mode1">⚡ 추천/콜찾기</button>
     <button class="mode-pill" id="btn-mode2">🧠 운행 전략</button>
     <button class="mode-pill" id="btn-mode3">📊 콜/범칙금 지도</button>
-    <button class="mode-pill" id="btn-mode4">🚘 대시보드</button>
+    <button class="mode-pill active" id="btn-mode4">🚘 대시보드</button>
   </div>
 
   <div class="bottom-bar" id="bottom-bar-v7961">
-    <button class="bb-btn clock-btn" id="btn-bottom-clock" style="background:#1E1E1E !important; color:#FFFFFF !important; border:1.5px solid #333333 !important;"><span class="bb-label">🕐</span></button>
-    <button class="bb-btn search-btn" id="btn-bottom-search" style="background:#22C55E !important; color:#FFFFFF !important; border:1.5px solid #16A34A !important;"><span class="bb-label">🔍 검색</span></button>
-    <button class="bb-btn board-btn" id="btn-bottom-board"><span class="bb-label">승차</span></button>
-    <button class="bb-btn alight-btn" id="btn-bottom-alight"><span class="bb-label">하차</span></button>
-    <button class="bb-btn restroom-btn" id="btn-bottom-restroom-search" style="background:#3B82F6 !important; color:#FFFFFF !important; border:1.5px solid #2563EB !important;"><span class="bb-label">휴식</span></button>
+    <button class="bb-btn clock-btn" id="btn-bottom-clock" style="background: rgb(30, 30, 30) !important; color: rgb(255, 255, 255) !important;"><span class="bb-label">🕐</span></button>
+    <button class="bb-btn search-btn" id="btn-bottom-search" style="background: rgb(34, 197, 94) !important; color: rgb(255, 255, 255) !important;"><span class="bb-label">🔍 검색</span></button>
+    <button class="bb-btn board-btn" id="btn-bottom-board" disabled=""><span class="bb-label">승차</span></button>
+    <button class="bb-btn alight-btn" id="btn-bottom-alight" disabled=""><span class="bb-label">하차</span></button>
+    <button class="bb-btn restroom-btn" id="btn-bottom-restroom-search" style="background: rgb(59, 130, 246) !important; color: rgb(255, 255, 255) !important;"><span class="bb-label">휴식</span></button>
     <button id="btn-save-call" style="display:none !important;">저장</button>
     <button id="btn-save-restroom" style="display:none !important;">화장실저장</button>
   </div>
@@ -2000,23 +2218,21 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     <div class="modal-content">
       <div class="modal-header">
         <span class="modal-title">이번 달 휴무일 체크</span>
-        <button class="btn-apply" id="btn-apply-calendar" onclick="window.closeCalendarModal && window.closeCalendarModal();" style="font-size:12px; padding: 6px 12px;">적용 및 닫기</button>
+        <button class="btn-apply" id="btn-apply-calendar" onclick="window.closeCalendarModal &amp;&amp; window.closeCalendarModal();" style="font-size:12px; padding: 6px 12px;">적용 및 닫기</button>
       </div>
       <div class="calendar-wrapper">
         <div style="font-size: 11px; color: #A3A3A3; margin-bottom: 12px; text-align: center;">오늘 이후 쉴 날짜를 모두 터치하세요.</div>
         <div class="calendar-weekdays">
           <span style="color:#EF4444;">일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span style="color:#3B82F6;">토</span>
         </div>
-        <div class="calendar-grid" id="calendar-grid">
-          <!-- JS로 생성됨 -->
-        </div>
+        <div class="calendar-grid" id="calendar-grid"><div></div><div></div><div></div><div></div><div class="cal-day past">1</div><div class="cal-day past">2</div><div class="cal-day past">3</div><div class="cal-day past">4</div><div class="cal-day past">5</div><div class="cal-day past">6</div><div class="cal-day past">7</div><div class="cal-day past">8</div><div class="cal-day past">9</div><div class="cal-day past">10</div><div class="cal-day past">11</div><div class="cal-day past">12</div><div class="cal-day past">13</div><div class="cal-day past">14</div><div class="cal-day past">15</div><div class="cal-day past">16</div><div class="cal-day past">17</div><div class="cal-day past">18</div><div class="cal-day past">19</div><div class="cal-day past">20</div><div class="cal-day past">21</div><div class="cal-day past">22</div><div class="cal-day past">23</div><div class="cal-day past">24</div><div class="cal-day past">25</div><div class="cal-day">26</div><div class="cal-day">27</div><div class="cal-day">28</div><div class="cal-day">29</div><div class="cal-day">30</div><div class="cal-day">31</div></div>
       </div>
     </div>
   </div>
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v8.9.96";
+  const BUILD_VERSION = "v8.9.97";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2040,7 +2256,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
 ;
   let drivingStatsTimer = null;
 
-  // v8.9.96 NEW: 2시간 휴식 안내 - 운행시작/휴식종료 기준 1회성 세팅 (디자인 훼손 없음)
+  // v8.9.97 NEW: 2시간 휴식 안내 - 운행시작/휴식종료 기준 1회성 세팅 (디자인 훼손 없음)
   const REST_ALERT_INTERVAL_MS = 2 * 60 * 60 * 1000; // 2시간
   let restAlertState = { nextAlertAt: null, hasFired: false, timeoutId: null };
   try {
@@ -2059,7 +2275,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     restAlertState.nextAlertAt = now + REST_ALERT_INTERVAL_MS;
     restAlertState.hasFired = false;
     saveRestAlertState();
-    try{ console.log('[v8.9.96 휴식타이머] 세팅 - 기준:', new Date(now).toLocaleTimeString(), '다음알림:', new Date(restAlertState.nextAlertAt).toLocaleTimeString()); }catch(e){}
+    try{ console.log('[v8.9.97 휴식타이머] 세팅 - 기준:', new Date(now).toLocaleTimeString(), '다음알림:', new Date(restAlertState.nextAlertAt).toLocaleTimeString()); }catch(e){}
     try{ updateRestCountdownUI(); }catch(e){}
     try{
       restAlertState.timeoutId = setTimeout(function(){
@@ -2071,6 +2287,20 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
   }
   function updateRestCountdownUI(){
     try{
+      // v8.9.97 B안 FIX: 운행중인데 타이머가 없으면 자동 복구 (휴식으로 사라진 버그 수정)
+      if(drivingState && drivingState.isDriving && !drivingState.isBreak){
+        if(!restAlertState.nextAlertAt || restAlertState.hasFired){
+          // 이미 알림이 울렸으면 숨김 유지 (B안: 운행시작 기준 1회만)
+          if(restAlertState.hasFired){
+            // hasFired면 숨김 - 다음 운행시작까지 대기
+          } else {
+            // null이면 지금부터 2시간으로 자동 복구
+            if(typeof scheduleRestAlertFromNow==='function'){
+              scheduleRestAlertFromNow();
+            }
+          }
+        }
+      }
       let badge = document.getElementById('rest-countdown-badge');
       if(!badge){
         const statusEl = document.getElementById('driving-current-status');
@@ -2078,17 +2308,17 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
           badge = document.createElement('span');
           badge.id = 'rest-countdown-badge';
           badge.style.cssText = 'display:inline-block;margin-left:6px;padding:1px 6px;border-radius:8px;background:rgba(255,200,0,0.18);border:1px solid rgba(255,200,0,0.35);color:#FFC800;font-size:10px;font-weight:900;white-space:nowrap;vertical-align:middle;cursor:pointer;';
-          badge.title = '길게 누르면 타이머 리셋';
+          badge.title = '클릭하면 상세, 길게 누르면 리셋';
           badge.addEventListener('click', function(){
             try{
               const base = restAlertState.nextAlertAt ? new Date(restAlertState.nextAlertAt - REST_ALERT_INTERVAL_MS) : null;
-              const baseStr = base ? base.getHours()+':'+String(base.getMinutes()).padStart(2,'0') : '없음';
-              const nextStr = restAlertState.nextAlertAt ? new Date(restAlertState.nextAlertAt).getHours()+':'+String(restAlertState.nextAlertAt ? new Date(restAlertState.nextAlertAt).getMinutes() : 0).padStart(2,'0') : '없음';
-              alert('현재 휴식 타이머 정보\n기준시각: '+baseStr+'\n다음알림: '+nextStr+'\n남은시간: '+ (restAlertState.nextAlertAt ? Math.floor((restAlertState.nextAlertAt-Date.now())/60000)+'분' : '없음')+'\n\n기준시각이 휴식종료 시간이면, 휴식 때문에 1시간30분으로 보이는게 정상입니다.\n리셋하려면 배지를 길게 누르세요.');
+              const baseStr = base ? String(base.getHours()).padStart(2,'0')+':'+String(base.getMinutes()).padStart(2,'0') : '없음';
+              const nextStr = restAlertState.nextAlertAt ? String(new Date(restAlertState.nextAlertAt).getHours()).padStart(2,'0')+':'+String(new Date(restAlertState.nextAlertAt).getMinutes()).padStart(2,'0') : '없음';
+              alert('현재 휴식 타이머(B안) 정보\n기준시각(운행시작): '+baseStr+'\n다음알림: '+nextStr+'\n남은시간: '+ (restAlertState.nextAlertAt ? Math.floor((restAlertState.nextAlertAt-Date.now())/60000)+'분' : '없음')+'\n\nB안: 운행시작 기준 고정 2시간, 휴식해도 유지');
             }catch(e){}
           });
           let pressTimer=null;
-          badge.addEventListener('touchstart', function(e){ pressTimer=setTimeout(function(){ if(confirm('휴식 타이머를 운행시작 기준으로 리셋할까요? (지금부터 2시간)')){ scheduleRestAlertFromNow(); } }, 800); }, {passive:true});
+          badge.addEventListener('touchstart', function(e){ pressTimer=setTimeout(function(){ if(confirm('휴식 타이머를 지금부터 2시간으로 리셋할까요?')){ scheduleRestAlertFromNow(); } }, 800); }, {passive:true});
           badge.addEventListener('touchend', function(){ if(pressTimer) clearTimeout(pressTimer); });
           statusEl.parentElement.appendChild(badge);
         }
@@ -2100,7 +2330,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       }
       if(drivingState.isBreak){
         badge.style.display='inline-block';
-        badge.textContent = '☕ 휴식중 - 운행시작 기준 2시간 유지 (알림 대기중)';
+        badge.textContent = '☕ 휴식중 - 운행시작 기준 2시간 유지';
         badge.style.background = 'rgba(45,212,191,0.15)';
         badge.style.borderColor = 'rgba(45,212,191,0.35)';
         badge.style.color = '#5EEAD4';
@@ -2124,7 +2354,6 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       const m = Math.floor((remain%3600000)/60000);
       const s = Math.floor((remain%60000)/1000);
       const timeStr = (h>0 ? String(h).padStart(2,'0')+':' : '') + String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-      // 디버그용 기준 시각 계산
       let baseInfo='';
       try{
         const baseDate = new Date(restAlertState.nextAlertAt - REST_ALERT_INTERVAL_MS);
@@ -2143,6 +2372,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       }
     }catch(e){}
   }
+
   function triggerRestAlert(){
     if(restAlertState.hasFired) return;
     restAlertState.hasFired = true;
@@ -2896,7 +3126,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
         date_str: new Date().toLocaleDateString('ko-KR'),
-        version: 'v8.9.96'
+        version: 'v8.9.97'
       };
       // v8.9.80: 매출 상세도 함께 전송 (손님탑승처럼 시트에 바로 기록되게)
       try{
@@ -2944,7 +3174,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         monthly_target: sim.target||0,
         monthly_current: sim.current||0,
         rest_dates: (sim.restDates||[]).join(','),
-        version: 'v8.9.96'
+        version: 'v8.9.97'
       };
       fetch(url, {
         method: 'POST',
@@ -2974,7 +3204,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.9.96'
+        version: 'v8.9.97'
       };
       
       // auto_backup은 항상 최신으로 갱신 (가벼운 백업) - 다중 저장소
@@ -3258,7 +3488,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
           if(drivingState.isDriving) startDrivingTimer();
           updateDrivingUI();
           try{
-            // v8.9.96: 복구 시 휴식 타이머 상태 복구
+            // v8.9.97: 복구 시 휴식 타이머 상태 복구
             if(drivingState.isDriving && !drivingState.isBreak){
               if(!restAlertState.nextAlertAt){
                 if(typeof scheduleRestAlertFromNow==='function') scheduleRestAlertFromNow();
@@ -3358,14 +3588,19 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         setTab(4);
       }
     }catch(e){}
-    // v8.9.96 B안: 휴식은 타이머에 영향 없음 - 운행시작 기준 고정 2시간 유지
-    try{ if(typeof updateRestCountdownUI==='function') updateRestCountdownUI(); }catch(e){}
+    // v8.9.97 B안 FIX: 휴식은 타이머에 영향 없음 - 운행시작 기준 고정 2시간, 사라진 타이머 자동 복구
     try{
-      if(!drivingState.isBreak && restAlertState.nextAlertAt && !restAlertState.hasFired){
-        if(Date.now() >= restAlertState.nextAlertAt){
+      if(!drivingState.isBreak){
+        // 휴식 종료 시 타이머가 없으면 복구 (이전 버전에서 clear된 경우)
+        if(!restAlertState.nextAlertAt && !restAlertState.hasFired){
+          if(typeof scheduleRestAlertFromNow==='function') scheduleRestAlertFromNow();
+        }
+        // 시간이 이미 지났으면 즉시 알림
+        if(restAlertState.nextAlertAt && !restAlertState.hasFired && Date.now() >= restAlertState.nextAlertAt){
           triggerRestAlert();
         }
       }
+      if(typeof updateRestCountdownUI==='function') updateRestCountdownUI();
     }catch(e){}
   }
 
@@ -4403,8 +4638,8 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       const days = ['일', '월', '화', '수', '목', '금', '토']; const dayStr = days[nowDate.getDay()];
       const isWeekend = (nowDate.getDay() === 0 || nowDate.getDay() === 6);
       let badgeHtml = isHoliday ? `<span class="holiday-badge">🔴 ${holidayName || '공휴일'}</span>` : (isWeekend ? `<span class="holiday-badge" style="background:#FF8C00;">🟡 휴일</span>` : `<span class="weekday-badge">🟢 평일</span>`);
-      headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) <span class="build-ver-tag">v8.9.96</span> ${badgeHtml}`;
-    } catch(e) { try { const h=document.getElementById('app-header-title'); if(h) h.innerHTML=`📅 ${nowDate.getMonth()+1}.${nowDate.getDate()} <span class="build-ver-tag">v8.9.96</span>`; } catch(e2){} }
+      headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) <span class="build-ver-tag">v8.9.97</span> ${badgeHtml}`;
+    } catch(e) { try { const h=document.getElementById('app-header-title'); if(h) h.innerHTML=`📅 ${nowDate.getMonth()+1}.${nowDate.getDate()} <span class="build-ver-tag">v8.9.97</span>`; } catch(e2){} }
   }
 
   async function checkIsPublicHolidayRealtime() {
@@ -7382,7 +7617,7 @@ function initMic() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.96</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.97</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
@@ -7687,5 +7922,5 @@ document.addEventListener('DOMContentLoaded', function() {
   }catch(e){}
 })();
 </script>
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
-</html>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
+<div id="bottom-status-below" class="bottom-status-below"><span id="bottom-status-below-text">⏸️ 대기중</span></div></body></html>
