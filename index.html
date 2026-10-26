@@ -111,7 +111,7 @@
   const EMBEDDED_DEFAULTS = {
     daily_rev: 0,
     sim_data: {target:4000000, current:0, restDates:[]},
-    version: 'v8.9.98'
+    version: 'v8.9.99'
   };
 </script>
 <style>
@@ -235,7 +235,7 @@
 </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>sudataxi-k v8.9.98</title>
+  <title>sudataxi-k v8.9.99</title>
 
   <link rel="manifest" href="data:application/json;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwMDAwMDAiLCAiZGVzY3JpcHRpb24iOiAi7JWI7JaRL+q1sO2PrC/snZjsmZUv6rO87LKcIOy9nC/rspTsuZnquIgg7KeA64+EIC0g7IOB7JeF7KeA6rWsIOykkeyLrCB2OC45LjkwIiwgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsICJpY29ucyI6IFt7InB1cnBvc2UiOiAiYW55IG1hc2thYmxlIiwgInNpemVzIjogIjUxMng1MTIiLCAic3JjIjogImh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzM3NzQvMzc3NDA4My5wbmciLCAidHlwZSI6ICJpbWFnZS9wbmcifV0sICJuYW1lIjogIuyImOuLpO2DneyLnEsgdjguOS45MCIsICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsICJzaG9ydF9uYW1lIjogIuyImOuLpO2DneyLnEsiLCAic3RhcnRfdXJsIjogIi4vaW5kZXguaHRtbD92PTguOS45MCIsICJ0aGVtZV9jb2xvciI6ICIjRkZDODAwIiwgInZlcnNpb24iOiAiOC45LjkwIn0=">
   <meta name="theme-color" content="#FFC800">
@@ -1592,7 +1592,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
   
   <div class="sticky-top-area" style="padding-bottom: 6px; box-shadow: 0 -20px 0 20px var(--main-bg);">
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 2px;">
-      <div class="header" id="app-header-title" style="margin-bottom: 0; flex: 1;">📅 2026.10.26(월) <span class="build-ver-tag">v8.9.98</span> <span class="weekday-badge">🟢 평일</span></div>
+      <div class="header" id="app-header-title" style="margin-bottom: 0; flex: 1;">📅 2026.10.26(월) <span class="build-ver-tag">v8.9.99</span> <span class="weekday-badge">🟢 평일</span></div>
       <button id="btn-theme-toggle" onclick="toggleTheme()" class="btn-idle" style="border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 900; cursor: pointer; white-space: nowrap; flex-shrink: 0; border: 1px solid var(--theme-border); color: var(--theme-accent);">☀️ 주간</button>
     </div>
   <button class="big-btn" id="btn-search" style="margin-bottom: 2px; display: none;">
@@ -2114,7 +2114,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = "v8.9.98";
+  const BUILD_VERSION = "v8.9.99";
   try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){}; 
   const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
   
@@ -2138,7 +2138,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
 ;
   let drivingStatsTimer = null;
 
-  // v8.9.98 NEW: 2시간 휴식 안내 - 운행시작/휴식종료 기준 1회성 세팅 (디자인 훼손 없음)
+  // v8.9.99 NEW: 2시간 휴식 안내 - 운행시작/휴식종료 기준 1회성 세팅 (디자인 훼손 없음)
   const REST_ALERT_INTERVAL_MS = 2 * 60 * 60 * 1000; // 2시간
   let restAlertState = { nextAlertAt: null, hasFired: false, timeoutId: null };
   try {
@@ -2157,7 +2157,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
     restAlertState.nextAlertAt = now + REST_ALERT_INTERVAL_MS;
     restAlertState.hasFired = false;
     saveRestAlertState();
-    try{ console.log('[v8.9.98 휴식타이머] 세팅 - 기준:', new Date(now).toLocaleTimeString(), '다음알림:', new Date(restAlertState.nextAlertAt).toLocaleTimeString()); }catch(e){}
+    try{ console.log('[v8.9.99 휴식타이머] 세팅 - 기준:', new Date(now).toLocaleTimeString(), '다음알림:', new Date(restAlertState.nextAlertAt).toLocaleTimeString()); }catch(e){}
     try{ updateRestCountdownUI(); }catch(e){}
     try{
       restAlertState.timeoutId = setTimeout(function(){
@@ -2169,7 +2169,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
   }
   function updateRestCountdownUI(){
     try{
-      // v8.9.98 A안 FIX: 운행중인데 타이머가 없으면 자동 복구 (이전 B안 버그로 사라진 경우)
+      // v8.9.99 FIX2: 운행중인데 타이머가 없으면 자동 복구 + hasFired 후에도 배지 유지
       if(drivingState && drivingState.isDriving && !drivingState.isBreak){
         if(!restAlertState.nextAlertAt && !restAlertState.hasFired){
           if(typeof scheduleRestAlertFromNow==='function'){
@@ -2191,7 +2191,8 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
               const baseStr = base ? String(base.getHours()).padStart(2,'0')+':'+String(base.getMinutes()).padStart(2,'0') : '없음';
               const nextStr = restAlertState.nextAlertAt ? String(new Date(restAlertState.nextAlertAt).getHours()).padStart(2,'0')+':'+String(new Date(restAlertState.nextAlertAt).getMinutes()).padStart(2,'0') : '없음';
               const remainMin = restAlertState.nextAlertAt ? Math.floor((restAlertState.nextAlertAt-Date.now())/60000) : 0;
-              alert('현재 휴식 타이머(A안) 정보\n기준시각(운행시작 또는 휴식종료): '+baseStr+'\n다음알림: '+nextStr+'\n남은시간: '+remainMin+'분 ('+Math.floor(remainMin/60)+'시간 '+remainMin%60+'분)\n\nA안: 운행시작 또는 휴식종료부터 2시간 후 1회 알림');
+              const status = restAlertState.hasFired ? '알림 울림 - 휴식 대기중' : '대기중';
+              alert('현재 휴식 타이머(A안) 정보\n상태: '+status+'\n기준시각(운행시작 또는 휴식종료): '+baseStr+'\n다음알림: '+nextStr+'\n남은시간: '+remainMin+'분\n\n배지가 안보이면 운행 종료 후 재시작 해주세요.');
             }catch(e){}
           });
           let pressTimer=null;
@@ -2213,17 +2214,30 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         badge.style.color = '#5EEAD4';
         return;
       }
-      if(!restAlertState.nextAlertAt || restAlertState.hasFired){
+      if(!restAlertState.nextAlertAt){
+        // nextAlertAt이 없으면 숨김 (hasFired와 별개)
         badge.style.display='none';
         return;
       }
       const remain = restAlertState.nextAlertAt - Date.now();
-      if(remain <= 0){
+      // hasFired여도 계속 표시 - 휴식 필요 상태
+      if(remain <= 0 || restAlertState.hasFired){
         badge.style.display='inline-block';
-        badge.textContent = '⏰ 휴식 안내 시간!';
-        badge.style.background = 'rgba(239,68,68,0.2)';
+        let overdueMin = Math.floor(Math.abs(remain)/60000);
+        let baseInfo='';
+        try{
+          const baseDate = new Date(restAlertState.nextAlertAt - REST_ALERT_INTERVAL_MS);
+          baseInfo = ' (기준 '+ String(baseDate.getHours()).padStart(2,'0')+':'+String(baseDate.getMinutes()).padStart(2,'0')+')';
+        }catch(e){}
+        if(restAlertState.hasFired){
+          badge.textContent = '⏰ 휴식 필요! '+overdueMin+'분 초과'+baseInfo;
+        } else {
+          badge.textContent = '⏰ 휴식 안내 시간!'+baseInfo;
+        }
+        badge.style.background = 'rgba(239,68,68,0.25)';
         badge.style.borderColor = '#EF4444';
         badge.style.color = '#FCA5A5';
+        badge.style.animation = 'pulse 1.5s infinite';
         return;
       }
       const isUrgent = remain <= 30*60*1000;
@@ -2238,6 +2252,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       }catch(e){}
       badge.style.display='inline-block';
       badge.textContent = '⏰ 다음 휴식안내 ' + timeStr + ' 후' + baseInfo;
+      badge.style.animation = '';
       if(isUrgent){
         badge.style.background = 'rgba(239,68,68,0.18)';
         badge.style.borderColor = 'rgba(239,68,68,0.4)';
@@ -3004,7 +3019,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
         date_str: new Date().toLocaleDateString('ko-KR'),
-        version: 'v8.9.98'
+        version: 'v8.9.99'
       };
       // v8.9.80: 매출 상세도 함께 전송 (손님탑승처럼 시트에 바로 기록되게)
       try{
@@ -3052,7 +3067,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         monthly_target: sim.target||0,
         monthly_current: sim.current||0,
         rest_dates: (sim.restDates||[]).join(','),
-        version: 'v8.9.98'
+        version: 'v8.9.99'
       };
       fetch(url, {
         method: 'POST',
@@ -3082,7 +3097,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.9.98'
+        version: 'v8.9.99'
       };
       
       // auto_backup은 항상 최신으로 갱신 (가벼운 백업) - 다중 저장소
@@ -3366,7 +3381,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
           if(drivingState.isDriving) startDrivingTimer();
           updateDrivingUI();
           try{
-            // v8.9.98: 복구 시 휴식 타이머 상태 복구
+            // v8.9.99: 복구 시 휴식 타이머 상태 복구
             if(drivingState.isDriving && !drivingState.isBreak){
               if(!restAlertState.nextAlertAt){
                 if(typeof scheduleRestAlertFromNow==='function') scheduleRestAlertFromNow();
@@ -3466,7 +3481,7 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
         setTab(4);
       }
     }catch(e){}
-    // v8.9.98 A안 최종: 휴식 시작 시 기존 타이머 취소(휴식중 알림 방지), 종료 시 2시간 후 1회 재세팅
+    // v8.9.99 A안 최종: 휴식 시작 시 기존 타이머 취소(휴식중 알림 방지), 종료 시 2시간 후 1회 재세팅
     try{
       if(drivingState.isBreak){
         // 휴식 시작 - 기존 예약 취소
@@ -4513,8 +4528,8 @@ body.theme-day .backup-section[style*="rgba(255, 200, 0, 0.4)"] {
       const days = ['일', '월', '화', '수', '목', '금', '토']; const dayStr = days[nowDate.getDay()];
       const isWeekend = (nowDate.getDay() === 0 || nowDate.getDay() === 6);
       let badgeHtml = isHoliday ? `<span class="holiday-badge">🔴 ${holidayName || '공휴일'}</span>` : (isWeekend ? `<span class="holiday-badge" style="background:#FF8C00;">🟡 휴일</span>` : `<span class="weekday-badge">🟢 평일</span>`);
-      headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) <span class="build-ver-tag">v8.9.98</span> ${badgeHtml}`;
-    } catch(e) { try { const h=document.getElementById('app-header-title'); if(h) h.innerHTML=`📅 ${nowDate.getMonth()+1}.${nowDate.getDate()} <span class="build-ver-tag">v8.9.98</span>`; } catch(e2){} }
+      headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) <span class="build-ver-tag">v8.9.99</span> ${badgeHtml}`;
+    } catch(e) { try { const h=document.getElementById('app-header-title'); if(h) h.innerHTML=`📅 ${nowDate.getMonth()+1}.${nowDate.getDate()} <span class="build-ver-tag">v8.9.99</span>`; } catch(e2){} }
   }
 
   async function checkIsPublicHolidayRealtime() {
@@ -7492,7 +7507,7 @@ function initMic() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.98</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.9.99</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
