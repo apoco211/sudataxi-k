@@ -265,7 +265,7 @@ body { background-color: var(--main-bg); color: var(--main-text); max-width: 430
 .feedback-text { font-size: 11px; color: #A3A3A3; margin-top: 14px; line-height: 1.4; font-weight: 600; display: flex; align-items: flex-start; gap: 4px; word-break: keep-all; }
 .revenue-box { background: var(--stat-bg); border: 1.5px solid var(--theme-accent); padding: 14px 16px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(255, 200, 0, 0.05); }
 
-/* ⚠️ 수정됨: 화면이 좁을 때(세로 모드) 글자와 입력칸이 찌그러지지 않고 자연스럽게 두 줄로 감싸지도록 flex-wrap 허용 */
+/* 세로 모드에서 글자와 입력칸이 찌그러지지 않고 자연스럽게 두 줄로 감싸지도록 flex-wrap 허용 */
 .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; flex-wrap: wrap; }
 .label { font-size: 15px; font-weight: 900; color: var(--theme-accent); flex-shrink: 0; word-break: keep-all; }
 .input-group { display: flex; align-items: center; gap: 6px; flex: 1; justify-content: flex-end; min-width: 200px; }
@@ -286,14 +286,17 @@ body { background-color: var(--main-bg); color: var(--main-text); max-width: 430
 .rev-bottom-main { font-size: 12px; color: #FFF; font-weight: 800; white-space: nowrap; }
 .rev-bottom-sub { font-size: 9px; color: var(--stat-label); white-space: nowrap; }
 .rev-bottom-val { font-size: 14px; font-weight: 900; color: #4ADE80; text-align: right; white-space: nowrap; letter-spacing: -0.5px; }
-.chart-wrapper { padding-top: 6px; }
-.chart-container { display: flex; align-items: flex-end; justify-content: space-between; height: 110px; padding: 0 4px; gap: 4px; margin-top: 8px; }
-.chart-col { display: flex; flex-direction: column; align-items: center; flex: 1; gap: 4px; }
-.chart-time-text { font-size: 9px; color: #A3A3A3; font-family: monospace; font-weight: 700; margin-bottom: -2px; }
-.chart-bar-bg { width: 100%; max-width: 30px; height: 80px; background: #2A2A2A; border-radius: 4px; display: flex; align-items: flex-end; overflow: hidden; position: relative; }
+
+/* ⚠️ 차트 삐져나옴(Blowout) 완벽 해결을 위한 CSS 교정 */
+.chart-wrapper { padding-top: 6px; width: 100%; }
+.chart-container { display: flex; align-items: flex-end; justify-content: space-between; height: 110px; padding: 0; gap: 2px; margin-top: 8px; width: 100%; }
+.chart-col { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 0; gap: 4px; }
+.chart-time-text { font-size: 8.5px; color: #A3A3A3; font-family: monospace; font-weight: 700; margin-bottom: -2px; white-space: nowrap; letter-spacing: -0.5px; }
+.chart-bar-bg { width: 100%; max-width: 32px; height: 80px; background: #2A2A2A; border-radius: 4px; display: flex; align-items: flex-end; overflow: hidden; position: relative; margin: 0 auto; }
 .chart-bar-fill { width: 100%; border-radius: 4px; transition: height 0.5s ease; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding-top: 4px; }
-.chart-bar-text { font-size: 9px; font-weight: 900; color: rgba(255,255,255,0.9); text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
-.chart-label { font-size: 10px; font-weight: 700; color: #8A8A8A; white-space: nowrap; }
+.chart-bar-text { font-size: 9.5px; font-weight: 900; color: rgba(255,255,255,0.9); text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+.chart-label { font-size: 9.5px; font-weight: 700; color: #8A8A8A; white-space: normal; text-align: center; word-break: keep-all; line-height: 1.15; letter-spacing: -0.3px; }
+
 .calc-input-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; background: #2A2A2A; padding: 8px 12px; border-radius: 8px; gap: 8px;}
 .calc-input-group label { font-size: 12px; font-weight: 800; color: #D1D5DB; word-break: keep-all; flex: 1;}
 .calc-input-wrapper { display: flex; align-items: center; gap: 4px; flex-shrink: 0;}
@@ -496,7 +499,9 @@ box-shadow: 0 -2px 10px rgba(0,0,0,0.4), 0 0 0 8px var(--main-bg), 0 60px 0 35px
 .bottom-mode-dock .mode-pill { height: 32px !important; border-radius: 10px !important; font-size: 11.5px !important; font-weight: 900 !important; }
 .bottom-mode-dock #btn-mode5 { grid-column: 1 / -1 !important; height: 32px !important; }
 body.theme-day .bottom-mode-dock { background: #FFFFFF !important; border-color: #D1D5DB !important; }
-body { padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important; }
+
+/* 화면 하단 메뉴 영역만큼 충분한 여백 확보 */
+body { padding-bottom: calc(240px + env(safe-area-inset-bottom, 0px)) !important; }
 </style>
 <style id="tdj-styles">
 #tab5-extras{max-width:480px;margin:0 auto;padding:0 0 20px;min-height:60vh;background:transparent}
@@ -806,23 +811,26 @@ display:flex !important;flex-direction:column;align-items:flex-start;justify-con
 </div>
 </div>
 </div>
+
 <!-- 주간 퍼포먼스 (이번 주) 차트 -->
 <div class="backup-section">
 <div class="backup-title" style="margin-bottom: 4px;">📊 주간 퍼포먼스 (이번 주)</div>
 <div style="font-size: 10px; color: var(--stat-label); text-align: center;">상단: 운행시간 / 막대: 예상매출 / 숫자: 탑승률(KPI)</div>
-<div class="chart-wrapper">
-<div class="chart-container" id="weekly-chart" style="display: block;"></div>
+<div class="chart-wrapper" style="width: 100%; overflow: hidden;">
+<!-- JS에서 차트 내부가 아닌 겉에 안내 문구를 추가하도록 수정됨 -->
+<div class="chart-container" id="weekly-chart"></div>
 </div>
 </div>
+
 <!-- 월간 퍼포먼스 (이번 달) 차트 -->
 <div class="backup-section">
 <div class="backup-title" style="margin-bottom: 4px;">📅 월간 퍼포먼스 (이번 달)</div>
 <div style="font-size: 10px; color: var(--stat-label); text-align: center;">주차별 평균 탑승률 및 매출 추이</div>
-<div class="chart-wrapper">
-<div class="chart-container" id="monthly-chart" style="padding: 0px 20px; display: flex; justify-content: space-around;"></div>
-<div id="monthly-target-info" class="monthly-target-info-dup" style="font-size: 9px; color: rgb(163, 163, 163); text-align: center; margin-top: 8px; display: block; width: 100%;"></div>
+<div class="chart-wrapper" style="width: 100%; overflow: hidden;">
+<div class="chart-container" id="monthly-chart"></div>
 </div>
 </div>
+
 <!-- 골든타임 분석 차트 -->
 <div class="backup-section">
 <div class="backup-title" style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
@@ -876,7 +884,7 @@ display:flex !important;flex-direction:column;align-items:flex-start;justify-con
 </div>
 </div>
 </div>
-<!-- 대시보드 최하단: A25 카카오 콜지도 Firebase 연동 설정 카드 -->
+<!-- ⚠️ 삐져나옴 완벽 교정: A25 카카오 콜지도 Firebase 연동 설정 카드 -->
 <div class="backup-section" id="firebase-setting-section" style="background: rgba(255, 200, 0, 0.05); border: 1.5px solid var(--theme-accent); margin-bottom: 20px;">
 <div class="backup-header" style="margin-bottom: 6px;">
 <span class="backup-title" style="font-size: 13px;">🔥 A25 카카오 콜지도 Firebase 연동</span>
@@ -885,13 +893,14 @@ display:flex !important;flex-direction:column;align-items:flex-start;justify-con
 <div style="font-size: 10.5px; color: var(--stat-label); margin-bottom: 8px; line-height: 1.4;">
 A25 안드로이드폰과 실시간 콜수요지도를 동기화합니다. 콘솔의 설정 객체(JSON)를 붙여넣거나 Database URL을 입력하세요.
 </div>
+<!-- 입력창이 바깥으로 삐져나가지 않도록 width:100% 및 box-sizing 추가 -->
 <div style="display:flex; flex-direction:column; gap:6px; margin-bottom: 8px;">
-<input type="text" id="input-fb-dburl" placeholder="Database URL (예: https://프로젝트ID-default-rtdb.firebaseio.com)" style="background:#121212; border:1px solid #4B5563; color:#FFF; font-size:11px; padding:7px 8px; border-radius:6px; font-family:monospace; width:100%;">
-<div style="display:flex; gap:6px;">
-<input type="text" id="input-fb-apikey" placeholder="API Key (AIzaSy...)" style="flex:1; background:#121212; border:1px solid #4B5563; color:#FFF; font-size:11px; padding:7px 8px; border-radius:6px; font-family:monospace;">
-<input type="text" id="input-fb-projectid" placeholder="Project ID" style="flex:1; background:#121212; border:1px solid #4B5563; color:#FFF; font-size:11px; padding:7px 8px; border-radius:6px; font-family:monospace;">
+<input type="text" id="input-fb-dburl" placeholder="Database URL (예: https://...)" style="width:100%; box-sizing: border-box; background:#121212; border:1px solid #4B5563; color:#FFF; font-size:11px; padding:7px 8px; border-radius:6px; font-family:monospace;">
+<div style="display:flex; gap:6px; width: 100%;">
+<input type="text" id="input-fb-apikey" placeholder="API Key" style="flex:1; min-width:0; width:100%; box-sizing: border-box; background:#121212; border:1px solid #4B5563; color:#FFF; font-size:11px; padding:7px 8px; border-radius:6px; font-family:monospace;">
+<input type="text" id="input-fb-projectid" placeholder="Project ID" style="flex:1; min-width:0; width:100%; box-sizing: border-box; background:#121212; border:1px solid #4B5563; color:#FFF; font-size:11px; padding:7px 8px; border-radius:6px; font-family:monospace;">
 </div>
-<textarea id="input-fb-json" placeholder="또는 Firebase SDK config 객체 {...} 전체를 여기에 붙여넣기" style="background:#121212; border:1px solid #4B5563; color:#FFF; font-size:10px; padding:6px 8px; border-radius:6px; font-family:monospace; height:46px; resize:none;"></textarea>
+<textarea id="input-fb-json" placeholder="Firebase config 객체 {...} 전체 붙여넣기" style="width:100%; box-sizing: border-box; background:#121212; border:1px solid #4B5563; color:#FFF; font-size:10px; padding:6px 8px; border-radius:6px; font-family:monospace; height:46px; resize:none;"></textarea>
 </div>
 <div style="display:flex; gap:6px;">
 <button type="button" id="btn-save-firebase" onclick="saveFirebaseConfigFromDashboard()" style="flex:2; height:36px; background:var(--theme-accent); color:var(--theme-text-on-accent); font-weight:900; font-size:11.5px; border:none; border-radius:8px; cursor:pointer;">💾 설정 저장 & 실시간 연결</button>
@@ -2239,19 +2248,23 @@ monthlyData[weekNum].count++;
 }
 }
 });
+
+// ⚠️ 수정됨: 주간 차트 렌더링 시 레이아웃 깨짐(Blowout) 방지 로직 보완
 const weeklyChart = document.getElementById('weekly-chart');
 if (weeklyChart) {
-document.querySelectorAll('#weekly-target-info, #weekly-bars-wrapper').forEach(el=>el.remove());
-weeklyChart.innerHTML = '';
-weeklyChart.style.display = 'block';
+const wrapper = weeklyChart.closest('.chart-wrapper');
+wrapper.querySelectorAll('#weekly-target-info').forEach(el=>el.remove());
+
+// 차트 설명 텍스트를 flex box 바깥(위쪽)에 독립적으로 배치합니다.
 const headerInfo = document.createElement('div');
 headerInfo.id = 'weekly-target-info';
 headerInfo.style.cssText = 'display:block;width:100%;font-size:10px;color:#FFC800;text-align:center;margin-bottom:8px;font-weight:800;line-height:1.3;';
 headerInfo.innerHTML = `실재 기준: 일일필요 <span style="color:#FFF;">${Math.round(dailyNeeded).toLocaleString()}원</span> (남은 ${sim.remainMoney.toLocaleString()}원 / ${sim.workDaysLeft}일)`;
-weeklyChart.appendChild(headerInfo);
-const barsWrapper = document.createElement('div');
-barsWrapper.id = 'weekly-bars-wrapper';
-barsWrapper.style.cssText = 'display:flex;justify-content:space-between;align-items:flex-end;gap:2px;width:100%;';
+wrapper.insertBefore(headerInfo, weeklyChart);
+
+weeklyChart.innerHTML = '';
+weeklyChart.style.cssText = 'display: flex; justify-content: space-between; align-items: flex-end; width: 100%; padding: 0; gap: 2px;';
+
 weeklyData.forEach((d) => {
 let finalRate = d.count > 0 ? Math.round(d.rate / d.count) : 0;
 let baseline = dailyNeeded > 1000 ? dailyNeeded : dailyBaseline25;
@@ -2262,16 +2275,20 @@ const isRestDay = d.date ? sim.restDates.includes(d.date) : false;
 if (isRestDay) { color = '#444'; }
 let text = d.rev > 0 ? `${finalRate}%` : (isRestDay ? '휴무' : '');
 let timeStr = d.total > 0 ? `${Math.floor(d.total/3600)}h` : '-';
-barsWrapper.innerHTML += `<div class="chart-col" style="flex:1;min-width:0;"> <div class="chart-time-text">${timeStr}</div> <div class="chart-bar-bg" style="position:relative;"> <div class="chart-bar-fill" style="height: ${heightPct}%; background-color: ${color};"> <span class="chart-bar-text">${text}</span> </div> </div> <span class="chart-label">${d.label}</span> </div>`;
+weeklyChart.innerHTML += `<div class="chart-col" style="flex:1;min-width:0;"> <div class="chart-time-text">${timeStr}</div> <div class="chart-bar-bg"> <div class="chart-bar-fill" style="height: ${heightPct}%; background-color: ${color};"> <span class="chart-bar-text">${text}</span> </div> </div> <span class="chart-label">${d.label}</span> </div>`;
 });
-weeklyChart.appendChild(barsWrapper);
 }
+
+// ⚠️ 수정됨: 월간 차트 렌더링 시 레이아웃 깨짐(Blowout) 방지 로직 보완
 const monthlyChart = document.getElementById('monthly-chart');
 if (monthlyChart) {
-document.querySelectorAll('#monthly-target-info, .monthly-target-info-dup').forEach(el=>el.remove());
+const wrapper = monthlyChart.closest('.chart-wrapper');
+wrapper.querySelectorAll('.monthly-target-info-dup').forEach(el=>el.remove());
+
 monthlyChart.innerHTML = '';
-monthlyChart.style.display = 'flex';
-monthlyChart.style.justifyContent = 'space-around';
+// 좁은 공간에서 패딩으로 인해 요소가 밀려나는 현상을 방지하기 위해 padding:0 적용
+monthlyChart.style.cssText = 'display: flex; justify-content: space-between; align-items: flex-end; width: 100%; padding: 0; gap: 2px;';
+
 monthlyData.slice(0, 5).forEach((d, idx) => {
 const wInfo = getWeekInfoByIdx(idx);
 if (wInfo.dayCount === 0 && idx >= 4) return;
@@ -2287,18 +2304,16 @@ heightPct = Math.min(heightPct, 130);
 let color = d.rev > 0 ? getBarColor(finalRate) : '#2A2A2A';
 let text = d.rev > 0 ? `${finalRate}%` : '';
 let timeStr = d.count > 0 ? `${Math.floor((d.total/d.count)/3600)}h` : '-';
-let labelDetail = `${d.label}<br><span style="font-size:8px;color:#888;">${wInfo.start}~${wInfo.end}일 (${cappedDays}일)</span>`;
-monthlyChart.innerHTML += `<div class="chart-col"> <div class="chart-time-text">${timeStr}</div> <div class="chart-bar-bg" style="max-width: 40px; height: 80px; position:relative;"> <div class="chart-bar-fill" style="height: ${heightPct}%; background-color: ${color};"> <span class="chart-bar-text" style="font-size:11px;">${text}</span> </div> </div> <span class="chart-label" style="margin-top: 4px; font-size:10px; line-height:1.1;">${labelDetail}</span> </div>`;
+let labelDetail = `${d.label}<br><span style="font-size:8.5px;color:#888;">${wInfo.start}~${wInfo.end}일</span>`;
+monthlyChart.innerHTML += `<div class="chart-col" style="flex:1;min-width:0;"> <div class="chart-time-text">${timeStr}</div> <div class="chart-bar-bg" style="max-width:36px;"> <div class="chart-bar-fill" style="height: ${heightPct}%; background-color: ${color};"> <span class="chart-bar-text" style="font-size:10.5px;">${text}</span> </div> </div> <span class="chart-label" style="margin-top: 4px;">${labelDetail}</span> </div>`;
 });
-let monthlyInfo = document.getElementById('monthly-target-info');
-if (!monthlyInfo) {
-monthlyInfo = document.createElement('div');
-monthlyInfo.id = 'monthly-target-info';
+
+// 차트 설명 텍스트를 flex box 바깥(아래쪽)에 독립적으로 배치합니다.
+const monthlyInfo = document.createElement('div');
 monthlyInfo.className = 'monthly-target-info-dup';
-monthlyChart.parentNode.appendChild(monthlyInfo);
-}
-monthlyInfo.style.cssText = 'font-size:9px;color:#A3A3A3;text-align:center;margin-top:8px;display:block;width:100%;';
+monthlyInfo.style.cssText = 'font-size:9px;color:#A3A3A3;text-align:center;margin-top:8px;display:block;width:100%; word-break: keep-all; line-height:1.3;';
 monthlyInfo.innerHTML = `기준: 일일필요 ${Math.round(dailyNeeded).toLocaleString()}원 × 근무일 (기본 5일, 첫/막주는 일수만큼) / 남은 ${sim.remainMoney.toLocaleString()}원`;
+wrapper.appendChild(monthlyInfo);
 }
 renderGoldenTimeInsights();
 }
@@ -2396,7 +2411,6 @@ allTitles[0].innerText = `목표 ${TARGET.toLocaleString()}원 달성률`;
 }
 const labelEl = document.querySelector('.revenue-box .label');
 if (labelEl) {
-// ⚠️ 수정됨: JS 로직에서도 <div>를 <span>으로 원복하여 한 줄을 기본으로 유지
 labelEl.innerHTML = `💰 오늘 실매출 <span style="font-size:11px; color:#FFC800; font-weight:800;">(일일필요 ${TARGET.toLocaleString()}원)</span>`;
 }
 if(valTimeEl) {
