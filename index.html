@@ -150,12 +150,12 @@ body.theme-day .fp-btn-del{ background:#F1F5F9 !important; color:#64748B !import
 const EMBEDDED_DEFAULTS = {
 daily_rev: 0,
 sim_data: {target:4000000, current:0, restDates:[]},
-version: 'v8.10.0'
+version: 'v8.10.1'
 };
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>sudataxi-k v8.10.0</title>
+<title>sudataxi-k v8.10.1</title>
 <link rel="manifest" href="data:application/json;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwMDAwMDAiLCAiZGVzY3JpcHRpb24iOiAi7JWI7JaRL+q1sO2PrC/snZjsmZUv6rO87LKcIOy9nC/rspTsuZnquIgg7KeA64+EIC0g7IOB7JeF7KeA6rWsIOykkeyLrCB2OC45LjkwIiwgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsICJpY29ucyI6IFt7InB1cnBvc2UiOiAiYW55IG1hc2thYmxlIiwgInNpemVzIjogIjUxMng1MTIiLCAic3JjIjogImh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzM3NzQvMzc3NDA4My5wbmciLCAidHlwZSI6ICJpbWFnZS9wbmcifV0sICJuYW1lIjogIuyImOuLpO2DneyLnEsgdjguOS45MCIsICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsICJzaG9ydF9uYW1lIjogIuyImOuLpO2DneyLnEsiLCAic3RhcnRfdXJsIjogIi4vaW5kZXguaHRtbD92PTguOS45MCIsICJ0aGVtZV9jb2xvciI6ICIjRkZDODAwIiwgInZlcnNpb24iOiAiOC45LjkwIn0=">
 <meta name="theme-color" content="#FFC800">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -419,6 +419,7 @@ body.theme-day .session-item { background: #FFFFFF; }
 .penalty-modal-btn { flex: 1; padding: 8px; border-radius: 8px; font-weight: 800; font-size: 12px; border: none; cursor: pointer; }
 .penalty-modal-btn.cancel { background: #2A2A2A; color: #8A8A8A; }
 .penalty-modal-btn.submit { background: #EF4444; color: #FFF; }
+
 /* 5분할 하단바 스타일 */
 .bottom-bar#bottom-bar-v7961 {
 position: fixed !important;
@@ -453,15 +454,19 @@ font-size: 13px !important;
 line-height: 1 !important;
 border: 1px solid rgba(0,0,0,0.2) !important;
 cursor: pointer !important;
+transition: all 0.2s ease;
 }
+
+#bottom-bar-v7961 button#btn-bottom-board.active-board { border: 4px solid #000 !important; box-shadow: 0 0 0 3px #fff, 0 0 0 6px #000 !important; z-index: 10 !important; transform: scale(1.02); }
+#bottom-bar-v7961 button#btn-bottom-alight.active-alight { border: 4px solid #fff !important; box-shadow: 0 0 0 3px #000, 0 0 0 6px #fff !important; z-index: 10 !important; transform: scale(1.02); }
+#bottom-bar-v7961 button#btn-bottom-restroom-search.active-rest { border: 4px solid #fff !important; box-shadow: 0 0 0 3px #000, 0 0 0 6px #3B82F6 !important; z-index: 10 !important; transform: scale(1.02); }
+
 .bottom-bar .board-btn { background: #FFC800 !important; color: #000000 !important; }
 .bottom-bar .alight-btn { background: #FF6B00 !important; color: #FFFFFF !important; }
 .bottom-bar .restroom-btn { background: #3B82F6 !important; color: #FFFFFF !important; }
 .bottom-bar .search-btn { background: #22C55E !important; color: #FFFFFF !important; }
 .bottom-bar .clock-btn { background: #1E1E1E !important; color: #FFFFFF !important; }
-.bottom-bar .bb-btn.active-board { border: 4px solid #000 !important; box-shadow: 0 0 0 3px #fff, 0 0 0 6px #000 !important; }
-.bottom-bar .bb-btn.active-alight { border: 4px solid #fff !important; box-shadow: 0 0 0 3px #000, 0 0 0 6px #fff !important; }
-.bottom-bar .bb-btn.active-rest { border: 4px solid #fff !important; box-shadow: 0 0 0 3px #000, 0 0 0 6px #3B82F6 !important; }
+
 .bottom-status-below { position: fixed; left: 0; right: 0; bottom: 0; z-index: 9998; text-align: center; pointer-events: none; padding: 2px 0 4px 0; }
 .bottom-status-below span { display: inline-block; background: rgba(0,0,0,0.85); color: #FFD600; font-size: 11px; font-weight: 900; padding: 2px 10px; border-radius: 10px; border: 1px solid rgba(255,214,0,0.35); }
 body.theme-day .bottom-bar#bottom-bar-v7961 { background: #FFFFFF !important; border: 2px solid #FFC800 !important; }
@@ -539,7 +544,7 @@ display:flex !important;flex-direction:column;align-items:flex-start;justify-con
 <body class="mode-1 theme-day">
 <div class="sticky-top-area" style="padding-bottom: 6px; box-shadow: 0 -20px 0 20px var(--main-bg);">
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 2px;">
-<div class="header" id="app-header-title" style="margin-bottom: 0; flex: 1;">📅 2026.11.3(화) <span class="build-ver-tag">v8.10.0</span> <span class="weekday-badge">🟢 평일</span></div>
+<div class="header" id="app-header-title" style="margin-bottom: 0; flex: 1;">📅 2026.11.3(화) <span class="build-ver-tag">v8.10.1</span> <span class="weekday-badge">🟢 평일</span></div>
 <button id="btn-theme-toggle" onclick="toggleTheme()" class="btn-idle" style="border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 900; cursor: pointer; white-space: nowrap; flex-shrink: 0; border: 1px solid var(--theme-border); color: var(--theme-accent);">🌙 야간</button>
 </div>
 <button class="big-btn" id="btn-search" style="margin-bottom: 2px; display: none;">
@@ -973,7 +978,7 @@ A25 안드로이드폰과 실시간 콜수요지도를 동기화합니다. 콘�
 <div id="bottom-status-below" class="bottom-status-below"><span id="bottom-status-below-text">⏸️ 대기중</span></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const BUILD_VERSION = "v8.10.0";
+const BUILD_VERSION = "v8.10.1";
 try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){};
 const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
 let currentMode = 1;
@@ -1646,7 +1651,7 @@ bottomText.textContent = `${drivingState.isBreak ? '☕ 휴식중' : (drivingSta
 }
 
 // ----------------------------------------------------
-// ⚠️ 수정(보완)됨: CSS 클래스(.active-board, .active-alight, .active-rest) 토글 로직 추가
+// ⚠️ 수정(보완)됨: CSS 클래스(.active-board, .active-alight, .active-rest) 토글 로직 
 // ----------------------------------------------------
 function updateDrivingUI() {
 const driveBtn = document.getElementById('btn-drive-toggle');
