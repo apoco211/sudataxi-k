@@ -1,5 +1,26 @@
 <html lang="ko"><head><style>
 @font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style><style>
+@font-face {
 font-family: "Optimistic";
 font-style: normal;
 font-weight: 400 600;
@@ -150,13 +171,13 @@ body.theme-day .fp-btn-del{ background:#F1F5F9 !important; color:#64748B !import
 const EMBEDDED_DEFAULTS = {
 daily_rev: 0,
 sim_data: {target:4000000, current:0, restDates:[]},
-version: 'v8.10.1'
+version: 'v8.10.2'
 };
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>sudataxi-k v8.10.1</title>
-<link rel="manifest" href="data:application/json;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwMDAwMDAiLCAiZGVzY3JpcHRpb24iOiAi7JWI7JaRL+q1sO2PrC/snZjsmZUv6rO87LKcIOy9nC/rspTsuZnquIgg7KeA64+EIC0g7IOB7JeF7KeA6rWsIOykkeyLrCB2OC45LjkwIiwgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsICJpY29ucyI6IFt7InB1cnBvc2UiOiAiYW55IG1hc2thYmxlIiwgInNpemVzIjogIjUxMng1MTIiLCAic3JjIjogImh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzM3NzQvMzc3NDA4My5wbmciLCAidHlwZSI6ICJpbWFnZS9wbmcifV0sICJuYW1lIjogIuyImOuLpO2DneyLnEsgdjguOS45MCIsICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsICJzaG9ydF9uYW1lIjogIuyImOuLpO2DneyLnEsiLCAic3RhcnRfdXJsIjogIi4vaW5kZXguaHRtbD92PTguOS45MCIsICJ0aGVtZV9jb2xvciI6ICIjRkZDODAwIiwgInZlcnNpb24iOiAiOC45LjkwIn0=">
+<title>sudataxi-k v8.10.2</title>
+<link rel="manifest" href="data:application/json;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwMDAwMDAiLCAiZGVzY3JpcHRpb24iOiAi7JWI7JaRL+q1sO2PrC/snZjsmZUv6rO87LKcIOy9nC/rspTsuZnquIgg7KeA64+EIC0g7IOB7JeF7KeA6rWsIOykkeyLrCB2OC45LjkwIiwgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsICJpY29ucyI6IFt7InB1cnBvc2UiOiAiYW55IG1hc2thYmxlIiwgInNpemVzIjogIjUxMng1MTIiLCAic3JjIjogImh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzM3NzQvMzc3NDA4My5wbmciLCAidHlwZSI6ICJpbWFnZS9wbmcifV0sICJuYW1lIjogIuyImOuLpO2DneyLnEsgdjguMTAuMiIsICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsICJzaG9ydF9uYW1lIjogIuyImOuLpO2DneyLnEsiLCAic3RhcnRfdXJsIjogIi4vaW5kZXguaHRtbD92PTguMTAuMiIsICJ0aGVtZV9jb2xvciI6ICIjRkZDODAwIiwgInZlcnNpb24iOiAiOC4xMC4yIn0=">
 <meta name="theme-color" content="#FFC800">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -553,14 +574,14 @@ display:flex !important;flex-direction:column;align-items:flex-start;justify-con
 <body class="mode-1 theme-day">
 <div class="sticky-top-area" style="padding-bottom: 6px; box-shadow: 0 -20px 0 20px var(--main-bg);">
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 2px;">
-<div class="header" id="app-header-title" style="margin-bottom: 0; flex: 1;">📅 2026.11.3(화) <span class="build-ver-tag">v8.10.1</span> <span class="weekday-badge">🟢 평일</span></div>
+<div class="header" id="app-header-title" style="margin-bottom: 0; flex: 1;">📅 2026.11.3(화) <span class="build-ver-tag">v8.10.2</span> <span class="weekday-badge">🟢 평일</span></div>
 <button id="btn-theme-toggle" onclick="toggleTheme()" class="btn-idle" style="border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 900; cursor: pointer; white-space: nowrap; flex-shrink: 0; border: 1px solid var(--theme-border); color: var(--theme-accent);">🌙 야간</button>
 </div>
 <button class="big-btn" id="btn-search" style="margin-bottom: 2px; display: none;">
 <span>📍 주변 콜/동선 탐색 (AI 엔진)</span>
 </button>
 </div>
-<div class="loc-bar" id="loc-bar" style="margin-top: 6px; display: flex;">
+<div class="loc-bar" id="loc-bar" style="margin-top: 6px; display: none;">
 <span id="loc-text">📍 실시간 GPS 위치 수신 대기 중...</span>
 <button class="refresh-btn" id="btn-refresh">⟳</button>
 </div>
@@ -611,7 +632,7 @@ display:flex !important;flex-direction:column;align-items:flex-start;justify-con
 <div id="tab1-extras" style="display: none;">
 <div class="backup-section" style="margin-bottom: 12px; border-color: var(--theme-accent);">
 <div class="backup-header">
-<span class="backup-title" style="font-size:12px;">📊 공공데이터 & 카카오 콜지도 AI 상태</span>
+<span class="backup-title" style="font-size:12px;">📊 공공데이터 &amp; 카카오 콜지도 AI 상태</span>
 </div>
 <div style="font-size: 11px; color: var(--stat-label); line-height: 1.6; display: flex; flex-direction: column; gap: 2px;">
 <span id="status-firebase">📡 A25 카카오 콜지도: 대기 중</span>
@@ -623,7 +644,7 @@ display:flex !important;flex-direction:column;align-items:flex-start;justify-con
 </div>
 <div class="backup-section">
 <div class="backup-header">
-<span class="backup-title" style="font-size:12px;">📊 데이터 관리 & 백업</span>
+<span class="backup-title" style="font-size:12px;">📊 데이터 관리 &amp; 백업</span>
 <span class="backup-count" id="log-count-text">저장 기록: 0개</span>
 </div>
 <div class="backup-btn-group">
@@ -695,7 +716,7 @@ display:flex !important;flex-direction:column;align-items:flex-start;justify-con
 <div class="penalty-modal-btns"><button class="penalty-modal-btn cancel" type="button" onclick="closePenaltyModal()">취소</button><button class="penalty-modal-btn submit" type="button" onclick="addPenaltyFromModal()">입력</button></div>
 </div>
 </div>
-<div id="tab4-extras" style="display: block;">
+<div id="tab4-extras" style="display: none;">
 <div class="backup-section" style="margin-top: 0;">
 <div class="backup-title" style="margin-bottom: 10px;">🚘 실시간 운행 제어</div>
 <div style="display: flex; gap: 6px; margin-bottom: 8px;">
@@ -781,7 +802,7 @@ display:flex !important;flex-direction:column;align-items:flex-start;justify-con
 <!-- 오늘 실매출 입력 UI -->
 <div class="revenue-box">
 <div class="top-row">
-<div class="label">💰 오늘 실매출 <span style="font-size:11px; color:#FFC800; font-weight:800;">(일일필요 137,931원)</span></div>
+<div class="label">💰 오늘 실매출 <span style="font-size:11px; color:#FFC800; font-weight:800;">(일일필요 148,148원)</span></div>
 <div class="input-group">
 <button class="btn-mic" id="btn-mic" title="음성 입력" data-mic-init="1">🎤</button>
 <button class="btn-mic" id="btn-sheet-pull" title="오늘 실매출" onclick="promptFetchDailyRev()" style="background:#0F766E;">☁️</button>
@@ -794,12 +815,12 @@ display:flex !important;flex-direction:column;align-items:flex-start;justify-con
 </div>
 <div class="rev-stats-grid">
 <div class="rev-stat-item">
-<span class="rev-stat-title">목표 137,931원 달성률</span>
+<span class="rev-stat-title">목표 148,148원 달성률</span>
 <span class="rev-stat-value" id="val-pct">0.0%</span>
 </div>
 <div class="rev-stat-item" style="text-align: right;">
 <span class="rev-stat-title">남은 목표액</span>
-<span class="rev-stat-value" id="val-remain">137,931 원</span>
+<span class="rev-stat-value" id="val-remain">148,148 원</span>
 </div>
 </div>
 <div class="rev-bottom-row">
@@ -807,7 +828,7 @@ display:flex !important;flex-direction:column;align-items:flex-start;justify-con
 <span class="rev-bottom-main">🕒 추가 운행 필요</span>
 <span class="rev-bottom-sub">(시간당 25,000원 기준)</span>
 </div>
-<div class="rev-bottom-val" id="val-time" style="color: rgb(74, 222, 128);">약 5시간 31분</div>
+<div class="rev-bottom-val" id="val-time" style="color: rgb(74, 222, 128);">약 5시간 56분</div>
 </div>
 </div>
 </div>
@@ -818,7 +839,7 @@ display:flex !important;flex-direction:column;align-items:flex-start;justify-con
 <div style="font-size: 10px; color: var(--stat-label); text-align: center;">상단: 운행시간 / 막대: 예상매출 / 숫자: 탑승률(KPI)</div>
 <div class="chart-wrapper" style="width: 100%; overflow: hidden;">
 <!-- JS에서 차트 내부가 아닌 겉에 안내 문구를 추가하도록 수정됨 -->
-<div class="chart-container" id="weekly-chart"></div>
+<div id="weekly-target-info" style="display: block; width: 100%; font-size: 10px; color: rgb(255, 200, 0); text-align: center; margin-bottom: 8px; font-weight: 800; line-height: 1.3;">실재 기준: 일일필요 <span style="color:#FFF;">148,148원</span> (남은 4,000,000원 / 27일)</div><div class="chart-container" id="weekly-chart" style="display: flex; justify-content: space-between; align-items: flex-end; width: 100%; padding: 0px; gap: 2px;"><div class="chart-col" style="flex:1;min-width:0;"> <div class="chart-time-text">-</div> <div class="chart-bar-bg"> <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;"> <span class="chart-bar-text"></span> </div> </div> <span class="chart-label">월</span> </div><div class="chart-col" style="flex:1;min-width:0;"> <div class="chart-time-text">-</div> <div class="chart-bar-bg"> <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;"> <span class="chart-bar-text"></span> </div> </div> <span class="chart-label">화</span> </div><div class="chart-col" style="flex:1;min-width:0;"> <div class="chart-time-text">-</div> <div class="chart-bar-bg"> <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;"> <span class="chart-bar-text"></span> </div> </div> <span class="chart-label">수</span> </div><div class="chart-col" style="flex:1;min-width:0;"> <div class="chart-time-text">-</div> <div class="chart-bar-bg"> <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;"> <span class="chart-bar-text"></span> </div> </div> <span class="chart-label">목</span> </div><div class="chart-col" style="flex:1;min-width:0;"> <div class="chart-time-text">-</div> <div class="chart-bar-bg"> <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;"> <span class="chart-bar-text"></span> </div> </div> <span class="chart-label">금</span> </div><div class="chart-col" style="flex:1;min-width:0;"> <div class="chart-time-text">-</div> <div class="chart-bar-bg"> <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;"> <span class="chart-bar-text"></span> </div> </div> <span class="chart-label">토</span> </div><div class="chart-col" style="flex:1;min-width:0;"> <div class="chart-time-text">-</div> <div class="chart-bar-bg"> <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;"> <span class="chart-bar-text"></span> </div> </div> <span class="chart-label">일</span> </div></div>
 </div>
 </div>
 
@@ -827,8 +848,8 @@ display:flex !important;flex-direction:column;align-items:flex-start;justify-con
 <div class="backup-title" style="margin-bottom: 4px;">📅 월간 퍼포먼스 (이번 달)</div>
 <div style="font-size: 10px; color: var(--stat-label); text-align: center;">주차별 평균 탑승률 및 매출 추이</div>
 <div class="chart-wrapper" style="width: 100%; overflow: hidden;">
-<div class="chart-container" id="monthly-chart"></div>
-</div>
+<div class="chart-container" id="monthly-chart" style="display: flex; justify-content: space-between; align-items: flex-end; width: 100%; padding: 0px; gap: 2px;"><div class="chart-col" style="flex:1;min-width:0;"> <div class="chart-time-text">-</div> <div class="chart-bar-bg" style="max-width:36px;"> <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;"> <span class="chart-bar-text" style="font-size:10.5px;"></span> </div> </div> <span class="chart-label" style="margin-top: 4px;">1주차<br><span style="font-size:8.5px;color:#888;">1~1일</span></span> </div><div class="chart-col" style="flex:1;min-width:0;"> <div class="chart-time-text">-</div> <div class="chart-bar-bg" style="max-width:36px;"> <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;"> <span class="chart-bar-text" style="font-size:10.5px;"></span> </div> </div> <span class="chart-label" style="margin-top: 4px;">2주차<br><span style="font-size:8.5px;color:#888;">2~8일</span></span> </div><div class="chart-col" style="flex:1;min-width:0;"> <div class="chart-time-text">-</div> <div class="chart-bar-bg" style="max-width:36px;"> <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;"> <span class="chart-bar-text" style="font-size:10.5px;"></span> </div> </div> <span class="chart-label" style="margin-top: 4px;">3주차<br><span style="font-size:8.5px;color:#888;">9~15일</span></span> </div><div class="chart-col" style="flex:1;min-width:0;"> <div class="chart-time-text">-</div> <div class="chart-bar-bg" style="max-width:36px;"> <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;"> <span class="chart-bar-text" style="font-size:10.5px;"></span> </div> </div> <span class="chart-label" style="margin-top: 4px;">4주차<br><span style="font-size:8.5px;color:#888;">16~22일</span></span> </div><div class="chart-col" style="flex:1;min-width:0;"> <div class="chart-time-text">-</div> <div class="chart-bar-bg" style="max-width:36px;"> <div class="chart-bar-fill" style="height: 0%; background-color: #2A2A2A;"> <span class="chart-bar-text" style="font-size:10.5px;"></span> </div> </div> <span class="chart-label" style="margin-top: 4px;">5주차<br><span style="font-size:8.5px;color:#888;">23~29일</span></span> </div></div>
+<div class="monthly-target-info-dup" style="font-size: 9px; color: rgb(163, 163, 163); text-align: center; margin-top: 8px; display: block; width: 100%; word-break: keep-all; line-height: 1.3;">기준: 일일필요 148,148원 × 근무일 (기본 5일, 첫/막주는 일수만큼) / 남은 4,000,000원</div></div>
 </div>
 
 <!-- 골든타임 분석 차트 -->
@@ -841,7 +862,7 @@ display:flex !important;flex-direction:column;align-items:flex-start;justify-con
 </div>
 </div>
 <div style="font-size: 10px; color: var(--stat-label); margin-bottom: 8px; text-align: center;" id="work-time-range-label">자정 ~ 익일 자정 (2시간 단위 누적 탑승) - 기준 0시</div>
-<div id="golden-time-chart" class="golden-chart-container"></div>
+<div id="golden-time-chart" class="golden-chart-container"><div style="width:100%; font-size:11px; color:var(--stat-label); text-align:center; padding: 40px 0;">탑승 기록이 없습니다.</div></div>
 </div>
 <!-- 월간 목표 시뮬레이터 -->
 <div class="backup-section" style="border-color: rgba(255, 200, 0, 0.4);">
@@ -860,14 +881,14 @@ display:flex !important;flex-direction:column;align-items:flex-start;justify-con
 <button type="button" onclick="promptFetchMonthlyCurrent()" title="셀 직접 지정" style="height:36px; min-width:36px; background:#334155; color:#fff; border:0; border-radius:8px; font-weight:900; font-size:12px; cursor:pointer;">⚙️</button>
 </div>
 </div>
-<button class="btn-rest-day" id="btn-open-calendar" onclick="window.openCalendarModal && window.openCalendarModal();">
+<button class="btn-rest-day" id="btn-open-calendar" onclick="window.openCalendarModal &amp;&amp; window.openCalendarModal();">
 <span>🗓️ 남은 휴무일 (말일까지)</span>
 <span id="rest-day-count-badge">0일 선택됨</span>
 </button>
 <div class="calc-result-box">
 <div class="calc-result-row">
 <span class="calc-result-label">남은 실제 근무일</span>
-<span class="calc-result-val"><span id="res-sim-days">29</span> 일</span>
+<span class="calc-result-val"><span id="res-sim-days">27</span> 일</span>
 </div>
 <div class="calc-result-row">
 <span class="calc-result-label">남은 목표 금액</span>
@@ -876,11 +897,11 @@ display:flex !important;flex-direction:column;align-items:flex-start;justify-con
 <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 10px 0;"></div>
 <div class="calc-result-row">
 <span class="calc-result-label" style="color: #FFF;">📌 일일 목표 매출</span>
-<span class="calc-result-val highlight"><span id="res-sim-daily-target">137,931</span> 원</span>
+<span class="calc-result-val highlight"><span id="res-sim-daily-target">148,148</span> 원</span>
 </div>
 <div class="calc-result-row" style="margin-bottom: 0;">
 <span class="calc-result-label" style="font-size: 10px;">🕒 필요 운행 시간 (시간당 2.5만)</span>
-<span class="calc-result-val green"><span id="res-sim-daily-hours" style="color: rgb(74, 222, 128);">-</span></span>
+<span class="calc-result-val green"><span id="res-sim-daily-hours" style="color: rgb(74, 222, 128);">약 5시간 56분</span></span>
 </div>
 </div>
 </div>
@@ -903,18 +924,18 @@ A25 안드로이드폰과 실시간 콜수요지도를 동기화합니다. 콘�
 <textarea id="input-fb-json" placeholder="Firebase config 객체 {...} 전체 붙여넣기" style="width:100%; box-sizing: border-box; background:#121212; border:1px solid #4B5563; color:#FFF; font-size:10px; padding:6px 8px; border-radius:6px; font-family:monospace; height:46px; resize:none;"></textarea>
 </div>
 <div style="display:flex; gap:6px;">
-<button type="button" id="btn-save-firebase" onclick="saveFirebaseConfigFromDashboard()" style="flex:2; height:36px; background:var(--theme-accent); color:var(--theme-text-on-accent); font-weight:900; font-size:11.5px; border:none; border-radius:8px; cursor:pointer;">💾 설정 저장 & 실시간 연결</button>
+<button type="button" id="btn-save-firebase" onclick="saveFirebaseConfigFromDashboard()" style="flex:2; height:36px; background:var(--theme-accent); color:var(--theme-text-on-accent); font-weight:900; font-size:11.5px; border:none; border-radius:8px; cursor:pointer;">💾 설정 저장 &amp; 실시간 연결</button>
 <button type="button" onclick="window.testInjectDemandHotspots()" style="flex:1.2; height:36px; background:#1E293B; color:#5EEAD4; border:1px solid #2DD4BF; font-weight:900; font-size:11px; border-radius:8px; cursor:pointer;">🧪 테스트 10곳</button>
 </div>
 <div id="fb-last-sync-time" style="font-size:9.5px; color:var(--stat-label); margin-top:6px; text-align:right;">마지막 수신: 대기 중</div>
 </div>
 </div>
 <!-- 탭 5 Extras: Taxi DJ -->
-<div id="tab5-extras" style="display: none;">
+<div id="tab5-extras" style="display: block;">
 <div id="tdj-root" data-theme="light" class="light">
 <div class="tdj-header"><b>🎧 TAXI DJ</b><div class="tdj-hbtns"><button class="tdj-iconbtn" id="tdj-gear">⚙︎</button></div></div>
-<div id="tdj-tabs"><button class="tdj-tab on" data-tab="보관함">보관함</button><button class="tdj-tab" data-tab="YT뮤직">YT뮤직</button><button class="tdj-tab" data-tab="롱믹스">롱믹스</button><button class="tdj-tab" data-tab="히스토리">히스토리</button></div>
-<main id="tdj-main"></main>
+<div id="tdj-tabs"><button class="tdj-tab" data-tab="보관함">보관함</button><button class="tdj-tab" data-tab="YT뮤직">YT뮤직</button><button class="tdj-tab on" data-tab="롱믹스">롱믹스</button><button class="tdj-tab" data-tab="히스토리">히스토리</button></div>
+<main id="tdj-main"><div class="tdj-grid2"><button class="tdj-preset" data-long="1"><span style="font-size:28px">🔥</span><div><b>20대 팝송</b><div style="font-size:11px;color:var(--tdj-dim)">롱믹스</div></div></button><button class="tdj-preset" data-long="2"><span style="font-size:28px">📻</span><div><b>4050 가요</b><div style="font-size:11px;color:var(--tdj-dim)">롱믹스</div></div></button><button class="tdj-preset" data-long="3"><span style="font-size:28px">🎤</span><div><b>트로트</b><div style="font-size:11px;color:var(--tdj-dim)">롱믹스</div></div></button><button class="tdj-preset" data-long="4"><span style="font-size:28px">🌧️</span><div><b>비오는날</b><div style="font-size:11px;color:var(--tdj-dim)">롱믹스</div></div></button><button class="tdj-preset" data-long="5"><span style="font-size:28px">☕</span><div><b>밤 재즈</b><div style="font-size:11px;color:var(--tdj-dim)">롱믹스</div></div></button><button class="tdj-preset" data-long="6"><span style="font-size:28px">🚕</span><div><b>신나는</b><div style="font-size:11px;color:var(--tdj-dim)">롱믹스</div></div></button></div></main>
 <div id="tdj-player" style="display:none"><div style="flex:1;min-width:0"><div style="font-size:11px;color:var(--tdj-dim)">재생 중</div><div id="tdj-pname" style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600"></div></div><audio id="tdj-audio" controls="" style="height:32px;width:200px"></audio><button id="tdj-pclose" style="width:32px;height:32px;color:var(--tdj-dim)">✕</button></div>
 <div id="tdj-settings"><div class="tdj-bg"></div><div class="tdj-box">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><b style="font-size:16px">설정 - 프리셋 편집</b><button id="tdj-sclose" style="width:32px;height:32px;border-radius:50%;background:var(--tdj-bg);color:var(--tdj-dim);border:1px solid var(--tdj-card-border)">✕</button></div>
@@ -938,10 +959,10 @@ A25 안드로이드폰과 실시간 콜수요지도를 동기화합니다. 콘�
 <!-- 하단 모드 독 -->
 <div class="mode-container bottom-mode-dock" id="bottom-mode-dock">
 <button class="mode-pill" id="btn-mode1">⚡ 추천/콜찾기</button>
-<button class="mode-pill active" id="btn-mode2">🧠 운행 전략</button>
+<button class="mode-pill" id="btn-mode2">🧠 운행 전략</button>
 <button class="mode-pill" id="btn-mode3">📊 콜/범칙금 지도</button>
 <button class="mode-pill" id="btn-mode4">🚘 대시보드</button>
-<button class="mode-pill" id="btn-mode5">🎧 Taxi DJ</button>
+<button class="mode-pill active" id="btn-mode5">🎧 Taxi DJ</button>
 </div>
 <!-- 하단 5분할 액션 바 -->
 <div class="bottom-bar" id="bottom-bar-v7961">
@@ -977,21 +998,21 @@ A25 안드로이드폰과 실시간 콜수요지도를 동기화합니다. 콘�
 <div class="modal-content">
 <div class="modal-header">
 <span class="modal-title">이번 달 휴무일 체크</span>
-<button class="btn-apply" id="btn-apply-calendar" onclick="window.closeCalendarModal && window.closeCalendarModal();" style="font-size:12px; padding: 6px 12px;">적용 및 닫기</button>
+<button class="btn-apply" id="btn-apply-calendar" onclick="window.closeCalendarModal &amp;&amp; window.closeCalendarModal();" style="font-size:12px; padding: 6px 12px;">적용 및 닫기</button>
 </div>
 <div class="calendar-wrapper">
 <div style="font-size: 11px; color: #A3A3A3; margin-bottom: 12px; text-align: center;">오늘 이후 쉴 날짜를 모두 터치하세요.</div>
 <div class="calendar-weekdays">
 <span style="color:#EF4444;">일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span style="color:#3B82F6;">토</span>
 </div>
-<div class="calendar-grid" id="calendar-grid"></div>
+<div class="calendar-grid" id="calendar-grid"><div class="cal-day past">1</div><div class="cal-day past">2</div><div class="cal-day past">3</div><div class="cal-day">4</div><div class="cal-day">5</div><div class="cal-day">6</div><div class="cal-day">7</div><div class="cal-day">8</div><div class="cal-day">9</div><div class="cal-day">10</div><div class="cal-day">11</div><div class="cal-day">12</div><div class="cal-day">13</div><div class="cal-day">14</div><div class="cal-day">15</div><div class="cal-day">16</div><div class="cal-day">17</div><div class="cal-day">18</div><div class="cal-day">19</div><div class="cal-day">20</div><div class="cal-day">21</div><div class="cal-day">22</div><div class="cal-day">23</div><div class="cal-day">24</div><div class="cal-day">25</div><div class="cal-day">26</div><div class="cal-day">27</div><div class="cal-day">28</div><div class="cal-day">29</div><div class="cal-day">30</div></div>
 </div>
 </div>
 </div>
 <div id="bottom-status-below" class="bottom-status-below"><span id="bottom-status-below-text">⏸️ 대기중</span></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const BUILD_VERSION = "v8.10.1";
+const BUILD_VERSION = "v8.10.2";
 try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){};
 const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
 let currentMode = 1;
@@ -1367,6 +1388,7 @@ let currentThemeMode = localStorage.getItem('sudataxi_theme_mode') || 'night';
 function applyThemeMode(theme) {
 currentThemeMode = theme;
 localStorage.setItem('sudataxi_theme_mode', theme);
+try { if (typeof tdj_applyThemeFromMain === 'function') tdj_applyThemeFromMain(theme); } catch(e){}
 const btn = document.getElementById('btn-theme-toggle');
 if (theme === 'day') {
 document.body.classList.add('theme-day');
@@ -2526,11 +2548,545 @@ callMapViewLeaflet.setView([centerPos.lat, centerPos.lng], 13);
 callMapViewLeaflet.invalidateSize();
 }
 }
+
+// ==========================================
+// [v8.10.2 FIX] 자주가는 곳 지속성 & null 파싱 방어 + 렌더링 중단 방지
+// ==========================================
+const FREQUENT_KEY = 'sudataxi_frequent_presets';
+let frequentPresets = [];
+let selectedFrequentSearchResult = null;
+
+function safeParseFrequentArray(raw) {
+  try {
+    if (!raw || raw === 'null' || raw === 'undefined') return [];
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed.filter(x=>x && typeof x==='object');
+    if (parsed === null) return [];
+    return [];
+  } catch(e) {
+    console.warn('[frequent] parse failed', e);
+    return [];
+  }
+}
+
+function loadFrequentPresets() {
+  try {
+    const raw = localStorage.getItem(FREQUENT_KEY) || (typeof getFromAnyStorage==='function' ? getFromAnyStorage(FREQUENT_KEY) : null);
+    frequentPresets = safeParseFrequentArray(raw);
+  } catch(e) {
+    frequentPresets = [];
+  }
+  if (!Array.isArray(frequentPresets)) frequentPresets = [];
+}
+
+function saveFrequentPresets() {
+  try {
+    if (!Array.isArray(frequentPresets)) frequentPresets = [];
+    const str = JSON.stringify(frequentPresets);
+    localStorage.setItem(FREQUENT_KEY, str);
+    if (typeof saveToAllStorages==='function') saveToAllStorages(FREQUENT_KEY, str);
+  } catch(e) {
+    console.warn('[frequent] save failed', e);
+  }
+  renderFrequentPresets();
+}
+
+function renderFrequentPresets() {
+  try {
+    const listEl = document.getElementById('frequent-presets-list');
+    const emptyEl = document.getElementById('frequent-presets-empty');
+    if (!listEl) return;
+    if (!Array.isArray(frequentPresets)) frequentPresets = [];
+    listEl.innerHTML = '';
+    if (frequentPresets.length === 0) {
+      if (emptyEl) emptyEl.style.display = 'block';
+      return;
+    }
+    if (emptyEl) emptyEl.style.display = 'none';
+    frequentPresets.forEach((fp) => {
+      if (!fp || typeof fp !== 'object') return;
+      const name = fp.name || '이름없음';
+      const addr = fp.addr || fp.keyword || '';
+      let distText = '';
+      try {
+        if (typeof currentPos !== 'undefined' && currentPos && fp.lat && fp.lng && typeof getStraightDistanceKm === 'function') {
+          const d = getStraightDistanceKm(currentPos.lat, currentPos.lng, fp.lat, fp.lng);
+          if (!isNaN(d)) distText = `${d.toFixed(1)}km`;
+        }
+      } catch(e){}
+      const card = document.createElement('div');
+      card.className = 'frequent-preset-card';
+      card.innerHTML = `<div class="fp-left"><div class="fp-name"><span class="fp-name-text">${name}</span>${distText ? `<span class="fp-badge">${distText}</span>` : ''}</div><div class="fp-addr">${addr}</div>${fp.meta ? `<div class="fp-meta">${fp.meta}</div>` : ''}</div><div class="fp-actions"><button class="fp-btn fp-btn-navi" data-fp-navi="${fp.id}">내비</button><button class="fp-btn fp-btn-del" data-fp-del="${fp.id}">삭제</button></div>`;
+      listEl.appendChild(card);
+    });
+    listEl.querySelectorAll('[data-fp-navi]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const id = btn.getAttribute('data-fp-navi');
+        const fp = frequentPresets.find(x=>x && x.id===id);
+        if (fp) useFrequentPresetForNavi(fp);
+      });
+    });
+    listEl.querySelectorAll('[data-fp-del]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const id = btn.getAttribute('data-fp-del');
+        deleteFrequentPreset(id);
+      });
+    });
+  } catch(e) {
+    console.error('[frequent] render failed', e);
+    // 렌더링 실패해도 앱 전체 중단 방지: 빈 배열로 복구 시도
+    try {
+      const emptyEl = document.getElementById('frequent-presets-empty');
+      if (emptyEl) emptyEl.style.display = 'block';
+    } catch(_){}
+  }
+}
+
+function useFrequentPresetForNavi(fp) {
+  try {
+    if (!fp) return;
+    if (fp.lat && fp.lng && typeof openKakaoNaviApp === 'function') {
+      openKakaoNaviApp(fp.lat, fp.lng, fp.name || fp.keyword);
+    } else if (fp.keyword) {
+      if (typeof showToast === 'function') showToast(`🔍 ${fp.keyword} 검색`);
+      if (navigator.clipboard) navigator.clipboard.writeText(fp.keyword).catch(()=>{});
+    }
+  } catch(e){ console.error(e); }
+}
+
+function deleteFrequentPreset(id) {
+  if (!Array.isArray(frequentPresets)) frequentPresets = [];
+  frequentPresets = frequentPresets.filter(x=>x && x.id!==id);
+  saveFrequentPresets();
+  if (typeof showToast === 'function') showToast('🗑️ 삭제됨');
+}
+
+function openFrequentModal() {
+  const modal = document.getElementById('frequent-modal');
+  if (modal) modal.style.display = 'flex';
+}
+function closeFrequentModal() {
+  const modal = document.getElementById('frequent-modal');
+  if (modal) modal.style.display = 'none';
+  selectedFrequentSearchResult = null;
+  const resEl = document.getElementById('fp-search-results');
+  if (resEl) resEl.innerHTML = '';
+}
+
+async function searchFrequentPlace() {
+  const kwInput = document.getElementById('fp-input-keyword');
+  const resEl = document.getElementById('fp-search-results');
+  if (!kwInput || !resEl) return;
+  const kw = kwInput.value.trim();
+  if (!kw) { if(typeof showToast==='function') showToast('⚠️ 검색어를 입력하세요'); return; }
+  resEl.innerHTML = '<div style="font-size:11px;color:#94A3B8;padding:8px;">🔍 전국 검색 중...</div>';
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=kr&limit=8&q=${encodeURIComponent(kw)}`;
+    const resp = await fetch(url, {headers:{'Accept-Language':'ko'}});
+    const data = await resp.json();
+    if (!Array.isArray(data) || data.length===0) {
+      resEl.innerHTML = '<div style="font-size:11px;color:#94A3B8;padding:8px;">검색 결과 없음. 다른 키워드로 시도하거나 현재위치 등록을 이용하세요.</div>';
+      return;
+    }
+    resEl.innerHTML = '';
+    data.forEach(item=>{
+      const div = document.createElement('div');
+      div.style.cssText = 'padding:8px;border:1px solid #334155;border-radius:6px;cursor:pointer;background:#1E293B;color:#FFF;font-size:12px;';
+      div.innerHTML = `<div style="font-weight:800;">${item.display_name.split(',')[0]}</div><div style="font-size:10px;color:#94A3B8;">${item.display_name}</div>`;
+      div.addEventListener('click', ()=>{
+        selectedFrequentSearchResult = {
+          lat: parseFloat(item.lat),
+          lng: parseFloat(item.lon),
+          addr: item.display_name,
+          keyword: kw
+        };
+        Array.from(resEl.children).forEach(c=>c.style.borderColor='#334155');
+        div.style.borderColor='#2DD4BF';
+        if(typeof showToast==='function') showToast(`📍 ${item.display_name.split(',')[0]} 선택됨`);
+      });
+      resEl.appendChild(div);
+    });
+  } catch(e) {
+    console.error(e);
+    resEl.innerHTML = `<div style="font-size:11px;color:#EF4444;padding:8px;">검색 실패: ${e.message}</div>`;
+  }
+}
+
+function confirmFrequentAdd() {
+  const nameInput = document.getElementById('fp-input-name');
+  if (!nameInput) return;
+  const name = nameInput.value.trim();
+  if (!name) { if(typeof showToast==='function') showToast('⚠️ 이름을 입력하세요'); return; }
+  if (!selectedFrequentSearchResult) { if(typeof showToast==='function') showToast('⚠️ 장소를 먼저 검색/선택하세요'); return; }
+  const newItem = {
+    id: Date.now().toString(),
+    name,
+    keyword: selectedFrequentSearchResult.keyword || name,
+    addr: selectedFrequentSearchResult.addr || '',
+    lat: selectedFrequentSearchResult.lat,
+    lng: selectedFrequentSearchResult.lng,
+    createdAt: Date.now(),
+    meta: ''
+  };
+  if (!Array.isArray(frequentPresets)) frequentPresets = [];
+  frequentPresets.unshift(newItem);
+  saveFrequentPresets();
+  closeFrequentModal();
+  nameInput.value = '';
+  const kwInput = document.getElementById('fp-input-keyword');
+  if (kwInput) kwInput.value = '';
+  if(typeof showToast==='function') showToast(`✅ ${name} 등록됨`);
+}
+
+async function addFrequentFromCurrentPos() {
+  const nameInput = document.getElementById('fp-input-name');
+  if (!nameInput) return;
+  const name = nameInput.value.trim();
+  if (!name) { if(typeof showToast==='function') showToast('⚠️ 이름을 입력하세요'); return; }
+  if (typeof currentPos === 'undefined' || !currentPos) { if(typeof showToast==='function') showToast('⚠️ GPS 위치 없음'); return; }
+  let addr = '';
+  try {
+    if (typeof getSmartLocationName === 'function') {
+      addr = await getSmartLocationName(currentPos.lat, currentPos.lng, '현재위치');
+    } else {
+      addr = `${currentPos.lat.toFixed(4)}, ${currentPos.lng.toFixed(4)}`;
+    }
+  } catch(e) { addr = `${currentPos.lat.toFixed(4)}, ${currentPos.lng.toFixed(4)}`; }
+  const newItem = {
+    id: Date.now().toString(),
+    name,
+    keyword: name,
+    addr,
+    lat: currentPos.lat,
+    lng: currentPos.lng,
+    createdAt: Date.now(),
+    meta: '현재위치'
+  };
+  if (!Array.isArray(frequentPresets)) frequentPresets = [];
+  frequentPresets.unshift(newItem);
+  saveFrequentPresets();
+  closeFrequentModal();
+  nameInput.value = '';
+  const kwInput = document.getElementById('fp-input-keyword');
+  if (kwInput) kwInput.value = '';
+  if(typeof showToast==='function') showToast(`✅ ${name} 현재위치로 등록됨`);
+}
+
+
+// ==========================================
+// [v8.10.2 FIX] TAXI DJ 박스 복구 - 주야간 토글 중복 제거, 메인 테마 동기화
+// ==========================================
+const TDJ_ICONS=['🔥','📻','🎤','🌧️','☕','🚕','🎄','👶','⚽','🎃','🎅','💃','🕺','🎸','🎹','🎷','💕','🌙','⭐','🎧','🎵','🎶','🚗','✈️','🏖️','🍺','🍷','🎂','🎉','💿','📀','🎬','🌈','🌸','❤️','💛'];
+const TDJ_DEFAULT_PRESETS=[
+{id:'1',emoji:'🔥',label:'20대 팝송',query:'20대 인기 팝송 모음'},
+{id:'2',emoji:'📻',label:'4050 가요',query:'4050 추억의 가요 메들리'},
+{id:'3',emoji:'🎤',label:'트로트',query:'7080 트로트 메들리'},
+{id:'4',emoji:'🌧️',label:'비오는날',query:'비오는날 잔잔한 발라드'},
+{id:'5',emoji:'☕',label:'밤 재즈',query:'밤에 듣기좋은 카페 재즈'},
+{id:'6',emoji:'🚕',label:'신나는',query:'운전할때 신나는 댄스곡'},
+];
+const TDJ_VERSIONS=[
+{ver:'v24',date:'2026-09-26',title:'아이콘 세트 선택 추가',desc:'• 프리셋 앞에 이모지 36개 세트 선택 가능\n• 설정에서 아이콘 버튼 클릭 -> 아이콘 피커 팝업\n• 새 프리셋 추가 시에도 아이콘 선택'},
+{ver:'v23',date:'2026-09-26',title:'설정 = 프리셋 편집 원복',desc:'• 설정 = 프리셋 편집\n• 주간/야간은 헤더 달 버튼'},
+{ver:'v22',date:'2026-09-26',title:'히스토리 전체 누적',desc:'• v1~v22 전체 보이게'},
+{ver:'v21',date:'2026-09-26',title:'PWA 노치 터치 수정',desc:'• safe-area 적용'},
+{ver:'v20',date:'2026-09-26',title:'아이콘 고정 + 보관함',desc:'• feed/library\n• 팝업 0개'},
+{ver:'v13',date:'2026-09-25',title:'디자인 규격 확정',desc:'• 108px 카드'},
+{ver:'v1',date:'2026-09-23',title:'최초 버전',desc:'• TAXI DJ 시작'},
+];
+
+let tdj_presets = [];
+let tdj_tab = '보관함';
+let tdj_files = [];
+let tdj_playing = null;
+let tdj_playingUrl = null;
+let tdj_pickingFor = null;
+let tdj_tempNewEmoji = '🎵';
+
+function tdj_safeParse(raw, fallback) {
+  try {
+    if (!raw || raw==='null' || raw==='undefined') return fallback;
+    const p = JSON.parse(raw);
+    if (p===null) return fallback;
+    return p;
+  } catch(e) { return fallback; }
+}
+
+function tdj_loadPresets() {
+  try {
+    const raw = localStorage.getItem('taxi-presets');
+    const parsed = tdj_safeParse(raw, null);
+    if (Array.isArray(parsed) && parsed.length>0) {
+      tdj_presets = parsed.filter(x=>x && typeof x==='object');
+    } else {
+      tdj_presets = TDJ_DEFAULT_PRESETS.slice();
+    }
+  } catch(e) {
+    tdj_presets = TDJ_DEFAULT_PRESETS.slice();
+  }
+  if (!Array.isArray(tdj_presets) || tdj_presets.length===0) tdj_presets = TDJ_DEFAULT_PRESETS.slice();
+}
+
+function tdj_savePresets() {
+  try {
+    localStorage.setItem('taxi-presets', JSON.stringify(Array.isArray(tdj_presets)?tdj_presets:TDJ_DEFAULT_PRESETS));
+  } catch(e){}
+  tdj_render();
+  tdj_renderSettings();
+}
+
+function tdj_applyThemeFromMain(mainTheme) {
+  try {
+    const root = document.getElementById('tdj-root');
+    if (!root) return;
+    const isDay = (mainTheme === 'day');
+    root.setAttribute('data-theme', isDay ? 'light' : 'dark');
+    root.classList.toggle('light', isDay);
+  } catch(e){}
+}
+
+function tdj_openDB() {
+  return new Promise((res,rej)=>{
+    const r=indexedDB.open('taxi-dj',1);
+    r.onupgradeneeded=()=>{
+      if(!r.result.objectStoreNames.contains('files')) r.result.createObjectStore('files',{keyPath:'id',autoIncrement:true});
+    };
+    r.onsuccess=()=>res(r.result);
+    r.onerror=()=>rej(r.error);
+  });
+}
+
+async function tdj_loadFiles() {
+  try {
+    const d=await tdj_openDB();
+    const tx=d.transaction('files','readonly');
+    const req=tx.objectStore('files').getAll();
+    req.onsuccess=()=>{ tdj_files=req.result||[]; tdj_render(); };
+    req.onerror=()=>{ tdj_files=[]; tdj_render(); };
+  } catch(e){ tdj_files=[]; tdj_render(); }
+}
+
+async function tdj_addFiles(list) {
+  try {
+    const d=await tdj_openDB();
+    const tx=d.transaction('files','readwrite');
+    const st=tx.objectStore('files');
+    for(const f of list){
+      if(!f.type || !f.type.startsWith('audio/')) continue;
+      st.add({name:f.name,blob:f});
+    }
+    tx.oncomplete=()=>tdj_loadFiles();
+    tx.onerror=()=>tdj_loadFiles();
+  } catch(e){ console.error(e); }
+}
+
+async function tdj_delFile(id) {
+  try {
+    const d=await tdj_openDB();
+    const tx=d.transaction('files','readwrite');
+    tx.objectStore('files').delete(id);
+    tx.oncomplete=()=>{
+      if(tdj_playing && tdj_playing.id===id) tdj_stop();
+      tdj_loadFiles();
+    };
+  } catch(e){}
+}
+
+function tdj_playFile(f) {
+  try {
+    if(tdj_playingUrl) URL.revokeObjectURL(tdj_playingUrl);
+    tdj_playingUrl=URL.createObjectURL(f.blob);
+    tdj_playing=f;
+    const pname=document.getElementById('tdj-pname');
+    if(pname) pname.textContent=f.name;
+    const player=document.getElementById('tdj-player');
+    if(player) player.style.display='flex';
+    const a=document.getElementById('tdj-audio');
+    if(a){ a.src=tdj_playingUrl; a.play().catch(()=>{}); }
+    tdj_render();
+  } catch(e){ console.error(e); }
+}
+
+function tdj_stop() {
+  try {
+    const a=document.getElementById('tdj-audio');
+    if(a) a.pause();
+    if(tdj_playingUrl) URL.revokeObjectURL(tdj_playingUrl);
+  } catch(e){}
+  tdj_playingUrl=null;
+  tdj_playing=null;
+  const player=document.getElementById('tdj-player');
+  if(player) player.style.display='none';
+  tdj_render();
+}
+
+function tdj_openUniversal(u) {
+  try {
+    const a=document.createElement('a');
+    a.href=u;
+    a.target='_blank';
+    a.rel='noopener';
+    a.style.position='fixed';
+    a.style.opacity='0';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>a.remove(),500);
+  } catch(e){ window.open(u,'_blank'); }
+}
+
+function tdj_openLibrary(){ tdj_openUniversal('https://www.youtube.com/feed/library'); }
+function tdj_openYTM(q){ tdj_openUniversal('https://music.youtube.com/search?q='+encodeURIComponent(q)); }
+function tdj_openLong(q){ tdj_openUniversal('https://www.youtube.com/results?search_query='+encodeURIComponent(q+' 10시간')); }
+
+function tdj_render() {
+  try {
+    const main=document.getElementById('tdj-main');
+    if(!main) return;
+    if(tdj_tab==='보관함'){
+      main.innerHTML=`<button class="tdj-btn-offline" id="tdj-btnLib"><span style="font-weight:700;font-size:15px">유튜브 보관함 열기</span><span style="color:var(--tdj-yellow);font-weight:800;font-size:14px">앱에서 열기 →</span></button><button class="tdj-btn-add" id="tdj-btnAdd">+ 파일 추가</button><input id="tdj-finput" type="file" accept="audio/*" multiple style="display:none">${tdj_files.length===0?`<div style="padding:40px 0;text-align:center;color:var(--tdj-dim2);font-size:13px">보관함은 사진 속 화면까지만 열림<br><span style="font-size:11px;">MP3 파일을 추가해보세요</span></div>`:`<div style="margin-top:12px">${tdj_files.map(f=>`<div class="tdj-file"><button data-play="${f.id}" style="width:32px;height:32px;border-radius:50%;background:${tdj_playing&&tdj_playing.id===f.id?'var(--tdj-yellow)':'var(--tdj-card-border)'}">${tdj_playing&&tdj_playing.id===f.id?'■':'▶'}</button><div style="flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.name}</div><button data-del="${f.id}">✕</button></div>`).join('')}</div>`}`;
+      const btnLib=document.getElementById('tdj-btnLib');
+      if(btnLib) btnLib.onclick=tdj_openLibrary;
+      const btnAdd=document.getElementById('tdj-btnAdd');
+      if(btnAdd) btnAdd.onclick=()=>{ const inp=document.getElementById('tdj-finput'); if(inp) inp.click(); };
+      const finp=document.getElementById('tdj-finput');
+      if(finp) finp.onchange=e=>{ if(e.target.files) tdj_addFiles(e.target.files); e.target.value=''; };
+      main.querySelectorAll('[data-play]').forEach(b=>{ b.onclick=()=>{ const f=tdj_files.find(x=>x.id==b.dataset.play); if(!f) return; if(tdj_playing&&tdj_playing.id==f.id) tdj_stop(); else tdj_playFile(f); }; });
+      main.querySelectorAll('[data-del]').forEach(b=>{ b.onclick=()=>tdj_delFile(Number(b.dataset.del)); });
+    } else if(tdj_tab==='YT뮤직'){
+      main.innerHTML=`<div class="tdj-grid2">${tdj_presets.map(p=>`<button class="tdj-preset" data-ytm="${p.id}"><span style="font-size:28px">${p.emoji||'🎵'}</span><b>${p.label||'이름없음'}</b></button>`).join('')}</div>`;
+      main.querySelectorAll('[data-ytm]').forEach(b=>{ b.onclick=()=>{ const p=tdj_presets.find(x=>x.id==b.dataset.ytm); if(p) tdj_openYTM(p.query||p.label); }; });
+    } else if(tdj_tab==='롱믹스'){
+      main.innerHTML=`<div class="tdj-grid2">${tdj_presets.map(p=>`<button class="tdj-preset" data-long="${p.id}"><span style="font-size:28px">${p.emoji||'🎵'}</span><div><b>${p.label||'이름없음'}</b><div style="font-size:11px;color:var(--tdj-dim)">롱믹스</div></div></button>`).join('')}</div>`;
+      main.querySelectorAll('[data-long]').forEach(b=>{ b.onclick=()=>{ const p=tdj_presets.find(x=>x.id==b.dataset.long); if(p) tdj_openLong(p.query||p.label); }; });
+    } else if(tdj_tab==='히스토리'){
+      main.innerHTML=TDJ_VERSIONS.map((v,i)=>`<div class="tdj-vhist ${i===0?'now':''}"><div style="display:flex;justify-content:space-between"><b style="color:var(--tdj-yellow)">${v.ver}</b><span style="font-size:11px;color:var(--tdj-dim2)">${v.date}</span></div><div style="margin-top:4px;font-weight:700;font-size:13px">${v.title}</div><p>${v.desc}</p></div>`).join('');
+    }
+  } catch(e){ console.error('[tdj] render failed', e); }
+}
+
+function tdj_renderSettings(){
+  try {
+    const sl=document.getElementById('tdj-slist');
+    if(!sl) return;
+    if(!Array.isArray(tdj_presets)) tdj_presets = TDJ_DEFAULT_PRESETS.slice();
+    sl.innerHTML=tdj_presets.map(p=>`
+<div class="tdj-srow">
+<button class="tdj-emoji-btn" data-emoji="${p.id}" style="font-size:20px">${p.emoji||'🎵'}</button>
+<input data-id="${p.id}" data-k="label" value="${(p.label||'').replace(/"/g,'&quot;')}" style="flex:1">
+<input data-id="${p.id}" data-k="query" value="${(p.query||'').replace(/"/g,'&quot;')}" style="flex:2">
+<button data-delp="${p.id}" style="color:#ff5555;font-size:12px">삭제</button>
+</div>`).join('');
+    sl.querySelectorAll('input[data-id]').forEach(inp=>{
+      inp.onchange=()=>{
+        const pr=tdj_presets.find(x=>x.id==inp.dataset.id);
+        if(pr){ pr[inp.dataset.k]=inp.value; tdj_savePresets(); }
+      };
+    });
+    sl.querySelectorAll('[data-delp]').forEach(b=>{
+      b.onclick=()=>{
+        tdj_presets=tdj_presets.filter(x=>x.id!=b.dataset.delp);
+        tdj_savePresets();
+      };
+    });
+    sl.querySelectorAll('[data-emoji]').forEach(b=>{
+      b.onclick=()=>{
+        tdj_pickingFor=b.dataset.emoji;
+        const picker=document.getElementById('tdj-iconPicker');
+        if(picker) picker.classList.add('on');
+        tdj_buildIconGrid();
+      };
+    });
+    const newEmojiBtn=document.getElementById('tdj-newEmojiBtn');
+    if(newEmojiBtn) newEmojiBtn.textContent=tdj_tempNewEmoji;
+  } catch(e){ console.error(e); }
+}
+
+function tdj_buildIconGrid(){
+  try {
+    const grid=document.getElementById('tdj-iconGrid');
+    if(!grid) return;
+    grid.innerHTML=TDJ_ICONS.map(ic=>`<button class="tdj-icon-opt" data-ic="${ic}">${ic}</button>`).join('');
+    grid.querySelectorAll('[data-ic]').forEach(btn=>{
+      btn.onclick=()=>{
+        if(tdj_pickingFor==='new'){
+          tdj_tempNewEmoji=btn.dataset.ic;
+          const b=document.getElementById('tdj-newEmojiBtn');
+          if(b) b.textContent=tdj_tempNewEmoji;
+        } else {
+          const pr=tdj_presets.find(x=>x.id==tdj_pickingFor);
+          if(pr){ pr.emoji=btn.dataset.ic; tdj_savePresets(); }
+        }
+        const picker=document.getElementById('tdj-iconPicker');
+        if(picker) picker.classList.remove('on');
+      };
+    });
+  } catch(e){ console.error(e); }
+}
+
+function tdj_init() {
+  try {
+    tdj_loadPresets();
+    // 메인 테마 동기화 (중복 토글 제거)
+    if (typeof currentThemeMode !== 'undefined') {
+      tdj_applyThemeFromMain(currentThemeMode);
+    } else {
+      const savedTheme = localStorage.getItem('sudataxi_theme_mode') || 'night';
+      tdj_applyThemeFromMain(savedTheme);
+    }
+    // 이벤트 바인딩
+    document.querySelectorAll('#tdj-tabs .tdj-tab').forEach(t=>{
+      t.addEventListener('click', ()=>{
+        document.querySelectorAll('#tdj-tabs .tdj-tab').forEach(x=>x.classList.remove('on'));
+        t.classList.add('on');
+        tdj_tab=t.dataset.tab;
+        tdj_render();
+      });
+    });
+    const gear=document.getElementById('tdj-gear');
+    if(gear) gear.addEventListener('click', ()=>{ tdj_renderSettings(); const s=document.getElementById('tdj-settings'); if(s) s.classList.add('on'); });
+    const newEmojiBtn=document.getElementById('tdj-newEmojiBtn');
+    if(newEmojiBtn) newEmojiBtn.addEventListener('click', ()=>{
+      tdj_pickingFor='new';
+      const picker=document.getElementById('tdj-iconPicker');
+      if(picker) picker.classList.add('on');
+      tdj_buildIconGrid();
+    });
+    const addPreset=document.getElementById('tdj-addPreset');
+    if(addPreset) addPreset.addEventListener('click', ()=>{
+      const lEl=document.getElementById('tdj-newLabel');
+      const qEl=document.getElementById('tdj-newQuery');
+      const l=lEl ? lEl.value.trim() : '';
+      const q=qEl ? qEl.value.trim() : '';
+      if(!l||!q) { alert('이름과 검색어 입력'); return; }
+      tdj_presets.push({id:Date.now().toString(),emoji:tdj_tempNewEmoji,label:l,query:q});
+      if(lEl) lEl.value='';
+      if(qEl) qEl.value='';
+      tdj_tempNewEmoji='🎵';
+      tdj_savePresets();
+    });
+    const iconClose=document.getElementById('tdj-iconClose');
+    if(iconClose) iconClose.addEventListener('click', ()=>{ const p=document.getElementById('tdj-iconPicker'); if(p) p.classList.remove('on'); });
+    const iconBg=document.querySelector('#tdj-iconPicker .tdj-bg');
+    if(iconBg) iconBg.addEventListener('click', ()=>{ const p=document.getElementById('tdj-iconPicker'); if(p) p.classList.remove('on'); });
+    const sclose=document.getElementById('tdj-sclose');
+    if(sclose) sclose.addEventListener('click', ()=>{ const s=document.getElementById('tdj-settings'); if(s) s.classList.remove('on'); });
+    const sbg=document.querySelector('#tdj-settings .tdj-bg');
+    if(sbg) sbg.addEventListener('click', ()=>{ const s=document.getElementById('tdj-settings'); if(s) s.classList.remove('on'); });
+    const pclose=document.getElementById('tdj-pclose');
+    if(pclose) pclose.addEventListener('click', tdj_stop);
+    tdj_loadFiles();
+    tdj_render();
+  } catch(e){ console.error('[tdj] init failed', e); }
+}
+
 // ==========================================
 // [초기화 및 버튼 리스너 바인딩 보장]
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
 applyThemeMode(currentThemeMode);
+try { loadFrequentPresets(); renderFrequentPresets(); } catch(e){}
+try { if (typeof tdj_init === 'function') tdj_init(); } catch(e){}
+
 initSimulator();
 initDailyRevenue();
 restoreDrivingState();
@@ -2593,6 +3149,21 @@ const inpSimC = document.getElementById('input-sim-current');
 if (inpSimT) inpSimT.addEventListener('input', calculateSimulatorTargets);
 if (inpSimC) inpSimC.addEventListener('input', calculateSimulatorTargets);
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    const btnAddFreq = document.getElementById('btn-add-frequent');
+    if (btnAddFreq) btnAddFreq.addEventListener('click', openFrequentModal);
+    const btnFreqSearch = document.getElementById('btn-frequent-search');
+    if (btnFreqSearch) btnFreqSearch.addEventListener('click', openFrequentModal);
+    // 모달 닫기 바인딩은 이미 inline onclick이지만 안전하게 추가
+    const freqModal = document.getElementById('frequent-modal');
+    if (freqModal) {
+      freqModal.addEventListener('click', (e)=>{ if(e.target===freqModal) closeFrequentModal(); });
+    }
+  } catch(e){ console.error(e); }
+});
+
 </script>
-</body>
-</html>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
+</body></html>
