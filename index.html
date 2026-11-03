@@ -1602,16 +1602,16 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
       <div class="header" id="app-header-title" style="margin-bottom: 0; flex: 1;">📅 2026.11.4(수) <span class="build-ver-tag">v8.10.8</span> <span class="weekday-badge">🟢 평일</span></div>
       <button id="btn-theme-toggle" onclick="toggleTheme()" class="btn-idle" style="border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 900; cursor: pointer; white-space: nowrap; flex-shrink: 0; border: 1px solid var(--theme-border); color: var(--theme-accent);">☀️ 주간</button>
     </div>
-  <div class="loc-bar" id="loc-bar" style="margin-top: 6px; display: flex;">
-    <span id="loc-text">📍 실시간 GPS 수신 중...</span>
-    <button class="refresh-btn" id="btn-refresh">⟳</button>
-  </div><button class="big-btn" id="btn-search" style="margin-bottom: 2px; display: flex;">
+  <button class="big-btn" id="btn-search" style="margin-bottom: 2px; display: none;">
       <span>📍 주변 콜/동선 탐색 (AI 엔진)</span>
-    </button></div>
+    </button></div><div class="loc-bar" id="loc-bar" style="margin-top: 6px; display: none;">
+    <span id="loc-text">📍 실시간 GPS 위치 수신 대기 중...</span>
+    <button class="refresh-btn" id="btn-refresh">⟳</button>
+  </div>
 
   
   
-  <div class="btn-group-main" id="main-btn-group" style="display: flex;">
+  <div class="btn-group-main" id="main-btn-group" style="display: none;">
     
     <div style="display: flex; gap: 6px;">
       <button class="map-btn" id="btn-show-map" style="display: none; flex: 2;">
@@ -1623,10 +1623,10 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
     </div>
   </div>
   
-  <div class="pipeline-log" id="pipeline-log" style="display: block;">대기 중 · 데이터 결합 연산 준비</div>
-  <div class="card-list" id="card-list" style="display: flex;"></div>
+  <div class="pipeline-log" id="pipeline-log" style="display: none;">대기 중 · 데이터 결합 연산 준비</div>
+  <div class="card-list" id="card-list" style="display: none;"></div>
 
-  <div id="frequent-presets-section" class="frequent-presets-section" style="display: block;">
+  <div id="frequent-presets-section" class="frequent-presets-section" style="display: none;">
     <div class="frequent-header" style="flex-wrap:nowrap;">
       <div class="frequent-header-left" style="flex-wrap:nowrap;">
         <span style="font-size:12px; font-weight:900; color:inherit; white-space:nowrap;">📌 자주가는 곳</span>
@@ -1661,7 +1661,7 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
   </div>
 
 
-  <div id="tab1-extras" style="display: block;">
+  <div id="tab1-extras" style="display: none;">
     <!-- 새롭게 추가된 공공데이터 상태 모니터링 패널 -->
     <div class="backup-section" style="margin-bottom: 12px; border-color: var(--theme-accent);">
       <div class="backup-header">
@@ -1866,7 +1866,7 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
     </div>
   </div>
 
-  <div id="tab4-extras" style="display: none;">
+  <div id="tab4-extras" style="display: block;">
     <div class="backup-section" style="margin-top: 0;">
       <div class="backup-title" style="margin-bottom: 10px;">🚘 실시간 운행 제어</div>
       <div style="display: flex; gap: 6px; margin-bottom: 8px;">
@@ -2192,8 +2192,8 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
   <div id="tab5-extras" style="display: none;">
     <div id="tdj-root" data-theme="dark" class="">
       <div class="tdj-header"><b>🎧 TAXI DJ</b><div class="tdj-hbtns"><button class="tdj-iconbtn" id="tdj-gear">⚙︎</button></div></div>
-      <div id="tdj-tabs"><button class="tdj-tab" data-tab="보관함">보관함</button><button class="tdj-tab on" data-tab="YT뮤직">YT뮤직</button><button class="tdj-tab" data-tab="롱믹스">롱믹스</button><button class="tdj-tab" data-tab="히스토리">히스토리</button></div>
-      <main id="tdj-main"><div class="tdj-grid2"><button class="tdj-preset" data-ytm="1"><span>🔥</span><b>20대 팝송</b></button><button class="tdj-preset" data-ytm="2"><span>📻</span><b>4050 가요</b></button><button class="tdj-preset" data-ytm="3"><span>🎤</span><b>트로트</b></button><button class="tdj-preset" data-ytm="4"><span>🌧️</span><b>비오는날</b></button><button class="tdj-preset" data-ytm="5"><span>☕</span><b>밤 재즈</b></button><button class="tdj-preset" data-ytm="6"><span>🚕</span><b>신나는</b></button></div></main>
+      <div id="tdj-tabs"><button class="tdj-tab on" data-tab="보관함">보관함</button><button class="tdj-tab" data-tab="YT뮤직">YT뮤직</button><button class="tdj-tab" data-tab="롱믹스">롱믹스</button><button class="tdj-tab" data-tab="히스토리">히스토리</button></div>
+      <main id="tdj-main"></main>
       <div id="tdj-player" style="display:none"><div style="flex:1;min-width:0"><div style="font-size:11px;color:var(--tdj-dim)">재생 중</div><div id="tdj-pname" style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600"></div></div><audio id="tdj-audio" controls="" style="height:32px;width:200px"></audio><button id="tdj-pclose" style="width:32px;height:32px;color:var(--tdj-dim)">✕</button></div>
       <div id="tdj-settings"><div class="tdj-bg"></div><div class="tdj-box">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><b style="font-size:16px">설정 - 프리셋 편집</b><button id="tdj-sclose" style="width:32px;height:32px;border-radius:50%;background:var(--tdj-bg);color:var(--tdj-dim);border:1px solid var(--tdj-card-border)">✕</button></div>
@@ -2216,10 +2216,10 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
   </div>
 
   <div class="mode-container bottom-mode-dock" id="bottom-mode-dock">
-    <button class="mode-pill active" id="btn-mode1">⚡ 추천/콜찾기</button>
+    <button class="mode-pill" id="btn-mode1">⚡ 추천/콜찾기</button>
     <button class="mode-pill" id="btn-mode2">🧠 운행 전략</button>
     <button class="mode-pill" id="btn-mode3">📊 콜/범칙금 지도</button>
-    <button class="mode-pill" id="btn-mode4">🚘 대시보드</button>
+    <button class="mode-pill active" id="btn-mode4">🚘 대시보드</button>
     <button class="mode-pill" id="btn-mode5">🎧 Taxi DJ</button>
   </div>
 
@@ -2234,7 +2234,7 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
     <button id="btn-save-restroom" style="display:none !important;">화장실저장</button>
   </div>
   
-  <div class="toast-banner" id="toast-banner" style="position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 12px; padding: 6px 12px; border-radius: 12px; z-index: 300; display: none; box-shadow: rgba(0, 0, 0, 0.6) 0px 3px 12px;">📍 위치 권한 오류</div>
+  <div class="toast-banner" id="toast-banner" style="position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 12px; padding: 6px 12px; border-radius: 12px; z-index: 300; display: none; box-shadow: 0 3px 12px rgba(0,0,0,0.6);"></div>
   
   <div class="map-modal-overlay" id="map-modal">
     <div class="map-modal-content">
