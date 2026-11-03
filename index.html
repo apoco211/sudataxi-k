@@ -505,7 +505,7 @@ font-family:'Inter','Noto Sans KR',system-ui,sans-serif;position:relative;z-inde
 #tdj-root #tdj-tabs{display:flex;border-bottom:1px solid var(--tdj-card-border);background:var(--tdj-bg) !important;position:sticky;top:56px;z-index:4}
 #tdj-root .tdj-tab{flex:1;height:48px;font-size:13px;color:var(--tdj-dim);font-weight:700;position:relative;border:none;background:none;cursor:pointer;}
 #tdj-root .tdj-tab.on{color:var(--tdj-text) !important}
-#tdj-root .tdj-tab.on::after{content:'absolute;bottom:0;left:20%;right:20%;height:2px;background:var(--tdj-yellow);border-radius:2px}
+#tdj-root .tdj-tab.on::after{content:'';position:absolute;bottom:0;left:20%;right:20%;height:2px;background:var(--tdj-yellow);border-radius:2px}
 #tdj-root #tdj-main{padding:14px 12px 120px;min-height:300px;background:var(--tdj-bg) !important;position:relative;z-index:1;}
 #tdj-root .tdj-btn-offline{width:100%;height:64px;background:var(--tdj-card) !important;border:2px solid var(--tdj-yellow) !important;border-radius:14px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-weight:700;font-size:14px;color:var(--tdj-text) !important;cursor:pointer;}
 #tdj-root .tdj-btn-add{width:100%;height:52px;border:1px dashed var(--tdj-card-border) !important;border-radius:14px;color:var(--tdj-dim);font-size:13px;margin-top:10px;background:var(--tdj-card) !important;font-weight:600;cursor:pointer;}
@@ -713,7 +713,7 @@ display:flex !important;flex-direction:column;align-items:flex-start;justify-con
 </div>
 </div>
 <div class="backup-section">
-<div class="backup-title" style="margin-bottom: 10px; display: justify-content: space-between; align-items: flex-start; gap: 4px;">
+<div class="backup-title" style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 4px;">
 <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap; flex: 1; min-width: 0;">
 <span style="white-space: nowrap;">⏱️ 오늘 운행 현황</span>
 <span id="driving-current-status" style="color: var(--stat-label); font-size: 13px; font-weight: 800; white-space: nowrap;">(운행 대기)</span>
@@ -1644,6 +1644,10 @@ if (bottomText) {
 bottomText.textContent = `${drivingState.isBreak ? '☕ 휴식중' : (drivingState.isPassengerBoarded ? '🟡 승차중' : '🈳 빈차운행중')} [${timeStr}]`;
 }
 }
+
+// ----------------------------------------------------
+// ⚠️ 수정(보완)됨: CSS 클래스(.active-board, .active-alight, .active-rest) 토글 로직 추가
+// ----------------------------------------------------
 function updateDrivingUI() {
 const driveBtn = document.getElementById('btn-drive-toggle');
 const breakBtn = document.getElementById('btn-break-toggle');
@@ -1651,6 +1655,13 @@ const boardBtn = document.getElementById('btn-board');
 const alightBtn = document.getElementById('btn-alight');
 const bottomBoardBtn = document.getElementById('btn-bottom-board');
 const bottomAlightBtn = document.getElementById('btn-bottom-alight');
+const bottomRestBtn = document.getElementById('btn-bottom-restroom-search'); // 하단 휴식 버튼
+
+// 1. 상태 변경 전 모든 하단 버튼의 active 테두리 클래스 초기화
+if (bottomBoardBtn) bottomBoardBtn.classList.remove('active-board');
+if (bottomAlightBtn) bottomAlightBtn.classList.remove('active-alight');
+if (bottomRestBtn) bottomRestBtn.classList.remove('active-rest');
+
 if (drivingState.isDriving) {
 if (driveBtn) { driveBtn.innerText = '⏹️ 운행 종료'; driveBtn.className = 'drive-control-btn btn-red'; }
 if (breakBtn) { breakBtn.disabled = false; }
@@ -1660,17 +1671,21 @@ if (boardBtn) { boardBtn.disabled = false; boardBtn.className = 'drive-control-b
 if (alightBtn) { alightBtn.disabled = true; alightBtn.className = 'drive-control-btn btn-idle'; }
 if (bottomBoardBtn) { bottomBoardBtn.disabled = false; bottomBoardBtn.style.opacity = '1'; }
 if (bottomAlightBtn) { bottomAlightBtn.disabled = true; }
+// 휴식 상태일 때 휴식 버튼에 파란색 테두리
+if (bottomRestBtn) { bottomRestBtn.classList.add('active-rest'); }
 } else {
 if (breakBtn) { breakBtn.innerText = '☕ 휴식 시작'; breakBtn.className = 'drive-control-btn btn-idle'; }
 if (drivingState.isPassengerBoarded) {
 if (boardBtn) { boardBtn.disabled = true; boardBtn.className = 'drive-control-btn btn-idle'; }
 if (alightBtn) { alightBtn.disabled = false; alightBtn.className = 'drive-control-btn btn-orange'; }
 if (bottomBoardBtn) bottomBoardBtn.disabled = true;
-if (bottomAlightBtn) bottomAlightBtn.disabled = false;
+// 손님 탑승 중일 때 하차 버튼에 하얀색/검은색 반전 테두리
+if (bottomAlightBtn) { bottomAlightBtn.disabled = false; bottomAlightBtn.classList.add('active-alight'); }
 } else {
 if (boardBtn) { boardBtn.disabled = false; boardBtn.className = 'drive-control-btn btn-accent'; }
 if (alightBtn) { alightBtn.disabled = true; alightBtn.className = 'drive-control-btn btn-idle'; }
-if (bottomBoardBtn) bottomBoardBtn.disabled = false;
+// 빈차 상태(대기 중)일 때 승차 버튼에 검은색 테두리
+if (bottomBoardBtn) { bottomBoardBtn.disabled = false; bottomBoardBtn.classList.add('active-board'); }
 if (bottomAlightBtn) bottomAlightBtn.disabled = true;
 }
 }
@@ -1685,6 +1700,8 @@ if (bottomAlightBtn) bottomAlightBtn.disabled = true;
 renderCurrentStateTime(Date.now());
 updateRestCountdownUI();
 }
+// ----------------------------------------------------
+
 function handleBoardingTimeOnly(e, isHighValue = false) {
 if (!drivingState.isDriving) toggleDriving();
 if (drivingState.isBreak) {
@@ -2161,7 +2178,7 @@ let monthlyData = [
 { label: '1주차', rev: 0, rate: 0, total: 0, count:0, weekIdx:0 },
 { label: '2주차', rev: 0, rate: 0, total: 0, count:0, weekIdx:1 },
 { label: '3주차', rev: 0, rate: 0, total: 0, count:0, weekIdx:2 },
-{ label: '4주차', 대v: 0, rate: 0, total: 0, count:0, weekIdx:3 },
+{ label: '4주차', rev: 0, rate: 0, total: 0, count:0, weekIdx:3 },
 { label: '5주차', rev: 0, rate: 0, total: 0, count:0, weekIdx:4 }
 ];
 Object.keys(records).forEach(k => {
