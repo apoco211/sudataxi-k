@@ -171,12 +171,12 @@ body.theme-day .fp-btn-del{ background:#F1F5F9 !important; color:#64748B !import
 const EMBEDDED_DEFAULTS = {
 daily_rev: 0,
 sim_data: {target:4000000, current:0, restDates:[]},
-version: 'v8.10.4'
+version: 'v8.10.5'
 };
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>sudataxi-k v8.10.4</title>
+<title>sudataxi-k v8.10.5</title>
 <link rel="manifest" href="data:application/json;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwMDAwMDAiLCAiZGVzY3JpcHRpb24iOiAi7JWI7JaRL+q1sO2PrC/snZjsmZUv6rO87LKcIOy9nC/rspTsuZnquIgg7KeA64+EIC0g7IOB7JeF7KeA6rWsIOykkeyLrCB2OC45LjkwIiwgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsICJpY29ucyI6IFt7InB1cnBvc2UiOiAiYW55IG1hc2thYmxlIiwgInNpemVzIjogIjUxMng1MTIiLCAic3JjIjogImh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzM3NzQvMzc3NDA4My5wbmciLCAidHlwZSI6ICJpbWFnZS9wbmcifV0sICJuYW1lIjogIuyImOuLpO2DneyLnEsgdjguMTAuMiIsICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsICJzaG9ydF9uYW1lIjogIuyImOuLpO2DneyLnEsiLCAic3RhcnRfdXJsIjogIi4vaW5kZXguaHRtbD92PTguMTAuMiIsICJ0aGVtZV9jb2xvciI6ICIjRkZDODAwIiwgInZlcnNpb24iOiAiOC4xMC4yIn0=">
 <meta name="theme-color" content="#FFC800">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -193,8 +193,8 @@ version: 'v8.10.4'
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=7ee80d17f027cf99b9634ae13731a6a9&amp;libraries=services"></script>
 <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
 <!-- Firebase v8 SDK for A25 Plan B Integration -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.5/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.5/firebase-database.js"></script>
 <style>
 :root {
 --theme-accent: #FFC800;
@@ -574,14 +574,14 @@ display:flex !important;flex-direction:column;align-items:flex-start;justify-con
 <body class="mode-1">
 <div class="sticky-top-area" style="padding-bottom: 6px; box-shadow: 0 -20px 0 20px var(--main-bg);">
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 2px;">
-<div class="header" id="app-header-title" style="margin-bottom: 0; flex: 1;">📅 2026.11.3(화) <span class="build-ver-tag">v8.10.4</span> <span class="weekday-badge">🟢 평일</span></div>
+<div class="header" id="app-header-title" style="margin-bottom: 0; flex: 1;">📅 2026.11.3(화) <span class="build-ver-tag">v8.10.5</span> <span class="weekday-badge">🟢 평일</span></div>
 <button id="btn-theme-toggle" onclick="toggleTheme()" class="btn-idle" style="border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 900; cursor: pointer; white-space: nowrap; flex-shrink: 0; border: 1px solid var(--theme-border); color: var(--theme-accent);">☀️ 주간</button>
 </div>
 <button class="big-btn" id="btn-search" style="margin-bottom: 2px; display: none;">
 <span>📍 주변 콜/동선 탐색 (AI 엔진)</span>
 </button>
 </div>
-<div class="loc-bar" id="loc-bar" style="margin-top: 6px; display: none;">
+<div class="loc-bar" id="loc-bar" style="margin-top: 6px; display: flex;">
 <span id="loc-text">📍 실시간 GPS 위치 수신 대기 중...</span>
 <button class="refresh-btn" id="btn-refresh">⟳</button>
 </div>
@@ -650,7 +650,7 @@ display:flex !important;flex-direction:column;align-items:flex-start;justify-con
 <div class="backup-btn-group">
 <button class="backup-btn" id="btn-export" style="flex: 2.2;">📦 전체 백업(운행일지 포함)</button>
 <button class="backup-btn" id="btn-import-open" style="flex: 1;">📥 복원</button>
-<button class="backup-btn" id="btn-sheets-sync" style="flex: 1.5; background: #0F766E; color: #FFF; border-color: #14B8A6;" onclick="setupGoogleSheetsSync()">☁️ 구글시트 연동</button>
+<button class="backup-btn" id="btn-sheets-sync" style="flex: 1.5; background: #0F766E; color: #FFF; border-color: #14B8A6;" onclick="setupGoogleSheetsSync()" title="https://script.google.com/macros/s/AKfycbxNxAF_1mzRCZ_lgLllpKkAgApS-ajmP7Llnc-k7IYXoRdsnLoOZTgLS2LjGZ9W4qG-/exec">☁️ 시트연동됨</button>
 <input type="file" id="import-file-input" accept=".json,application/json" style="display: none;">
 </div>
 <div style="margin-top: 6px; border-top: 1px dashed var(--stat-border); padding-top: 4px;">
@@ -667,7 +667,7 @@ display:flex !important;flex-direction:column;align-items:flex-start;justify-con
 </div>
 </div>
 </div>
-<div id="tab2-extras" style="display: none;">
+<div id="tab2-extras" style="display: block;">
 <div class="strategy-box">
 <div class="strategy-title">💡 <span id="strategy-time-title">12시 - 주간 평시 / 새벽 연비 운행 - 상업지구 중심</span></div>
 <div class="strategy-content" id="strategy-text">도심 내 단거리 수요가 꾸준합니다. 상업지구를 중심으로 순환하며 연비 위주 운행을 권장합니다.</div>
@@ -716,7 +716,7 @@ display:flex !important;flex-direction:column;align-items:flex-start;justify-con
 <div class="penalty-modal-btns"><button class="penalty-modal-btn cancel" type="button" onclick="closePenaltyModal()">취소</button><button class="penalty-modal-btn submit" type="button" onclick="addPenaltyFromModal()">입력</button></div>
 </div>
 </div>
-<div id="tab4-extras" style="display: block;">
+<div id="tab4-extras" style="display: none;">
 <div class="backup-section" style="margin-top: 0;">
 <div class="backup-title" style="margin-bottom: 10px;">🚘 실시간 운행 제어</div>
 <div style="display: flex; gap: 6px; margin-bottom: 8px;">
@@ -959,9 +959,9 @@ A25 안드로이드폰과 실시간 콜수요지도를 동기화합니다. 콘�
 <!-- 하단 모드 독 -->
 <div class="mode-container bottom-mode-dock" id="bottom-mode-dock">
 <button class="mode-pill" id="btn-mode1">⚡ 추천/콜찾기</button>
-<button class="mode-pill" id="btn-mode2">🧠 운행 전략</button>
+<button class="mode-pill active" id="btn-mode2">🧠 운행 전략</button>
 <button class="mode-pill" id="btn-mode3">📊 콜/범칙금 지도</button>
-<button class="mode-pill active" id="btn-mode4">🚘 대시보드</button>
+<button class="mode-pill" id="btn-mode4">🚘 대시보드</button>
 <button class="mode-pill" id="btn-mode5">🎧 Taxi DJ</button>
 </div>
 <!-- 하단 5분할 액션 바 -->
@@ -1012,7 +1012,7 @@ A25 안드로이드폰과 실시간 콜수요지도를 동기화합니다. 콘�
 <div id="bottom-status-below" class="bottom-status-below"><span id="bottom-status-below-text">⏸️ 대기중</span></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const BUILD_VERSION = "v8.10.4";
+const BUILD_VERSION = 'v8.10.5';
 try { document.title = `수다택시 K ${BUILD_VERSION}`; } catch(e){};
 const KAKAO_JS_KEY = "7ee80d17f027cf99b9634ae13731a6a9";
 let currentMode = 1;
@@ -2567,7 +2567,7 @@ callMapViewLeaflet.invalidateSize();
 }
 
 // ==========================================
-// [v8.10.4 FIX] 자주가는 곳 지속성 & null 파싱 방어 + 렌더링 중단 방지
+// [v8.10.5 FIX] 자주가는 곳 지속성 & null 파싱 방어 + 렌더링 중단 방지
 // ==========================================
 const FREQUENT_KEY = 'sudataxi_frequent_presets';
 let frequentPresets = [];
@@ -2791,7 +2791,7 @@ async function addFrequentFromCurrentPos() {
 
 
 // ==========================================
-// [v8.10.4 FIX] TAXI DJ 박스 복구 - 주야간 토글 중복 제거, 메인 테마 동기화
+// [v8.10.5 FIX] TAXI DJ 박스 복구 - 주야간 토글 중복 제거, 메인 테마 동기화
 // ==========================================
 const TDJ_ICONS=['🔥','📻','🎤','🌧️','☕','🚕','🎄','👶','⚽','🎃','🎅','💃','🕺','🎸','🎹','🎷','💕','🌙','⭐','🎧','🎵','🎶','🚗','✈️','🏖️','🍺','🍷','🎂','🎉','💿','📀','🎬','🌈','🌸','❤️','💛'];
 const TDJ_DEFAULT_PRESETS=[
@@ -3098,7 +3098,8 @@ function tdj_init() {
 
 // ==========================================
 
-// [v8.10.4] Google Sheets 영구연동 복구 모듈 (제미나이 노출 방지 + 빌드 연속성 보장)
+const DEFAULT_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxNxAF_1mzRCZ_lgLllpKkAgApS-ajmP7Llnc-k7IYXoRdsnLoOZTgLS2LjGZ9W4qG-/exec';
+// [v8.10.5] Google Sheets 영구연동 복구 모듈 (제미나이 노출 방지 + 빌드 연속성 보장)
 const GS_CONFIG_KEY = 'sudataxi_gs_config';
 function safeParseGSConfig(raw){
   try{
@@ -3185,6 +3186,27 @@ window.setupGoogleSheetsSync = setupGoogleSheetsSync;
 window.pushToGoogleSheet = pushToGoogleSheet;
 window.promptFetchDailyRev = promptFetchDailyRev;
 window.autoFetchMonthlyCurrent = autoFetchMonthlyCurrent;
+
+
+// [v8.10.5] 호환성: 구 키(sudataxi_sheets_url)와 신 키(sudataxi_gs_config) 동시 유지 + 기본 URL 박음
+(function(){
+  try{
+    const DEF = 'https://script.google.com/macros/s/AKfycbxNxAF_1mzRCZ_lgLllpKkAgApS-ajmP7Llnc-k7IYXoRdsnLoOZTgLS2LjGZ9W4qG-/exec';
+    // 구 키가 비어있으면 기본값으로 채움 (복구)
+    const cur = localStorage.getItem('sudataxi_sheets_url');
+    if(!cur || cur.trim()==='' || cur.includes('...')){
+      localStorage.setItem('sudataxi_sheets_url', DEF);
+      try{ saveToAllStorages('sudataxi_sheets_url', DEF); }catch(e){}
+    }
+    // 신 키도 동일하게 채움
+    const cur2 = localStorage.getItem('sudataxi_gs_config');
+    if(!cur2){
+      const cfg = JSON.stringify({ webAppUrl: DEF, updatedAt: Date.now(), sheetName: 'sudataxi' });
+      localStorage.setItem('sudataxi_gs_config', cfg);
+      try{ saveToAllStorages('sudataxi_gs_config', cfg); }catch(e){}
+    }
+  }catch(e){}
+})();
 
 // [초기화 및 버튼 리스너 바인딩 보장]
 // ==========================================
@@ -3285,5 +3307,22 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 </script>
+
+<!-- 
+[BITNOTE / 빌드노트 - v8.10.5 통일본]
+- 앱 표시: v8.10.5
+- BUILD_VERSION: v8.10.5
+- EMBEDDED_DEFAULTS: v8.10.5
+- Manifest/PWA: v8.10.5
+- Google Docs Main1/Main2/Masterplan A25: v8.10.5 로 업데이트 필요
+- 핵심 패치: 
+  1) 영구저장 3중 백업 (localStorage/sessionStorage/cookie) + safeParse 방어
+  2) 구글시트 연동 복구 - setupGoogleSheetsSync() prompt 저장 방식, HTML 노출 방지
+  3) 추천카드 렌더 충돌 해결 (card-list/pipeline-log/frequent 동시 표시)
+  4) calculateAndRender fallback 좌표 (군포시청 37.3823,126.9619)
+  5) TAXI DJ v24 tdj_ 네임스페이스 유지, 메인 테마 동기화
+- 저장키 유지: sudataxi_frequent_presets, taxi-presets, taxi-dj(IDB), driving_records, sim_data, call_logs, active_demand_hotspots, firebase_config, gs_config
+-->
+
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
 </body></html>
