@@ -1,4 +1,4 @@
-name: Build A25 Lite APK (FINAL - no version param)
+name: Build A25 Lite APK (FINAL - fix jar)
 
 on:
   push:
@@ -18,16 +18,23 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Fix missing wrapper jar
+      - name: Fix wrapper jar (force fresh download)
         run: |
-          echo "Checking wrapper jar..."
           ls -la gradle/wrapper/ || true
-          if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
-            echo "Downloading wrapper jar 8.0"
-            mkdir -p gradle/wrapper
-            curl -L -o gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v8.0.0/gradle/wrapper/gradle-wrapper.jar
-            ls -lh gradle/wrapper/
-          fi
+          rm -f gradle/wrapper/gradle-wrapper.jar
+          mkdir -p gradle/wrapper
+          curl -L --fail -o gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v8.0.0/gradle/wrapper/gradle-wrapper.jar
+          ls -lh gradle/wrapper/
+          file gradle/wrapper/gradle-wrapper.jar || true
+
+      - name: Ensure wrapper properties is 8.0
+        run: |
+          echo "distributionBase=GRADLE_USER_HOME" > gradle/wrapper/gradle-wrapper.properties
+          echo "distributionPath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
+          echo "distributionUrl=https\\://services.gradle.org/distributions/gradle-8.0-bin.zip" >> gradle/wrapper/gradle-wrapper.properties
+          echo "zipStoreBase=GRADLE_USER_HOME" >> gradle/wrapper/gradle-wrapper.properties
+          echo "zipStorePath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
+          cat gradle/wrapper/gradle-wrapper.properties
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
