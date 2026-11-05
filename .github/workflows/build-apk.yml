@@ -1,4 +1,5 @@
-name: Build A25 Lite APK
+name: Build A25 Lite APK (iPhone friendly)
+
 on:
   push:
     branches: [ main, master ]
@@ -25,16 +26,12 @@ jobs:
 
       - name: Generate wrapper (fix missing jar)
         run: |
-          ls -la gradle/wrapper/
           gradle wrapper --gradle-version 8.0
           chmod +x ./gradlew
-          ls -la gradle/wrapper/ gradlew
+          ls -lh gradle/wrapper/
 
       - name: Build Debug APK
-        run: ./gradlew :app:assembleDebug --stacktrace --info
-
-      - name: List APK
-        run: find app/build -name "*.apk" | xargs ls -lh
+        run: ./gradlew :app:assembleDebug --stacktrace
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
