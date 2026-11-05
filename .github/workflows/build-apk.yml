@@ -1,4 +1,4 @@
-name: Build A25 Lite APK (FINAL - fix jar)
+name: Build A25 Lite APK (BYPASS WRAPPER - FINAL)
 
 on:
   push:
@@ -18,29 +18,18 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Fix wrapper jar (force fresh download)
+      - name: Setup Gradle 8.0 (no wrapper needed)
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: 8.0
+
+      - name: Delete corrupted wrapper (bypass it)
         run: |
-          ls -la gradle/wrapper/ || true
           rm -f gradle/wrapper/gradle-wrapper.jar
-          mkdir -p gradle/wrapper
-          curl -L --fail -o gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v8.0.0/gradle/wrapper/gradle-wrapper.jar
-          ls -lh gradle/wrapper/
-          file gradle/wrapper/gradle-wrapper.jar || true
+          ls -la gradle/wrapper/ || true
 
-      - name: Ensure wrapper properties is 8.0
-        run: |
-          echo "distributionBase=GRADLE_USER_HOME" > gradle/wrapper/gradle-wrapper.properties
-          echo "distributionPath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
-          echo "distributionUrl=https\\://services.gradle.org/distributions/gradle-8.0-bin.zip" >> gradle/wrapper/gradle-wrapper.properties
-          echo "zipStoreBase=GRADLE_USER_HOME" >> gradle/wrapper/gradle-wrapper.properties
-          echo "zipStorePath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
-          cat gradle/wrapper/gradle-wrapper.properties
-
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
-
-      - name: Build Debug APK
-        run: ./gradlew :app:assembleDebug --stacktrace
+      - name: Build Debug APK with system gradle (not wrapper)
+        run: gradle :app:assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
