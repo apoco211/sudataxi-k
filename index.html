@@ -9439,7 +9439,7 @@ function transmitA25Pins(){
         try{
           var prev = document.getElementById('a25-screenshot-preview');
           var thumb = document.getElementById('a25-shot-thumb');
-          if(data && (data.screenshotUrl || data.imageUrl || data.imageBase64 || (data.hotspots && data.hotspots.length))){
+          if(data && (data.screenshotUrl || data.imageUrl || data.imageBase64 || (data.hotspots && data.hotspots.length) || (data.lat && data.lng))){
             a25CurrentScreenshot = data.screenshotUrl || data.imageUrl || (data.imageBase64 ? ('data:image/jpeg;base64,' + data.imageBase64) : null);
             if(data.lat && data.lng) a25CenterGPS = {lat:data.lat, lng:data.lng};
             if(prev && thumb && a25CurrentScreenshot){ thumb.src = a25CurrentScreenshot; prev.style.display = 'block'; }
