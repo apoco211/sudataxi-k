@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SudaTaxi A25 Lite (저사양용)"
+        android:textSize="20sp"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="메모리 10MB 미만 - 카카오 콜에 영향 없음"
+        android:textColor="#0F766E"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="Firebase URL:"/>
+    <EditText android:id="@+id/etFirebaseUrl"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:hint="https://your-project.firebaseio.com"/>
+
+    <Button android:id="@+id/btnStart"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="🔥 저사양 모드 시작 (10MB)"
+        android:layout_marginTop="16dp"/>
+
+    <TextView android:id="@+id/tvStatus"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="사용법:\n1. Firebase URL 입력\n2. 오버레이 권한 허용\n3. 접근성 권한 허용 (터치 감지용 - 매우 가벼움)\n4. 카카오T 수요지도에서 🔥 버튼 터치\n5. 반투명 화면 위에 핫스팟 3~10곳 터치\n6. 전송 버튼\n\n특징:\n- 스크린샷 캡처 없음 (MediaProjection 미사용)\n- 비트맵 없음, 가상디스플레이 없음\n- 메모리 10MB 미만\n- 콜 오면 자동으로 숨김"
+        android:layout_marginTop="16dp"
+        android:textSize="12sp"/>
+
+</LinearLayout>
