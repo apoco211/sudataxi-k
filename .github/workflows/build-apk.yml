@@ -1,4 +1,4 @@
-name: Build A25 Lite APK (BYPASS WRAPPER - FINAL)
+name: Build A25 Lite APK (FINAL - fix jar)
 
 on:
   push:
@@ -18,22 +18,45 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Gradle 8.0 (no wrapper needed)
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: 8.0
-
-      - name: Delete corrupted wrapper (bypass it)
+      - name: Fix wrapper jar (force fresh download)
         run: |
-          rm -f gradle/wrapper/gradle-wrapper.jar
+          echo "=== before ==="
           ls -la gradle/wrapper/ || true
-          cat gradle/wrapper/gradle-wrapper.properties || true
+          echo "Removing any corrupted jar"
+          rm -f gradle/wrapper/gradle-wrapper.jar
+          mkdir -p gradle/wrapper
+          echo "Downloading fresh wrapper jar 8.0"
+          curl -L --fail -o gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v8.0.0/gradle/wrapper/gradle-wrapper.jar
+          echo "=== after download ==="
+          ls -lh gradle/wrapper/
+          file gradle/wrapper/gradle-wrapper.jar || true
+          SIZE=$(stat -c%s gradle/wrapper/gradle-wrapper.jar)
+          echo "jar size: $SIZE"
+          if [ "$SIZE" -lt 50000 ]; then
+            echo "jar too small, trying alternative URL"
+            curl -L --fail -o gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v8.0.0/gradle/wrapper/gradle-wrapper.jar
+            ls -lh gradle/wrapper/
+          fi
 
-      - name: Build Debug APK with system gradle (not wrapper)
-        run: gradle :app:assembleDebug --stacktrace
+      - name: Ensure wrapper properties is 8.0
+        run: |
+          cat gradle/wrapper/gradle-wrapper.properties || true
+          echo "distributionBase=GRADLE_USER_HOME" > gradle/wrapper/gradle-wrapper.properties
+          echo "distributionPath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
+          echo "distributionUrl=https\://services.gradle.org/distributions/gradle-8.0-bin.zip" >> gradle/wrapper/gradle-wrapper.properties
+          echo "zipStoreBase=GRADLE_USER_HOME" >> gradle/wrapper/gradle-wrapper.properties
+          echo "zipStorePath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
+          cat gradle/wrapper/gradle-wrapper.properties
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Build Debug APK
+        run: ./gradlew :app:assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: SudaTaxi-A25-Lite-APK
           path: app/build/outputs/apk/debug/*.apk
+          retention-days: 30
