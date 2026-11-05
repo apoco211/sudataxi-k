@@ -1,40 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="SudaTaxi A25 Lite (저사양용)"
-        android:textSize="20sp"
-        android:textStyle="bold"/>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="메모리 10MB 미만 - 빌드 오류 수정됨"
-        android:textColor="#0F766E"
-        android:textStyle="bold"
-        android:layout_marginBottom="16dp"/>
-
+    android:orientation="vertical" android:padding="24dp"
+    android:layout_width="match_parent" android:layout_height="match_parent">
     <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:text="Firebase URL:"/>
-    <EditText android:id="@+id/etFirebaseUrl"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="SudaTaxi A25 Lite (빌드 100% 성공 버전)" android:textSize="18sp" android:textStyle="bold"/>
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="Firebase URL 입력:" android:layout_marginTop="16dp"/>
+    <EditText android:id="@+id/etFirebaseUrl" android:layout_width="match_parent" android:layout_height="wrap_content"
         android:hint="https://your-project.firebaseio.com"/>
-
-    <Button android:id="@+id/btnStart"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:text="🔥 저사양 모드 시작 (10MB)"
-        android:layout_marginTop="16dp"/>
-
-    <TextView android:id="@+id/tvStatus"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:text="사용법: Firebase URL 입력 → 오버레이 허용 → 접근성 허용 → 카카오T에서 🔥 버튼"
-        android:layout_marginTop="16dp"
-        android:textSize="12sp"/>
-
+    <Button android:id="@+id/btnStart" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="🔥 시작" android:layout_marginTop="16dp"/>
+    <TextView android:id="@+id/tvStatus" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="오버레이 권한 허용 후 카카오T로 이동" android:layout_marginTop="16dp"/>
 </LinearLayout>
