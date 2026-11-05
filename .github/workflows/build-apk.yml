@@ -1,4 +1,4 @@
-name: Build A25 Lite APK (BYPASS WRAPPER - FINAL)
+name: Build A25 Lite APK (FINAL VERIFIED 8.0)
 
 on:
   push:
@@ -18,19 +18,29 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Gradle 8.0 (no wrapper needed)
+      - name: Setup Gradle 8.0
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: 8.0
 
-      - name: Delete corrupted wrapper (bypass it)
+      - name: Generate fresh wrapper jar
         run: |
           rm -f gradle/wrapper/gradle-wrapper.jar
-          ls -la gradle/wrapper/ || true
-          cat gradle/wrapper/gradle-wrapper.properties || true
+          mkdir -p gradle/wrapper
+          cat > gradle/wrapper/gradle-wrapper.properties << 'EOF'
+          distributionBase=GRADLE_USER_HOME
+          distributionPath=wrapper/dists
+          distributionUrl=https\://services.gradle.org/distributions/gradle-8.0-bin.zip
+          zipStoreBase=GRADLE_USER_HOME
+          zipStorePath=wrapper/dists
+          EOF
+          gradle wrapper --gradle-version 8.0
+          chmod +x ./gradlew
+          ls -lh gradle/wrapper/
+          file gradle/wrapper/gradle-wrapper.jar
 
-      - name: Build Debug APK with system gradle (not wrapper)
-        run: gradle :app:assembleDebug --stacktrace
+      - name: Build Debug APK
+        run: ./gradlew :app:assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
