@@ -1,4 +1,4 @@
-name: Build A25 Lite APK (BYPASS WRAPPER - FINAL)
+name: Build A25 Lite APK (FINAL - no setup-gradle)
 
 on:
   workflow_dispatch:
@@ -12,11 +12,15 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-      - uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: 8.0
-      - run: rm -f gradle/wrapper/gradle-wrapper.jar
-      - run: gradle :app:assembleDebug --stacktrace
+      - name: Fix wrapper jar
+        run: |
+          rm -f gradle/wrapper/gradle-wrapper.jar
+          mkdir -p gradle/wrapper
+          curl -L -o gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v8.0.0/gradle/wrapper/gradle-wrapper.jar
+          chmod +x ./gradlew
+          ls -lh gradle/wrapper/
+      - name: Build APK
+        run: ./gradlew :app:assembleDebug --stacktrace
       - uses: actions/upload-artifact@v4
         with:
           name: SudaTaxi-A25-Lite-APK
