@@ -12,7 +12,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -38,17 +37,15 @@ class MainActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // 접근성 권한 체크 - 설정으로 유도
-            Toast.makeText(this, "접근성 설정에서 SudaTaxi A25 Lite 활성화 해주세요 (터치 좌표 캡처용 - 매우 가벼움)", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "접근성 설정에서 SudaTaxi A25 Lite 활성화 해주세요", Toast.LENGTH_LONG).show()
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
 
-            // 서비스 시작
             val svc = Intent(this, OverlayServiceLite::class.java).apply {
                 putExtra("firebase_url", url)
             }
             startForegroundService(svc)
 
-            tvStatus.text = "✅ 실행중 - 카카오T로 이동해서 핫스팟 터치 → 🔥 버튼 터치"
+            tvStatus.text = "✅ 실행중 - 카카오T로 이동"
         }
     }
 }
