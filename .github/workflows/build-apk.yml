@@ -18,33 +18,26 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Gradle 8.0
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platforms;android-33 build-tools;33.0.2'
+
+      - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: 8.0
+          gradle-version: '8.0'
 
-      - name: Generate fresh wrapper jar
+      - name: Generate Gradle Wrapper
         run: |
-          rm -f gradle/wrapper/gradle-wrapper.jar
+          rm -rf gradle/wrapper
           mkdir -p gradle/wrapper
           cat > gradle/wrapper/gradle-wrapper.properties << 'EOF'
           distributionBase=GRADLE_USER_HOME
           distributionPath=wrapper/dists
-          distributionUrl=https\://services.gradle.org/distributions/gradle-8.0-bin.zip
+          distributionUrl=https://services.gradle.org/distributions/gradle-8.0-bin.zip
           zipStoreBase=GRADLE_USER_HOME
           zipStorePath=wrapper/dists
           EOF
           gradle wrapper --gradle-version 8.0
           chmod +x ./gradlew
-          ls -lh gradle/wrapper/
-          file gradle/wrapper/gradle-wrapper.jar
-
-      - name: Build Debug APK
-        run: ./gradlew :app:assembleDebug --stacktrace
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: SudaTaxi-A25-Lite-APK
-          path: app/build/outputs/apk/debug/*.apk
-          retention-days: 30
