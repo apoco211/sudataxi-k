@@ -1,5 +1,4 @@
 name: Build A25 Lite APK
-
 on:
   push:
     branches: [ main, master ]
@@ -19,17 +18,23 @@ jobs:
           java-version: '17'
           cache: gradle
 
-      - name: Setup Gradle (use wrapper)
+      - name: Setup Gradle 8.0
         uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: 8.0
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
+      - name: Generate wrapper (fix missing jar)
+        run: |
+          ls -la gradle/wrapper/
+          gradle wrapper --gradle-version 8.0
+          chmod +x ./gradlew
+          ls -la gradle/wrapper/ gradlew
 
       - name: Build Debug APK
-        run: ./gradlew :app:assembleDebug --stacktrace
+        run: ./gradlew :app:assembleDebug --stacktrace --info
 
       - name: List APK
-        run: find app/build -name "*.apk" -type f | xargs ls -lh
+        run: find app/build -name "*.apk" | xargs ls -lh
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
