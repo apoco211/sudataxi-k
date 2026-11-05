@@ -1994,7 +1994,7 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
       <div class="backup-title" style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
         <span>🌗 낮밤 자동 전환</span>
         <label style="display:flex; align-items:center; gap:4px; font-size:11px; font-weight:800; cursor:pointer;">
-          <input type="checkbox" id="auto-theme-enabled" onchange="toggleAutoThemeEnabled()"> 사용
+          <input type="checkbox" id="auto-theme-enabled" checked onchange="toggleAutoThemeEnabled()"> 사용
         </label>
       </div>
       <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:6px;">
@@ -2751,6 +2751,13 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
     saveAutoThemeSettings();
   }
   function updateAutoThemeUI(){
+    // v8.14.16: 첫 로드 시 자동 활성화
+    try{
+      if(!localStorage.getItem('sudataxi_auto_theme_v16')){
+        localStorage.setItem('sudataxi_auto_theme_v16', '1');
+        localStorage.setItem(AUTO_THEME_KEY, JSON.stringify({enabled:true, mode:'sun', dayStart:'06:00', nightStart:'19:00', snoozeUntil:0}));
+      }
+    }catch(e){}
     try{
       const cfg = getAutoThemeSettings();
       const enabledEl = document.getElementById('auto-theme-enabled');
