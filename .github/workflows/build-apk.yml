@@ -1,4 +1,4 @@
-name: Build A25 Lite APK (iPhone friendly)
+name: Build A25 Lite APK
 
 on:
   push:
@@ -17,18 +17,20 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-          cache: gradle
 
-      - name: Setup Gradle 8.0
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: 8.0
-
-      - name: Generate wrapper (fix missing jar)
+      - name: Fix missing wrapper jar (core fix)
         run: |
-          gradle wrapper --gradle-version 8.0
-          chmod +x ./gradlew
-          ls -lh gradle/wrapper/
+          echo "Checking wrapper jar..."
+          ls -la gradle/wrapper/ || true
+          if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
+            echo "wrapper jar missing -> downloading Gradle 8.0 wrapper jar"
+            mkdir -p gradle/wrapper
+            curl -L -o gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v8.0.0/gradle/wrapper/gradle-wrapper.jar
+            ls -lh gradle/wrapper/
+          fi
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
 
       - name: Build Debug APK
         run: ./gradlew :app:assembleDebug --stacktrace
