@@ -9066,6 +9066,17 @@ function updateA25FirebaseUI(data, isClear){
     if(statusEl){ statusEl.textContent='🟡 대기중'; statusEl.style.color='#FBBF24'; statusEl.style.borderColor='#F59E0B'; }
     if(metaEl) metaEl.textContent='마지막 동기화: '+ new Date().toLocaleTimeString() +' / 핫스팟 0개 (데이터 없음)';
     if(listEl) listEl.innerHTML='<div style="font-size:11px; color:#64748B; text-align:center; padding:8px;">A25에서 데이터 대기중... 플로팅 버튼 🔥을 눌러보세요</div>';
+    // v8.14.17: 새 위치 데이터만 핀 화면 열기
+    if(data && data.lat && data.lng){
+      var ts = data.timestamp || 0;
+      if(ts !== window._a25LastOpenTs){
+        window._a25LastOpenTs = ts;
+        a25CenterGPS = {lat:data.lat, lng:data.lng};
+        if(typeof openA25PinEditor === 'function'){
+          setTimeout(function(){ openA25PinEditor(); }, 300);
+        }
+      }
+    }
     return;
   }
   const hotspots = data.hotspots || [];
