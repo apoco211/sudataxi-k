@@ -9144,6 +9144,12 @@ function clearA25DemandCache(){
   a25LastTimestamp = 0;
   try{ localStorage.removeItem('sudataxi_demand_hotspots'); localStorage.removeItem('sudataxi_demand_last_sync'); }catch(e){}
   updateA25FirebaseUI(null, true);
+  const base = getA25FirebaseUrl();
+  if(base){
+    fetch(base+'/sudataxi/demand_hotspots.json', {method:'DELETE'}).then(r=>{
+      if(r.ok) showToast && showToast('🗑️ Firebase 데이터도 삭제됨');
+    }).catch(()=>{});
+  }
   showToast && showToast('🗑️ A25 수요지도 캐시 삭제됨');
 }
 async function fetchA25DemandFromFirebase(){
