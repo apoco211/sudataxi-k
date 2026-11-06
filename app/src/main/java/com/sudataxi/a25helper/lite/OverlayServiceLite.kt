@@ -8,49 +8,35 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.PixelFormat
-import android.graphics.PointF
-import android.location.Location
-import android.location.LocationManager
 import android.os.Build
 import android.os.IBinder
+import android.provider.Settings
 import android.util.Log
 import android.view.Gravity
-import android.view.MotionEvent
-import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.FrameLayout
-import android.widget.TextView
 import android.widget.Toast
-import kotlin.math.cos
-import org.json.JSONObject
-import java.io.OutputStreamWriter
-import java.net.HttpURLConnection
-import java.net.URL
 
 class OverlayServiceLite : Service() {
     private val TAG = "OverlayServiceLite"
     private var windowManager: WindowManager? = null
-    private var floatingView: View? = null
-    private var captureOverlay: View? = null
-    private var firebaseUrl = ""
-    private val tappedPoints = mutableListOf<PointF>()
-    private var centerLat = 37.3912
-    private var centerLng = 126.9498
-    private var screenW = 1080
-    private var screenH = 1920
+    private var floatingView: FrameLayout? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try {
-            firebaseUrl = intent?.getStringExtra("firebase_url")
-                ?: getSharedPreferences("a25_lite", MODE_PRIVATE).getString("firebase_url", "") ?: ""
+            if (!Settings.canDrawOverlays(this)) {
+                Toast.makeText(this, "오버레이 권한을 허용해주세요", Toast.LENGTH_LONG).show()
+                stopSelf()
+                return START_NOT_STICKY
+            }
 
             createChannel()
             startForeground(1, createNotification())
-            getLocation()
             showFloatingButton()
         } catch (e: Exception) {
             Log.e(TAG, "onStartCommand error", e)
+            Toast.makeText(this, "시작 실패: ${e.message}", Toast.LENGTH_LONG).show()
             stopSelf()
         }
         return START_STICKY
@@ -71,43 +57,15 @@ class OverlayServiceLite : Service() {
         }
         return builder
             .setContentTitle("A25 Lite 실행중")
-            .setContentText("버튼으로 3~10곳 저장")
+            .setContentText("플로팅 버튼으로 핫스팟 저장")
             .setSmallIcon(android.R.drawable.ic_menu_mylocation)
             .build()
-    }
-
-    private fun getLocation() {
-        try {
-            val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-            val loc: Location? = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-                ?: lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
-            if (loc != null) {
-                centerLat = loc.latitude
-                centerLng = loc.longitude
-            }
-        } catch (e: Exception) {
-            Log.w(TAG, "getLocation failed", e)
-        }
     }
 
     private fun showFloatingButton() {
         try {
             windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
 
-            // 화면 크기 안전하게 가져오기
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                val metrics = windowManager!!.currentWindowMetrics
-                screenW = metrics.bounds.width()
-                screenH = metrics.bounds.height()
-            } else {
-                @Suppress("DEPRECATION")
-                val metrics = android.util.DisplayMetrics()
-                @Suppress("DEPRECATION")
-                windowManager!!.defaultDisplay.getMetrics(metrics)
-                screenW = metrics.widthPixels
-                screenH = metrics.heightPixels
-            }
-
             val params = WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
@@ -115,170 +73,42 @@ class OverlayServiceLite : Service() {
                     WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
                 else
                     WindowManager.LayoutParams.TYPE_PHONE,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                 PixelFormat.TRANSLUCENT
             )
             params.gravity = Gravity.TOP or Gravity.START
-            params.x = 30
-            params.y = 300
+            params.x = 40
+            params.y = 200
 
             val container = FrameLayout(this)
             val btn = Button(this).apply {
-                text = "🔥 0"
+                text = "🔥"
+                textSize = 18f
                 setBackgroundColor(Color.parseColor("#2DD4BF"))
-                setOnClickListener { showCaptureOverlay() }
-                setOnLongClickListener { sendAll(); true }
+                setTextColor(Color.BLACK)
+                setPadding(24, 16, 24, 16)
+                setOnClickListener {
+                    Toast.makeText(this@OverlayServiceLite, "핫스팟 캡처 시작", Toast.LENGTH_SHORT).show()
+                    // TODO: showCaptureOverlay() 호출
+                }
             }
             container.addView(btn)
             floatingView = container
+
             windowManager!!.addView(container, params)
+            Toast.makeText(this, "플로팅 버튼 생성 완료", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             Log.e(TAG, "showFloatingButton error", e)
-            Toast.makeText(this, "플로팅 버튼 실패: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "버튼 생성 실패: ${e.message}", Toast.LENGTH_LONG).show()
         }
-    }
-
-    private fun showCaptureOverlay() {
-        if (captureOverlay != null) return
-        try {
-            val params = WindowManager.LayoutParams(
-                WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.MATCH_PARENT,
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-                else
-                    WindowManager.LayoutParams.TYPE_PHONE,
-                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                PixelFormat.TRANSLUCENT
-            )
-
-            val overlay = FrameLayout(this).apply { setBackgroundColor(Color.parseColor("#33000000")) }
-            val hint = TextView(this).apply {
-                text = "핫스팟 3~10곳 터치\n완료되면 전송"
-                setTextColor(Color.WHITE)
-                textSize = 14f
-                setBackgroundColor(Color.parseColor("#AA000000"))
-                setPadding(20, 20, 20, 20)
-                gravity = Gravity.CENTER
-            }
-            val btnSend = Button(this).apply {
-                text = "전송 (${tappedPoints.size}곳)"
-                setBackgroundColor(Color.parseColor("#2DD4BF"))
-                setOnClickListener {
-                    if (tappedPoints.size < 3) {
-                        Toast.makeText(this@OverlayServiceLite, "최소 3곳", Toast.LENGTH_SHORT).show()
-                        return@setOnClickListener
-                    }
-                    sendAll()
-                    closeCaptureOverlay()
-                }
-            }
-            val btnCancel = Button(this).apply {
-                text = "취소"
-                setBackgroundColor(Color.DKGRAY)
-                setTextColor(Color.WHITE)
-                setOnClickListener { closeCaptureOverlay() }
-            }
-
-            overlay.setOnTouchListener { _, event ->
-                if (event.action == MotionEvent.ACTION_DOWN) {
-                    tappedPoints.add(PointF(event.rawX, event.rawY))
-                    val dot = View(this).apply {
-                        setBackgroundColor(Color.RED)
-                        layoutParams = FrameLayout.LayoutParams(24, 24).apply {
-                            leftMargin = (event.rawX - 12).toInt()
-                            topMargin = (event.rawY - 12).toInt()
-                        }
-                    }
-                    overlay.addView(dot)
-                    btnSend.text = "전송 (${tappedPoints.size}곳)"
-                    Toast.makeText(this, "${tappedPoints.size}곳 저장", Toast.LENGTH_SHORT).show()
-                }
-                true
-            }
-
-            overlay.addView(hint, FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT
-            ).apply { gravity = Gravity.TOP; topMargin = 100 })
-
-            val bottom = FrameLayout(this).apply {
-                addView(btnSend, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 120).apply { bottomMargin = 140 })
-                addView(btnCancel, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 100))
-            }
-            overlay.addView(bottom, FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT
-            ).apply { gravity = Gravity.BOTTOM })
-
-            captureOverlay = overlay
-            windowManager!!.addView(overlay, params)
-        } catch (e: Exception) {
-            Log.e(TAG, "showCaptureOverlay error", e)
-        }
-    }
-
-    private fun closeCaptureOverlay() {
-        try {
-            captureOverlay?.let { windowManager?.removeView(it) }
-        } catch (e: Exception) {
-            Log.w(TAG, "remove overlay", e)
-        }
-        captureOverlay = null
-    }
-
-    private fun sendAll() {
-        if (tappedPoints.isEmpty()) return
-        getLocation()
-        val metersPerPixel = 9.5
-        val centerX = screenW / 2f
-        val centerY = screenH / 2f
-        val hotspots = tappedPoints.mapIndexed { idx, pt ->
-            val dx = pt.x - centerX
-            val dy = centerY - pt.y
-            val dLat = dy * metersPerPixel / 111320.0
-            val dLng = dx * metersPerPixel / (111320.0 * cos(Math.toRadians(centerLat)))
-            mapOf("lat" to centerLat + dLat, "lng" to centerLng + dLng, "level" to (10 - idx))
-        }
-        val payload = mapOf(
-            "timestamp" to System.currentTimeMillis(),
-            "device" to "A25_HELPER_LITE",
-            "center" to mapOf("lat" to centerLat, "lng" to centerLng),
-            "count" to hotspots.size,
-            "hotspots" to hotspots
-        )
-        Thread {
-            try {
-                val url = URL("$firebaseUrl/sudataxi/demand_hotspots.json")
-                val conn = url.openConnection() as HttpURLConnection
-                conn.requestMethod = "PUT"
-                conn.setRequestProperty("Content-Type", "application/json")
-                conn.doOutput = true
-                OutputStreamWriter(conn.outputStream).use { it.write(JSONObject(payload).toString()) }
-                val ok = conn.responseCode in 200..299
-                android.os.Handler(mainLooper).post {
-                    if (ok) {
-                        Toast.makeText(this, "✅ ${hotspots.size}곳 전송 완료!", Toast.LENGTH_LONG).show()
-                        tappedPoints.clear()
-                    } else {
-                        Toast.makeText(this, "❌ 전송 실패", Toast.LENGTH_LONG).show()
-                    }
-                }
-            } catch (e: Exception) {
-                android.os.Handler(mainLooper).post {
-                    Toast.makeText(this, "❌ 오류: ${e.message}", Toast.LENGTH_LONG).show()
-                }
-            }
-        }.start()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         try {
             floatingView?.let { windowManager?.removeView(it) }
-            captureOverlay?.let { windowManager?.removeView(it) }
         } catch (e: Exception) {
-            Log.w(TAG, "onDestroy removeView", e)
+            Log.w(TAG, "removeView", e)
         }
     }
 
