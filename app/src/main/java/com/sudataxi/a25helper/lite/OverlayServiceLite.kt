@@ -51,6 +51,9 @@ class OverlayServiceLite : Service() {
     private var touchY = 0f
     private var moved = false
     private var btnSend: Button? = null
+    private var hintText: TextView? = null
+    private var refPoint: PointF? = null  // 택시 아이콘 기준점
+    private var isCalibrating = true
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try {
@@ -183,6 +186,8 @@ class OverlayServiceLite : Service() {
         if (captureOverlay != null) return
         tappedPoints.clear()
         dotViews.clear()
+        refPoint = null
+        isCalibrating = true
         try {
             val p = WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
@@ -192,12 +197,12 @@ class OverlayServiceLite : Service() {
                 PixelFormat.TRANSLUCENT
             )
             val overlay = FrameLayout(this).apply { setBackgroundColor(Color.parseColor("#33000000")) }
-            val hint = TextView(this).apply {
-                text = "3~10곳 터치"
+            hintText = TextView(this).apply {
+                text = "🚕 택시 아이콘을 터치하세요"
                 setTextColor(Color.WHITE)
-                textSize = 14f
+                textSize = 15f
                 setBackgroundColor(Color.parseColor("#CC000000"))
-                setPadding(20, 10, 20, 10)
+                setPadding(20, 12, 20, 12)
                 gravity = Gravity.CENTER
             }
 
@@ -205,6 +210,7 @@ class OverlayServiceLite : Service() {
                 text = "전송 (0)"
                 setBackgroundColor(Color.parseColor("#16A34A"))
                 setTextColor(Color.WHITE)
+                isEnabled = false
                 setOnClickListener {
                     if (tappedPoints.size < 3) {
                         Toast.makeText(this@OverlayServiceLite, "최소 3곳", Toast.LENGTH_SHORT).show()
@@ -233,30 +239,50 @@ class OverlayServiceLite : Service() {
                     val adjX = e.rawX
                     val adjY = e.rawY - statusBarOffset
 
-                    tappedPoints.add(PointF(adjX, adjY))
-                    val dot = View(this).apply {
-                        background = GradientDrawable().apply {
-                            shape = GradientDrawable.OVAL
-                            setColor(Color.RED)
+                    if (isCalibrating) {
+                        // 첫 터치 = 택시 아이콘 기준점
+                        refPoint = PointF(adjX, adjY)
+                        isCalibrating = false
+                        hintText?.text = "핫스팟 3~10곳 터치"
+                        btnSend?.isEnabled = true
+                        val refDot = View(this).apply {
+                            background = GradientDrawable().apply {
+                                shape = GradientDrawable.OVAL
+                                setColor(Color.YELLOW)
+                            }
+                            layoutParams = FrameLayout.LayoutParams(36, 36).apply {
+                                leftMargin = (adjX - 18).toInt()
+                                topMargin = (adjY - 18).toInt()
+                            }
                         }
-                        layoutParams = FrameLayout.LayoutParams(28, 28).apply {
-                            leftMargin = (adjX - 14).toInt()
-                            topMargin = (adjY - 14).toInt()
+                        overlay.addView(refDot)
+                        Toast.makeText(this, "기준점 설정됨", Toast.LENGTH_SHORT).show()
+                    } else {
+                        // 핫스팟 터치
+                        tappedPoints.add(PointF(adjX, adjY))
+                        val dot = View(this).apply {
+                            background = GradientDrawable().apply {
+                                shape = GradientDrawable.OVAL
+                                setColor(Color.RED)
+                            }
+                            layoutParams = FrameLayout.LayoutParams(28, 28).apply {
+                                leftMargin = (adjX - 14).toInt()
+                                topMargin = (adjY - 14).toInt()
+                            }
                         }
+                        overlay.addView(dot)
+                        dotViews.add(dot)
+                        btnSend?.text = "전송 (${tappedPoints.size})"
                     }
-                    overlay.addView(dot)
-                    dotViews.add(dot)
-                    btnSend?.text = "전송 (${tappedPoints.size})"
                 }
                 true
             }
 
-            overlay.addView(hint, FrameLayout.LayoutParams(
+            overlay.addView(hintText, FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT
             ).apply { gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL; topMargin = 80 })
 
-            // LinearLayout으로 버튼 겹침 방지
             val bottom = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
                 setPadding(16, 8, 16, 16)
@@ -297,15 +323,16 @@ class OverlayServiceLite : Service() {
         captureOverlay = null
         tappedPoints.clear()
         dotViews.clear()
-        // 플로팅 버튼은 그대로 유지
+        refPoint = null
+        isCalibrating = true
     }
 
     private fun sendAll() {
-        if (tappedPoints.isEmpty()) return
+        if (tappedPoints.isEmpty() || refPoint == null) return
         getLocation()
         val mpp = 9.5
-        val cx = screenW / 2f
-        val cy = screenH / 2f
+        val cx = refPoint!!.x  // 택시 아이콘 기준
+        val cy = refPoint!!.y
         val hotspots = tappedPoints.mapIndexed { i, pt ->
             val dx = pt.x - cx
             val dy = cy - pt.y
