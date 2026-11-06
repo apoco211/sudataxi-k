@@ -6,10 +6,9 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.graphics.Color
 import android.graphics.PixelFormat
-import android.location.Location
-import android.location.LocationManager
 import android.os.Build
 import android.os.IBinder
 import android.provider.Settings
@@ -39,8 +38,13 @@ class OverlayServiceLite : Service() {
 
             createChannel()
 
-            // location 타입 없이 시작 (Android 14+ 권한 문제 회피)
-            startForeground(1, createNotification())
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                startForeground(1, createNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(1, createNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+            } else {
+                startForeground(1, createNotification())
+            }
 
             showFloatingButton()
         } catch (e: Exception) {
