@@ -23,6 +23,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.FrameLayout
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import kotlin.math.cos
@@ -190,13 +191,13 @@ class OverlayServiceLite : Service() {
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                 PixelFormat.TRANSLUCENT
             )
-            val overlay = FrameLayout(this).apply { setBackgroundColor(Color.parseColor("#44000000")) }
+            val overlay = FrameLayout(this).apply { setBackgroundColor(Color.parseColor("#33000000")) }
             val hint = TextView(this).apply {
-                text = "3~10곳 터치 (잘못찍으면 되돌리기)"
+                text = "3~10곳 터치"
                 setTextColor(Color.WHITE)
-                textSize = 15f
-                setBackgroundColor(Color.parseColor("#DD000000"))
-                setPadding(24, 14, 24, 14)
+                textSize = 14f
+                setBackgroundColor(Color.parseColor("#CC000000"))
+                setPadding(20, 10, 20, 10)
                 gravity = Gravity.CENTER
             }
 
@@ -219,22 +220,15 @@ class OverlayServiceLite : Service() {
                 setTextColor(Color.BLACK)
                 setOnClickListener { undoLast() }
             }
-            val btnCancel = Button(this).apply {
-                text = "취소"
+            val btnClose = Button(this).apply {
+                text = "닫기"
                 setBackgroundColor(Color.parseColor("#4B5563"))
                 setTextColor(Color.WHITE)
                 setOnClickListener { closeCaptureOverlay() }
             }
-            val btnExit = Button(this).apply {
-                text = "✕ 종료"
-                setBackgroundColor(Color.parseColor("#DC2626"))
-                setTextColor(Color.WHITE)
-                setOnClickListener { stopSelf() }
-            }
 
             overlay.setOnTouchListener { _, e ->
                 if (e.action == MotionEvent.ACTION_DOWN) {
-                    // 터치 좌표 보정 (상태바 등으로 인한 오프셋)
                     val statusBarOffset = getStatusBarHeight()
                     val adjX = e.rawX
                     val adjY = e.rawY - statusBarOffset
@@ -260,13 +254,15 @@ class OverlayServiceLite : Service() {
             overlay.addView(hint, FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT
-            ).apply { gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL; topMargin = 100 })
+            ).apply { gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL; topMargin = 80 })
 
-            val bottom = FrameLayout(this).apply {
-                addView(btnSend, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 110).apply { bottomMargin = 340 })
-                addView(btnUndo, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 90).apply { bottomMargin = 240 })
-                addView(btnCancel, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 80).apply { bottomMargin = 150 })
-                addView(btnExit, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 70))
+            // LinearLayout으로 버튼 겹침 방지
+            val bottom = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(16, 8, 16, 16)
+                addView(btnSend, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 100).apply { bottomMargin = 8 })
+                addView(btnUndo, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 80).apply { bottomMargin = 8 })
+                addView(btnClose, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 70))
             }
             overlay.addView(bottom, FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
@@ -301,6 +297,7 @@ class OverlayServiceLite : Service() {
         captureOverlay = null
         tappedPoints.clear()
         dotViews.clear()
+        // 플로팅 버튼은 그대로 유지
     }
 
     private fun sendAll() {
