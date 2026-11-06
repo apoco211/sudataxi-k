@@ -6,7 +6,6 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ServiceInfo
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.location.Location
@@ -40,12 +39,8 @@ class OverlayServiceLite : Service() {
 
             createChannel()
 
-            // Android 10+ 에서는 타입을 명시해야 함
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                startForeground(1, createNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION)
-            } else {
-                startForeground(1, createNotification())
-            }
+            // location 타입 없이 시작 (Android 14+ 권한 문제 회피)
+            startForeground(1, createNotification())
 
             showFloatingButton()
         } catch (e: Exception) {
