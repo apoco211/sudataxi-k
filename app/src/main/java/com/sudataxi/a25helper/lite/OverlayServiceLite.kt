@@ -38,6 +38,7 @@ class OverlayServiceLite : Service() {
     private var captureOverlay: View? = null
     private var firebaseUrl = ""
     private val tappedPoints = mutableListOf<PointF>()
+    private val dotViews = mutableListOf<View>()
     private var centerLat = 37.3912
     private var centerLng = 126.9498
     private var screenW = 1080
@@ -48,6 +49,7 @@ class OverlayServiceLite : Service() {
     private var touchX = 0f
     private var touchY = 0f
     private var moved = false
+    private var btnSend: Button? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try {
@@ -178,6 +180,8 @@ class OverlayServiceLite : Service() {
 
     private fun showCaptureOverlay() {
         if (captureOverlay != null) return
+        tappedPoints.clear()
+        dotViews.clear()
         try {
             val p = WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
@@ -186,16 +190,17 @@ class OverlayServiceLite : Service() {
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                 PixelFormat.TRANSLUCENT
             )
-            val overlay = FrameLayout(this).apply { setBackgroundColor(Color.parseColor("#55000000")) }
+            val overlay = FrameLayout(this).apply { setBackgroundColor(Color.parseColor("#44000000")) }
             val hint = TextView(this).apply {
-                text = "3~10곳 터치 후 전송"
+                text = "3~10곳 터치 (잘못찍으면 되돌리기)"
                 setTextColor(Color.WHITE)
-                textSize = 16f
+                textSize = 15f
                 setBackgroundColor(Color.parseColor("#DD000000"))
-                setPadding(28, 18, 28, 18)
+                setPadding(24, 14, 24, 14)
                 gravity = Gravity.CENTER
             }
-            val btnSend = Button(this).apply {
+
+            btnSend = Button(this).apply {
                 text = "전송 (0)"
                 setBackgroundColor(Color.parseColor("#16A34A"))
                 setTextColor(Color.WHITE)
@@ -207,6 +212,12 @@ class OverlayServiceLite : Service() {
                     sendAll()
                     closeCaptureOverlay()
                 }
+            }
+            val btnUndo = Button(this).apply {
+                text = "↩ 되돌리기"
+                setBackgroundColor(Color.parseColor("#F59E0B"))
+                setTextColor(Color.BLACK)
+                setOnClickListener { undoLast() }
             }
             val btnCancel = Button(this).apply {
                 text = "취소"
@@ -223,19 +234,25 @@ class OverlayServiceLite : Service() {
 
             overlay.setOnTouchListener { _, e ->
                 if (e.action == MotionEvent.ACTION_DOWN) {
-                    tappedPoints.add(PointF(e.rawX, e.rawY))
+                    // 터치 좌표 보정 (상태바 등으로 인한 오프셋)
+                    val statusBarOffset = getStatusBarHeight()
+                    val adjX = e.rawX
+                    val adjY = e.rawY - statusBarOffset
+
+                    tappedPoints.add(PointF(adjX, adjY))
                     val dot = View(this).apply {
                         background = GradientDrawable().apply {
                             shape = GradientDrawable.OVAL
                             setColor(Color.RED)
                         }
-                        layoutParams = FrameLayout.LayoutParams(32, 32).apply {
-                            leftMargin = (e.rawX - 16).toInt()
-                            topMargin = (e.rawY - 16).toInt()
+                        layoutParams = FrameLayout.LayoutParams(28, 28).apply {
+                            leftMargin = (adjX - 14).toInt()
+                            topMargin = (adjY - 14).toInt()
                         }
                     }
                     overlay.addView(dot)
-                    btnSend.text = "전송 (${tappedPoints.size})"
+                    dotViews.add(dot)
+                    btnSend?.text = "전송 (${tappedPoints.size})"
                 }
                 true
             }
@@ -243,12 +260,13 @@ class OverlayServiceLite : Service() {
             overlay.addView(hint, FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT
-            ).apply { gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL; topMargin = 140 })
+            ).apply { gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL; topMargin = 100 })
 
             val bottom = FrameLayout(this).apply {
-                addView(btnSend, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 120).apply { bottomMargin = 240 })
-                addView(btnCancel, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 100).apply { bottomMargin = 130 })
-                addView(btnExit, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 90))
+                addView(btnSend, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 110).apply { bottomMargin = 340 })
+                addView(btnUndo, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 90).apply { bottomMargin = 240 })
+                addView(btnCancel, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 80).apply { bottomMargin = 150 })
+                addView(btnExit, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 70))
             }
             overlay.addView(bottom, FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
@@ -262,9 +280,27 @@ class OverlayServiceLite : Service() {
         }
     }
 
+    private fun getStatusBarHeight(): Int {
+        val resId = resources.getIdentifier("status_bar_height", "dimen", "android")
+        return if (resId > 0) resources.getDimensionPixelSize(resId) else 0
+    }
+
+    private fun undoLast() {
+        if (tappedPoints.isEmpty()) return
+        tappedPoints.removeAt(tappedPoints.lastIndex)
+        if (dotViews.isNotEmpty()) {
+            val last = dotViews.removeAt(dotViews.lastIndex)
+            (captureOverlay as? FrameLayout)?.removeView(last)
+        }
+        btnSend?.text = "전송 (${tappedPoints.size})"
+        Toast.makeText(this, "마지막 점 삭제", Toast.LENGTH_SHORT).show()
+    }
+
     private fun closeCaptureOverlay() {
         try { captureOverlay?.let { windowManager?.removeView(it) } } catch (e: Exception) {}
         captureOverlay = null
+        tappedPoints.clear()
+        dotViews.clear()
     }
 
     private fun sendAll() {
@@ -299,7 +335,6 @@ class OverlayServiceLite : Service() {
                 android.os.Handler(mainLooper).post {
                     if (ok) {
                         Toast.makeText(this, "✅ ${hotspots.size}곳 전송 완료", Toast.LENGTH_LONG).show()
-                        tappedPoints.clear()
                     } else {
                         Toast.makeText(this, "❌ 전송 실패", Toast.LENGTH_LONG).show()
                     }
