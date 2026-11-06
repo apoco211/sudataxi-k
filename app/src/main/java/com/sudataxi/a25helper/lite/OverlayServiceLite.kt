@@ -141,10 +141,11 @@ class OverlayServiceLite : Service() {
                     setStroke(6, Color.WHITE)
                 }
                 setOnTouchListener { _, e ->
+                    val lp = layoutParams ?: return@setOnTouchListener false
                     when (e.action) {
                         MotionEvent.ACTION_DOWN -> {
-                            startX = layoutParams!!.x
-                            startY = layoutParams!!.y
+                            startX = lp.x
+                            startY = lp.y
                             touchX = e.rawX
                             touchY = e.rawY
                             moved = false
@@ -154,9 +155,9 @@ class OverlayServiceLite : Service() {
                             val dy = e.rawY - touchY
                             if (Math.abs(dx) > 12 || Math.abs(dy) > 12) moved = true
                             if (moved) {
-                                layoutParams!!.x = startX + dx.toInt()
-                                layoutParams!!.y = startY + dy.toInt()
-                                windowManager?.updateViewLayout(root, layoutParams)
+                                lp.x = startX + dx.toInt()
+                                lp.y = startY + dy.toInt()
+                                windowManager?.updateViewLayout(root, lp)
                             }
                         }
                         MotionEvent.ACTION_UP -> {
