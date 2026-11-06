@@ -6,8 +6,11 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.graphics.Color
 import android.graphics.PixelFormat
+import android.location.Location
+import android.location.LocationManager
 import android.os.Build
 import android.os.IBinder
 import android.provider.Settings
@@ -22,6 +25,7 @@ class OverlayServiceLite : Service() {
     private val TAG = "OverlayServiceLite"
     private var windowManager: WindowManager? = null
     private var floatingView: FrameLayout? = null
+    private var firebaseUrl = ""
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try {
@@ -31,8 +35,18 @@ class OverlayServiceLite : Service() {
                 return START_NOT_STICKY
             }
 
+            firebaseUrl = intent?.getStringExtra("firebase_url")
+                ?: getSharedPreferences("a25_lite", MODE_PRIVATE).getString("firebase_url", "") ?: ""
+
             createChannel()
-            startForeground(1, createNotification())
+
+            // Android 10+ 에서는 타입을 명시해야 함
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(1, createNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION)
+            } else {
+                startForeground(1, createNotification())
+            }
+
             showFloatingButton()
         } catch (e: Exception) {
             Log.e(TAG, "onStartCommand error", e)
@@ -73,7 +87,7 @@ class OverlayServiceLite : Service() {
                     WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
                 else
                     WindowManager.LayoutParams.TYPE_PHONE,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT
             )
             params.gravity = Gravity.TOP or Gravity.START
@@ -88,8 +102,7 @@ class OverlayServiceLite : Service() {
                 setTextColor(Color.BLACK)
                 setPadding(24, 16, 24, 16)
                 setOnClickListener {
-                    Toast.makeText(this@OverlayServiceLite, "핫스팟 캡처 시작", Toast.LENGTH_SHORT).show()
-                    // TODO: showCaptureOverlay() 호출
+                    Toast.makeText(this@OverlayServiceLite, "핫스팟 캡처 준비", Toast.LENGTH_SHORT).show()
                 }
             }
             container.addView(btn)
