@@ -2320,8 +2320,7 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
           <div style="font-size:10px; color:#FB923C; margin-top:4px; font-weight:800;">👆 사진 터치해서 핀 찍기 (최대 10곳)</div>
         </div>
         <div style="display:flex; gap:6px; margin-top:4px;">
-          <button type="button" onclick="openA25PinEditor()" style="flex:1; background:#F97316; color:#000; border:none; border-radius:8px; padding:8px; font-size:12px; font-weight:900;">📍 핀 찍기 (최대10)</button>
-          <button type="button" onclick="applyA25PinsToMode()" style="flex:1; background:#22C55E; color:#000; border:none; border-radius:8px; padding:8px; font-size:12px; font-weight:900;">🚀 모드별 적용</button>
+          <!-- 핀 찍기 / 모드별 적용 버튼 제거 (자동 적용으로 대체) -->
         </div>
         <div id="a25-firebase-hotspots" style="display:flex; flex-direction:column; gap:4px; max-height:220px; overflow-y:auto; margin-top:6px;"><div style="font-size:11px; color:#64748B; text-align:center; padding:8px;">수신된 콜수요 없음</div></div>
         <div style="font-size:9px; color:#64748B; line-height:1.3; margin-top:2px;">
@@ -6138,6 +6137,30 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
       }
     }
 
+    // === A25 연동: 앞 3곳(또는 모드2 안내)을 추천 카드로 주입 ===
+    try {
+      const isMode2 = document.body.classList.contains('mode-2');
+      let a25Items = [];
+      if (isMode2) {
+        const target = JSON.parse(localStorage.getItem('sudataxi_a25_mode2_target') || 'null');
+        const guide3 = JSON.parse(localStorage.getItem('sudataxi_a25_mode2_guide3') || '[]');
+        if (target && target.lat) a25Items.push({...target, name: '🎯 A25 관내 목적지', isA25Target: true, baseScore: 95});
+        guide3.forEach((g,i) => {
+          if (g && g.lat) a25Items.push({lat:g.lat, lng:g.lng, name: '📍 A25 방향 안내 '+(i+1), isA25Guide: true, baseScore: 80 - i*5});
+        });
+      } else {
+        const top3 = JSON.parse(localStorage.getItem('sudataxi_a25_mode1_top3') || '[]');
+        top3.forEach((p,i) => {
+          if (p && p.lat) a25Items.push({lat:p.lat, lng:p.lng, name: '🔥 A25 콜수요 '+(i+1), isA25Hotspot: true, baseScore: 90 - i*5, source:'a25'});
+        });
+      }
+      a25Items.forEach(item => {
+        if (!rawPool.some(rp => getStraightDistanceKm(rp.lat||0, rp.lng||0, item.lat, item.lng) < 0.15)) {
+          rawPool.unshift(item);
+        }
+      });
+    } catch(e) { console.warn('A25 inject fail', e); }
+
     let preFiltered = [];
     for (let item of rawPool) {
       let straightDist = getStraightDistanceKm(currentPos.lat, currentPos.lng, item.lat, item.lng);
@@ -6377,7 +6400,11 @@ async function fetchKakaoRoadRoute(fromLat, fromLng, toLat, toLng) {
     } else { callMapViewLeaflet.setView([centerPos.lat, centerPos.lng], 13); callMapViewLeaflet.invalidateSize(); }
     callMapViewLeaflet.eachLayer(l => { if (l instanceof L.Marker) callMapViewLeaflet.removeLayer(l); });
     L.marker([centerPos.lat, centerPos.lng], { icon: L.divIcon({ html: '<div class="custom-map-marker current">📍</div>', className: '', iconSize: [24, 24] }), zIndexOffset: 1000 }).addTo(callMapViewLeaflet);
-    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]'); const nowHour = new Date().getHours();
+    const logs = JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]'); 
+
+    
+
+const nowHour = new Date().getHours();
     logs.forEach(log => {
        const logLat = Number(log.lat); const logLng = Number(log.lng); const logDate = new Date(log.timestamp || log.time); const logHour = logDate.getHours();
        let hourDiff = Math.abs(nowHour - logHour); if (hourDiff > 12) hourDiff = 24 - hourDiff; const isTimeMatch = hourDiff <= 1;
@@ -9144,18 +9171,7 @@ function updateA25FirebaseUI(data, isClear){
     if(statusEl){ statusEl.textContent='🟡 대기중'; statusEl.style.color='#FBBF24'; statusEl.style.borderColor='#F59E0B'; }
     if(metaEl) metaEl.textContent='마지막 동기화: '+ new Date().toLocaleTimeString() +' / 핫스팟 0개 (데이터 없음)';
     if(listEl) listEl.innerHTML='<div style="font-size:11px; color:#64748B; text-align:center; padding:8px;">A25에서 데이터 대기중... 플로팅 버튼 🔥을 눌러보세요</div>';
-    // v8.14.25: 위치 변경 시 한 번만 열기
-    if(data && data.lat && data.lng){
-      var locKey = Math.round(data.lat*1000) + ',' + Math.round(data.lng*1000);
-      if(locKey !== window._a25LastLocKey){
-        window._a25LastLocKey = locKey;
-        a25CenterGPS = {lat:data.lat, lng:data.lng};
-        if(typeof openA25PinEditor === 'function' && !window._a25PinOpen){
-          window._a25PinOpen = true;
-          setTimeout(function(){ openA25PinEditor(); }, 300);
-        }
-      }
-    }
+    // 지도 자동 오픈 제거 (신호 수신 시 지도 뜨지 않음)
     return;
   }
   const hotspots = data.hotspots || [];
@@ -9190,6 +9206,22 @@ function updateA25FirebaseUI(data, isClear){
   }catch(e){}
   a25DemandHotspots = hotspots;
   a25LastTimestamp = ts;
+  // === 자동 적용: 모드 판단 → 첫탭 이동 → 카드 반영 + 나머지 저장 ===
+  try {
+    if (hotspots.length >= 3) {
+      // 현재 모드 판단 (body class 기준)
+      const isMode2 = document.body.classList.contains('mode-2');
+      // applyA25PinsToMode 내부 로직을 재사용하기 위해 임시로 a25ManualPins를 세팅
+      const prevPins = a25ManualPins;
+      a25ManualPins = hotspots.map(h => ({lat:h.lat, lng:h.lng, level:h.level||10}));
+      applyA25PinsToMode();
+      a25ManualPins = prevPins;
+      // 첫 탭으로 이동 (이미 1번이면 재호출해도 무방)
+      if (typeof setTab === 'function') setTab(1);
+      if (typeof showToast === 'function') showToast('🔥 A25 데이터 자동 적용됨 (' + hotspots.length + '곳)');
+    }
+  } catch(e) { console.warn('A25 auto-apply fail', e); }
+
   try{ if(typeof window.onA25DemandUpdate==='function') window.onA25DemandUpdate(hotspots, data); }catch(e){}
   try{
     if(!window._a25FirstSyncToastShown){
