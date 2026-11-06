@@ -42,7 +42,7 @@ class OverlayServiceLite : Service() {
     private var centerLng = 126.9498
     private var screenW = 1080
     private var screenH = 1920
-    private var layoutParams: WindowManager.LayoutParams? = null
+    private var wmParams: WindowManager.LayoutParams? = null
     private var startX = 0
     private var startY = 0
     private var touchX = 0f
@@ -119,7 +119,7 @@ class OverlayServiceLite : Service() {
                 screenH = m.heightPixels
             }
 
-            layoutParams = WindowManager.LayoutParams(
+            wmParams = WindowManager.LayoutParams(
                 160, 160,
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY else WindowManager.LayoutParams.TYPE_PHONE,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
@@ -141,7 +141,7 @@ class OverlayServiceLite : Service() {
                     setStroke(6, Color.WHITE)
                 }
                 setOnTouchListener { _, e ->
-                    val lp = layoutParams ?: return@setOnTouchListener false
+                    val lp = wmParams ?: return@setOnTouchListener false
                     when (e.action) {
                         MotionEvent.ACTION_DOWN -> {
                             startX = lp.x
@@ -169,7 +169,7 @@ class OverlayServiceLite : Service() {
             }
             root.addView(btn, FrameLayout.LayoutParams(160, 160))
             floatingView = root
-            windowManager!!.addView(root, layoutParams)
+            windowManager!!.addView(root, wmParams)
         } catch (e: Exception) {
             Log.e(TAG, "showFloatingButton", e)
             Toast.makeText(this, "버튼 실패: ${e.message}", Toast.LENGTH_LONG).show()
