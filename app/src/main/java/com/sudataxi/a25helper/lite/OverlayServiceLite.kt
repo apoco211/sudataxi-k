@@ -35,6 +35,7 @@ import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 
+// v8.14.41: 하단 닫기 버튼 네비게이션 바 가림 수정 + 상단 X 추가 + 선택 0개여도 닫힘
 class OverlayServiceLite : Service() {
     private val TAG = "OverlayServiceLite"
     private var windowManager: WindowManager? = null
@@ -298,6 +299,7 @@ class OverlayServiceLite : Service() {
             }
             val btnClose = Button(this).apply {
                 text = "닫기"
+                isEnabled = true
                 setBackgroundColor(Color.parseColor("#4B5563"))
                 setTextColor(Color.WHITE)
                 setOnClickListener { closeCaptureOverlay() }
@@ -350,13 +352,36 @@ class OverlayServiceLite : Service() {
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT
             ).apply { gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL; topMargin = 80 })
+            // === v8.14.41 FIX: 하단 버튼이 안드로이드 내비게이션 바(III, O, ◁) / 제스처 바에 가려져서 터치가 안 되던 문제 ===
+            // 원본은 bottom padding 16px만 줘서 닫기 버튼이 네비게이션 바 밑에 깔림.
+            // 이제 네비게이션 바 높이 + 24px를 아래에 확보해서 닫기가 항상 네비게이션 바 위에 뜨게 함.
+            // 닫기는 선택 0개여도 항상 눌림. 상단 우측 X도 추가해서 어디서든 닫을 수 있게 함.
+            val navBarH = getNavigationBarHeight()
+            val bottomInset = navBarH + 28
+            // 상단 우측 닫기 (캘리브레이션 전에도 닫을 수 있게 - 콜 오면 바로 닫고 나가야 함)
+            val btnTopClose = Button(this).apply {
+                text = "✕ 닫기"
+                textSize = 14f
+                setTextColor(Color.WHITE)
+                setBackgroundColor(Color.parseColor("#DC2626"))
+                setPadding(24, 16, 24, 16)
+                setOnClickListener { closeCaptureOverlay() }
+            }
+            overlay.addView(btnTopClose, FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+            ).apply { gravity = Gravity.TOP or Gravity.END; topMargin = 24; rightMargin = 16 })
+            // 닫기 버튼을 더 크고 눈에 띄게 - 선택 없어도 닫힘을 문구로 명시
+            btnClose.text = "✕ 닫기 (선택 없어도 닫힘)"
+            btnClose.setBackgroundColor(Color.parseColor("#DC2626"))
             val bottom = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
-                setPadding(16, 8, 16, 16)
-                addView(btnSend, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 100).apply { bottomMargin = 8 })
-                addView(btnScaleRow, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { bottomMargin = 8 })
-                addView(btnUndo, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 80).apply { bottomMargin = 8 })
-                addView(btnClose, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 70))
+                setBackgroundColor(Color.parseColor("#CC000000"))
+                setPadding(16, 12, 16, bottomInset)
+                addView(btnSend, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 110).apply { bottomMargin = 10 })
+                addView(btnScaleRow, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { bottomMargin = 10 })
+                addView(btnUndo, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 88).apply { bottomMargin = 10 })
+                addView(btnClose, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 96))
             }
             overlay.addView(bottom, FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
@@ -371,6 +396,14 @@ class OverlayServiceLite : Service() {
 
     private fun saveMpp() {
         try { getSharedPreferences("a25_lite", MODE_PRIVATE).edit().putFloat("mpp", mpp).apply() } catch (e: Exception) {}
+    }
+
+    // === v8.14.41: 하단 내비게이션 바 높이 (제스처 바 / 3버튼 바 모두 대응) ===
+    private fun getNavigationBarHeight(): Int {
+        return try {
+            val resId = resources.getIdentifier("navigation_bar_height", "dimen", "android")
+            if (resId > 0) resources.getDimensionPixelSize(resId) else 96
+        } catch (e: Exception) { 96 }
     }
 
     private fun getStatusBarHeight(): Int {
