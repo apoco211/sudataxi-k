@@ -36,6 +36,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 // v8.14.41: 하단 닫기 버튼 네비게이션 바 가림 수정 + 상단 X 추가 + 선택 0개여도 닫힘
+// v8.14.42-LITE FIX: 기준점 GPS 얼림 - 기준점 찍은 순간의 GPS를 고정해서 전송 때 다시 가져온 GPS로 밀리는 문제 해결
 class OverlayServiceLite : Service() {
     private val TAG = "OverlayServiceLite"
     private var windowManager: WindowManager? = null
@@ -46,13 +47,20 @@ class OverlayServiceLite : Service() {
     private val dotViews = mutableListOf<View>()
     private var refDotView: View? = null
     // --- v8.14.38-LITE FIX: 기본값 군포를 조용히 쓰지 않음 ---
-    // 원본은 getLastKnownLocation이 null이면 centerLat/Lng가 군포 기본값(37.3912,126.9498) 그대로 전송됨.
-    // 수원(37.26)에 있는데 군포 중심으로 보내면 핫스팟 전체가 북쪽으로 ~11km 밀려서,
-    // 웹앱에서 "A25 관내 목적지 11.4km"로 뜨고, 안내 3개는 8km 필터에 걸려 0개가 됨.
     private var centerLat = 37.3912
     private var centerLng = 126.9498
     private var hasLocation = false
     private var lastLocTime = 0L
+    private var lastAccuracy = Float.MAX_VALUE
+    // --- v8.14.42 FIX: 기준점 찍은 순간의 GPS를 얼려둠 ---
+    // 원본은 refPoint(화면 좌표)만 저장하고, centerLat/Lng는 sendAll() 때 다시 가져온 값으로 계산함.
+    // 기준점 찍고 핀 찍는 사이에 GPS가 움직이면, dx/dy는 옛날 기준점 기준인데 center는 새 값이라 핀 전체가 밀림.
+    // 이제 ref를 찍는 순간 center를 refCenterLat/Lng에 복사해두고, sendAll()에서는 그 얼린 값만 씀.
+    // refPoint = 화면 상대위치, refCenter = 절대위치. 둘은 같은 순간에 찍혀야 의미가 있음.
+    private var refCenterLat = 0.0
+    private var refCenterLng = 0.0
+    private var refCenterTime = 0L
+    private var refCenterAccuracy = Float.MAX_VALUE
     private var screenW = 1080
     private var screenH = 1920
     private var wmParams: WindowManager.LayoutParams? = null
@@ -63,11 +71,8 @@ class OverlayServiceLite : Service() {
     private var moved = false
     private var btnSend: Button? = null
     private var hintText: TextView? = null
-    private var refPoint: PointF? = null  // 택시 아이콘 기준점
+    private var refPoint: PointF? = null
     private var isCalibrating = true
-    // --- v8.14.38-LITE FIX: 축척(mpp) 고정 9.5가 틀어지는 원인 ---
-    // 원본 mpp=9.5는 특정 줌에서만 맞음. A25 지도를 줌인/줌아웃하면 실제 mpp가 4~20으로 바뀜.
-    // 그래서 탭한 거리 그대로 km가 틀어짐. 이제 오버레이에서 - / + 로 바꿀 수 있고, prefs에 저장됨.
     private var mpp = 9.5f
     private val MPP_STEPS = floatArrayOf(4f, 6f, 7.5f, 9.5f, 12f, 15f, 20f)
     private var mppIndex = 3
@@ -81,7 +86,6 @@ class OverlayServiceLite : Service() {
             }
             firebaseUrl = intent?.getStringExtra("firebase_url")
                 ?: getSharedPreferences("a25_lite", MODE_PRIVATE).getString("firebase_url", "") ?: ""
-            // 저장된 축척 복원
             val prefs = getSharedPreferences("a25_lite", MODE_PRIVATE)
             mpp = prefs.getFloat("mpp", 9.5f)
             mppIndex = MPP_STEPS.indexOfFirst { it == mpp }.takeIf { it >= 0 } ?: 3
@@ -118,31 +122,42 @@ class OverlayServiceLite : Service() {
     private fun getLocation() {
         try {
             val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-            // 1) 마지막 위치라도 "얼마나 오래됐는지"를 먼저 봄. 2분 넘으면 오래된 것으로 취급.
             val candidates = listOfNotNull(
                 try { lm.getLastKnownLocation(LocationManager.GPS_PROVIDER) } catch (e: SecurityException) { null },
                 try { lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) } catch (e: SecurityException) { null }
             )
             val freshest = candidates.maxByOrNull { it.time }
-            if (freshest != null) {
+            if (freshest == null) {
+                // v8.14.42: 후보가 없으면 hasLocation을 false로 명확히 내림. 예전 값 유지하면 안 됨.
+                hasLocation = false
+            } else {
                 val age = System.currentTimeMillis() - freshest.time
                 centerLat = freshest.latitude
                 centerLng = freshest.longitude
                 lastLocTime = freshest.time
-                // 2분 이내만 "있음"으로 인정. 그 이상은 아래에서 새로 요청함.
-                hasLocation = age < 120_000
-                if (!hasLocation) Toast.makeText(this, "GPS 위치가 ${age / 1000}초 전 것이라 새로 잡는 중…", Toast.LENGTH_SHORT).show()
+                lastAccuracy = freshest.accuracy
+                // v8.14.42: 정확도 체크 추가. NETWORK 500m~1km짜리가 최신이라고 들어오면 그걸 기준으로 쓰면 안 됨.
+                // 200m보다 나쁘면 "없음"으로 취급하고 새로 요청함.
+                hasLocation = age < 120_000 && freshest.accuracy < 200f
+                if (!hasLocation) {
+                    if (age >= 120_000) Toast.makeText(this, "GPS 위치가 ${age / 1000}초 전 것이라 새로 잡는 중…", Toast.LENGTH_SHORT).show()
+                    else if (freshest.accuracy >= 200f) Toast.makeText(this, "GPS 정확도 낮음 (${freshest.accuracy.toInt()}m), 다시 잡는 중…", Toast.LENGTH_SHORT).show()
+                }
             }
-            // 2) 오래됐거나 없으면 1회성으로 새로 요청. 이 콜백이 오면 center가 갱신됨.
             if (!hasLocation) {
                 try {
                     val listener = object : LocationListener {
                         override fun onLocationChanged(loc: Location) {
+                            // 정확도 나쁜 NETWORK 위치가 좋은 GPS를 덮지 않게 함
+                            if (loc.accuracy > 200f) return
+                            // 이미 더 좋은 위치가 있으면 굳이 덮지 않음
+                            if (hasLocation && loc.accuracy > lastAccuracy + 20f) return
                             centerLat = loc.latitude
                             centerLng = loc.longitude
                             lastLocTime = loc.time
+                            lastAccuracy = loc.accuracy
                             hasLocation = true
-                            Toast.makeText(this@OverlayServiceLite, "GPS 갱신됨", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@OverlayServiceLite, "GPS 갱신됨 (정확도 ${loc.accuracy.toInt()}m)", Toast.LENGTH_SHORT).show()
                             try { lm.removeUpdates(this) } catch (e: Exception) {}
                         }
                         override fun onStatusChanged(p: String?, s: Int, e: Bundle?) {}
@@ -156,6 +171,31 @@ class OverlayServiceLite : Service() {
                 }
             }
         } catch (e: Exception) { Log.e(TAG, "getLocation", e) }
+    }
+
+    // v8.14.42: 기준점 찍은 순간의 GPS를 얼림. 이걸 안 하면 sendAll() 때 center가 바뀌어서 밀림.
+    private fun freezeRefCenter() {
+        refCenterLat = centerLat
+        refCenterLng = centerLng
+        refCenterTime = lastLocTime
+        refCenterAccuracy = lastAccuracy
+        Log.d(TAG, "freezeRefCenter lat=$refCenterLat lng=$refCenterLng time=$refCenterTime acc=$refCenterAccuracy")
+    }
+
+    private fun resetCalibration() {
+        // 기준점 다시 찍기: 기존 핫스팟은 기준점이 바뀌면 의미가 없어지므로 같이 지움
+        tappedPoints.clear()
+        dotViews.forEach { (captureOverlay as? FrameLayout)?.removeView(it) }
+        dotViews.clear()
+        refDotView?.let { (captureOverlay as? FrameLayout)?.removeView(it) }
+        refDotView = null
+        refPoint = null
+        refCenterTime = 0L
+        isCalibrating = true
+        btnSend?.text = "전송 (0)"
+        btnSend?.isEnabled = false
+        hintText?.text = "🚕 택시 아이콘을 다시 터치하세요  ·  축척 ${mpp}m/px"
+        Toast.makeText(this, "기준점 초기화 - 택시 아이콘 다시 터치", Toast.LENGTH_SHORT).show()
     }
 
     private fun showFloatingButton() {
@@ -235,8 +275,8 @@ class OverlayServiceLite : Service() {
         dotViews.clear()
         refPoint = null
         refDotView = null
+        refCenterTime = 0L
         isCalibrating = true
-        // 캡처 열 때 GPS 한 번 더 갱신 시도
         getLocation()
         try {
             val p = WindowManager.LayoutParams(
@@ -275,7 +315,13 @@ class OverlayServiceLite : Service() {
                 setTextColor(Color.BLACK)
                 setOnClickListener { undoLast() }
             }
-            // --- FIX: 축척 조절 버튼. A25 지도를 줌인하면 - , 줌아웃하면 + 로 맞추면 됨 ---
+            // v8.14.42: 기준점 다시 찍기 버튼. 첫 터치 실수하면 닫고 다시 열 필요 없이 여기서 고침.
+            val btnRecalibrate = Button(this).apply {
+                text = "◎ 기준점 다시 찍기"
+                setBackgroundColor(Color.parseColor("#7C3AED"))
+                setTextColor(Color.WHITE)
+                setOnClickListener { resetCalibration() }
+            }
             val btnScaleRow = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
                 val btnMinus = Button(this@OverlayServiceLite).apply {
@@ -306,15 +352,16 @@ class OverlayServiceLite : Service() {
             }
             overlay.setOnTouchListener { _, e ->
                 if (e.action == MotionEvent.ACTION_DOWN) {
-                    // --- FIX: 좌표계 통일. 원본은 rawY에서 상태바를 뺐는데 점 찍을 때는 오버레이 좌표라서
-                    // 점 위치가 상태바 높이만큼 위로 어긋남. e.x/e.y는 오버레이 기준이라 기준점/핫스팟 모두 같은 계열로 계산해야 함.
-                    // 둘 다 e.x/e.y로 통일하면 상태바 오차는 상쇄됨.
                     val adjX = e.x
                     val adjY = e.y
                     if (isCalibrating) {
                         refPoint = PointF(adjX, adjY)
+                        // ★ 핵심: 이 순간 GPS를 얼림. 나중에 sendAll()에서 다시 가져온 GPS 쓰면 안 됨.
+                        freezeRefCenter()
                         isCalibrating = false
-                        hintText?.text = "축척 ${mpp}m/px  ·  핫스팟 3~10곳 터치"
+                        val ageSec = if (refCenterTime > 0) (System.currentTimeMillis() - refCenterTime) / 1000 else -1
+                        val accTxt = if (refCenterAccuracy < 10000f) "${refCenterAccuracy.toInt()}m" else "?"
+                        hintText?.text = "기준점 고정: ${String.format("%.5f", refCenterLat)}, ${String.format("%.5f", refCenterLng)} (GPS ${ageSec}초 전, 정확도 $accTxt) · 핫스팟 3~10곳 터치"
                         btnSend?.isEnabled = true
                         val refDot = View(this).apply {
                             background = GradientDrawable().apply {
@@ -352,13 +399,8 @@ class OverlayServiceLite : Service() {
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT
             ).apply { gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL; topMargin = 80 })
-            // === v8.14.41 FIX: 하단 버튼이 안드로이드 내비게이션 바(III, O, ◁) / 제스처 바에 가려져서 터치가 안 되던 문제 ===
-            // 원본은 bottom padding 16px만 줘서 닫기 버튼이 네비게이션 바 밑에 깔림.
-            // 이제 네비게이션 바 높이 + 24px를 아래에 확보해서 닫기가 항상 네비게이션 바 위에 뜨게 함.
-            // 닫기는 선택 0개여도 항상 눌림. 상단 우측 X도 추가해서 어디서든 닫을 수 있게 함.
             val navBarH = getNavigationBarHeight()
             val bottomInset = navBarH + 28
-            // 상단 우측 닫기 (캘리브레이션 전에도 닫을 수 있게 - 콜 오면 바로 닫고 나가야 함)
             val btnTopClose = Button(this).apply {
                 text = "✕ 닫기"
                 textSize = 14f
@@ -371,7 +413,6 @@ class OverlayServiceLite : Service() {
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT
             ).apply { gravity = Gravity.TOP or Gravity.END; topMargin = 24; rightMargin = 16 })
-            // 닫기 버튼을 더 크고 눈에 띄게 - 선택 없어도 닫힘을 문구로 명시
             btnClose.text = "✕ 닫기 (선택 없어도 닫힘)"
             btnClose.setBackgroundColor(Color.parseColor("#DC2626"))
             val bottom = LinearLayout(this).apply {
@@ -380,6 +421,7 @@ class OverlayServiceLite : Service() {
                 setPadding(16, 12, 16, bottomInset)
                 addView(btnSend, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 110).apply { bottomMargin = 10 })
                 addView(btnScaleRow, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { bottomMargin = 10 })
+                addView(btnRecalibrate, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 88).apply { bottomMargin = 10 })
                 addView(btnUndo, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 88).apply { bottomMargin = 10 })
                 addView(btnClose, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 96))
             }
@@ -398,7 +440,6 @@ class OverlayServiceLite : Service() {
         try { getSharedPreferences("a25_lite", MODE_PRIVATE).edit().putFloat("mpp", mpp).apply() } catch (e: Exception) {}
     }
 
-    // === v8.14.41: 하단 내비게이션 바 높이 (제스처 바 / 3버튼 바 모두 대응) ===
     private fun getNavigationBarHeight(): Int {
         return try {
             val resId = resources.getIdentifier("navigation_bar_height", "dimen", "android")
@@ -432,6 +473,7 @@ class OverlayServiceLite : Service() {
         dotViews.clear()
         refDotView = null
         refPoint = null
+        refCenterTime = 0L
         isCalibrating = true
     }
 
@@ -441,35 +483,46 @@ class OverlayServiceLite : Service() {
             Toast.makeText(this, "Firebase URL이 비어있어요", Toast.LENGTH_LONG).show()
             return
         }
-        // --- FIX: GPS 없으면 군포 기본값으로 보내지 말고 막음 ---
-        // 원본은 이 체크가 없어서 수원인데 군포 중심 데이터가 가서 11.4km가 됐음.
-        getLocation()
-        if (!hasLocation) {
-            Toast.makeText(this, "GPS 위치를 아직 못 잡았어요. 잠시 후 다시 전송하세요 (군포 기본값으로는 안 보냄)", Toast.LENGTH_LONG).show()
+        // v8.14.42: 전송 때 getLocation()을 다시 부르면 안 됨. 얼린 refCenter를 써야 함.
+        // 원본은 여기서 getLocation()을 불러서 center가 바뀌었음.
+        if (refCenterTime == 0L) {
+            Toast.makeText(this, "기준점을 먼저 찍으세요", Toast.LENGTH_LONG).show()
             return
         }
-        val centerAge = if (lastLocTime > 0) System.currentTimeMillis() - lastLocTime else -1L
-        val stale = centerAge > 120_000
-        if (stale) Toast.makeText(this, "GPS가 ${centerAge / 1000}초 전 위치예요. 그래도 보내지만 거리가 틀어질 수 있어요", Toast.LENGTH_LONG).show()
+        // 얼린 기준점의 정확도가 너무 나쁘면 막음 (군포 기본값 문제와 같은 계열)
+        if (refCenterAccuracy > 200f) {
+            Toast.makeText(this, "기준점 GPS 정확도가 너무 낮아요 (${refCenterAccuracy.toInt()}m). 기준점 다시 찍어보세요", Toast.LENGTH_LONG).show()
+            return
+        }
+        val refAge = System.currentTimeMillis() - refCenterTime
+        val stale = refAge > 120_000
+        if (stale) Toast.makeText(this, "기준점 GPS가 ${refAge / 1000}초 전 위치예요. 그래도 보내지만 거리가 틀어질 수 있어요", Toast.LENGTH_LONG).show()
+        // ★ 얼린 기준점 기준으로 변환. 여기가 핵심 수정.
+        val useLat = refCenterLat
+        val useLng = refCenterLng
         val cx = refPoint!!.x
         val cy = refPoint!!.y
         val hotspots = tappedPoints.mapIndexed { i, pt ->
             val dx = pt.x - cx
             val dy = cy - pt.y
             val dLat = dy * mpp / 111320.0
-            val dLng = dx * mpp / (111320.0 * cos(Math.toRadians(centerLat)))
-            mapOf("lat" to centerLat + dLat, "lng" to centerLng + dLng, "level" to (10 - i))
+            val dLng = dx * mpp / (111320.0 * cos(Math.toRadians(useLat)))
+            mapOf("lat" to useLat + dLat, "lng" to useLng + dLng, "level" to (10 - i))
         }
         val payload = mapOf(
             "timestamp" to System.currentTimeMillis(),
             "device" to "A25_HELPER_LITE",
-            "center" to mapOf("lat" to centerLat, "lng" to centerLng),
+            // center는 이제 얼린 기준점. 아이폰이 보는 값과 일치해야 함.
+            "center" to mapOf("lat" to useLat, "lng" to useLng),
             "count" to hotspots.size,
             "hotspots" to hotspots,
-            // 웹앱이 무시해도 되는 진단 필드. 나중에 웹앱에서 "GPS 오래됨" 경고를 띄울 때 씀.
             "mpp" to mpp,
-            "center_age_ms" to centerAge,
-            "center_stale" to stale
+            "center_age_ms" to refAge,
+            "center_stale" to stale,
+            "center_accuracy_m" to refCenterAccuracy,
+            // 디버깅용: 전송 순간의 라이브 GPS도 같이 보냄. 두 값이 다르면 GPS가 움직인 증거.
+            "live_center" to mapOf("lat" to centerLat, "lng" to centerLng),
+            "live_center_age_ms" to (System.currentTimeMillis() - lastLocTime)
         )
         Thread {
             try {
@@ -482,7 +535,7 @@ class OverlayServiceLite : Service() {
                 val ok = conn.responseCode in 200..299
                 android.os.Handler(mainLooper).post {
                     if (ok) {
-                        Toast.makeText(this, "✅ ${hotspots.size}곳 전송 완료 (축척 ${mpp}m/px)", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, "✅ ${hotspots.size}곳 전송 완료 (기준점 ${String.format("%.5f", useLat)}, ${String.format("%.5f", useLng)} / 축척 ${mpp}m/px)", Toast.LENGTH_LONG).show()
                     } else {
                         Toast.makeText(this, "❌ 전송 실패", Toast.LENGTH_LONG).show()
                     }
