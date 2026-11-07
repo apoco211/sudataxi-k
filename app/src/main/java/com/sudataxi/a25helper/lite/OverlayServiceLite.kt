@@ -36,7 +36,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 // v8.14.41: 하단 닫기 버튼 네비게이션 바 가림 수정 + 상단 X 추가 + 선택 0개여도 닫힘
-// v8.14.42-LITE FIX: 기준점 GPS 얼림 - 기준점 찍은 순간의 GPS를 고정해서 전송 때 다시 가져온 GPS로 밀리는 문제 해결
+// v8.14.43-LITE FIX: 기준점 GPS 얼림 - 기준점 찍은 순간의 GPS를 고정해서 전송 때 다시 가져온 GPS로 밀리는 문제 해결
 class OverlayServiceLite : Service() {
     private val TAG = "OverlayServiceLite"
     private var windowManager: WindowManager? = null
@@ -52,7 +52,7 @@ class OverlayServiceLite : Service() {
     private var hasLocation = false
     private var lastLocTime = 0L
     private var lastAccuracy = Float.MAX_VALUE
-    // --- v8.14.42 FIX: 기준점 찍은 순간의 GPS를 얼려둠 ---
+    // --- v8.14.43 FIX: 기준점 찍은 순간의 GPS를 얼려둠 ---
     // 원본은 refPoint(화면 좌표)만 저장하고, centerLat/Lng는 sendAll() 때 다시 가져온 값으로 계산함.
     // 기준점 찍고 핀 찍는 사이에 GPS가 움직이면, dx/dy는 옛날 기준점 기준인데 center는 새 값이라 핀 전체가 밀림.
     // 이제 ref를 찍는 순간 center를 refCenterLat/Lng에 복사해두고, sendAll()에서는 그 얼린 값만 씀.
@@ -128,7 +128,7 @@ class OverlayServiceLite : Service() {
             )
             val freshest = candidates.maxByOrNull { it.time }
             if (freshest == null) {
-                // v8.14.42: 후보가 없으면 hasLocation을 false로 명확히 내림. 예전 값 유지하면 안 됨.
+                // v8.14.43: 후보가 없으면 hasLocation을 false로 명확히 내림. 예전 값 유지하면 안 됨.
                 hasLocation = false
             } else {
                 val age = System.currentTimeMillis() - freshest.time
@@ -136,7 +136,7 @@ class OverlayServiceLite : Service() {
                 centerLng = freshest.longitude
                 lastLocTime = freshest.time
                 lastAccuracy = freshest.accuracy
-                // v8.14.42: 정확도 체크 추가. NETWORK 500m~1km짜리가 최신이라고 들어오면 그걸 기준으로 쓰면 안 됨.
+                // v8.14.43: 정확도 체크 추가. NETWORK 500m~1km짜리가 최신이라고 들어오면 그걸 기준으로 쓰면 안 됨.
                 // 200m보다 나쁘면 "없음"으로 취급하고 새로 요청함.
                 hasLocation = age < 120_000 && freshest.accuracy < 200f
                 if (!hasLocation) {
@@ -173,13 +173,18 @@ class OverlayServiceLite : Service() {
         } catch (e: Exception) { Log.e(TAG, "getLocation", e) }
     }
 
-    // v8.14.42: 기준점 찍은 순간의 GPS를 얼림. 이걸 안 하면 sendAll() 때 center가 바뀌어서 밀림.
+    // v8.14.43 FIX: freeze는 무조건 현재 시간으로 찍음. lastLocTime이 0이면 refCenterTime도 0이 돼서
+    // sendAll에서 "기준점 먼저 찍으세요"로 계속 막히던 버그. GPS가 나중에 와도 refCenterTime은 0 그대로라서
+    // 닫고 다시 열기 전까진 절대 전송이 안 됐음. 이제 System.currentTimeMillis()로 찍고,
+    // GPS 원본 시간은 따로 저장해서 나이 계산에만 씀.
+    private var refCenterLocTime = 0L
     private fun freezeRefCenter() {
         refCenterLat = centerLat
         refCenterLng = centerLng
-        refCenterTime = lastLocTime
+        refCenterTime = System.currentTimeMillis()
+        refCenterLocTime = lastLocTime
         refCenterAccuracy = lastAccuracy
-        Log.d(TAG, "freezeRefCenter lat=$refCenterLat lng=$refCenterLng time=$refCenterTime acc=$refCenterAccuracy")
+        Log.d(TAG, "freezeRefCenter lat=$refCenterLat lng=$refCenterLng time=$refCenterTime locTime=$refCenterLocTime acc=$refCenterAccuracy")
     }
 
     private fun resetCalibration() {
@@ -191,10 +196,11 @@ class OverlayServiceLite : Service() {
         refDotView = null
         refPoint = null
         refCenterTime = 0L
+        refCenterLocTime = 0L
         isCalibrating = true
         btnSend?.text = "전송 (0)"
         btnSend?.isEnabled = false
-        hintText?.text = "🚕 택시 아이콘을 다시 터치하세요  ·  축척 ${mpp}m/px"
+        hintText?.text = "① 택시 아이콘을 다시 터치하세요 (노란 점)  ·  축척 ${mpp}m/px"
         Toast.makeText(this, "기준점 초기화 - 택시 아이콘 다시 터치", Toast.LENGTH_SHORT).show()
     }
 
@@ -288,7 +294,7 @@ class OverlayServiceLite : Service() {
             )
             val overlay = FrameLayout(this).apply { setBackgroundColor(Color.parseColor("#33000000")) }
             hintText = TextView(this).apply {
-                text = "🚕 택시 아이콘을 터치하세요  ·  축척 ${mpp}m/px"
+                text = "① 택시 아이콘을 터치하세요 (노란 점)  ·  축척 ${mpp}m/px"
                 setTextColor(Color.WHITE)
                 textSize = 15f
                 setBackgroundColor(Color.parseColor("#CC000000"))
@@ -315,7 +321,7 @@ class OverlayServiceLite : Service() {
                 setTextColor(Color.BLACK)
                 setOnClickListener { undoLast() }
             }
-            // v8.14.42: 기준점 다시 찍기 버튼. 첫 터치 실수하면 닫고 다시 열 필요 없이 여기서 고침.
+            // v8.14.43: 기준점 다시 찍기 버튼. 첫 터치 실수하면 닫고 다시 열 필요 없이 여기서 고침.
             val btnRecalibrate = Button(this).apply {
                 text = "◎ 기준점 다시 찍기"
                 setBackgroundColor(Color.parseColor("#7C3AED"))
@@ -352,6 +358,8 @@ class OverlayServiceLite : Service() {
             }
             overlay.setOnTouchListener { _, e ->
                 if (e.action == MotionEvent.ACTION_DOWN) {
+                    // v8.14.43: 하단 버튼 영역 터치는 핀으로 안 셈. 전송 버튼 누른 게 핀으로 찍히면 좌표가 밑으로 밀림.
+                    if (e.y > screenH - 420) return@setOnTouchListener false
                     val adjX = e.x
                     val adjY = e.y
                     if (isCalibrating) {
@@ -474,6 +482,7 @@ class OverlayServiceLite : Service() {
         refDotView = null
         refPoint = null
         refCenterTime = 0L
+        refCenterLocTime = 0L
         isCalibrating = true
     }
 
@@ -483,13 +492,19 @@ class OverlayServiceLite : Service() {
             Toast.makeText(this, "Firebase URL이 비어있어요", Toast.LENGTH_LONG).show()
             return
         }
-        // v8.14.42: 전송 때 getLocation()을 다시 부르면 안 됨. 얼린 refCenter를 써야 함.
-        // 원본은 여기서 getLocation()을 불러서 center가 바뀌었음.
-        if (refCenterTime == 0L) {
-            Toast.makeText(this, "기준점을 먼저 찍으세요", Toast.LENGTH_LONG).show()
+        // v8.14.43: 게이트는 refPoint로만 판단. refCenterTime==0으로 판단하면 GPS 아직 없을 때
+        // 기준점을 찍어도 0이 돼서 "기준점 먼저 찍으세요" 무한 반복이 됨.
+        // refPoint가 있으면 기준점은 찍힌 거고, GPS 문제는 아래 정확도 체크로 따로 알려줌.
+        if (refPoint == null) {
+            Toast.makeText(this, "택시 아이콘(노란 점)을 먼저 터치하세요", Toast.LENGTH_LONG).show()
             return
         }
-        // 얼린 기준점의 정확도가 너무 나쁘면 막음 (군포 기본값 문제와 같은 계열)
+        // v8.14.43: 정확도 체크도 MAX_VALUE( GPS 아직 없음 )는 따로 구분.
+        // MAX_VALUE면 "GPS 아직"이지 "정확도 낮음"이 아님. 둘을 섞으면 사용자가 뭘 해야 할지 모름.
+        if (refCenterAccuracy == Float.MAX_VALUE) {
+            Toast.makeText(this, "GPS를 아직 못 잡았어요. 잠시 기다렸다가 기준점 다시 찍기를 눌러보세요", Toast.LENGTH_LONG).show()
+            return
+        }
         if (refCenterAccuracy > 200f) {
             Toast.makeText(this, "기준점 GPS 정확도가 너무 낮아요 (${refCenterAccuracy.toInt()}m). 기준점 다시 찍어보세요", Toast.LENGTH_LONG).show()
             return
