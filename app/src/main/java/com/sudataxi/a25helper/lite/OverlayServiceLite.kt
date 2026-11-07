@@ -12,9 +12,12 @@ import android.graphics.PixelFormat
 import android.graphics.PointF
 import android.graphics.drawable.GradientDrawable
 import android.location.Location
+import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Build
+import android.os.Bundle
 import android.os.IBinder
+import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.Gravity
@@ -40,8 +43,15 @@ class OverlayServiceLite : Service() {
     private var firebaseUrl = ""
     private val tappedPoints = mutableListOf<PointF>()
     private val dotViews = mutableListOf<View>()
+    private var refDotView: View? = null
+    // --- v8.14.38-LITE FIX: 기본값 군포를 조용히 쓰지 않음 ---
+    // 원본은 getLastKnownLocation이 null이면 centerLat/Lng가 군포 기본값(37.3912,126.9498) 그대로 전송됨.
+    // 수원(37.26)에 있는데 군포 중심으로 보내면 핫스팟 전체가 북쪽으로 ~11km 밀려서,
+    // 웹앱에서 "A25 관내 목적지 11.4km"로 뜨고, 안내 3개는 8km 필터에 걸려 0개가 됨.
     private var centerLat = 37.3912
     private var centerLng = 126.9498
+    private var hasLocation = false
+    private var lastLocTime = 0L
     private var screenW = 1080
     private var screenH = 1920
     private var wmParams: WindowManager.LayoutParams? = null
@@ -54,6 +64,12 @@ class OverlayServiceLite : Service() {
     private var hintText: TextView? = null
     private var refPoint: PointF? = null  // 택시 아이콘 기준점
     private var isCalibrating = true
+    // --- v8.14.38-LITE FIX: 축척(mpp) 고정 9.5가 틀어지는 원인 ---
+    // 원본 mpp=9.5는 특정 줌에서만 맞음. A25 지도를 줌인/줌아웃하면 실제 mpp가 4~20으로 바뀜.
+    // 그래서 탭한 거리 그대로 km가 틀어짐. 이제 오버레이에서 - / + 로 바꿀 수 있고, prefs에 저장됨.
+    private var mpp = 9.5f
+    private val MPP_STEPS = floatArrayOf(4f, 6f, 7.5f, 9.5f, 12f, 15f, 20f)
+    private var mppIndex = 3
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try {
@@ -62,12 +78,13 @@ class OverlayServiceLite : Service() {
                 stopSelf()
                 return START_NOT_STICKY
             }
-
             firebaseUrl = intent?.getStringExtra("firebase_url")
                 ?: getSharedPreferences("a25_lite", MODE_PRIVATE).getString("firebase_url", "") ?: ""
-
+            // 저장된 축척 복원
+            val prefs = getSharedPreferences("a25_lite", MODE_PRIVATE)
+            mpp = prefs.getFloat("mpp", 9.5f)
+            mppIndex = MPP_STEPS.indexOfFirst { it == mpp }.takeIf { it >= 0 } ?: 3
             createChannel()
-
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 startForeground(1, createNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -75,7 +92,6 @@ class OverlayServiceLite : Service() {
             } else {
                 startForeground(1, createNotification())
             }
-
             getLocation()
             showFloatingButton()
         } catch (e: Exception) {
@@ -101,12 +117,44 @@ class OverlayServiceLite : Service() {
     private fun getLocation() {
         try {
             val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-            val loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER) ?: lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
-            if (loc != null) {
-                centerLat = loc.latitude
-                centerLng = loc.longitude
+            // 1) 마지막 위치라도 "얼마나 오래됐는지"를 먼저 봄. 2분 넘으면 오래된 것으로 취급.
+            val candidates = listOfNotNull(
+                try { lm.getLastKnownLocation(LocationManager.GPS_PROVIDER) } catch (e: SecurityException) { null },
+                try { lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) } catch (e: SecurityException) { null }
+            )
+            val freshest = candidates.maxByOrNull { it.time }
+            if (freshest != null) {
+                val age = System.currentTimeMillis() - freshest.time
+                centerLat = freshest.latitude
+                centerLng = freshest.longitude
+                lastLocTime = freshest.time
+                // 2분 이내만 "있음"으로 인정. 그 이상은 아래에서 새로 요청함.
+                hasLocation = age < 120_000
+                if (!hasLocation) Toast.makeText(this, "GPS 위치가 ${age / 1000}초 전 것이라 새로 잡는 중…", Toast.LENGTH_SHORT).show()
             }
-        } catch (e: Exception) {}
+            // 2) 오래됐거나 없으면 1회성으로 새로 요청. 이 콜백이 오면 center가 갱신됨.
+            if (!hasLocation) {
+                try {
+                    val listener = object : LocationListener {
+                        override fun onLocationChanged(loc: Location) {
+                            centerLat = loc.latitude
+                            centerLng = loc.longitude
+                            lastLocTime = loc.time
+                            hasLocation = true
+                            Toast.makeText(this@OverlayServiceLite, "GPS 갱신됨", Toast.LENGTH_SHORT).show()
+                            try { lm.removeUpdates(this) } catch (e: Exception) {}
+                        }
+                        override fun onStatusChanged(p: String?, s: Int, e: Bundle?) {}
+                        override fun onProviderEnabled(p: String) {}
+                        override fun onProviderDisabled(p: String) {}
+                    }
+                    lm.requestSingleUpdate(LocationManager.GPS_PROVIDER, listener, Looper.getMainLooper())
+                    lm.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, listener, Looper.getMainLooper())
+                } catch (e: SecurityException) {
+                    Toast.makeText(this, "위치 권한이 없어요", Toast.LENGTH_LONG).show()
+                }
+            }
+        } catch (e: Exception) { Log.e(TAG, "getLocation", e) }
     }
 
     private fun showFloatingButton() {
@@ -124,7 +172,6 @@ class OverlayServiceLite : Service() {
                 screenW = m.widthPixels
                 screenH = m.heightPixels
             }
-
             wmParams = WindowManager.LayoutParams(
                 160, 160,
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY else WindowManager.LayoutParams.TYPE_PHONE,
@@ -135,7 +182,6 @@ class OverlayServiceLite : Service() {
                 x = 80
                 y = 400
             }
-
             val root = FrameLayout(this)
             val btn = Button(this).apply {
                 text = "📷"
@@ -187,7 +233,10 @@ class OverlayServiceLite : Service() {
         tappedPoints.clear()
         dotViews.clear()
         refPoint = null
+        refDotView = null
         isCalibrating = true
+        // 캡처 열 때 GPS 한 번 더 갱신 시도
+        getLocation()
         try {
             val p = WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
@@ -198,14 +247,13 @@ class OverlayServiceLite : Service() {
             )
             val overlay = FrameLayout(this).apply { setBackgroundColor(Color.parseColor("#33000000")) }
             hintText = TextView(this).apply {
-                text = "🚕 택시 아이콘을 터치하세요"
+                text = "🚕 택시 아이콘을 터치하세요  ·  축척 ${mpp}m/px"
                 setTextColor(Color.WHITE)
                 textSize = 15f
                 setBackgroundColor(Color.parseColor("#CC000000"))
                 setPadding(20, 12, 20, 12)
                 gravity = Gravity.CENTER
             }
-
             btnSend = Button(this).apply {
                 text = "전송 (0)"
                 setBackgroundColor(Color.parseColor("#16A34A"))
@@ -226,24 +274,45 @@ class OverlayServiceLite : Service() {
                 setTextColor(Color.BLACK)
                 setOnClickListener { undoLast() }
             }
+            // --- FIX: 축척 조절 버튼. A25 지도를 줌인하면 - , 줌아웃하면 + 로 맞추면 됨 ---
+            val btnScaleRow = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                val btnMinus = Button(this@OverlayServiceLite).apply {
+                    text = "− 축척"
+                    setBackgroundColor(Color.parseColor("#1F2937"))
+                    setTextColor(Color.WHITE)
+                    setOnClickListener {
+                        if (mppIndex > 0) { mppIndex--; mpp = MPP_STEPS[mppIndex]; saveMpp(); hintText?.text = "축척 ${mpp}m/px  ·  핫스팟 3~10곳 터치" }
+                    }
+                }
+                val btnPlus = Button(this@OverlayServiceLite).apply {
+                    text = "+ 축척"
+                    setBackgroundColor(Color.parseColor("#1F2937"))
+                    setTextColor(Color.WHITE)
+                    setOnClickListener {
+                        if (mppIndex < MPP_STEPS.lastIndex) { mppIndex++; mpp = MPP_STEPS[mppIndex]; saveMpp(); hintText?.text = "축척 ${mpp}m/px  ·  핫스팟 3~10곳 터치" }
+                    }
+                }
+                addView(btnMinus, LinearLayout.LayoutParams(0, 80, 1f).apply { rightMargin = 8 })
+                addView(btnPlus, LinearLayout.LayoutParams(0, 80, 1f))
+            }
             val btnClose = Button(this).apply {
                 text = "닫기"
                 setBackgroundColor(Color.parseColor("#4B5563"))
                 setTextColor(Color.WHITE)
                 setOnClickListener { closeCaptureOverlay() }
             }
-
             overlay.setOnTouchListener { _, e ->
                 if (e.action == MotionEvent.ACTION_DOWN) {
-                    val statusBarOffset = getStatusBarHeight()
-                    val adjX = e.rawX
-                    val adjY = e.rawY - statusBarOffset
-
+                    // --- FIX: 좌표계 통일. 원본은 rawY에서 상태바를 뺐는데 점 찍을 때는 오버레이 좌표라서
+                    // 점 위치가 상태바 높이만큼 위로 어긋남. e.x/e.y는 오버레이 기준이라 기준점/핫스팟 모두 같은 계열로 계산해야 함.
+                    // 둘 다 e.x/e.y로 통일하면 상태바 오차는 상쇄됨.
+                    val adjX = e.x
+                    val adjY = e.y
                     if (isCalibrating) {
-                        // 첫 터치 = 택시 아이콘 기준점
                         refPoint = PointF(adjX, adjY)
                         isCalibrating = false
-                        hintText?.text = "핫스팟 3~10곳 터치"
+                        hintText?.text = "축척 ${mpp}m/px  ·  핫스팟 3~10곳 터치"
                         btnSend?.isEnabled = true
                         val refDot = View(this).apply {
                             background = GradientDrawable().apply {
@@ -256,9 +325,9 @@ class OverlayServiceLite : Service() {
                             }
                         }
                         overlay.addView(refDot)
+                        refDotView = refDot
                         Toast.makeText(this, "기준점 설정됨", Toast.LENGTH_SHORT).show()
                     } else {
-                        // 핫스팟 터치
                         tappedPoints.add(PointF(adjX, adjY))
                         val dot = View(this).apply {
                             background = GradientDrawable().apply {
@@ -277,16 +346,15 @@ class OverlayServiceLite : Service() {
                 }
                 true
             }
-
             overlay.addView(hintText, FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT
             ).apply { gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL; topMargin = 80 })
-
             val bottom = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
                 setPadding(16, 8, 16, 16)
                 addView(btnSend, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 100).apply { bottomMargin = 8 })
+                addView(btnScaleRow, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { bottomMargin = 8 })
                 addView(btnUndo, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 80).apply { bottomMargin = 8 })
                 addView(btnClose, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 70))
             }
@@ -294,12 +362,15 @@ class OverlayServiceLite : Service() {
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT
             ).apply { gravity = Gravity.BOTTOM })
-
             captureOverlay = overlay
             windowManager!!.addView(overlay, p)
         } catch (e: Exception) {
             Log.e(TAG, "showCaptureOverlay", e)
         }
+    }
+
+    private fun saveMpp() {
+        try { getSharedPreferences("a25_lite", MODE_PRIVATE).edit().putFloat("mpp", mpp).apply() } catch (e: Exception) {}
     }
 
     private fun getStatusBarHeight(): Int {
@@ -308,7 +379,10 @@ class OverlayServiceLite : Service() {
     }
 
     private fun undoLast() {
-        if (tappedPoints.isEmpty()) return
+        if (tappedPoints.isEmpty()) {
+            Toast.makeText(this, "지울 점 없음 (기준점은 닫기로 초기화)", Toast.LENGTH_SHORT).show()
+            return
+        }
         tappedPoints.removeAt(tappedPoints.lastIndex)
         if (dotViews.isNotEmpty()) {
             val last = dotViews.removeAt(dotViews.lastIndex)
@@ -323,15 +397,28 @@ class OverlayServiceLite : Service() {
         captureOverlay = null
         tappedPoints.clear()
         dotViews.clear()
+        refDotView = null
         refPoint = null
         isCalibrating = true
     }
 
     private fun sendAll() {
         if (tappedPoints.isEmpty() || refPoint == null) return
+        if (firebaseUrl.isBlank()) {
+            Toast.makeText(this, "Firebase URL이 비어있어요", Toast.LENGTH_LONG).show()
+            return
+        }
+        // --- FIX: GPS 없으면 군포 기본값으로 보내지 말고 막음 ---
+        // 원본은 이 체크가 없어서 수원인데 군포 중심 데이터가 가서 11.4km가 됐음.
         getLocation()
-        val mpp = 9.5
-        val cx = refPoint!!.x  // 택시 아이콘 기준
+        if (!hasLocation) {
+            Toast.makeText(this, "GPS 위치를 아직 못 잡았어요. 잠시 후 다시 전송하세요 (군포 기본값으로는 안 보냄)", Toast.LENGTH_LONG).show()
+            return
+        }
+        val centerAge = if (lastLocTime > 0) System.currentTimeMillis() - lastLocTime else -1L
+        val stale = centerAge > 120_000
+        if (stale) Toast.makeText(this, "GPS가 ${centerAge / 1000}초 전 위치예요. 그래도 보내지만 거리가 틀어질 수 있어요", Toast.LENGTH_LONG).show()
+        val cx = refPoint!!.x
         val cy = refPoint!!.y
         val hotspots = tappedPoints.mapIndexed { i, pt ->
             val dx = pt.x - cx
@@ -345,7 +432,11 @@ class OverlayServiceLite : Service() {
             "device" to "A25_HELPER_LITE",
             "center" to mapOf("lat" to centerLat, "lng" to centerLng),
             "count" to hotspots.size,
-            "hotspots" to hotspots
+            "hotspots" to hotspots,
+            // 웹앱이 무시해도 되는 진단 필드. 나중에 웹앱에서 "GPS 오래됨" 경고를 띄울 때 씀.
+            "mpp" to mpp,
+            "center_age_ms" to centerAge,
+            "center_stale" to stale
         )
         Thread {
             try {
@@ -358,7 +449,7 @@ class OverlayServiceLite : Service() {
                 val ok = conn.responseCode in 200..299
                 android.os.Handler(mainLooper).post {
                     if (ok) {
-                        Toast.makeText(this, "✅ ${hotspots.size}곳 전송 완료", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, "✅ ${hotspots.size}곳 전송 완료 (축척 ${mpp}m/px)", Toast.LENGTH_LONG).show()
                     } else {
                         Toast.makeText(this, "❌ 전송 실패", Toast.LENGTH_LONG).show()
                     }
