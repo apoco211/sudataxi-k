@@ -37,6 +37,9 @@ import java.net.URL
 
 // v8.14.41: 하단 닫기 버튼 네비게이션 바 가림 수정 + 상단 X 추가 + 선택 0개여도 닫힘
 // v8.14.43-LITE FIX: 기준점 GPS 얼림 - 기준점 찍은 순간의 GPS를 고정해서 전송 때 다시 가져온 GPS로 밀리는 문제 해결
+// v8.14.44-LITE FIX: (1) lastKnown 캐시(37.29) 믿고 얼리는 버그 수정 - 15초 이내 + 100m 이내만 신선으로 인정, 나머지는 무조건 새로 요청
+//                   (2) 기준점 찍을 때 GPS가 신선하지 않으면 얼리지 않고 막음 - "GPS 새로 잡는 중" 토스트 후 다시 찍게 함
+//                   (3) 핀 찍을 때 바로 핀 좌표 힌트에 표시 - 본앱까지 가지 않고 그 자리에서 남쪽/서울 확인 가능
 class OverlayServiceLite : Service() {
     private val TAG = "OverlayServiceLite"
     private var windowManager: WindowManager? = null
@@ -119,6 +122,7 @@ class OverlayServiceLite : Service() {
         return b.setContentTitle("A25 Lite").setContentText("핫스팟 저장").setSmallIcon(android.R.drawable.ic_menu_mylocation).build()
     }
 
+    // v8.14.44 FIX: lastKnown 캐시를 믿지 않음. 카카오택시는 실시간 GPS를 쓰는데, 헬퍼만 캐시를 봐서 남쪽(37.29)에 멈춰 있던 게 이번 버그.
     private fun getLocation() {
         try {
             val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -127,48 +131,48 @@ class OverlayServiceLite : Service() {
                 try { lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) } catch (e: SecurityException) { null }
             )
             val freshest = candidates.maxByOrNull { it.time }
-            if (freshest == null) {
-                // v8.14.43: 후보가 없으면 hasLocation을 false로 명확히 내림. 예전 값 유지하면 안 됨.
-                hasLocation = false
-            } else {
+            if (freshest != null) {
                 val age = System.currentTimeMillis() - freshest.time
+                // 15초 이내 + 정확도 100m 이내만 "신선"으로 인정. 그 외는 임시값으로만 두고 새로 잡는다.
                 centerLat = freshest.latitude
                 centerLng = freshest.longitude
                 lastLocTime = freshest.time
                 lastAccuracy = freshest.accuracy
-                // v8.14.43: 정확도 체크 추가. NETWORK 500m~1km짜리가 최신이라고 들어오면 그걸 기준으로 쓰면 안 됨.
-                // 200m보다 나쁘면 "없음"으로 취급하고 새로 요청함.
-                hasLocation = age < 120_000 && freshest.accuracy < 200f
-                if (!hasLocation) {
-                    if (age >= 120_000) Toast.makeText(this, "GPS 위치가 ${age / 1000}초 전 것이라 새로 잡는 중…", Toast.LENGTH_SHORT).show()
-                    else if (freshest.accuracy >= 200f) Toast.makeText(this, "GPS 정확도 낮음 (${freshest.accuracy.toInt()}m), 다시 잡는 중…", Toast.LENGTH_SHORT).show()
-                }
+                hasLocation = age < 15_000 && freshest.accuracy < 100f
+                if (!hasLocation && age >= 15_000) Toast.makeText(this, "GPS가 ${age / 1000}초 전 위치라 새로 잡는 중…", Toast.LENGTH_SHORT).show()
+            } else {
+                hasLocation = false
             }
-            if (!hasLocation) {
-                try {
-                    val listener = object : LocationListener {
-                        override fun onLocationChanged(loc: Location) {
-                            // 정확도 나쁜 NETWORK 위치가 좋은 GPS를 덮지 않게 함
-                            if (loc.accuracy > 200f) return
-                            // 이미 더 좋은 위치가 있으면 굳이 덮지 않음
-                            if (hasLocation && loc.accuracy > lastAccuracy + 20f) return
-                            centerLat = loc.latitude
-                            centerLng = loc.longitude
-                            lastLocTime = loc.time
-                            lastAccuracy = loc.accuracy
-                            hasLocation = true
-                            Toast.makeText(this@OverlayServiceLite, "GPS 갱신됨 (정확도 ${loc.accuracy.toInt()}m)", Toast.LENGTH_SHORT).show()
-                            try { lm.removeUpdates(this) } catch (e: Exception) {}
-                        }
-                        override fun onStatusChanged(p: String?, s: Int, e: Bundle?) {}
-                        override fun onProviderEnabled(p: String) {}
-                        override fun onProviderDisabled(p: String) {}
+            // ★ hasLocation이 true여도 무조건 새로 요청. NETWORK 캐시(37.29)일 수 있어서 믿으면 안 됨.
+            try {
+                val listener = object : LocationListener {
+                    override fun onLocationChanged(loc: Location) {
+                        if (loc.accuracy > 100f) return
+                        val locAge = System.currentTimeMillis() - loc.time
+                        if (locAge > 15_000) return
+                        if (loc.provider == LocationManager.NETWORK_PROVIDER && hasLocation && lastAccuracy < loc.accuracy) return
+                        centerLat = loc.latitude
+                        centerLng = loc.longitude
+                        lastLocTime = loc.time
+                        lastAccuracy = loc.accuracy
+                        hasLocation = true
+                        Toast.makeText(this@OverlayServiceLite, "GPS 갱신됨 (정확도 ${loc.accuracy.toInt()}m)", Toast.LENGTH_SHORT).show()
+                        try { lm.removeUpdates(this) } catch (e: Exception) {}
                     }
-                    lm.requestSingleUpdate(LocationManager.GPS_PROVIDER, listener, Looper.getMainLooper())
-                    lm.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, listener, Looper.getMainLooper())
-                } catch (e: SecurityException) {
-                    Toast.makeText(this, "위치 권한이 없어요", Toast.LENGTH_LONG).show()
+                    override fun onStatusChanged(p: String?, s: Int, e: Bundle?) {}
+                    override fun onProviderEnabled(p: String) {}
+                    override fun onProviderDisabled(p: String) {}
                 }
+                lm.requestSingleUpdate(LocationManager.GPS_PROVIDER, listener, Looper.getMainLooper())
+                lm.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, listener, Looper.getMainLooper())
+                // 5초 뒤에도 안 오면 한 번 더 요청 (GPS가 느릴 때)
+                android.os.Handler(Looper.getMainLooper()).postDelayed({
+                    if (!hasLocation || System.currentTimeMillis() - lastLocTime > 15_000) {
+                        try { lm.requestSingleUpdate(LocationManager.GPS_PROVIDER, listener, Looper.getMainLooper()) } catch (e: Exception) {}
+                    }
+                }, 5000)
+            } catch (e: SecurityException) {
+                Toast.makeText(this, "위치 권한이 없어요", Toast.LENGTH_LONG).show()
             }
         } catch (e: Exception) { Log.e(TAG, "getLocation", e) }
     }
@@ -363,6 +367,13 @@ class OverlayServiceLite : Service() {
                     val adjX = e.x
                     val adjY = e.y
                     if (isCalibrating) {
+                        // v8.14.44 FIX: GPS가 신선하지 않으면 얼리지 않는다. 옛날 캐시(37.29) 그대로 얼리는 게 이번 버그였다.
+                        val gpsAge = if (lastLocTime > 0) System.currentTimeMillis() - lastLocTime else Long.MAX_VALUE
+                        if (lastLocTime == 0L || gpsAge > 30_000 || lastAccuracy > 100f) {
+                            Toast.makeText(this, "GPS 새로 잡는 중… 2초 기다렸다가 다시 찍어주세요 (현재 ${String.format("%.5f", centerLat)})", Toast.LENGTH_SHORT).show()
+                            getLocation()
+                            return@setOnTouchListener true
+                        }
                         refPoint = PointF(adjX, adjY)
                         // ★ 핵심: 이 순간 GPS를 얼림. 나중에 sendAll()에서 다시 가져온 GPS 쓰면 안 됨.
                         freezeRefCenter()
@@ -386,6 +397,16 @@ class OverlayServiceLite : Service() {
                         Toast.makeText(this, "기준점 설정됨", Toast.LENGTH_SHORT).show()
                     } else {
                         tappedPoints.add(PointF(adjX, adjY))
+                        // v8.14.44 FIX: 핀 찍을 때 바로 좌표 계산해서 힌트에 표시. 본앱까지 가지 않고 그 자리에서 남쪽/서울 확인 가능.
+                        val cx = refPoint?.x ?: adjX
+                        val cy = refPoint?.y ?: adjY
+                        val dx = adjX - cx
+                        val dy = cy - adjY
+                        val dLat = dy * mpp / 111320.0
+                        val dLng = dx * mpp / (111320.0 * cos(Math.toRadians(refCenterLat)))
+                        val pinLat = refCenterLat + dLat
+                        val pinLng = refCenterLng + dLng
+                        hintText?.text = "핀 ${tappedPoints.size}: ${String.format("%.5f", pinLat)}, ${String.format("%.5f", pinLng)} · 기준점 ${String.format("%.5f", refCenterLat)}, ${String.format("%.5f", refCenterLng)} · 축척 ${mpp}m/px"
                         val dot = View(this).apply {
                             background = GradientDrawable().apply {
                                 shape = GradientDrawable.OVAL
