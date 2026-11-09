@@ -37,6 +37,7 @@ import java.net.URL
 
 // v8.14.41: 하단 닫기 버튼 네비게이션 바 가림 수정 + 상단 X 추가 + 선택 0개여도 닫힘
 // v8.14.43-LITE FIX: 기준점 GPS 얼림 - 기준점 찍은 순간의 GPS를 고정해서 전송 때 다시 가져온 GPS로 밀리는 문제 해결
+// v8.14.45-LITE FIX: 플로팅 버튼 누르면 GPS 새로 갱신
 // v8.14.44-LITE FIX: (1) lastKnown 캐시(37.29) 믿고 얼리는 버그 수정 - 15초 이내 + 100m 이내만 신선으로 인정, 나머지는 무조건 새로 요청
 //                   (2) 기준점 찍을 때 GPS가 신선하지 않으면 얼리지 않고 막음 - "GPS 새로 잡는 중" 토스트 후 다시 찍게 함
 //                   (3) 핀 찍을 때 바로 핀 좌표 힌트에 표시 - 본앱까지 가지 않고 그 자리에서 남쪽/서울 확인 가능
@@ -252,6 +253,8 @@ class OverlayServiceLite : Service() {
                             touchX = e.rawX
                             touchY = e.rawY
                             moved = false
+                            // v8.14.45 FIX: 플로팅 버튼 누르면 GPS 새로 갱신. 오버레이 열릴 때쯤엔 신선한 GPS가 와 있음.
+                            getLocation()
                         }
                         MotionEvent.ACTION_MOVE -> {
                             val dx = e.rawX - touchX
