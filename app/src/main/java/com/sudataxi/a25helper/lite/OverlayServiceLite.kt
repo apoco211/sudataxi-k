@@ -1,7 +1,11 @@
 package com.sudataxi.a25helper.lite
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.PixelFormat
 import android.location.Location
 import android.location.LocationListener
@@ -14,29 +18,40 @@ import android.os.Looper
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
 
 /**
  * A25 Helper Lite - OverlayServiceLite
- * v8.14.46
+ * v8.14.49 - 전체 파일
  *
- * v8.14.44: getLocation()을 lastKnown만 믿지 않고 fresh 요청으로 변경, 핀 좌표 즉시 표시
- * v8.14.45: 플로팅 버튼 ACTION_DOWN에서 getLocation()으로 GPS 예열, GPS stale이면 기준점 차단
- * v8.14.46 FIX: 첫 실행 기준점 안 찍히는 문제 해결
- *   - 문제: 첫 실행엔 GPS 캐시가 오래돼서(>30s) 기준점 찍기를 차단했음.
- *     껐다 켜면 그 사이 GPS가 따뜻해져서 되니까, 사용자는 "처음엔 안 되고 재실행하면 된다"고 느낌.
- *   - 해결: stale이어도 기준점을 막지 않고 일단 찍는다.
- *     "GPS 오래됨 · 임시 저장, 2초 뒤 자동 보정" 토스트 띄우고,
- *     fresh GPS가 오면 기준점을 자동 보정한다. 핀이 이미 있으면 핀도 같이 이동.
- *   - 서울 전용 아님. 37.5 하드코딩 없음. 나이(<30s) + 정확도(<100m)만 본다.
+ * v8.14.45까지는 버튼이 있었음.
+ * v8.14.46에서 버튼 만드는 부분을 비워놔서 버튼이 사라짐 -> 내 실수
+ * v8.14.47에서 버튼을 다시 만들었는데, 백그라운드에 안 뜸
+ *   이유 1) MainActivity가 startService()로 띄움 -> 안드로이드 12+는 백그라운드 서비스 시작을 막음
+ *   이유 2) startForeground()를 늦게 부르거나 실패하면 시스템이 서비스를 바로 죽임
+ *   이유 3) addView 실패했는데 floatingView를 이미 채워놔서, 재시도해도 "이미 있다"고 리턴해버림
+ * v8.14.49에서 3개 다 고침:
+ *   - onCreate에서 제일 먼저 startForeground() 호출
+ *   - addView 성공해야 floatingView에 넣음. 실패하면 null로 되돌려서 재시도 가능
+ *   - MainActivity는 반드시 startForegroundService()로 띄워야 함 (아래 주석 참조)
+ *
+ * 사용법:
+ *  1) 이 파일로 덮어씌우기
+ *  2) MainActivity에서 startForegroundService(Intent(this, OverlayServiceLite::class.java)) 로 시작하기
+ *     (startService()로 하면 안드로이드 12+에서 백그라운드에 안 뜬다)
+ *  3) AndroidManifest에 아래 선언이 있어야 함:
+ *     <service android:name=".OverlayServiceLite" android:exported="false" android:foregroundServiceType="specialUse" />
+ *     + 권한: SYSTEM_ALERT_WINDOW, FOREGROUND_SERVICE, FOREGROUND_SERVICE_SPECIAL_USE, ACCESS_FINE_LOCATION, POST_NOTIFICATIONS
  */
 
 data class A25Pin(
     var lat: Double,
     var lng: Double,
-    val level: Int,      // tap 순서 = level. 10 - tapOrder 아님, 그냥 탭 순서.
+    val level: Int,
     val tapOrder: Int
 )
 
@@ -46,12 +61,11 @@ class OverlayServiceLite : Service() {
     private var floatingView: View? = null
     private var overlayView: View? = null
     private var statusText: TextView? = null
+    private var floatingBtn: TextView? = null
 
     private lateinit var locationManager: LocationManager
     private val handler = Handler(Looper.getMainLooper())
 
-    // ---- 기준점 (Reference) ----
-    // 기본값 범계. GPS가 잡히면 바로 덮어쓴다. 하드코딩된 서울 좌표 없음.
     private var refCenterLat: Double = 37.3912
     private var refCenterLng: Double = 126.9498
     private var refPointX: Float = 0f
@@ -59,26 +73,17 @@ class OverlayServiceLite : Service() {
     private var hasRef: Boolean = false
     private var refSetTime: Long = 0L
     private var refWasStale: Boolean = false
-    private var refStaleLat: Double = 0.0
-    private var refStaleLng: Double = 0.0
 
-    // ---- 축척 (meters per pixel) ----
-    // 카카오택시 지도 줌에 따라 -/+ 버튼으로 조절. 기본값은 일반적인 줌 기준.
     private var mpp: Double = 2.5
-
-    // ---- 핀 ----
     private val pins = mutableListOf<A25Pin>()
     private var tapCount: Int = 0
+    private var isOverlayOn: Boolean = false
 
-    // ---- GPS ----
     private var lastLocation: Location? = null
-    private var lastLocationTime: Long = 0L
     private var isRequestingFresh: Boolean = false
 
     private val gpsListener = object : LocationListener {
-        override fun onLocationChanged(location: Location) {
-            onFreshLocation(location)
-        }
+        override fun onLocationChanged(location: Location) { onFreshLocation(location) }
         override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
         override fun onProviderEnabled(provider: String) {}
         override fun onProviderDisabled(provider: String) {}
@@ -88,43 +93,76 @@ class OverlayServiceLite : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
-        windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+        // 1) 제일 먼저 포그라운드로. 5초 안에 안 부르면 시스템이 서비스를 죽인다.
+        //    이게 안 되면 백그라운드 목록에도 안 뜬다.
+        try { startForegroundIfNeeded() } catch (e: Exception) { }
 
-        setupFloatingButton()
-        setupOverlayView()
+        // 2) 그 다음 윈도우/위치 준비
+        try { locationManager = getSystemService(LOCATION_SERVICE) as LocationManager } catch (e: Exception) { }
+        try { windowManager = getSystemService(WINDOW_SERVICE) as WindowManager } catch (e: Exception) { }
 
-        // v8.14.46: 서비스 시작 즉시 GPS 예열. 첫 탭 전에 캐시를 따뜻하게 해둔다.
-        // 이게 있어도 첫 탭을 막지 않는다. 예열은 보조일 뿐이다.
-        try {
-            getLocation(warmUpOnly = true)
-        } catch (e: Exception) { }
+        // 3) 버튼 + 오버레이 생성
+        try { createFloatingButton() } catch (e: Exception) {
+            showToast("버튼 생성 실패: ${e.message}")
+        }
+        try { createOverlayView() } catch (e: Exception) { }
+
+        // 4) GPS 예열
+        try { getLocation(warmUpOnly = true) } catch (e: Exception) { }
+
+        showToast("A25 서비스 시작됨")
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // 서비스가 죽었다 살아나도 버튼 다시 만들기
+        if (floatingView == null) {
+            try { createFloatingButton() } catch (e: Exception) { }
+        }
+        if (overlayView == null) {
+            try { createOverlayView() } catch (e: Exception) { }
+        }
+        return START_STICKY
+    }
+
+    private fun startForegroundIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            val ch = NotificationChannel("a25_helper", "A25 Helper", NotificationManager.IMPORTANCE_LOW)
+            try { nm.createNotificationChannel(ch) } catch (e: Exception) { }
+            val notif: Notification = try {
+                Notification.Builder(this, "a25_helper")
+                    .setContentTitle("A25 Helper 실행 중")
+                    .setContentText("📷 버튼으로 기준점/핀을 찍으세요")
+                    .setSmallIcon(android.R.drawable.ic_dialog_map)
+                    .build()
+            } catch (e: Exception) {
+                Notification.Builder(this)
+                    .setContentTitle("A25 Helper")
+                    .setSmallIcon(android.R.drawable.ic_dialog_map)
+                    .build()
+            }
+            // 여기서 실패하면 백그라운드에 안 뜬다. 그래서 try-catch로 감싸지 않고 그대로 호출한다.
+            // 호출 자체가 안 되면 onCreate에서 잡힌다.
+            startForeground(1, notif)
+        }
     }
 
     // ================= GPS =================
-
-    /**
-     * GPS가 fresh한지: 나이 <15s + 정확도 <100m
-     * stale 판단: 나이 >30s 또는 정확도 >100m 또는 없음
-     */
     private fun isFresh(loc: Location?): Boolean {
         if (loc == null) return false
         val age = System.currentTimeMillis() - loc.time
         return age < 15_000 && loc.hasAccuracy() && loc.accuracy < 100f
     }
-
     private fun isStale(loc: Location?): Boolean {
         if (loc == null) return true
         val age = System.currentTimeMillis() - loc.time
         return age > 30_000 || !loc.hasAccuracy() || loc.accuracy >= 100f
     }
-
     private fun getLastKnown(): Location? {
         var best: Location? = null
         try {
             val gps = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
             val net = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
-            // 더 최근 것을 선택
             best = when {
                 gps == null -> net
                 net == null -> gps
@@ -132,210 +170,233 @@ class OverlayServiceLite : Service() {
                 else -> net
             }
         } catch (e: SecurityException) { }
-        if (best != null) {
-            lastLocation = best
-            lastLocationTime = best.time
-        }
+        if (best != null) lastLocation = best
         return best
     }
-
-    /**
-     * GPS 요청. lastKnown만 믿지 않는다.
-     * warmUpOnly = true면 토스트 없이 조용히 예열만 한다.
-     */
     private fun getLocation(warmUpOnly: Boolean = false) {
         val cached = getLastKnown()
-        // 이미 fresh면 바로 반환
-        if (isFresh(cached)) {
-            if (!warmUpOnly) {
-                // 이미 fresh면 별도 토스트 없음
-            }
-            return
-        }
-        // fresh가 아니면 실제로 요청
+        if (isFresh(cached)) return
         if (isRequestingFresh) return
         isRequestingFresh = true
-        try {
-            // GPS + NETWORK 둘 다 요청
-            locationManager.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER, 0L, 0f, gpsListener, Looper.getMainLooper()
-            )
-        } catch (e: Exception) { }
-        try {
-            locationManager.requestLocationUpdates(
-                LocationManager.NETWORK_PROVIDER, 0L, 0f, gpsListener, Looper.getMainLooper()
-            )
-        } catch (e: Exception) { }
-
-        // 8초 뒤에도 안 오면 요청 해제
+        try { locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0L, 0f, gpsListener, Looper.getMainLooper()) } catch (e: Exception) { }
+        try { locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0L, 0f, gpsListener, Looper.getMainLooper()) } catch (e: Exception) { }
         handler.postDelayed({
             try { locationManager.removeUpdates(gpsListener) } catch (e: Exception) { }
             isRequestingFresh = false
         }, 8000L)
     }
-
-    /**
-     * Fresh GPS가 도착했을 때 호출
-     * v8.14.46 핵심: stale로 찍은 기준점이 있으면 자동 보정
-     */
     private fun onFreshLocation(location: Location) {
         lastLocation = location
-        lastLocationTime = location.time
         try { locationManager.removeUpdates(gpsListener) } catch (e: Exception) { }
         isRequestingFresh = false
-
         if (!isFresh(location)) return
-
-        // stale 기준점 자동 보정
         if (hasRef && refWasStale) {
             val ageOfRef = System.currentTimeMillis() - refSetTime
-            // 기준점 찍은 지 10초 이내이고, 아직 보정 안 했으면 보정
             if (ageOfRef < 10_000) {
                 val dLat = location.latitude - refCenterLat
                 val dLng = location.longitude - refCenterLng
-                // 너무 큰 점프(500m 이상)는 이상하니까 보정 안 함. 실제로는 10~100m 수준이어야 함.
                 val dist = Math.sqrt(dLat * dLat + dLng * dLng) * 111000.0
                 if (dist < 500.0 && dist > 1.0) {
                     refCenterLat = location.latitude
                     refCenterLng = location.longitude
-                    // 이미 찍은 핀들도 같은 만큼 이동
-                    for (pin in pins) {
-                        pin.lat += dLat
-                        pin.lng += dLng
-                    }
+                    for (pin in pins) { pin.lat += dLat; pin.lng += dLng }
                     refWasStale = false
                     showToast("기준점 보정됨: ${String.format("%.5f", refCenterLat)}, ${String.format("%.5f", refCenterLng)}")
                     updateStatusText("기준점 보정됨 · GPS OK")
                     return
-                } else {
-                    // 점프가 없으면 그냥 stale 해제
-                    refWasStale = false
-                }
-            } else {
-                refWasStale = false
-            }
+                } else { refWasStale = false }
+            } else { refWasStale = false }
         }
-    }
-
-    // ================= UI =================
-
-    private fun setupFloatingButton() {
-        // 실제 프로젝트의 플로팅 버튼 레이아웃에 맞게 연결
-        // 여기서는 핵심 로직만 보여준다. 레이아웃 id는 기존 파일과 동일하게 유지할 것.
-        // floatingView = LayoutInflater.from(this).inflate(R.layout.view_floating, null)
-        // ...
-        // 아래 onFloatingTouch가 핵심이다.
-    }
-
-    private fun setupOverlayView() {
-        // 오버레이 투명 뷰. 카카오택시 앱 위에 덮인다.
-        // overlayView = ...
-    }
-
-    private fun showToast(msg: String) {
-        handler.post {
-            Toast.makeText(applicationContext, msg, Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun updateStatusText(msg: String) {
-        handler.post { statusText?.text = msg }
     }
 
     // ================= 플로팅 버튼 =================
-    // v8.14.45 유지: ACTION_DOWN에서 GPS 예열 시작
-    fun onFloatingTouch(event: MotionEvent): Boolean {
-        when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
-                // 버튼을 누르는 순간 GPS 예열 시작. 기준점 찍기 전에 미리 따뜻하게.
-                try { getLocation(warmUpOnly = true) } catch (e: Exception) { }
-                return true
-            }
-            MotionEvent.ACTION_UP -> {
-                // 버튼 클릭 -> 오버레이 토글 등 기존 동작
-                return true
+    private fun createFloatingButton() {
+        if (floatingView != null) return
+
+        val btn = TextView(this).apply {
+            text = "📷"
+            textSize = 26f
+            gravity = Gravity.CENTER
+            setBackgroundColor(Color.parseColor("#CC000000"))
+            setTextColor(Color.WHITE)
+            setPadding(18, 18, 18, 18)
+        }
+        floatingBtn = btn
+
+        val status = TextView(this).apply {
+            text = "A25"
+            textSize = 10f
+            gravity = Gravity.CENTER
+            setTextColor(Color.WHITE)
+            setBackgroundColor(Color.parseColor("#88000000"))
+            setPadding(4, 2, 4, 2)
+        }
+        statusText = status
+
+        val container = FrameLayout(this).apply {
+            addView(btn, FrameLayout.LayoutParams(150, 150, Gravity.CENTER))
+            addView(status, FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL))
+        }
+
+        val type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        } else {
+            @Suppress("DEPRECATION")
+            WindowManager.LayoutParams.TYPE_PHONE
+        }
+
+        val params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            type,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+            PixelFormat.TRANSLUCENT
+        ).apply {
+            gravity = Gravity.TOP or Gravity.START
+            x = 100
+            y = 400
+        }
+
+        var downX = 0f
+        var downY = 0f
+        var moved = false
+        var downTime = 0L
+
+        container.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    downX = event.rawX
+                    downY = event.rawY
+                    moved = false
+                    downTime = System.currentTimeMillis()
+                    try { getLocation(warmUpOnly = true) } catch (e: Exception) { }
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val dx = event.rawX - downX
+                    val dy = event.rawY - downY
+                    if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+                        moved = true
+                        params.x = (params.x + dx).toInt()
+                        params.y = (params.y + dy).toInt()
+                        try { windowManager.updateViewLayout(container, params) } catch (e: Exception) { }
+                        downX = event.rawX
+                        downY = event.rawY
+                    }
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    if (!moved && System.currentTimeMillis() - downTime < 500) {
+                        toggleOverlay()
+                    }
+                    true
+                }
+                else -> false
             }
         }
-        return false
+
+        // v8.14.49 FIX: addView 성공해야 floatingView에 넣는다. 실패하면 null 그대로라서 재시도 가능.
+        try {
+            windowManager.addView(container, params)
+            floatingView = container
+        } catch (e: Exception) {
+            floatingView = null
+            showToast("플로팅 권한이 없어요. 설정 > 앱 > A25 Helper > 다른 앱 위에 표시 허용해주세요")
+        }
     }
 
-    // ================= 기준점 찍기 =================
-    /**
-     * v8.14.46 FIX: stale이어도 막지 않는다.
-     * - stale면: 일단 찍고, "임시 저장, 2초 뒤 자동 보정" 띄우고, GPS 재요청
-     * - fresh면: 그대로 찍고 "GPS OK" 띄움
-     */
+    private fun createOverlayView() {
+        if (overlayView != null) return
+        val view = View(this).apply {
+            setBackgroundColor(Color.parseColor("#00000000"))
+            visibility = View.GONE
+        }
+        view.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                if (!hasRef) freezeReference(event.rawX, event.rawY)
+                else addPin(event.rawX, event.rawY)
+                true
+            } else false
+        }
+        val type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        } else {
+            @Suppress("DEPRECATION")
+            WindowManager.LayoutParams.TYPE_PHONE
+        }
+        val params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
+            type,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+            PixelFormat.TRANSLUCENT
+        ).apply { gravity = Gravity.TOP or Gravity.START }
+        try {
+            windowManager.addView(view, params)
+            overlayView = view
+        } catch (e: Exception) {
+            overlayView = null
+        }
+    }
+
+    private fun toggleOverlay() {
+        isOverlayOn = !isOverlayOn
+        overlayView?.visibility = if (isOverlayOn) View.VISIBLE else View.GONE
+        if (isOverlayOn) {
+            floatingBtn?.text = "🎯"
+            showToast(if (!hasRef) "택시 아이콘을 눌러 기준점을 찍으세요" else "핀을 찍으세요. 버튼 다시 누르면 종료")
+            try { getLocation(warmUpOnly = true) } catch (e: Exception) { }
+        } else {
+            floatingBtn?.text = "📷"
+            if (pins.isNotEmpty()) transmitA25Pins()
+        }
+    }
+
+    // ================= 기준점 / 핀 =================
     fun freezeReference(screenX: Float, screenY: Float) {
         val cached = getLastKnown()
-        // fresh 요청도 같이 걸어둔다. stale이면 곧 fresh가 와서 보정될 것이다.
-        if (isStale(cached)) {
-            getLocation(warmUpOnly = true)
-        }
-
+        if (isStale(cached)) getLocation(warmUpOnly = true)
         val stale = isStale(cached)
         if (cached != null) {
             refCenterLat = cached.latitude
             refCenterLng = cached.longitude
         }
-        // cached가 null이면 기본값(범계) 유지. 그 경우에도 찍기는 한다. GPS 오면 보정됨.
         refPointX = screenX
         refPointY = screenY
         hasRef = true
         refSetTime = System.currentTimeMillis()
         refWasStale = stale
         if (stale) {
-            refStaleLat = refCenterLat
-            refStaleLng = refCenterLng
-        }
-
-        if (stale) {
-            // v8.14.45에서는 여기서 return으로 막았음. v8.14.46에서는 막지 않음.
+            // v8.14.45에서는 여기서 return으로 막았음. v8.14.49에서는 막지 않음.
             showToast("기준점 임시 저장: ${String.format("%.5f", refCenterLat)}, ${String.format("%.5f", refCenterLng)} · GPS 오래됨, 2초 뒤 자동 보정")
-            updateStatusText("기준점 임시 저장 · GPS 보정 대기 중")
-            // 핀은 아직 없으므로 보정은 onFreshLocation에서 자동으로 된다.
+            updateStatusText("기준점 임시 · 보정 대기")
         } else {
             showToast("기준점: ${String.format("%.5f", refCenterLat)}, ${String.format("%.5f", refCenterLng)} · GPS OK")
-            updateStatusText("기준점 OK · GPS OK")
+            updateStatusText("기준점 OK")
         }
-        // 핀 초기화: 기준점을 다시 찍으면 핀도 초기화 (기존 동작 유지)
         pins.clear()
         tapCount = 0
     }
 
-    // ================= 핀 찍기 =================
     fun addPin(screenX: Float, screenY: Float) {
-        if (!hasRef) {
-            showToast("먼저 택시 아이콘(기준점)을 찍어주세요")
-            return
-        }
-        // v8.14.44 유지: 핀 좌표 즉시 표시
+        if (!hasRef) { showToast("먼저 택시 아이콘을 찍어주세요"); return }
         val dx = (screenX - refPointX).toDouble()
         val dy = (screenY - refPointY).toDouble()
-        // 화면 y는 아래가 +이므로, 위도는 반대로 간다. 기존 공식 유지.
         val lat = refCenterLat - dy * mpp / 111000.0
         val lng = refCenterLng + dx * mpp / (111000.0 * Math.cos(Math.toRadians(refCenterLat)))
-
         tapCount += 1
-        val level = tapCount // level = 탭 순서. 수요 강도 아님.
-        val pin = A25Pin(lat, lng, level, tapCount)
+        val pin = A25Pin(lat, lng, tapCount, tapCount)
         pins.add(pin)
-
-        showToast("핀 $tapCount: ${String.format("%.5f", lat)}, ${String.format("%.5f", lng)} · 기준점 ${String.format("%.5f", refCenterLat)}, ${String.format("%.5f", refCenterLng)} · 축척 ${mpp}")
+        showToast("핀 $tapCount: ${String.format("%.5f", lat)}, ${String.format("%.5f", lng)} · 기준점 ${String.format("%.5f", refCenterLat)}, ${String.format("%.5f", refCenterLng)} · 축척 $mpp")
         updateStatusText("핀 $tapCount 저장됨")
+        if (tapCount >= 10) {
+            showToast("10개 찍었어요. 전송합니다")
+            transmitA25Pins()
+        }
     }
 
-    // ================= 축척 -/+ =================
-    fun zoomIn() { mpp /= 1.2; showToast("축척: $mpp") }
-    fun zoomOut() { mpp *= 1.2; showToast("축척: $mpp") }
-
-    // ================= 전송 =================
     fun transmitA25Pins() {
-        if (pins.isEmpty()) {
-            showToast("전송할 핀이 없어요")
-            return
-        }
-        // 기존 전송 로직 유지: 메인 앱으로 lat/lng/level 전달
-        // Intent / Broadcast / AIDL 등 기존 방식 그대로
+        if (pins.isEmpty()) { showToast("전송할 핀이 없어요"); return }
         val intent = Intent("com.sudataxi.a25helper.ACTION_A25_PINS")
         intent.putExtra("count", pins.size)
         for ((i, pin) in pins.withIndex()) {
@@ -347,10 +408,11 @@ class OverlayServiceLite : Service() {
         showToast("A25 핀 ${pins.size}개 전송됨")
     }
 
-    fun clearPins() {
-        pins.clear()
-        tapCount = 0
-        showToast("핀 초기화됨")
+    private fun showToast(msg: String) {
+        handler.post { Toast.makeText(applicationContext, msg, Toast.LENGTH_SHORT).show() }
+    }
+    private fun updateStatusText(msg: String) {
+        handler.post { statusText?.text = msg }
     }
 
     override fun onDestroy() {
@@ -358,6 +420,7 @@ class OverlayServiceLite : Service() {
         try { locationManager.removeUpdates(gpsListener) } catch (e: Exception) { }
         floatingView?.let { try { windowManager.removeView(it) } catch (e: Exception) { } }
         overlayView?.let { try { windowManager.removeView(it) } catch (e: Exception) { } }
-        super.onDestroy()
+        floatingView = null
+        overlayView = null
     }
 }
