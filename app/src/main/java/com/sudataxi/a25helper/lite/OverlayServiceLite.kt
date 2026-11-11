@@ -1,4 +1,12 @@
 package com.sudataxi.a25helper.lite
+// v8.14.46 매니페스트 필수 (이 파일만 고치면 시간 경과 멈춤이 반만 고쳐짐):
+//  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+//  <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+//  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+//  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+//  <service android:name=".lite.OverlayServiceLite"
+//      android:foregroundServiceType="location|specialUse" ... />
+//  + A25 설정 > 앱 > A25 Helper > 배터리 > 제한 없음 으로 바꿔야 Doze에서 안 죽음.
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -38,6 +46,18 @@ import java.net.URL
 // v8.14.41: 하단 닫기 버튼 네비게이션 바 가림 수정 + 상단 X 추가 + 선택 0개여도 닫힘
 // v8.14.43-LITE FIX: 기준점 GPS 얼림 - 기준점 찍은 순간의 GPS를 고정해서 전송 때 다시 가져온 GPS로 밀리는 문제 해결
 // v8.14.45-LITE FIX: 플로팅 버튼 누르면 GPS 새로 갱신
+// v8.14.46-LITE FIX: 첫 실행 노란점 안 찍힘 + 시간 지나면 멈춤 해결
+//  원인1) 첫 실행: getLocation()이 requestSingleUpdate 1회성이라 GPS가 아직 안 왔을 때
+//         첫 터치를 그냥 버림(return true). GPS 오기 전에 찍으면 무조건 실패했고,
+//         GPS가 온 뒤에 다시 열어야만 됐음. -> 터치를 pendingRefPoint에 보관하고,
+//         신선한 GPS가 오면 자동으로 노란점 찍음. 15초 타임아웃 시 최선값으로 찍고 경고.
+//  원인2) 시간 경과: singleUpdate는 첫 fix 후 removeUpdates()로 끝나서 이후 GPS가
+//         영원히 갱신 안 됨. 30초만 지나도 게이트(gpsAge>30s)가 모든 첫 터치를 막음.
+//         -> requestLocationUpdates() 지속 수신으로 교체. 서비스 살아있는 동안 계속 갱신.
+//  원인3) 정확도>100m fix를 무조건 버려서 실내/도심에서 영원히 hasLocation=false.
+//         -> 200m까지는 폴백으로 보관, hasLocation은 100m/15초 기준으로 분리.
+//  원인4) FGS 타입이 SPECIAL_USE만이라 Android 14+에서 위치 FGS로 안 보고 시간 지나면
+//         시스템이 위치/서비스를 멈춤. -> LOCATION|SPECIAL_USE로 변경 (매니페스트도 같이 수정 필요)
 // v8.14.44-LITE FIX: (1) lastKnown 캐시(37.29) 믿고 얼리는 버그 수정 - 15초 이내 + 100m 이내만 신선으로 인정, 나머지는 무조건 새로 요청
 //                   (2) 기준점 찍을 때 GPS가 신선하지 않으면 얼리지 않고 막음 - "GPS 새로 잡는 중" 토스트 후 다시 찍게 함
 //                   (3) 핀 찍을 때 바로 핀 좌표 힌트에 표시 - 본앱까지 가지 않고 그 자리에서 남쪽/서울 확인 가능
@@ -80,6 +100,13 @@ class OverlayServiceLite : Service() {
     private var mpp = 9.5f
     private val MPP_STEPS = floatArrayOf(4f, 6f, 7.5f, 9.5f, 12f, 15f, 20f)
     private var mppIndex = 3
+    // --- v8.14.46 FIX: 지속 GPS 수신 상태. 지역변수 listener는 1회성이라 시간 지나면 끝남 ---
+    private var locationManager: LocationManager? = null
+    private var isListening = false
+    private var pendingRefPoint: PointF? = null
+    private val mainHandler = android.os.Handler(Looper.getMainLooper())
+    private var pendingTimeoutRunnable: Runnable? = null
+    private var gpsWatchdogRunnable: Runnable? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try {
@@ -94,14 +121,16 @@ class OverlayServiceLite : Service() {
             mpp = prefs.getFloat("mpp", 9.5f)
             mppIndex = MPP_STEPS.indexOfFirst { it == mpp }.takeIf { it >= 0 } ?: 3
             createChannel()
+            // v8.14.46: LOCATION 타입을 같이 줘야 Android 14+에서 위치 FGS로 유지됨. SPECIAL_USE만으론 시간 지나면 멈춤.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                startForeground(1, createNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+                startForeground(1, createNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION or ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                startForeground(1, createNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+                startForeground(1, createNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION)
             } else {
                 startForeground(1, createNotification())
             }
-            getLocation()
+            ensureLocationUpdates()
+            startGpsWatchdog()
             showFloatingButton()
         } catch (e: Exception) {
             Log.e(TAG, "onStartCommand", e)
@@ -123,60 +152,140 @@ class OverlayServiceLite : Service() {
         return b.setContentTitle("A25 Lite").setContentText("핫스팟 저장").setSmallIcon(android.R.drawable.ic_menu_mylocation).build()
     }
 
-    // v8.14.44 FIX: lastKnown 캐시를 믿지 않음. 카카오택시는 실시간 GPS를 쓰는데, 헬퍼만 캐시를 봐서 남쪽(37.29)에 멈춰 있던 게 이번 버그.
-    private fun getLocation() {
+    // v8.14.46 FIX: getLocation()은 이제 1회성이 아니라 지속 수신 진입점. 기존 호출부 그대로 둠.
+    private fun getLocation() { ensureLocationUpdates() }
+
+    private fun isGpsFresh(): Boolean {
+        if (lastLocTime == 0L) return false
+        val age = System.currentTimeMillis() - lastLocTime
+        return age <= 30_000 && lastAccuracy <= 100f
+    }
+
+    private val locationListener = object : LocationListener {
+        override fun onLocationChanged(loc: Location) {
+            val age = System.currentTimeMillis() - loc.time
+            if (age > 30_000) return // 너무 오래된 캐시 fix는 무시하고 계속 기다림
+            // 이미 좋은 GPS가 있는데 정확도 나쁜 NETWORK가 끌어내리는 것 방지
+            if (loc.accuracy > 200f && hasLocation && lastAccuracy <= 100f) return
+            if (loc.provider == LocationManager.NETWORK_PROVIDER && hasLocation && lastAccuracy <= 30f && loc.accuracy > lastAccuracy) return
+            centerLat = loc.latitude
+            centerLng = loc.longitude
+            lastLocTime = loc.time
+            lastAccuracy = loc.accuracy
+            hasLocation = age <= 15_000 && loc.accuracy <= 100f
+            Log.d(TAG, "onLocationChanged provider=${loc.provider} lat=$centerLat lng=$centerLng acc=$lastAccuracy age=${age}ms fresh=$hasLocation")
+            tryFlushPendingRef()
+        }
+        override fun onStatusChanged(p: String?, s: Int, e: Bundle?) {}
+        override fun onProviderEnabled(p: String) { ensureLocationUpdates() }
+        override fun onProviderDisabled(p: String) {}
+    }
+
+    private fun ensureLocationUpdates() {
         try {
             val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-            val candidates = listOfNotNull(
-                try { lm.getLastKnownLocation(LocationManager.GPS_PROVIDER) } catch (e: SecurityException) { null },
-                try { lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) } catch (e: SecurityException) { null }
-            )
-            val freshest = candidates.maxByOrNull { it.time }
-            if (freshest != null) {
-                val age = System.currentTimeMillis() - freshest.time
-                // 15초 이내 + 정확도 100m 이내만 "신선"으로 인정. 그 외는 임시값으로만 두고 새로 잡는다.
-                centerLat = freshest.latitude
-                centerLng = freshest.longitude
-                lastLocTime = freshest.time
-                lastAccuracy = freshest.accuracy
-                hasLocation = age < 15_000 && freshest.accuracy < 100f
-                if (!hasLocation && age >= 15_000) Toast.makeText(this, "GPS가 ${age / 1000}초 전 위치라 새로 잡는 중…", Toast.LENGTH_SHORT).show()
-            } else {
-                hasLocation = false
-            }
-            // ★ hasLocation이 true여도 무조건 새로 요청. NETWORK 캐시(37.29)일 수 있어서 믿으면 안 됨.
-            try {
-                val listener = object : LocationListener {
-                    override fun onLocationChanged(loc: Location) {
-                        if (loc.accuracy > 100f) return
-                        val locAge = System.currentTimeMillis() - loc.time
-                        if (locAge > 15_000) return
-                        if (loc.provider == LocationManager.NETWORK_PROVIDER && hasLocation && lastAccuracy < loc.accuracy) return
-                        centerLat = loc.latitude
-                        centerLng = loc.longitude
-                        lastLocTime = loc.time
-                        lastAccuracy = loc.accuracy
-                        hasLocation = true
-                        Toast.makeText(this@OverlayServiceLite, "GPS 갱신됨 (정확도 ${loc.accuracy.toInt()}m)", Toast.LENGTH_SHORT).show()
-                        try { lm.removeUpdates(this) } catch (e: Exception) {}
-                    }
-                    override fun onStatusChanged(p: String?, s: Int, e: Bundle?) {}
-                    override fun onProviderEnabled(p: String) {}
-                    override fun onProviderDisabled(p: String) {}
+            locationManager = lm
+            // lastKnown은 폴백 표시용으로만. 신선하지 않으면 hasLocation=false 유지.
+            if (lastLocTime == 0L) {
+                val candidates = listOfNotNull(
+                    try { lm.getLastKnownLocation(LocationManager.GPS_PROVIDER) } catch (e: SecurityException) { null },
+                    try { lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) } catch (e: SecurityException) { null }
+                )
+                val freshest = candidates.maxByOrNull { it.time }
+                if (freshest != null) {
+                    centerLat = freshest.latitude
+                    centerLng = freshest.longitude
+                    lastLocTime = freshest.time
+                    lastAccuracy = freshest.accuracy
+                    val age = System.currentTimeMillis() - freshest.time
+                    hasLocation = age < 15_000 && freshest.accuracy < 100f
                 }
-                lm.requestSingleUpdate(LocationManager.GPS_PROVIDER, listener, Looper.getMainLooper())
-                lm.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, listener, Looper.getMainLooper())
-                // 5초 뒤에도 안 오면 한 번 더 요청 (GPS가 느릴 때)
-                android.os.Handler(Looper.getMainLooper()).postDelayed({
-                    if (!hasLocation || System.currentTimeMillis() - lastLocTime > 15_000) {
-                        try { lm.requestSingleUpdate(LocationManager.GPS_PROVIDER, listener, Looper.getMainLooper()) } catch (e: Exception) {}
-                    }
-                }, 5000)
-            } catch (e: SecurityException) {
-                Toast.makeText(this, "위치 권한이 없어요", Toast.LENGTH_LONG).show()
             }
-        } catch (e: Exception) { Log.e(TAG, "getLocation", e) }
+            if (isListening) return
+            // ★ 핵심: singleUpdate가 아니라 지속 수신. 한 번 fix 받고 removeUpdates() 하지 않음.
+            try { lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L, 0f, locationListener, Looper.getMainLooper()) } catch (e: SecurityException) { Toast.makeText(this, "위치 권한이 없어요", Toast.LENGTH_LONG).show(); return }
+            try { lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000L, 0f, locationListener, Looper.getMainLooper()) } catch (e: Exception) {}
+            isListening = true
+            Log.d(TAG, "ensureLocationUpdates: listening started")
+        } catch (e: Exception) { Log.e(TAG, "ensureLocationUpdates", e) }
     }
+
+    private fun restartLocationUpdates() {
+        try { locationManager?.removeUpdates(locationListener) } catch (e: Exception) {}
+        isListening = false
+        ensureLocationUpdates()
+    }
+
+    private fun stopLocationUpdates() {
+        try { locationManager?.removeUpdates(locationListener) } catch (e: Exception) {}
+        isListening = false
+        pendingTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+        gpsWatchdogRunnable?.let { mainHandler.removeCallbacks(it) }
+    }
+
+    // v8.14.46: 20초마다 GPS 나이 체크. 삼성 One UI가 GPS를 멈춰도 다시 깨움.
+    private fun startGpsWatchdog() {
+        gpsWatchdogRunnable?.let { mainHandler.removeCallbacks(it) }
+        val r = object : Runnable {
+            override fun run() {
+                try {
+                    if (isListening && lastLocTime > 0) {
+                        val age = System.currentTimeMillis() - lastLocTime
+                        if (age > 30_000) {
+                            Log.d(TAG, "watchdog: GPS stale ${age}ms, restart updates")
+                            restartLocationUpdates()
+                        }
+                    } else if (!isListening) {
+                        ensureLocationUpdates()
+                    }
+                } catch (e: Exception) {}
+                mainHandler.postDelayed(this, 20_000)
+            }
+        }
+        gpsWatchdogRunnable = r
+        mainHandler.postDelayed(r, 20_000)
+    }
+
+    // v8.14.46: 보관해둔 첫 터치가 있으면 신선한 GPS가 온 순간 자동 적용
+    private fun tryFlushPendingRef() {
+        val pending = pendingRefPoint ?: return
+        if (captureOverlay == null || !isCalibrating) { pendingRefPoint = null; return }
+        if (!isGpsFresh()) return
+        pendingRefPoint = null
+        pendingTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+        pendingTimeoutRunnable = null
+        mainHandler.post {
+            if (isCalibrating && captureOverlay != null) {
+                if (applyRefPoint(pending.x, pending.y)) {
+                    Toast.makeText(this, "GPS 잡혔어요. 노란점 자동 적용됨", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    // v8.14.46: 첫 터치 보관 + 15초 타임아웃. GPS가 영원히 안 오면 최선값으로 찍고 경고 (무한 블록 방지)
+    private fun waitForGpsAndApplyRef(x: Float, y: Float) {
+        pendingRefPoint = PointF(x, y)
+        ensureLocationUpdates()
+        Toast.makeText(this, "GPS 새로 잡는 중… 잡히면 노란점이 자동으로 찍혀요 (최대 15초)", Toast.LENGTH_SHORT).show()
+        pendingTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+        val r = Runnable {
+            val pending = pendingRefPoint ?: return@Runnable
+            pendingRefPoint = null
+            pendingTimeoutRunnable = null
+            if (!isCalibrating || captureOverlay == null) return@Runnable
+            if (lastLocTime == 0L) {
+                Toast.makeText(this, "GPS를 아직 못 잡았어요. 야외/창가에서 다시 터치해주세요", Toast.LENGTH_LONG).show()
+                return@Runnable
+            }
+            // 최선값 폴백: 정확도가 100m를 넘겨도 일단 찍고 경고. 찍기 자체를 막으면 첫 실행이 영원히 안 됨.
+            Toast.makeText(this, "GPS 정확도 ${if (lastAccuracy < 10000f) lastAccuracy.toInt().toString() + "m" else "?"}로 기준점 찍어요. 위치가 조금 틀어질 수 있어요", Toast.LENGTH_LONG).show()
+            applyRefPoint(pending.x, pending.y)
+        }
+        pendingTimeoutRunnable = r
+        mainHandler.postDelayed(r, 15_000)
+    }
+
 
     // v8.14.43 FIX: freeze는 무조건 현재 시간으로 찍음. lastLocTime이 0이면 refCenterTime도 0이 돼서
     // sendAll에서 "기준점 먼저 찍으세요"로 계속 막히던 버그. GPS가 나중에 와도 refCenterTime은 0 그대로라서
@@ -192,6 +301,32 @@ class OverlayServiceLite : Service() {
         Log.d(TAG, "freezeRefCenter lat=$refCenterLat lng=$refCenterLng time=$refCenterTime locTime=$refCenterLocTime acc=$refCenterAccuracy")
     }
 
+    // v8.14.46: 기준점 적용 로직을 터치 핸들러에서 분리. 직접 터치 + pending 자동적용이 같은 경로를 씀.
+    private fun applyRefPoint(adjX: Float, adjY: Float): Boolean {
+        val overlay = captureOverlay as? FrameLayout ?: return false
+        refPoint = PointF(adjX, adjY)
+        freezeRefCenter()
+        isCalibrating = false
+        val ageSec = if (refCenterTime > 0) (System.currentTimeMillis() - refCenterTime) / 1000 else -1
+        val accTxt = if (refCenterAccuracy < 10000f) "${refCenterAccuracy.toInt()}m" else "?"
+        hintText?.text = "기준점 고정: ${String.format("%.5f", refCenterLat)}, ${String.format("%.5f", refCenterLng)} (GPS ${ageSec}초 전, 정확도 $accTxt) · 핫스팟 3~10곳 터치"
+        btnSend?.isEnabled = true
+        val refDot = View(this).apply {
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(Color.YELLOW)
+            }
+            layoutParams = FrameLayout.LayoutParams(36, 36).apply {
+                leftMargin = (adjX - 18).toInt()
+                topMargin = (adjY - 18).toInt()
+            }
+        }
+        overlay.addView(refDot)
+        refDotView = refDot
+        Toast.makeText(this, "기준점 설정됨", Toast.LENGTH_SHORT).show()
+        return true
+    }
+
     private fun resetCalibration() {
         // 기준점 다시 찍기: 기존 핫스팟은 기준점이 바뀌면 의미가 없어지므로 같이 지움
         tappedPoints.clear()
@@ -203,6 +338,9 @@ class OverlayServiceLite : Service() {
         refCenterTime = 0L
         refCenterLocTime = 0L
         isCalibrating = true
+        pendingRefPoint = null
+        pendingTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+        pendingTimeoutRunnable = null
         btnSend?.text = "전송 (0)"
         btnSend?.isEnabled = false
         hintText?.text = "① 택시 아이콘을 다시 터치하세요 (노란 점)  ·  축척 ${mpp}m/px"
@@ -253,8 +391,8 @@ class OverlayServiceLite : Service() {
                             touchX = e.rawX
                             touchY = e.rawY
                             moved = false
-                            // v8.14.45 FIX: 플로팅 버튼 누르면 GPS 새로 갱신. 오버레이 열릴 때쯤엔 신선한 GPS가 와 있음.
-                            getLocation()
+                            // v8.14.46: 플로팅 버튼 누르면 지속 수신 재확인. 오버레이 열릴 때쯤엔 신선한 GPS가 와 있음.
+                            ensureLocationUpdates()
                         }
                         MotionEvent.ACTION_MOVE -> {
                             val dx = e.rawX - touchX
@@ -290,7 +428,7 @@ class OverlayServiceLite : Service() {
         refDotView = null
         refCenterTime = 0L
         isCalibrating = true
-        getLocation()
+        ensureLocationUpdates()
         try {
             val p = WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
@@ -370,34 +508,13 @@ class OverlayServiceLite : Service() {
                     val adjX = e.x
                     val adjY = e.y
                     if (isCalibrating) {
-                        // v8.14.44 FIX: GPS가 신선하지 않으면 얼리지 않는다. 옛날 캐시(37.29) 그대로 얼리는 게 이번 버그였다.
-                        val gpsAge = if (lastLocTime > 0) System.currentTimeMillis() - lastLocTime else Long.MAX_VALUE
-                        if (lastLocTime == 0L || gpsAge > 30_000 || lastAccuracy > 100f) {
-                            Toast.makeText(this, "GPS 새로 잡는 중… 2초 기다렸다가 다시 찍어주세요 (현재 ${String.format("%.5f", centerLat)})", Toast.LENGTH_SHORT).show()
-                            getLocation()
+                        // v8.14.46 FIX: GPS 안 신선해도 터치를 버리지 않음. 보관해두고 GPS 오면 자동 적용.
+                        // 예전 코드는 여기서 return true로 터치를 삼켜서, 첫 실행엔 무조건 실패했음.
+                        if (!isGpsFresh()) {
+                            waitForGpsAndApplyRef(adjX, adjY)
                             return@setOnTouchListener true
                         }
-                        refPoint = PointF(adjX, adjY)
-                        // ★ 핵심: 이 순간 GPS를 얼림. 나중에 sendAll()에서 다시 가져온 GPS 쓰면 안 됨.
-                        freezeRefCenter()
-                        isCalibrating = false
-                        val ageSec = if (refCenterTime > 0) (System.currentTimeMillis() - refCenterTime) / 1000 else -1
-                        val accTxt = if (refCenterAccuracy < 10000f) "${refCenterAccuracy.toInt()}m" else "?"
-                        hintText?.text = "기준점 고정: ${String.format("%.5f", refCenterLat)}, ${String.format("%.5f", refCenterLng)} (GPS ${ageSec}초 전, 정확도 $accTxt) · 핫스팟 3~10곳 터치"
-                        btnSend?.isEnabled = true
-                        val refDot = View(this).apply {
-                            background = GradientDrawable().apply {
-                                shape = GradientDrawable.OVAL
-                                setColor(Color.YELLOW)
-                            }
-                            layoutParams = FrameLayout.LayoutParams(36, 36).apply {
-                                leftMargin = (adjX - 18).toInt()
-                                topMargin = (adjY - 18).toInt()
-                            }
-                        }
-                        overlay.addView(refDot)
-                        refDotView = refDot
-                        Toast.makeText(this, "기준점 설정됨", Toast.LENGTH_SHORT).show()
+                        applyRefPoint(adjX, adjY)
                     } else {
                         tappedPoints.add(PointF(adjX, adjY))
                         // v8.14.44 FIX: 핀 찍을 때 바로 좌표 계산해서 힌트에 표시. 본앱까지 가지 않고 그 자리에서 남쪽/서울 확인 가능.
@@ -507,6 +624,9 @@ class OverlayServiceLite : Service() {
         refPoint = null
         refCenterTime = 0L
         refCenterLocTime = 0L
+        pendingRefPoint = null
+        pendingTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+        pendingTimeoutRunnable = null
         isCalibrating = true
     }
 
@@ -589,6 +709,7 @@ class OverlayServiceLite : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        stopLocationUpdates()
         try {
             floatingView?.let { windowManager?.removeView(it) }
             captureOverlay?.let { windowManager?.removeView(it) }
