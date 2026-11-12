@@ -241,13 +241,13 @@ body.theme-day .fp-cat-select-btn.active{ background:#14B8A6; color:#FFF; border
   const EMBEDDED_DEFAULTS = {
     daily_rev: 0,
     sim_data: {target:4000000, current:0, restDates:[]},
-    version: 'v8.15.5'
+    version: 'v8.15.7'
   };
 </script>
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>sudataxi-k v8.15.5</title>
+  <title>sudataxi-k v8.15.10</title>
 
   <link rel="manifest" href="data:application/json;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwMDAwMDAiLCAiZGVzY3JpcHRpb24iOiAi7JWI7JaRL+q1sO2PrC/snZjsmZUv6rO87LKcIOy9nC/rspTsuZnquIgg7KeA64+EIC0g7IOB7JeF7KeA6rWsIOykkeyLrCB2OC45LjkwIiwgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsICJpY29ucyI6IFt7InB1cnBvc2UiOiAiYW55IG1hc2thYmxlIiwgInNpemVzIjogIjUxMng1MTIiLCAic3JjIjogImh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzM3NzQvMzc3NDA4My5wbmciLCAidHlwZSI6ICJpbWFnZS9wbmcifV0sICJuYW1lIjogIuyImOuLpO2DneyLnEsgdjguOS45MCIsICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsICJzaG9ydF9uYW1lIjogIuyImOuLpO2DneyLnEsiLCAic3RhcnRfdXJsIjogIi4vaW5kZXguaHRtbD92PTguOS45MCIsICJ0aGVtZV9jb2xvciI6ICIjRkZDODAwIiwgInZlcnNpb24iOiAiOC45LjkwIn0=">
   <meta name="theme-color" content="#FFC800">
@@ -1670,7 +1670,7 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
 
 
 <style id="driveguard-styles">
-/* v8.15.5 Drive Guard - 탭은 주야간 변수 따라감, 경고는 야간/주간 모두 빨간색 유지 - 스코프: #tab6-extras, #driveguard-warn만. 다른 디자인 건드리지 않음 */
+/* v8.15.7 Drive Guard - 탭은 주야간 변수 따라감, 경고는 야간/주간 모두 빨간색 유지 - 스코프: #tab6-extras, #driveguard-warn만. 다른 디자인 건드리지 않음 */
 #tab6-extras{max-width:480px;margin:0 auto;padding:0 0 20px;min-height:60vh;background:transparent}
 #tab6-extras .dg-card{background:var(--card-bg);color:var(--main-text);border:1px solid var(--card-border);border-radius:16px;padding:16px}
 #tab6-extras .dg-speed-card{background:var(--card-bg);color:var(--main-text);border:1px solid var(--card-border);border-radius:20px;padding:18px;text-align:center}
@@ -1699,12 +1699,12 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
   
   <div class="sticky-top-area" style="padding-bottom: 6px; box-shadow: 0 -20px 0 20px var(--main-bg);">
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 2px;">
-      <div class="header" id="app-header-title" style="margin-bottom: 0px; flex: 1 1 0%; cursor: pointer;" data-copy-bound="1" title="클릭하면 빌드 정보 복사 박스가 열립니다">📅 2026.11.12(목) <span class="build-ver-tag" data-copy-bound="1" style="cursor: pointer;" title="클릭하면 빌드 정보 복사 박스가 열립니다">v8.15.5</span> <span class="weekday-badge">🟢 평일</span></div>
+      <div class="header" id="app-header-title" style="margin-bottom: 0px; flex: 1 1 0%; cursor: pointer;" data-copy-bound="1" title="클릭하면 빌드 정보 복사 박스가 열립니다">📅 2026.11.12(목) <span class="build-ver-tag" data-copy-bound="1" style="cursor: pointer;" title="클릭하면 빌드 정보 복사 박스가 열립니다">v8.15.7</span> <span class="weekday-badge">🟢 평일</span></div>
       <button id="btn-theme-toggle" onclick="toggleTheme()" class="btn-idle" style="border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 900; cursor: pointer; white-space: nowrap; flex-shrink: 0; border: 1px solid var(--theme-border); color: var(--theme-accent);">🌙 야간</button>
     </div>
   <button class="big-btn" id="btn-search" style="margin-bottom: 2px; display: none;">
       <span>📍 주변 콜/동선 탐색 (AI 엔진)</span>
-    </button></div><div class="loc-bar" id="loc-bar" style="margin-top: 6px; display: none;">
+    </button></div><div class="loc-bar" id="loc-bar" style="margin-top: 6px; display: flex;">
     <span id="loc-text">📍 실시간 GPS 수신 중...</span>
     <button class="refresh-btn" id="btn-refresh">⟳</button>
   </div>
@@ -1949,7 +1949,7 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
     </details>
   </div>
 
-  <div id="tab3-extras" style="display: none;">
+  <div id="tab3-extras" style="display: block;">
     <div id="heatmap-container" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;">
       <div style="display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); padding: 4px 8px; border-radius: 8px; border: 1px solid var(--card-border); font-size: 10px; color: var(--main-text);">
         <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
@@ -1988,7 +1988,7 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
   </div>
 
   
-  <div id="tab4-extras" style="display: block;">
+  <div id="tab4-extras" style="display: none;">
     <div class="backup-section" style="margin-top: 0; padding:8px 8px 6px 8px;">
       <div class="backup-title" style="margin-bottom: 6px; font-size:12px;">🚘 실시간 운행 제어 <span style="font-size:9px; color:var(--stat-label); font-weight:600;">- 현황 파악</span></div>
       <div style="display: flex; gap: 3px;">
@@ -2430,13 +2430,16 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
         <div class="dg-row" style="margin-top:10px"><b>닫은 후 다시 띄우기</b><span>2분</span></div>
         <div class="dg-small">닫기 버튼을 눌러도 2분 뒤에 여전히 운전 중이면 다시 뜹니다.</div>
       </div>
-      <div class="dg-card" style="margin-top:12px">
-        <div class="dg-row"><b>⚠️ 경고 문구</b></div>
-        <textarea id="dg-warnTextInput" rows="2" style="width:100%;margin-top:8px;padding:10px;border-radius:10px;border:1px solid var(--card-border);background:var(--main-bg);color:var(--main-text);font-size:15px;font-weight:800;line-height:1.4;resize:vertical;" placeholder="운전 중입니다
-작업은 정차 후에">운전 중입니다
+            <div class="dg-card" style="margin-top:12px">
+        <div class="dg-row"><b>⚠️ 경고 문구 리스트 (5개)</b></div>
+        <div class="dg-small">리스트에 채운 문구 중 하나가 2분마다 랜덤으로 바뀝니다. 채운 게 1개면 그 문구만 계속 뜹니다.</div>
+        <textarea class="dg-warnTextInput" id="dg-warnText-0" rows="2" placeholder="운전 중입니다" style="width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--card-border);background:var(--main-bg);color:var(--main-text);font-size:15px;font-weight:800;line-height:1.4;resize:vertical;">운전 중입니다
 작업은 정차 후에</textarea>
-        <div class="dg-small">여기에 입력한 대로 빨간 속도 경고의 큰 문구가 바뀝니다. 줄바꿈하면 두 줄로 표시됩니다.</div>
-        <button class="dg-btn" id="dg-warnTextReset" style="margin-top:8px">기본 문구로 되돌리기</button>
+        <textarea class="dg-warnTextInput" id="dg-warnText-1" rows="2" placeholder="문구 2 (예: 작업은 정차 후에)" style="width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--card-border);background:var(--main-bg);color:var(--main-text);font-size:15px;font-weight:800;line-height:1.4;resize:vertical;"></textarea>
+        <textarea class="dg-warnTextInput" id="dg-warnText-2" rows="2" placeholder="문구 3 (예: 잠시만 기다려 주세요)" style="width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--card-border);background:var(--main-bg);color:var(--main-text);font-size:15px;font-weight:800;line-height:1.4;resize:vertical;"></textarea>
+        <textarea class="dg-warnTextInput" id="dg-warnText-3" rows="2" placeholder="문구 4 (예: 운전 중이라 확인이 늦어요)" style="width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--card-border);background:var(--main-bg);color:var(--main-text);font-size:15px;font-weight:800;line-height:1.4;resize:vertical;"></textarea>
+        <textarea class="dg-warnTextInput" id="dg-warnText-4" rows="2" placeholder="문구 5 (예: 정차 후 연락드릴게요)" style="width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--card-border);background:var(--main-bg);color:var(--main-text);font-size:15px;font-weight:800;line-height:1.4;resize:vertical;"></textarea>
+        <div style="display:flex;gap:6px;margin-top:8px;"><button class="dg-btn" id="dg-warnTextShuffle" style="flex:1;">🎲 지금 다른 문구로 바꾸기</button><button class="dg-btn" id="dg-warnTextReset" style="flex:1;">기본 문구로 되돌리기</button></div>
       </div>
       <button class="dg-btn dg-btn-yellow" id="dg-startBtn" style="margin-top:12px">측정 중지하기</button>
       <button class="dg-btn" id="dg-offBtn" style="margin-top:8px">Drive Guard 끄기 (자동이동·경고 끔)</button>
@@ -2446,8 +2449,8 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
   <div class="mode-container bottom-mode-dock" id="bottom-mode-dock" style="display: grid !important; visibility: visible !important; opacity: 1 !important; position: fixed !important; bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important; left: 50% !important; transform: translateX(-50%) translateZ(0px) !important; z-index: 2147483646 !important; pointer-events: auto !important;">
     <button class="mode-pill" id="btn-mode1">⚡ 추천/콜찾기</button>
     <button class="mode-pill" id="btn-mode2">🧠 운행 전략</button>
-    <button class="mode-pill" id="btn-mode3">📊 콜/범칙금 지도</button>
-    <button class="mode-pill active" id="btn-mode4">🚘 대시보드</button>
+    <button class="mode-pill active" id="btn-mode3">📊 콜/범칙금 지도</button>
+    <button class="mode-pill" id="btn-mode4">🚘 대시보드</button>
     <button class="mode-pill" id="btn-mode5">🎧 Taxi DJ</button>
     <button class="mode-pill" id="btn-mode6">🛡️ Drive Guard</button>
   </div>
@@ -2506,7 +2509,7 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = 'v8.15.5';
+  const BUILD_VERSION = 'v8.15.7';
   /* v8.14.89 FIX: 헤더/카피박스는 BUILD_VERSION이 유일한 기준. 하드코딩된 옛 버전이 로드 후 덮어쓰지 못하게 강제 동기화. */
   function syncBuildVerTags(){ try{ document.querySelectorAll('.build-ver-tag').forEach(function(el){ el.textContent = BUILD_VERSION; }); var cb=document.getElementById('copy-build-ver'); if(cb) cb.value = BUILD_VERSION; }catch(e){} }
   try{ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', function(){ syncBuildVerTags(); setTimeout(syncBuildVerTags, 800); }); else { syncBuildVerTags(); setTimeout(syncBuildVerTags, 800); } }catch(e){}
@@ -3580,7 +3583,7 @@ function toggleTheme() { applyThemeMode(currentThemeMode === 'day' ? 'night' : '
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
         date_str: new Date().toLocaleDateString('ko-KR'),
-        version: 'v8.15.5'
+        version: 'v8.15.7'
       };
       // v8.9.80: 매출 상세도 함께 전송 (손님탑승처럼 시트에 바로 기록되게)
       try{
@@ -3628,7 +3631,7 @@ function toggleTheme() { applyThemeMode(currentThemeMode === 'day' ? 'night' : '
         monthly_target: sim.target||0,
         monthly_current: sim.current||0,
         rest_dates: (sim.restDates||[]).join(','),
-        version: 'v8.15.5'
+        version: 'v8.15.7'
       };
       fetch(url, {
         method: 'POST',
@@ -3660,7 +3663,7 @@ function toggleTheme() { applyThemeMode(currentThemeMode === 'day' ? 'night' : '
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.15.5'
+        version: 'v8.15.7'
       };
       
       // auto_backup은 항상 최신으로 갱신 (가벼운 백업) - 다중 저장소
@@ -5361,8 +5364,8 @@ function toggleTheme() { applyThemeMode(currentThemeMode === 'day' ? 'night' : '
       const days = ['일', '월', '화', '수', '목', '금', '토']; const dayStr = days[nowDate.getDay()];
       const isWeekend = (nowDate.getDay() === 0 || nowDate.getDay() === 6);
       let badgeHtml = isHoliday ? `<span class="holiday-badge">🔴 ${holidayName || '공휴일'}</span>` : (isWeekend ? `<span class="holiday-badge" style="background:#FF8C00;">🟡 휴일</span>` : `<span class="weekday-badge">🟢 평일</span>`);
-      headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) <span class="build-ver-tag">v8.15.5</span> ${badgeHtml}`;
-    } catch(e) { try { const h=document.getElementById('app-header-title'); if(h) h.innerHTML=`📅 ${nowDate.getMonth()+1}.${nowDate.getDate()} <span class="build-ver-tag">v8.15.5</span>`; } catch(e2){} }
+      headerEl.innerHTML = `📅 ${year}.${month}.${date}(${dayStr}) <span class="build-ver-tag">v8.15.7</span> ${badgeHtml}`;
+    } catch(e) { try { const h=document.getElementById('app-header-title'); if(h) h.innerHTML=`📅 ${nowDate.getMonth()+1}.${nowDate.getDate()} <span class="build-ver-tag">v8.15.7</span>`; } catch(e2){} }
   }
 
   async function checkIsPublicHolidayRealtime() {
@@ -5893,7 +5896,7 @@ function setTab(tab) {
       if (locBar) locBar.style.display = 'none';
       try { if (typeof tdjRender === 'function') tdjRender(); } catch(e){}
     } else if (tab === 6) {
-      // v8.15.5 Drive Guard 탭 - 기존 탭과 같은 방식으로 메인 그룹만 숨김
+      // v8.15.7 Drive Guard 탭 - 기존 탭과 같은 방식으로 메인 그룹만 숨김
       if (btnSearch) btnSearch.style.display = 'none';
       if (stickyArea && locBar && locBar.parentElement === stickyArea) stickyArea.after(locBar);
       if (mainGrp) mainGrp.style.display = 'none'; if (pipeLog) pipeLog.style.display = 'none'; if (cList) cList.style.display = 'none';
@@ -6738,7 +6741,7 @@ async function getKakaoPlaceName(lat, lng) {
 
   async function openRouteMapModal() {
     if (typeof L === 'undefined') { showToast('지도 로딩 중입니다.'); return; }
-    var _mm=document.getElementById('map-modal'); if(_mm){ _mm.classList.add('active'); _mm.style.setProperty('display','flex','important'); } /* v8.15.5 FIX: 인라인 display:none이 .active를 이겨서 지도가 안 떴음 - 열 때 inline을 flex로 풀음 */
+    var _mm=document.getElementById('map-modal'); if(_mm){ _mm.classList.add('active'); _mm.style.setProperty('display','flex','important'); } /* v8.15.7 FIX: 인라인 display:none이 .active를 이겨서 지도가 안 떴음 - 열 때 inline을 flex로 풀음 */
     try{ document.body.classList.add('modal-open'); document.body.classList.add('map-modal-open'); }catch(e){} /* v8.14.89 FIX: 가드가 지도 열림을 알게 - 안 하면 가드가 1초마다 하단바를 다시 켬 */
     try{ var bb=document.getElementById('bottom-bar-v7961'); if(bb){ bb.style.setProperty('display','none','important'); } }catch(e){}
     try{ var bd=document.getElementById('bottom-mode-dock'); if(bd){ bd.style.setProperty('display','none','important'); } }catch(e){}
@@ -6829,12 +6832,12 @@ async function getKakaoPlaceName(lat, lng) {
           }
         });
       }
-      if(markerCoords && markerCoords.length){ leafletMap.fitBounds(L.latLngBounds(markerCoords), { padding: [30, 30] }); } /* v8.15.5 FIX: 동선 0개면 fitBounds 에러로 지도 멈춤 방지 */
+      if(markerCoords && markerCoords.length){ leafletMap.fitBounds(L.latLngBounds(markerCoords), { padding: [30, 30] }); } /* v8.15.7 FIX: 동선 0개면 fitBounds 에러로 지도 멈춤 방지 */
     }, 200);
   }
 
   function closeRouteMapModal() { 
-  var _mm2=document.getElementById('map-modal'); if(_mm2){ _mm2.classList.remove('active'); _mm2.style.setProperty('display','none','important'); } /* v8.15.5 FIX: 닫을 때 inline none으로 복원 */
+  var _mm2=document.getElementById('map-modal'); if(_mm2){ _mm2.classList.remove('active'); _mm2.style.setProperty('display','none','important'); } /* v8.15.7 FIX: 닫을 때 inline none으로 복원 */
   try{ document.body.classList.remove('map-modal-open'); document.body.classList.remove('modal-open'); }catch(e){} /* v8.14.89 */ 
   try{ var bb=document.getElementById('bottom-bar-v7961'); if(bb){ bb.style.setProperty('display','grid','important'); } }catch(e){}
   try{ var bd=document.getElementById('bottom-mode-dock'); if(bd){ bd.style.setProperty('display','grid','important'); } }catch(e){}
@@ -8702,7 +8705,7 @@ function exportCallLogs() {
       if(typeof updateHeaderTitle === 'function'){ try{ updateHeaderTitle(new Date(), false, null); return; }catch(e){} }
       var nowDate = new Date();
       var days = ['일','월','화','수','목','금','토'];
-      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.15.5</span> <span class="weekday-badge">🟢 평일</span>';
+      headerEl.innerHTML = '📅 ' + nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate() + '(' + days[nowDate.getDay()] + ') <span class="build-ver-tag">v8.15.7</span> <span class="weekday-badge">🟢 평일</span>';
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(forceUpdateHeader, 200); });
@@ -9027,7 +9030,7 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 </script>
 <script>
-  // v8.15.5 FIX: 첫 화면은 대시보드(탭4). v8.15.5에서 탭1로 잘못 바꾼 것 복원 + 낀 모달이 터치를 막지 않게 정리
+  // v8.15.7 FIX: 첫 화면은 대시보드(탭4). v8.15.7에서 탭1로 잘못 바꾼 것 복원 + 낀 모달이 터치를 막지 않게 정리
   try {
     document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
@@ -9813,7 +9816,7 @@ function saveA25PinsAndClose(){
 // === v8.14.89 A25 자동적용 헬퍼 ===
 function getA25MyPos(){
   try{ if(typeof currentPos !== 'undefined' && currentPos && currentPos.lat) return {lat: currentPos.lat, lng: currentPos.lng}; }catch(e){}
-  // v8.15.5-A25center FIX: 아이폰 GPS가 없을 때 A25 위치를 씀. 기존에는 currentPos -> last_pos -> 기본값만 봐서 A25 위치가 여기서도 버려졌음. 아이폰 GPS가 있으면 아이폰이 우선이라 기존 동작은 그대로.
+  // v8.15.7-A25center FIX: 아이폰 GPS가 없을 때 A25 위치를 씀. 기존에는 currentPos -> last_pos -> 기본값만 봐서 A25 위치가 여기서도 버려졌음. 아이폰 GPS가 있으면 아이폰이 우선이라 기존 동작은 그대로.
   try{ if(typeof a25CenterGPS !== 'undefined' && a25CenterGPS && a25CenterGPS.lat) return {lat: a25CenterGPS.lat, lng: a25CenterGPS.lng}; }catch(e){}
   try{ if(typeof window._a25Center !== 'undefined' && window._a25Center && window._a25Center.lat) return {lat: window._a25Center.lat, lng: window._a25Center.lng}; }catch(e){}
   try{ var saved = JSON.parse(localStorage.getItem('sudataxi_last_pos')||'null'); if(saved && saved.lat) return {lat: saved.lat, lng: saved.lng}; }catch(e){}
@@ -10176,7 +10179,7 @@ function transmitA25Pins(){
           if(data && (data.screenshotUrl || data.imageUrl || data.imageBase64 || (data.hotspots && data.hotspots.length) || (data.lat && data.lng))){
             a25CurrentScreenshot = data.screenshotUrl || data.imageUrl || (data.imageBase64 ? ('data:image/jpeg;base64,' + data.imageBase64) : null);
             if(data.lat && data.lng) a25CenterGPS = {lat:data.lat, lng:data.lng};
-            // v8.15.5-A25center FIX: 오버레이는 center/live_center 안에 위치를 보냄. 최상위 lat/lng만 보면 a25CenterGPS가 영원히 null이라 A25 위치를 버리게 됨. live_center(전송 순간 GPS)를 우선, 없으면 center(기준점)를 씀.
+            // v8.15.7-A25center FIX: 오버레이는 center/live_center 안에 위치를 보냄. 최상위 lat/lng만 보면 a25CenterGPS가 영원히 null이라 A25 위치를 버리게 됨. live_center(전송 순간 GPS)를 우선, 없으면 center(기준점)를 씀.
             try{
               var _a25c = (data.live_center && data.live_center.lat) ? data.live_center : ((data.center && data.center.lat) ? data.center : null);
               if(_a25c){ a25CenterGPS = {lat:Number(_a25c.lat), lng:Number(_a25c.lng)}; try{ window._a25Center = {lat:Number(_a25c.lat), lng:Number(_a25c.lng)}; }catch(e){} try{ window._a25CenterTime = data.timestamp || Date.now(); }catch(e){} try{ window._a25CenterAccuracy = (typeof data.center_accuracy_m !== 'undefined' ? data.center_accuracy_m : null); }catch(e){} }
@@ -10317,7 +10320,7 @@ body.theme-day .copy-box-input, body.theme-day .copy-box-textarea{ background:#F
   <div class="copy-box-item">
     <div class="copy-box-label">🔖 빌드 버전</div>
     <div class="copy-box-row">
-      <input type="text" class="copy-box-input" id="copy-build-ver" readonly="" value="v8.15.5">
+      <input type="text" class="copy-box-input" id="copy-build-ver" readonly="" value="v8.15.7">
       <button class="copy-btn" onclick="copyToClipboard('copy-build-ver', this)">복사</button>
     </div>
   </div>
@@ -10325,15 +10328,15 @@ body.theme-day .copy-box-input, body.theme-day .copy-box-textarea{ background:#F
   <div class="copy-box-item">
     <div class="copy-box-label">🏗️ Builder 정보</div>
     <div class="copy-box-row">
-      <input type="text" class="copy-box-input" id="copy-builder-info" readonly="" value="[sudataxi-k (v8.15.5) via Builder-a4u v8.2.7] Repo: sudataxi-k / index.html">
+      <input type="text" class="copy-box-input" id="copy-builder-info" readonly="" value="[sudataxi-k (v8.15.7) via Builder-a4u v8.2.7] Repo: sudataxi-k / index.html">
       <button class="copy-btn" onclick="copyToClipboard('copy-builder-info', this)">복사</button>
     </div>
   </div>
 
   <div class="copy-box-item">
-    <div class="copy-box-label">📝 업데이트 내용 (v8.15.5)</div>
+    <div class="copy-box-label">📝 업데이트 내용 (v8.15.7)</div>
     <div class="copy-box-row">
-      <textarea class="copy-box-textarea" id="copy-update-log" readonly="">📌 sudataxi-k v8.15.5 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.5 |  ■ 가드 탭에 경고 문구 입력란 추가 | - 기존: 빨간 경고 문구(운전 중입니다. 작업은 정차 후에)가 고정이라 바꿀 수 없었음 | - 수정: Drive Guard 탭에 경고 문구 입력란 추가. 입력하면 빨간 경고의 큰 문구가 그대로 바뀌고, 줄바꿈하면 두 줄로 표시됨. 입력 내용은 저장되어 다음에 열어도 유지되고, 기본 문구로 되돌리기 버튼으로 복원 가능 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.4 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.4 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.4 |  ■ 속도 측정 안 됨 긴급 수정 | - 원인: v8.15.3 패치 때 진짜 줄바꿈이 아니라 \n 문자 그대로가 Drive Guard 스크립트에 들어가서 스크립트 전체가 문법 오류로 멈추고 GPS 측정(watchPosition)이 시작도 안 됐음 | - 수정: 잘못 들어간 \n을 진짜 줄바꿈으로 교체하고 스크립트 문법 검사 통과 확인. 경고 중간 운행시간 표시(v8.15.3 기능)는 그대로 유지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.3 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.3 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.3 |  ■ 속도 경고 중간 빈 공간에 운행시간 표시 추가 | - 기존: 빨간 속도 경고에는 속도만 뜨고 전체운행/승차중 시간이 안 보였음 | - 수정: 경고 중간 빈 공간(설명문 아래, 닫기 버튼 위)에 사진과 같은 흰색 알약 2개 추가 - 왼쪽 전체운행, 오른쪽 승차중/대기중 등 현재 상태. 하단바 텍스트를 그대로 복사해서 1초마다 갱신이라 시간 어긋남 없음 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.2 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.2 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.2 |  ■ 속도 경고 꺼지면 대시보드로 복귀 | - 기존: 속도 안내(Drive Guard 경고)가 꺼져도 가드 메뉴(탭6)에 그대로 머물렀음 | - 수정: 기준 아래 10초 유지로 경고가 자동 해제될 때 대시보드(탭4)로 자동 이동. 닫기 버튼·끄기 버튼 동작은 그대로 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.1 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.1 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.1 |  ■ 동선 지도 보기 안 뜸 수정 | - 원인: #map-modal에 인라인 display:none이 박혀 있어 .active(display:flex)가 이기지 못해 지도가 안 떴고, 하단 메뉴만 사라졌음 | - 수정: 열 때 인라인을 display:flex로 풀고, 닫을 때 다시 display:none으로 복원. 동선 0개면 fitBounds 에러 방지 가드 추가 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.0 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.0 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.0 |  ■ Drive Guard 주야간 토글 따라가게 수정 | - 기존: Drive Guard 탭 카드가 #1c1c1e / #fff / #aaa 하드코딩이라 주야간 토글해도 계속 어두웠음 | - 수정: 탭 카드·속도계·작은 글씨를 var(--card-bg) / var(--main-text) / var(--stat-label) / var(--card-border)로 변경. 주야간 토글·자동 테마 모두 따라감. 끄기 버튼도 var(--btn-idle-bg) 등으로 변경 | - 경고 화면은 야간/주간 모두 빨간색(#d7000f) 유지 - 운전 중 경고라서 눈에 띄어야 함 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.94 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.94 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.14.94 |  ■ 터치 전부 안 됨 진짜 원인 수정 | - 원인: 탭6 붙일 때 }를 하나 더 넣어서 setTab 함수가 중간에 끊기고, 그 뒤 else if가 문법 오류가 되어 메인 스크립트 전체가 안 뜸. 그래서 버튼 리스너도 안 붙고, 대시보드로 이동하는 코드도 안 뛰고, 콜지도에 머물면서 터치가 전부 안 됐음 | - 수정: } 하나 제거해서 if-else 체인 복원. 이제 메인 스크립트 정상 동작 | - 첫 화면: 대시보드로 복원. v8.14.93에서 탭1로 잘못 바꾼 것 되돌림. 첫 화면은 대시보드(탭4)가 맞음 | - 경고 배경 pointer-events:none, 닫기만 클릭, Drive Guard 끄기 버튼, 낀 모달 정리는 v8.14.93 그대로 유지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.93 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.93 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.14.93 |  ■ 터치 전부 안 됨 + 첫 화면 대시보드 수정 | - 첫 화면: 대시보드 강제 이동(setTab(4)) 제거. 원래 의도대로 첫 화면은 추천/콜찾기(탭1)로 복원 | - 터치 막힘: setTab 안에 있던 Drive Guard 자동복귀 가드를 아예 제거. setTab은 이제 깨끗하게 탭만 바꿈 | - 경고: 배경은 pointer-events:none으로 절대 터치를 안 막고, 닫기 버튼만 pointer-events:auto. 경고가 떠 있어도 다른 버튼 다 눌림 | - 자동이동: 1회만, 반복 setTab 호출 제거. Drive Guard 끄기 버튼 추가 (자동이동·경고 전부 끔, localStorage 저장) | - 낀 모달 정리: 로드 시 modal-open/map-modal-open/a25-pin-open 제거. 낀 모달 때문에 하단바가 display:none이 되어 터치 안 되는 것처럼 보이는 것 방지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.92 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.92 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.14.92 |  ■ Drive Guard 버튼 막힘 수정 | - 원인: 속도 값이 오래돼도 계속 운전 중으로 보고 모든 탭 이동을 즉시 Drive Guard로 강제해서 다른 버튼이 안 눌리는 것처럼 보였음. 경고가 숨겨져도 클릭을 막을 수 있는 구조였음 | - 수정: 속도 신선도 5초만 운전 중으로 봄. 탭 이동은 막지 않고, 이동 후 1.5초 뒤에도 운전 중이면 Drive Guard로 돌아옴. 경고 숨김 상태에서는 클릭을 절대 막지 않음 (pointer-events:none + visibility:hidden) | - 닫기 버튼 하단 잘림 방지, Drive Guard 바인드 중복 방지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.91 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.91 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.14.91 |  ■ Drive Guard 탭 추가 | - 하단 메뉴에서 가로로 길었던 Taxi DJ 한 칸을 둘로 나눠서 왼쪽 Taxi DJ / 오른쪽 Drive Guard | - Drive Guard 탭에 속도 경고 페이지 포함. 기준 10km/h, 기준 아래 10초 유지 시 자동 해제 | - 속도 10km/h 이상이면 Drive Guard 탭으로 자동 이동 + 붉은색 속도계 경고 표시 | - 다른 탭으로 옮겨도 운전 중이면 다시 Drive Guard로 돌아옴. 닫기 누르면 2분간은 안 뜨고, 2분 뒤 운전 중이면 다시 뜸 | - Drive Guard 페이지에는 카카오내비 없음. AI 연동 없음 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.90 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.90 업데이트
+      <textarea class="copy-box-textarea" id="copy-update-log" readonly="">📌 sudataxi-k v8.15.7 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.7 |  ■ 경고 문구 5개 리스트 + 2분마다 랜덤 변경 | - 기존: 경고 문구가 1개 고정이라 같은 문구만 계속 떴음 | - 수정: Drive Guard 탭에 경고 문구 5개 입력란 추가. 채운 문구 중 하나가 2분마다 랜덤으로 바뀜. 채운 게 1개면 그 문구만 뜸. 경고가 새로 뜰 때도 랜덤으로 1개 선택. 🎲 지금 다른 문구로 바꾸기 버튼으로 바로 확인 가능. 기존 1개 문구는 자동으로 리스트 1번으로 옮겨짐. 저장은 기존 다중 저장(빌드업해도 유지) 그대로 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.6 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.6 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.6 |  ■ 경고 문구 빌드업해도 유지되게 다중 저장으로 변경 | - 기존: 경고 문구는 localStorage 한 곳에만 저장돼서, 빌드업/저장소 정리 때 날아가면 기본 문구로 돌아갔음 | - 수정: 대시보드 운행기록과 같은 방식 적용 - 저장할 때 localStorage + 세션 + 쿠키(365일) + IndexedDB 네 곳에 동시 저장. 불러올 때는 localStorage가 비어도 세션/쿠키에서 복구하고 localStorage에 다시 채움 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.5 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.5 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.5 |  ■ 가드 탭에 경고 문구 입력란 추가 | - 기존: 빨간 경고 문구(운전 중입니다. 작업은 정차 후에)가 고정이라 바꿀 수 없었음 | - 수정: Drive Guard 탭에 경고 문구 입력란 추가. 입력하면 빨간 경고의 큰 문구가 그대로 바뀌고, 줄바꿈하면 두 줄로 표시됨. 입력 내용은 저장되어 다음에 열어도 유지되고, 기본 문구로 되돌리기 버튼으로 복원 가능 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.4 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.4 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.4 |  ■ 속도 측정 안 됨 긴급 수정 | - 원인: v8.15.3 패치 때 진짜 줄바꿈이 아니라 \n 문자 그대로가 Drive Guard 스크립트에 들어가서 스크립트 전체가 문법 오류로 멈추고 GPS 측정(watchPosition)이 시작도 안 됐음 | - 수정: 잘못 들어간 \n을 진짜 줄바꿈으로 교체하고 스크립트 문법 검사 통과 확인. 경고 중간 운행시간 표시(v8.15.3 기능)는 그대로 유지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.3 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.3 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.3 |  ■ 속도 경고 중간 빈 공간에 운행시간 표시 추가 | - 기존: 빨간 속도 경고에는 속도만 뜨고 전체운행/승차중 시간이 안 보였음 | - 수정: 경고 중간 빈 공간(설명문 아래, 닫기 버튼 위)에 사진과 같은 흰색 알약 2개 추가 - 왼쪽 전체운행, 오른쪽 승차중/대기중 등 현재 상태. 하단바 텍스트를 그대로 복사해서 1초마다 갱신이라 시간 어긋남 없음 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.2 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.2 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.2 |  ■ 속도 경고 꺼지면 대시보드로 복귀 | - 기존: 속도 안내(Drive Guard 경고)가 꺼져도 가드 메뉴(탭6)에 그대로 머물렀음 | - 수정: 기준 아래 10초 유지로 경고가 자동 해제될 때 대시보드(탭4)로 자동 이동. 닫기 버튼·끄기 버튼 동작은 그대로 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.1 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.1 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.1 |  ■ 동선 지도 보기 안 뜸 수정 | - 원인: #map-modal에 인라인 display:none이 박혀 있어 .active(display:flex)가 이기지 못해 지도가 안 떴고, 하단 메뉴만 사라졌음 | - 수정: 열 때 인라인을 display:flex로 풀고, 닫을 때 다시 display:none으로 복원. 동선 0개면 fitBounds 에러 방지 가드 추가 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.0 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.0 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.0 |  ■ Drive Guard 주야간 토글 따라가게 수정 | - 기존: Drive Guard 탭 카드가 #1c1c1e / #fff / #aaa 하드코딩이라 주야간 토글해도 계속 어두웠음 | - 수정: 탭 카드·속도계·작은 글씨를 var(--card-bg) / var(--main-text) / var(--stat-label) / var(--card-border)로 변경. 주야간 토글·자동 테마 모두 따라감. 끄기 버튼도 var(--btn-idle-bg) 등으로 변경 | - 경고 화면은 야간/주간 모두 빨간색(#d7000f) 유지 - 운전 중 경고라서 눈에 띄어야 함 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.94 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.94 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.14.94 |  ■ 터치 전부 안 됨 진짜 원인 수정 | - 원인: 탭6 붙일 때 }를 하나 더 넣어서 setTab 함수가 중간에 끊기고, 그 뒤 else if가 문법 오류가 되어 메인 스크립트 전체가 안 뜸. 그래서 버튼 리스너도 안 붙고, 대시보드로 이동하는 코드도 안 뛰고, 콜지도에 머물면서 터치가 전부 안 됐음 | - 수정: } 하나 제거해서 if-else 체인 복원. 이제 메인 스크립트 정상 동작 | - 첫 화면: 대시보드로 복원. v8.14.93에서 탭1로 잘못 바꾼 것 되돌림. 첫 화면은 대시보드(탭4)가 맞음 | - 경고 배경 pointer-events:none, 닫기만 클릭, Drive Guard 끄기 버튼, 낀 모달 정리는 v8.14.93 그대로 유지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.93 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.93 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.14.93 |  ■ 터치 전부 안 됨 + 첫 화면 대시보드 수정 | - 첫 화면: 대시보드 강제 이동(setTab(4)) 제거. 원래 의도대로 첫 화면은 추천/콜찾기(탭1)로 복원 | - 터치 막힘: setTab 안에 있던 Drive Guard 자동복귀 가드를 아예 제거. setTab은 이제 깨끗하게 탭만 바꿈 | - 경고: 배경은 pointer-events:none으로 절대 터치를 안 막고, 닫기 버튼만 pointer-events:auto. 경고가 떠 있어도 다른 버튼 다 눌림 | - 자동이동: 1회만, 반복 setTab 호출 제거. Drive Guard 끄기 버튼 추가 (자동이동·경고 전부 끔, localStorage 저장) | - 낀 모달 정리: 로드 시 modal-open/map-modal-open/a25-pin-open 제거. 낀 모달 때문에 하단바가 display:none이 되어 터치 안 되는 것처럼 보이는 것 방지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.92 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.92 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.14.92 |  ■ Drive Guard 버튼 막힘 수정 | - 원인: 속도 값이 오래돼도 계속 운전 중으로 보고 모든 탭 이동을 즉시 Drive Guard로 강제해서 다른 버튼이 안 눌리는 것처럼 보였음. 경고가 숨겨져도 클릭을 막을 수 있는 구조였음 | - 수정: 속도 신선도 5초만 운전 중으로 봄. 탭 이동은 막지 않고, 이동 후 1.5초 뒤에도 운전 중이면 Drive Guard로 돌아옴. 경고 숨김 상태에서는 클릭을 절대 막지 않음 (pointer-events:none + visibility:hidden) | - 닫기 버튼 하단 잘림 방지, Drive Guard 바인드 중복 방지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.91 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.91 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.14.91 |  ■ Drive Guard 탭 추가 | - 하단 메뉴에서 가로로 길었던 Taxi DJ 한 칸을 둘로 나눠서 왼쪽 Taxi DJ / 오른쪽 Drive Guard | - Drive Guard 탭에 속도 경고 페이지 포함. 기준 10km/h, 기준 아래 10초 유지 시 자동 해제 | - 속도 10km/h 이상이면 Drive Guard 탭으로 자동 이동 + 붉은색 속도계 경고 표시 | - 다른 탭으로 옮겨도 운전 중이면 다시 Drive Guard로 돌아옴. 닫기 누르면 2분간은 안 뜨고, 2분 뒤 운전 중이면 다시 뜸 | - Drive Guard 페이지에는 카카오내비 없음. AI 연동 없음 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.90 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.90 업데이트
 📅 2026-11-11 · 🔖 빌드 v8.14.90
 
 ■ A25 위치 수신 - center 버려지던 문제 수정
@@ -10375,7 +10378,7 @@ function openCopyBox(){
   if(!panel) return;
   // 최신 버전 정보 갱신
   try{
-    const ver = (typeof BUILD_VERSION !== 'undefined' ? BUILD_VERSION : 'v8.15.5');
+    const ver = (typeof BUILD_VERSION !== 'undefined' ? BUILD_VERSION : 'v8.15.7');
     document.getElementById('copy-build-ver').value = ver;
     document.getElementById('copy-builder-info').value = `[sudataxi-k (${ver}) 작업 맥락 (via Builder-a4u v8.2.7)] 📌 프로젝트(Repo): sudataxi-k 📁 작업 대상 파일: index.html`;
   }catch(e){}
@@ -10470,18 +10473,24 @@ document.addEventListener('keydown', (e)=>{
   </div>
 </div>
 <script id="driveguard-script">
-/* v8.15.5 Drive Guard - 탭은 주야간 변수 따라감, 경고는 야간/주간 모두 빨간색 유지 - 기존 GPS와 별개로 동작. 다른 기능 건드리지 않음. 내비 버튼 없음. AI 기능 없음. */
+/* v8.15.7 Drive Guard - 탭은 주야간 변수 따라감, 경고는 야간/주간 모두 빨간색 유지 - 기존 GPS와 별개로 동작. 다른 기능 건드리지 않음. 내비 버튼 없음. AI 기능 없음. */
 (function(){
   var dgState = { threshold: 10, lastSpeed: 0, lastUpdate: 0, belowSince: 0, dismissedUntil: 0, isWarning: false, watchId: null, off: false, _switched: false }; try{ dgState.off = (localStorage.getItem('sudataxi_dg_off')==='1'); }catch(e){}
   window.__dgState = dgState;
   function $(id){ return document.getElementById(id); }
-  function applyWarnText(){ try{ var inp=$('dg-warnTextInput'); var title=$('dg-warnTitle'); var val = inp ? inp.value : ''; if(!val) val='운전 중입니다\n작업은 정차 후에'; var esc = val.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); if(title) title.innerHTML = esc.replace(/\n/g,'<br>'); try{ localStorage.setItem('sudataxi_dg_warn_text', val); }catch(e){} }catch(e){} } /* v8.15.5: 가드 탭 입력란 -> 경고 문구 */
-  function syncWarnStatus(){ try{ var a=$('bottom-status-total-text'), b=$('bottom-status-below-text'), x=$('dg-warn-total'), y=$('dg-warn-status'); if(a&&x) x.textContent=a.textContent; if(b&&y) y.textContent=b.textContent; }catch(e){} } /* v8.15.5: 경고 중간 운행시간 = 하단바 텍스트 그대로 복사 */
+  function getWarnTextList(){ var out=[]; for(var i=0;i<5;i++){ var el=$('dg-warnText-'+i); out.push(el ? el.value : ''); } return out; }
+  function saveWarnTextList(list){ try{ var j=JSON.stringify(list); if(typeof saveToAllStorages==='function') saveToAllStorages('sudataxi_dg_warn_texts', j); else localStorage.setItem('sudataxi_dg_warn_texts', j); }catch(e){} try{ localStorage.setItem('sudataxi_dg_warn_texts', JSON.stringify(list)); }catch(e){} }
+  function loadWarnTextList(){ try{ var raw=null; try{ if(typeof getFromAnyStorage==='function') raw=getFromAnyStorage('sudataxi_dg_warn_texts'); }catch(e){} if(!raw){ try{ raw=localStorage.getItem('sudataxi_dg_warn_texts'); }catch(e){} } if(raw){ var arr=JSON.parse(raw); if(Array.isArray(arr) && arr.length){ while(arr.length<5) arr.push(''); return arr.slice(0,5); } } }catch(e){} try{ var old=null; try{ if(typeof getFromAnyStorage==='function') old=getFromAnyStorage('sudataxi_dg_warn_text'); }catch(e){} if(!old){ try{ old=localStorage.getItem('sudataxi_dg_warn_text'); }catch(e){} } if(old) return [old,'','','','']; }catch(e){} return ['운전 중입니다\n작업은 정차 후에','','','','']; }
+  function setWarnTitle(val){ try{ var title=$('dg-warnTitle'); if(!title) return; if(!val) val='운전 중입니다\n작업은 정차 후에'; var esc=val.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); title.innerHTML=esc.replace(/\n/g,'<br>'); }catch(e){} }
+  function pickRandomWarnText(forceDifferent){ try{ var list=getWarnTextList(); var cand=[]; for(var i=0;i<list.length;i++){ if(list[i] && list[i].trim()) cand.push(i); } if(!cand.length){ setWarnTitle('운전 중입니다\n작업은 정차 후에'); return; } var cur=dgState._warnIdx; var idx=cand[Math.floor(Math.random()*cand.length)]; if(forceDifferent && cand.length>1 && idx===cur){ idx=cand[(cand.indexOf(cur)+1)%cand.length]; if(idx===cur) idx=cand[(cand.indexOf(cur)+1)%cand.length]; } dgState._warnIdx=idx; setWarnTitle(list[idx]); }catch(e){} }
+  function applyWarnText(){ try{ var list=getWarnTextList(); saveWarnTextList(list); if(typeof dgState._warnIdx==='undefined' || dgState._warnIdx===null || !list[dgState._warnIdx] || !list[dgState._warnIdx].trim()){ pickRandomWarnText(false); } else { setWarnTitle(list[dgState._warnIdx]); } }catch(e){} }
+  function startWarnRotate(){ try{ if(dgState._warnRotate) clearInterval(dgState._warnRotate); dgState._warnRotate=setInterval(function(){ try{ var list=getWarnTextList(); var n=0; for(var i=0;i<list.length;i++){ if(list[i] && list[i].trim()) n++; } if(n>=2) pickRandomWarnText(true); }catch(e){} }, 120000); }catch(e){} } /* v8.15.7: 경고 문구 5개 리스트 + 2분마다 랜덤 */
+  function syncWarnStatus(){ try{ var a=$('bottom-status-total-text'), b=$('bottom-status-below-text'), x=$('dg-warn-total'), y=$('dg-warn-status'); if(a&&x) x.textContent=a.textContent; if(b&&y) y.textContent=b.textContent; }catch(e){} } /* v8.15.7: 경고 중간 운행시간 = 하단바 텍스트 그대로 복사 */
   function showWarn(){
     if(Date.now() < dgState.dismissedUntil) return;
     if(dgState.isWarning) return;
     dgState.isWarning = true;
-    var w = $('driveguard-warn'); if(w) w.classList.add('show');
+    pickRandomWarnText(false); var w = $('driveguard-warn'); if(w) w.classList.add('show');
   syncWarnStatus(); try{ if(dgState._warnSync) clearInterval(dgState._warnSync); dgState._warnSync=setInterval(syncWarnStatus, 1000); }catch(e){}
   }
   function hideWarn(msg){
@@ -10517,7 +10526,7 @@ document.addEventListener('keydown', (e)=>{
       dgState._switched = false;
       if(!dgState.belowSince) dgState.belowSince = Date.now();
       var badge2 = $('dg-statusBadge'); if(badge2){ badge2.textContent = '정차 중 - 작업 가능'; badge2.className = 'dg-status stopped'; }
-      if(Date.now() - dgState.belowSince >= 10000){ var _wasWarn = dgState.isWarning; hideWarn('기준 아래로 10초 유지되어 경고 해제'); if(_wasWarn){ try{ if(typeof setTab==='function') setTab(4); }catch(e){} } } /* v8.15.5 FIX: 속도 경고 자동해제되면 가드 메뉴에 머무르지 않고 대시보드(탭4)로 복귀 */
+      if(Date.now() - dgState.belowSince >= 10000){ var _wasWarn = dgState.isWarning; hideWarn('기준 아래로 10초 유지되어 경고 해제'); if(_wasWarn){ try{ if(typeof setTab==='function') setTab(4); }catch(e){} } } /* v8.15.7 FIX: 속도 경고 자동해제되면 가드 메뉴에 머무르지 않고 대시보드(탭4)로 복귀 */
     }
   }
   function onErr(e){
@@ -10533,7 +10542,7 @@ document.addEventListener('keydown', (e)=>{
   function bind(){
     if(window.__dgBound) return; window.__dgBound = true;
     var th = $('dg-threshold'); if(th) th.addEventListener('input', function(e){ dgState.threshold = Number(e.target.value); var lb = $('dg-thresholdLabel'); if(lb) lb.textContent = dgState.threshold + ' km/h'; });
-    try{ var _wti=$('dg-warnTextInput'); if(_wti){ try{ var _saved=localStorage.getItem('sudataxi_dg_warn_text'); if(_saved) _wti.value=_saved; }catch(e){} _wti.addEventListener('input', function(){ applyWarnText(); }); var _rst=$('dg-warnTextReset'); if(_rst) _rst.addEventListener('click', function(){ _wti.value='운전 중입니다\n작업은 정차 후에'; applyWarnText(); }); applyWarnText(); } }catch(e){}
+    try{ var _list=loadWarnTextList(); for(var _i=0; _i<5; _i++){ var _inp=$('dg-warnText-'+_i); if(_inp){ _inp.value=_list[_i]||''; (function(){ _inp.addEventListener('input', function(){ applyWarnText(); }); })(); } } var _rst=$('dg-warnTextReset'); if(_rst) _rst.addEventListener('click', function(){ var d=['운전 중입니다\n작업은 정차 후에','','','','']; for(var _j=0; _j<5; _j++){ var _e=$('dg-warnText-'+_j); if(_e) _e.value=d[_j]; } dgState._warnIdx=null; applyWarnText(); }); var _shf=$('dg-warnTextShuffle'); if(_shf) _shf.addEventListener('click', function(){ pickRandomWarnText(true); }); applyWarnText(); startWarnRotate(); }catch(e){}
     var closeBtn = $('dg-closeBtn'); if(closeBtn) closeBtn.addEventListener('click', function(){ dgState.dismissedUntil = Date.now() + 2*60*1000; hideWarn('닫음 - 2분 뒤 운전 중이면 다시 뜹니다'); });
     var offBtn = $('dg-offBtn'); if(offBtn){
       try{ offBtn.textContent = dgState.off ? 'Drive Guard 켜기' : 'Drive Guard 끄기 (자동이동·경고 끔)'; }catch(e){}
