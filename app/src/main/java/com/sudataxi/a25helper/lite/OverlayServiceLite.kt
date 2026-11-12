@@ -36,7 +36,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 // v8.14.41: 하단 닫기 버튼 네비게이션 바 가림 수정 + 상단 X 추가 + 선택 0개여도 닫힘
-// v8.14.43-LITE FIX: 기준점 GPS 얼림 - 기준점 찍은 순간의 GPS를 고정해서 전송 때 다시 가져온 GPS로 밀리는 문제 해결
+// v8.14.91-LITE FIX: 기준점 GPS 얼림 - 기준점 찍은 순간의 GPS를 고정해서 전송 때 다시 가져온 GPS로 밀리는 문제 해결
 class OverlayServiceLite : Service() {
     private val TAG = "OverlayServiceLite"
     private var windowManager: WindowManager? = null
@@ -77,6 +77,61 @@ class OverlayServiceLite : Service() {
     private val MPP_STEPS = floatArrayOf(4f, 6f, 7.5f, 9.5f, 12f, 15f, 20f)
     private var mppIndex = 3
 
+
+    // v8.14.91 FIX: Firebase URL 정규화 + 매번 재독
+    // 원인1: onStartCommand에서 한 번만 읽어서, 서비스 켠 뒤에 URL을 저장하면 계속 빈 URL로 전송 시도함.
+    // 원인2: 끝에 / 나 공백이 있으면 ...com//sudataxi/... 가 됨. 아이폰은 trim+strip을 하는데 헬퍼는 안 했음.
+    private fun normalizeFirebaseUrl(raw: String?): String {
+        var u = (raw ?: "").trim()
+        if (u.isEmpty()) return ""
+        // 사용자가 전체 경로를 복사해온 경우도 처리
+        if (u.endsWith("/sudataxi/demand_hotspots.json")) u = u.removeSuffix("/sudataxi/demand_hotspots.json")
+        else if (u.endsWith("/sudataxi/demand_hotspots")) u = u.removeSuffix("/sudataxi/demand_hotspots")
+        else if (u.endsWith("/sudataxi")) u = u.removeSuffix("/sudataxi")
+        if (u.endsWith(".json")) u = u.removeSuffix(".json")
+        while (u.endsWith("/")) u = u.dropLast(1)
+        u = u.trim()
+        return u
+    }
+    private fun refreshFirebaseUrl(): String {
+        // 매 전송마다 SharedPreferences에서 다시 읽음. 서비스 재시작 없이 URL 저장해도 다음 전송에 바로 반영됨.
+        val saved = try { getSharedPreferences("a25_lite", MODE_PRIVATE).getString("firebase_url", "") ?: "" } catch (e: Exception) { "" }
+        // Intent extra가 있으면 그게 우선이지만, prefs에 더 새 값이 있으면 prefs를 씀. 둘 다 있으면 prefs(사용자가 마지막에 저장한 값)를 우선.
+        val raw = if (saved.isNotBlank()) saved else firebaseUrl
+        firebaseUrl = normalizeFirebaseUrl(raw)
+        return firebaseUrl
+    }
+    // v8.14.91 FIX: 기준점 찍은 뒤 GPS가 좋아졌으면 얼린 값을 최신 좋은 값으로 교체
+    // 원인: 기준점을 너무 빨리 찍으면 refCenterAccuracy=MAX_VALUE로 얼려지고, GPS가 나중에 좋아져도 sendAll이 계속 막힘.
+    private fun tryRefreshRefCenterFromLastKnown(): Boolean {
+        try {
+            val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            val candidates = listOfNotNull(
+                try { lm.getLastKnownLocation(LocationManager.GPS_PROVIDER) } catch (e: SecurityException) { null },
+                try { lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) } catch (e: SecurityException) { null }
+            )
+            val best = candidates.filter { it.accuracy < 200f }.minByOrNull { it.accuracy } ?: return false
+            val age = System.currentTimeMillis() - best.time
+            if (age > 120_000) return false
+            // 얼린 값보다 확실히 좋을 때만 교체 (같은 위치를 왔다갔다 하지 않게)
+            if (refCenterAccuracy == Float.MAX_VALUE || best.accuracy + 20f < refCenterAccuracy) {
+                refCenterLat = best.latitude
+                refCenterLng = best.longitude
+                refCenterAccuracy = best.accuracy
+                refCenterTime = System.currentTimeMillis()
+                refCenterLocTime = best.time
+                // 현재 위치도 함께 갱신해 둠
+                centerLat = best.latitude
+                centerLng = best.longitude
+                lastLocTime = best.time
+                lastAccuracy = best.accuracy
+                hasLocation = true
+                return true
+            }
+        } catch (e: Exception) { Log.e(TAG, "tryRefreshRefCenter", e) }
+        return false
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try {
             if (!Settings.canDrawOverlays(this)) {
@@ -84,8 +139,10 @@ class OverlayServiceLite : Service() {
                 stopSelf()
                 return START_NOT_STICKY
             }
-            firebaseUrl = intent?.getStringExtra("firebase_url")
-                ?: getSharedPreferences("a25_lite", MODE_PRIVATE).getString("firebase_url", "") ?: ""
+            // v8.14.91: Intent보다 prefs(마지막 저장값)를 우선 + 정규화. 시작 뒤 URL 저장해도 재시작 없이 다음 전송에 반영되게 sendAll에서 다시 읽음.
+            val _rawUrl = getSharedPreferences("a25_lite", MODE_PRIVATE).getString("firebase_url", "")?.takeIf { it.isNotBlank() }
+                ?: intent?.getStringExtra("firebase_url") ?: ""
+            firebaseUrl = normalizeFirebaseUrl(_rawUrl)
             val prefs = getSharedPreferences("a25_lite", MODE_PRIVATE)
             mpp = prefs.getFloat("mpp", 9.5f)
             mppIndex = MPP_STEPS.indexOfFirst { it == mpp }.takeIf { it >= 0 } ?: 3
@@ -311,8 +368,8 @@ class OverlayServiceLite : Service() {
                         Toast.makeText(this@OverlayServiceLite, "최소 3곳", Toast.LENGTH_SHORT).show()
                         return@setOnClickListener
                     }
-                    sendAll()
-                    closeCaptureOverlay()
+                    // v8.14.91: sendAll이 false면 전송 안 된 거라 닫지 않음. 닫으면 핀이 다 날아가서 "보냈는데 안 옴"이 됨.
+                    if (sendAll()) closeCaptureOverlay()
                 }
             }
             val btnUndo = Button(this).apply {
@@ -486,33 +543,42 @@ class OverlayServiceLite : Service() {
         isCalibrating = true
     }
 
-    private fun sendAll() {
-        if (tappedPoints.isEmpty() || refPoint == null) return
+    // v8.14.91: Boolean 반환. false면 전송 안 된 거라 오버레이를 닫으면 안 됨 (핀 다 날아감).
+    // 기존 버그: sendAll이 URL/GPS 이유로 early-return해도 버튼이 무조건 closeCaptureOverlay()를 불러서 핀이 지워짐.
+    // 사용자는 "보냈다"고 생각하는데 실제론 전송 안 된 상태가 됨. 이번 캡처(재시작해도 옛날 TEST_INJECT)가 바로 그 케이스.
+    private fun sendAll(): Boolean {
+        // URL은 매번 다시 읽고 정규화
+        refreshFirebaseUrl()
+        if (tappedPoints.isEmpty() || refPoint == null) {
+            Toast.makeText(this, "기준점(노란 점) + 핀 3곳 이상을 먼저 찍어주세요", Toast.LENGTH_LONG).show()
+            return false
+        }
         if (firebaseUrl.isBlank()) {
-            Toast.makeText(this, "Firebase URL이 비어있어요", Toast.LENGTH_LONG).show()
-            return
+            Toast.makeText(this, "Firebase URL이 비어있어요. A25 앱에 아이폰과 똑같은 URL을 저장하고 다시 전송해주세요", Toast.LENGTH_LONG).show()
+            return false
         }
-        // v8.14.43: 게이트는 refPoint로만 판단. refCenterTime==0으로 판단하면 GPS 아직 없을 때
-        // 기준점을 찍어도 0이 돼서 "기준점 먼저 찍으세요" 무한 반복이 됨.
-        // refPoint가 있으면 기준점은 찍힌 거고, GPS 문제는 아래 정확도 체크로 따로 알려줌.
-        if (refPoint == null) {
-            Toast.makeText(this, "택시 아이콘(노란 점)을 먼저 터치하세요", Toast.LENGTH_LONG).show()
-            return
+        if (!firebaseUrl.startsWith("https://")) {
+            Toast.makeText(this, "Firebase URL이 https:// 로 시작해야 해요: $firebaseUrl", Toast.LENGTH_LONG).show()
+            return false
         }
-        // v8.14.43: 정확도 체크도 MAX_VALUE( GPS 아직 없음 )는 따로 구분.
-        // MAX_VALUE면 "GPS 아직"이지 "정확도 낮음"이 아님. 둘을 섞으면 사용자가 뭘 해야 할지 모름.
+        // 기준점 찍은 뒤 GPS가 좋아졌으면 얼린 값 교체 시도. 그래도 안 좋으면 그때 막음.
+        if (refCenterAccuracy == Float.MAX_VALUE || refCenterAccuracy > 200f) {
+            val refreshed = tryRefreshRefCenterFromLastKnown()
+            if (refreshed) {
+                Toast.makeText(this, "GPS 갱신됨 (${refCenterAccuracy.toInt()}m) - 갱신된 기준으로 전송합니다", Toast.LENGTH_SHORT).show()
+            }
+        }
         if (refCenterAccuracy == Float.MAX_VALUE) {
             Toast.makeText(this, "GPS를 아직 못 잡았어요. 잠시 기다렸다가 기준점 다시 찍기를 눌러보세요", Toast.LENGTH_LONG).show()
-            return
+            return false
         }
         if (refCenterAccuracy > 200f) {
             Toast.makeText(this, "기준점 GPS 정확도가 너무 낮아요 (${refCenterAccuracy.toInt()}m). 기준점 다시 찍어보세요", Toast.LENGTH_LONG).show()
-            return
+            return false
         }
         val refAge = System.currentTimeMillis() - refCenterTime
         val stale = refAge > 120_000
         if (stale) Toast.makeText(this, "기준점 GPS가 ${refAge / 1000}초 전 위치예요. 그래도 보내지만 거리가 틀어질 수 있어요", Toast.LENGTH_LONG).show()
-        // ★ 얼린 기준점 기준으로 변환. 여기가 핵심 수정.
         val useLat = refCenterLat
         val useLng = refCenterLng
         val cx = refPoint!!.x
@@ -527,7 +593,6 @@ class OverlayServiceLite : Service() {
         val payload = mapOf(
             "timestamp" to System.currentTimeMillis(),
             "device" to "A25_HELPER_LITE",
-            // center는 이제 얼린 기준점. 아이폰이 보는 값과 일치해야 함.
             "center" to mapOf("lat" to useLat, "lng" to useLng),
             "count" to hotspots.size,
             "hotspots" to hotspots,
@@ -535,32 +600,39 @@ class OverlayServiceLite : Service() {
             "center_age_ms" to refAge,
             "center_stale" to stale,
             "center_accuracy_m" to refCenterAccuracy,
-            // 디버깅용: 전송 순간의 라이브 GPS도 같이 보냄. 두 값이 다르면 GPS가 움직인 증거.
             "live_center" to mapOf("lat" to centerLat, "lng" to centerLng),
             "live_center_age_ms" to (System.currentTimeMillis() - lastLocTime)
         )
+        val host = try { java.net.URL(firebaseUrl).host } catch (e: Exception) { firebaseUrl }
+        Toast.makeText(this, "전송 중... ($host / ${hotspots.size}곳)", Toast.LENGTH_SHORT).show()
+        Log.d(TAG, "sendAll host=$host count=${hotspots.size} center=$useLat,$useLng acc=$refCenterAccuracy url_len=${firebaseUrl.length}")
         Thread {
             try {
-                val url = URL("$firebaseUrl/sudataxi/demand_hotspots.json")
+                val url = java.net.URL("$firebaseUrl/sudataxi/demand_hotspots.json")
                 val conn = url.openConnection() as HttpURLConnection
                 conn.requestMethod = "PUT"
                 conn.setRequestProperty("Content-Type", "application/json")
                 conn.doOutput = true
+                conn.connectTimeout = 8000
+                conn.readTimeout = 8000
                 OutputStreamWriter(conn.outputStream).use { it.write(JSONObject(payload).toString()) }
-                val ok = conn.responseCode in 200..299
+                val code = conn.responseCode
+                val ok = code in 200..299
                 android.os.Handler(mainLooper).post {
                     if (ok) {
                         Toast.makeText(this, "✅ ${hotspots.size}곳 전송 완료 (기준점 ${String.format("%.5f", useLat)}, ${String.format("%.5f", useLng)} / 축척 ${mpp}m/px)", Toast.LENGTH_LONG).show()
                     } else {
-                        Toast.makeText(this, "❌ 전송 실패", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, "❌ 전송 실패 (HTTP $code) - URL/규칙 확인", Toast.LENGTH_LONG).show()
                     }
                 }
             } catch (e: Exception) {
+                Log.e(TAG, "sendAll PUT", e)
                 android.os.Handler(mainLooper).post {
                     Toast.makeText(this, "❌ ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
         }.start()
+        return true
     }
 
     override fun onDestroy() {
