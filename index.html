@@ -262,13 +262,13 @@ body.theme-day .fp-cat-select-btn.active{ background:#14B8A6; color:#FFF; border
   const EMBEDDED_DEFAULTS = {
     daily_rev: 0,
     sim_data: {target:4000000, current:0, restDates:[]},
-    version: 'v8.15.11'
+    version: 'v8.15.13'
   };
 </script>
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>sudataxi-k v8.15.11</title>
+  <title>sudataxi-k v8.15.13</title>
 
   <link rel="manifest" href="data:application/json;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwMDAwMDAiLCAiZGVzY3JpcHRpb24iOiAi7JWI7JaRL+q1sO2PrC/snZjsmZUv6rO87LKcIOy9nC/rspTsuZnquIgg7KeA64+EIC0g7IOB7JeF7KeA6rWsIOykkeyLrCB2OC45LjkwIiwgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsICJpY29ucyI6IFt7InB1cnBvc2UiOiAiYW55IG1hc2thYmxlIiwgInNpemVzIjogIjUxMng1MTIiLCAic3JjIjogImh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzM3NzQvMzc3NDA4My5wbmciLCAidHlwZSI6ICJpbWFnZS9wbmcifV0sICJuYW1lIjogIuyImOuLpO2DneyLnEsgdjguOS45MCIsICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsICJzaG9ydF9uYW1lIjogIuyImOuLpO2DneyLnEsiLCAic3RhcnRfdXJsIjogIi4vaW5kZXguaHRtbD92PTguOS45MCIsICJ0aGVtZV9jb2xvciI6ICIjRkZDODAwIiwgInZlcnNpb24iOiAiOC45LjkwIn0=">
   <meta name="theme-color" content="#FFC800">
@@ -1708,24 +1708,30 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
 #tab6-extras .dg-btn-yellow{background:#FFC800;color:#111}
 #driveguard-warn{position:fixed;inset:0;background:#d7000f;color:#fff;display:none;flex-direction:column;z-index:2147483647;padding:20px;padding-top:env(safe-area-inset-top);padding-bottom:calc(20px + env(safe-area-inset-bottom));pointer-events:none;visibility:hidden;opacity:0}
 #driveguard-warn.show{display:flex;pointer-events:none;visibility:visible;opacity:1}
-#driveguard-warn h1{font-size:44px;line-height:1.1;margin:10px 0 6px;color:#fff}
+#driveguard-warn h1{font-size:29px;line-height:1.1;margin:10px 0 6px;color:#fff}
 #driveguard-warn .dg-warn-speed{font-size:72px;font-weight:900;line-height:1;color:#fff}
 #driveguard-warn .dg-warn-sub{font-size:16px;opacity:.95;line-height:1.5;color:#fff}
 #driveguard-warn .dg-actions{margin-top:auto;display:flex;flex-direction:column;gap:10px}
 #driveguard-warn .dg-close-btn{background:#fff;color:#d7000f;border:0;border-radius:14px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;pointer-events:auto;position:relative;z-index:2}
 #driveguard-warn .dg-pill{background:rgba(255,255,255,.2);padding:6px 10px;border-radius:999px;font-size:12px;display:inline-block;color:#fff}
+ #driveguard-warn #dg-warnPhoto{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;z-index:0}
+ #driveguard-warn.photo-mode #dg-warnPhoto{display:block}
+ #driveguard-warn > *:not(#dg-warnPhoto){position:relative;z-index:1}
+ #driveguard-warn.photo-mode .dg-pill,#driveguard-warn.photo-mode #dg-warnTitle,#driveguard-warn.photo-mode .dg-warn-sub,#driveguard-warn.photo-mode .dg-warn-status-row{display:none}
+ #driveguard-warn.photo-mode .dg-warn-speed,#driveguard-warn.photo-mode .dg-warn-speed + span{text-shadow:0 2px 12px rgba(0,0,0,.8)}
+ #driveguard-warn .dg-photo-btn{background:rgba(0,0,0,.55);color:#fff;border:1.5px solid rgba(255,255,255,.85);border-radius:14px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;pointer-events:auto;position:relative;z-index:2}
 </style>
 </head>
 <body class="mode-1 theme-day">
   
   <div class="sticky-top-area" style="padding-bottom: 6px; box-shadow: 0 -20px 0 20px var(--main-bg);">
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 2px;">
-      <div class="header" id="app-header-title" style="margin-bottom: 0px; flex: 1 1 0%; cursor: pointer;" data-copy-bound="1" title="클릭하면 빌드 정보 복사 박스가 열립니다">📅 2026.11.13(금) <span class="build-ver-tag" data-copy-bound="1" style="cursor: pointer;" title="클릭하면 빌드 정보 복사 박스가 열립니다">v8.15.11</span> <span class="weekday-badge">🟢 평일</span></div>
+      <div class="header" id="app-header-title" style="margin-bottom: 0px; flex: 1 1 0%; cursor: pointer;" data-copy-bound="1" title="클릭하면 빌드 정보 복사 박스가 열립니다">📅 2026.11.13(금) <span class="build-ver-tag" data-copy-bound="1" style="cursor: pointer;" title="클릭하면 빌드 정보 복사 박스가 열립니다">v8.15.13</span> <span class="weekday-badge">🟢 평일</span></div>
       <button id="btn-theme-toggle" onclick="toggleTheme()" class="btn-idle" style="border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 900; cursor: pointer; white-space: nowrap; flex-shrink: 0; border: 1px solid var(--theme-border); color: var(--theme-accent);">🌙 야간</button>
     </div>
   <button class="big-btn" id="btn-search" style="margin-bottom: 2px; display: none;">
       <span>📍 주변 콜/동선 탐색 (AI 엔진)</span>
-    </button></div><div class="loc-bar" id="loc-bar" style="margin-top: 6px; display: flex;">
+    </button></div><div class="loc-bar" id="loc-bar" style="margin-top: 6px; display: none;">
     <span id="loc-text">📍 실시간 GPS 수신 중...</span>
     <button class="refresh-btn" id="btn-refresh">⟳</button>
   </div>
@@ -1856,7 +1862,7 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
 
   <div id="tab2-extras" style="display: none;">
     <div class="strategy-box">
-      <div class="strategy-title">💡 <span id="strategy-time-title">14시 - 주간 평시 / 새벽 연비 운행 - 상업지구 중심</span></div>
+      <div class="strategy-title">💡 <span id="strategy-time-title">11시 - 주간 평시 / 새벽 연비 운행 - 상업지구 중심</span></div>
       <div class="strategy-content" id="strategy-text">도심 내 단거리 수요가 꾸준합니다. <b>범계 로데오, 평촌 먹자골목, 안양 일번가, 인덕원/산본 상업지구와 과천 지식정보타운 등 업체 밀집지역</b>을 중심으로 순환하며 연비 위주 운행을 하세요. 상업지구가 콜 발생의 핵심입니다.</div>
     </div>
     <div id="strategy-cards-list" class="card-list" style="margin-bottom: 8px;"><div class="card" style="border: 1.5px solid rgb(34, 197, 94); box-shadow: rgba(34, 197, 94, 0.15) 0px 0px 10px;">
@@ -1970,7 +1976,7 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
     </details>
   </div>
 
-  <div id="tab3-extras" style="display: block;">
+  <div id="tab3-extras" style="display: none;">
     <div id="heatmap-container" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;">
       <div style="display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); padding: 4px 8px; border-radius: 8px; border: 1px solid var(--card-border); font-size: 10px; color: var(--main-text);">
         <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
@@ -2421,7 +2427,7 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
     </div>
   </div>
 
-  <div id="tab6-extras" style="display: none;">
+  <div id="tab6-extras" style="display: block;">
     <div id="dg-root">
       <div class="dg-speed-card">
         <div>현재 속도</div>
@@ -2452,6 +2458,13 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
         <textarea class="dg-warnTextInput" id="dg-warnText-4" rows="2" placeholder="문구 5 (예: 정차 후 연락드릴게요)" style="width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--card-border);background:var(--main-bg);color:var(--main-text);font-size:15px;font-weight:800;line-height:1.4;resize:vertical;"></textarea>
         <div style="display:flex;gap:6px;margin-top:8px;"><button class="dg-btn" id="dg-warnTextShuffle" style="flex:1;">🎲 지금 다른 문구로 바꾸기</button><button class="dg-btn" id="dg-warnTextReset" style="flex:1;">기본 문구로 되돌리기</button></div>
       </div>
+      <div class="dg-card" id="dg-photo-card" style="margin-top:12px">
+        <div class="dg-row"><b>📷 경고 화면 사진</b><span id="dg-photoCount" style="font-size:12px;color:var(--stat-label);">0장</span></div>
+        <div class="dg-small">내가 고른 사진만 경고 화면에 뜹니다. 사진첩 전체가 자동으로 뜨지 않아요. 경고 화면의 🖼️ 버튼을 누르면 사진 ↔ 문자안내로 바뀝니다.</div>
+        <div id="dg-photoPreview" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;"><div class="dg-small">아직 고른 사진이 없어요. 사진 선택하기를 눌러 사진첩에서 골라주세요.</div></div>
+        <input type="file" id="dg-photoInput" accept="image/*" multiple="" style="display:none;">
+        <div style="display:flex;gap:6px;margin-top:8px;"><button class="dg-btn" id="dg-photoPick" type="button" style="flex:1;">📷 사진 선택하기</button><button class="dg-btn" id="dg-photoClear" type="button" style="flex:1;">🗑️ 사진 지우기</button></div>
+      </div>
       <button class="dg-btn dg-btn-yellow" id="dg-startBtn" style="margin-top:12px">측정 중지하기</button>
       <button class="dg-btn" id="dg-offBtn" style="margin-top:8px">Drive Guard 끄기 (자동이동·경고 끔)</button>
     </div>
@@ -2460,10 +2473,10 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
   <div class="mode-container bottom-mode-dock" id="bottom-mode-dock" style="display: grid !important; visibility: visible !important; opacity: 1 !important; position: fixed !important; bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important; left: 50% !important; transform: translateX(-50%) translateZ(0px) !important; z-index: 2147483646 !important; pointer-events: auto !important;">
     <button class="mode-pill" id="btn-mode1">⚡ 추천/콜찾기</button>
     <button class="mode-pill" id="btn-mode2">🧠 운행 전략</button>
-    <button class="mode-pill active" id="btn-mode3">📊 콜/범칙금 지도</button>
+    <button class="mode-pill" id="btn-mode3">📊 콜/범칙금 지도</button>
     <button class="mode-pill" id="btn-mode4">🚘 대시보드</button>
     <button class="mode-pill" id="btn-mode5">🎧 Taxi DJ</button>
-    <button class="mode-pill" id="btn-mode6">🛡️ Drive Guard</button>
+    <button class="mode-pill active" id="btn-mode6">🛡️ Drive Guard</button>
   </div>
 
 
@@ -2520,7 +2533,7 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = 'v8.15.11';
+  const BUILD_VERSION = 'v8.15.13';
   /* v8.14.89 FIX: 헤더/카피박스는 BUILD_VERSION이 유일한 기준. 하드코딩된 옛 버전이 로드 후 덮어쓰지 못하게 강제 동기화. */
   function syncBuildVerTags(){ try{ document.querySelectorAll('.build-ver-tag').forEach(function(el){ el.textContent = BUILD_VERSION; }); var cb=document.getElementById('copy-build-ver'); if(cb) cb.value = BUILD_VERSION; }catch(e){} }
   try{ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', function(){ syncBuildVerTags(); setTimeout(syncBuildVerTags, 800); }); else { syncBuildVerTags(); setTimeout(syncBuildVerTags, 800); } }catch(e){}
@@ -3594,7 +3607,7 @@ function toggleTheme() { applyThemeMode(currentThemeMode === 'day' ? 'night' : '
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
         date_str: new Date().toLocaleDateString('ko-KR'),
-        version: 'v8.15.11'
+        version: 'v8.15.13'
       };
       // v8.9.80: 매출 상세도 함께 전송 (손님탑승처럼 시트에 바로 기록되게)
       try{
@@ -3642,7 +3655,7 @@ function toggleTheme() { applyThemeMode(currentThemeMode === 'day' ? 'night' : '
         monthly_target: sim.target||0,
         monthly_current: sim.current||0,
         rest_dates: (sim.restDates||[]).join(','),
-        version: 'v8.15.11'
+        version: 'v8.15.13'
       };
       fetch(url, {
         method: 'POST',
@@ -3674,7 +3687,7 @@ function toggleTheme() { applyThemeMode(currentThemeMode === 'day' ? 'night' : '
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.15.11'
+        version: 'v8.15.13'
       };
       
       // auto_backup은 항상 최신으로 갱신 (가벼운 백업) - 다중 저장소
@@ -4108,7 +4121,7 @@ function toggleTheme() { applyThemeMode(currentThemeMode === 'day' ? 'night' : '
       if(typeof showToast==='function') showToast('☕ 휴식 종료 → 🙋 승차 (위치저장)');
       try{ if(typeof saveDrivingState==='function') saveDrivingState(); }catch(e){}
     }
-    // v8.15.11: 승차 즉시 돌던 연산 취소 (하차 후 겹침 방지)
+    // v8.15.13: 승차 즉시 돌던 연산 취소 (하차 후 겹침 방지)
     try{ _searchCancelled = true; _searchRunId++; }catch(e){}
     if (drivingState.isPassengerBoarded) { try{ if(typeof showToast==='function') showToast('🔄 이미 승차 중 - 새 위치로 다시 저장'); }catch(e){} /* v8.14.89: 이미 승차 중이어도 새 승차 위치 저장 허용 - 하차 누락으로 다음 승차가 막히던 문제 해결. return 하지 않음 */ }
     const boardBtn = document.getElementById('btn-board');
@@ -6176,7 +6189,7 @@ function setTab(tab) {
   }
 
   
-/* v8.15.11 SPEED: 계산 구조만 변경 (판단 로직·가산점·필터는 그대로)
+/* v8.15.13 SPEED: 계산 구조만 변경 (판단 로직·가산점·필터는 그대로)
    - runId 토큰: 새 검색이 시작되면 이전 연산은 버림 (중복 겹침 방지)
    - 승차 중: 새 검색 시작 금지 + 돌던 연산 취소 + A25는 저장만 하고 하차 후 반영
    - 타임아웃 래퍼: 외부 호출이 늦으면 버리고 캐시/빈값으로 넘어가서 '연산 중...' 무한대기 방지 */
@@ -6211,7 +6224,7 @@ async function calculateAndRender() {
     if (logEl) logEl.innerText = `⚡ [스마트 ${inWisu ? '관내 추천' : '관외 경유지 탐색'}] 연산 중...`;
     
     // AI V7.8.2 날씨 정보 연동
-    // v8.15.11: 날씨+카카오 병렬 + 각 3초 타임아웃 (순차 대기의 병목 제거)
+    // v8.15.13: 날씨+카카오 병렬 + 각 3초 타임아웃 (순차 대기의 병목 제거)
     var _parallel = await Promise.all([
       _withTimeout(fetchRealtimeWeatherUpgraded(currentPos.lat, currentPos.lng), 3000, null),
       _withTimeout(fetchLiveKakaoHotspots(currentPos.lat, currentPos.lng), 3000, [])
@@ -9672,7 +9685,7 @@ function updateA25FirebaseUI(data, isClear){
       if (window._a25LastAppliedKey !== dataKey && persistedKey !== dataKey) {
         const prevPins = a25ManualPins;
         a25ManualPins = hotspots.map(h => ({lat:h.lat, lng:h.lng, level:h.level||10}));
-        // v8.15.11: 승차 중엔 카드 갱신 안 함. 저장만 마치고 하차 후 1회 반영 (아래 saveA25Rest는 apply 내부가 아니라 update 흐름에서 이미 저장됨)
+        // v8.15.13: 승차 중엔 카드 갱신 안 함. 저장만 마치고 하차 후 1회 반영 (아래 saveA25Rest는 apply 내부가 아니라 update 흐름에서 이미 저장됨)
         if(_isBoardedNow()){ try{ _a25DeferredAt = ts || Date.now(); _showBoardedSearchPaused(); }catch(e){} }
         else { try{ applyA25PinsToMode(ts); }catch(e){ applyA25PinsToMode(); } }
         a25ManualPins = prevPins;
@@ -10398,7 +10411,7 @@ body.theme-day .copy-box-input, body.theme-day .copy-box-textarea{ background:#F
   <div class="copy-box-item">
     <div class="copy-box-label">🔖 빌드 버전</div>
     <div class="copy-box-row">
-      <input type="text" class="copy-box-input" id="copy-build-ver" readonly="" value="v8.15.11">
+      <input type="text" class="copy-box-input" id="copy-build-ver" readonly="" value="v8.15.13">
       <button class="copy-btn" onclick="copyToClipboard('copy-build-ver', this)">복사</button>
     </div>
   </div>
@@ -10406,15 +10419,15 @@ body.theme-day .copy-box-input, body.theme-day .copy-box-textarea{ background:#F
   <div class="copy-box-item">
     <div class="copy-box-label">🏗️ Builder 정보</div>
     <div class="copy-box-row">
-      <input type="text" class="copy-box-input" id="copy-builder-info" readonly="" value="[sudataxi-k (v8.15.11) via Builder-a4u v8.2.7] Repo: sudataxi-k / index.html">
+      <input type="text" class="copy-box-input" id="copy-builder-info" readonly="" value="[sudataxi-k (v8.15.13) via Builder-a4u v8.2.7] Repo: sudataxi-k / index.html">
       <button class="copy-btn" onclick="copyToClipboard('copy-builder-info', this)">복사</button>
     </div>
   </div>
 
   <div class="copy-box-item">
-    <div class="copy-box-label">📝 업데이트 내용 (v8.15.11)</div>
+    <div class="copy-box-label">📝 업데이트 내용 (v8.15.13)</div>
     <div class="copy-box-row">
-      <textarea class="copy-box-textarea" id="copy-update-log" readonly="">📌 sudataxi-k v8.15.11 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.15.11 |  ■ 콜검색 속도 구조 개선 (판단 로직·가산점·필터 그대로) | - 기존: 날씨→카카오→도로경로 순차 대기 + 타임아웃 없음 + 승차 중에도 검색 계속 + 중복 연산 겹침이라 연산 중이 오래 걸림 | - 수정: (1) 날씨+카카오 병렬 + 각 3초 타임아웃, (2) 검색마다 runId로 이전 연산 버림, (3) 승차 중엔 새 검색 시작 금지 + 돌던 연산 취소, A25는 저장만 하고 하차 후 1회 반영, (4) A25 Firebase fetch 3초 타임아웃 | - 결과: 승차 중엔 검색 안 돌고, 하차하면 자동 재개. 카드가 먼저 뜨고 느린 호출은 버리고 넘어감 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.10 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.10 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.15.11 |  ■ 대시보드 두 설정 한 줄로 축소 | - 기존: 운행 기준 시간 / 낮밤 자동 전환이 각각 큰 카드로 2줄을 차지하고 설명 텍스트까지 있었음 | - 수정: 두 설정을 한 줄에 나란히 배치하고, 제목·설명 텍스트를 없애고 크기 축소. 운행 기준 시간은 🕒+시간 선택, 낮밤 자동 전환은 🌗+모드 선택+사용 체크만 남김. 시간 직접 지정 시 시간 입력은 그때만 나타남 | - ID·동작은 그대로 (운행 기준 시간, 낮밤 모드/사용/시간 입력 모두 기존 그대로 동작) | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.9 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.9 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.15.9 |  ■ A25 콜카드 즉시 표시 | - 기존: A25 수신 후 날씨/카카오/도로거리 전체 연산이 끝날 때까지 콜카드가 안 떠서, A25 위치가 와도 늦게 반영됨 | - 수정: A25 수신 즉시 직선거리+추정시간으로 콜카드 3장을 먼저 표시. 전체 연산이 끝나면 그 결과로 자연스럽게 교체. A25 이름 해석도 기다리지 않고 캐시된 이름이 있으면 표시 | ■ 버전 표시 8→7로 돌아가던 문제 수정 | - 원인: 헤더를 다시 그리는 함수에 v8.15.7이 하드코딩돼 있어, 로드 직후 8로 바꿔도 헤더 재렌더 시 7로 덮어씌워졌음 | - 수정: 헤더 템플릿의 하드코딩을 BUILD_VERSION으로 교체. 이제 헤더를 다시 그려도 현재 빌드로 유지됨 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.8 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.8 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.15.8 |  ■ Drive Guard 자동 탭 이동 제거 | - 속도 10km/h 이상이어도 탭6으로 강제 이동하지 않고 경고창만 뜸. 경고 해제 시 대시보드로 강제 이동하지 않고 현재 탭 유지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.7 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.7 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.7 |  ■ 경고 문구 5개 리스트 + 2분마다 랜덤 변경 | - 기존: 경고 문구가 1개 고정이라 같은 문구만 계속 떴음 | - 수정: Drive Guard 탭에 경고 문구 5개 입력란 추가. 채운 문구 중 하나가 2분마다 랜덤으로 바뀜. 채운 게 1개면 그 문구만 뜸. 경고가 새로 뜰 때도 랜덤으로 1개 선택. 🎲 지금 다른 문구로 바꾸기 버튼으로 바로 확인 가능. 기존 1개 문구는 자동으로 리스트 1번으로 옮겨짐. 저장은 기존 다중 저장(빌드업해도 유지) 그대로 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.6 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.6 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.6 |  ■ 경고 문구 빌드업해도 유지되게 다중 저장으로 변경 | - 기존: 경고 문구는 localStorage 한 곳에만 저장돼서, 빌드업/저장소 정리 때 날아가면 기본 문구로 돌아갔음 | - 수정: 대시보드 운행기록과 같은 방식 적용 - 저장할 때 localStorage + 세션 + 쿠키(365일) + IndexedDB 네 곳에 동시 저장. 불러올 때는 localStorage가 비어도 세션/쿠키에서 복구하고 localStorage에 다시 채움 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.5 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.5 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.5 |  ■ 가드 탭에 경고 문구 입력란 추가 | - 기존: 빨간 경고 문구(운전 중입니다. 작업은 정차 후에)가 고정이라 바꿀 수 없었음 | - 수정: Drive Guard 탭에 경고 문구 입력란 추가. 입력하면 빨간 경고의 큰 문구가 그대로 바뀌고, 줄바꿈하면 두 줄로 표시됨. 입력 내용은 저장되어 다음에 열어도 유지되고, 기본 문구로 되돌리기 버튼으로 복원 가능 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.4 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.4 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.4 |  ■ 속도 측정 안 됨 긴급 수정 | - 원인: v8.15.3 패치 때 진짜 줄바꿈이 아니라 \n 문자 그대로가 Drive Guard 스크립트에 들어가서 스크립트 전체가 문법 오류로 멈추고 GPS 측정(watchPosition)이 시작도 안 됐음 | - 수정: 잘못 들어간 \n을 진짜 줄바꿈으로 교체하고 스크립트 문법 검사 통과 확인. 경고 중간 운행시간 표시(v8.15.3 기능)는 그대로 유지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.3 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.3 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.3 |  ■ 속도 경고 중간 빈 공간에 운행시간 표시 추가 | - 기존: 빨간 속도 경고에는 속도만 뜨고 전체운행/승차중 시간이 안 보였음 | - 수정: 경고 중간 빈 공간(설명문 아래, 닫기 버튼 위)에 사진과 같은 흰색 알약 2개 추가 - 왼쪽 전체운행, 오른쪽 승차중/대기중 등 현재 상태. 하단바 텍스트를 그대로 복사해서 1초마다 갱신이라 시간 어긋남 없음 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.2 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.2 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.2 |  ■ 속도 경고 꺼지면 대시보드로 복귀 | - 기존: 속도 안내(Drive Guard 경고)가 꺼져도 가드 메뉴(탭6)에 그대로 머물렀음 | - 수정: 기준 아래 10초 유지로 경고가 자동 해제될 때 대시보드(탭4)로 자동 이동. 닫기 버튼·끄기 버튼 동작은 그대로 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.1 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.1 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.1 |  ■ 동선 지도 보기 안 뜸 수정 | - 원인: #map-modal에 인라인 display:none이 박혀 있어 .active(display:flex)가 이기지 못해 지도가 안 떴고, 하단 메뉴만 사라졌음 | - 수정: 열 때 인라인을 display:flex로 풀고, 닫을 때 다시 display:none으로 복원. 동선 0개면 fitBounds 에러 방지 가드 추가 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.0 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.0 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.0 |  ■ Drive Guard 주야간 토글 따라가게 수정 | - 기존: Drive Guard 탭 카드가 #1c1c1e / #fff / #aaa 하드코딩이라 주야간 토글해도 계속 어두웠음 | - 수정: 탭 카드·속도계·작은 글씨를 var(--card-bg) / var(--main-text) / var(--stat-label) / var(--card-border)로 변경. 주야간 토글·자동 테마 모두 따라감. 끄기 버튼도 var(--btn-idle-bg) 등으로 변경 | - 경고 화면은 야간/주간 모두 빨간색(#d7000f) 유지 - 운전 중 경고라서 눈에 띄어야 함 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.94 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.94 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.14.94 |  ■ 터치 전부 안 됨 진짜 원인 수정 | - 원인: 탭6 붙일 때 }를 하나 더 넣어서 setTab 함수가 중간에 끊기고, 그 뒤 else if가 문법 오류가 되어 메인 스크립트 전체가 안 뜸. 그래서 버튼 리스너도 안 붙고, 대시보드로 이동하는 코드도 안 뛰고, 콜지도에 머물면서 터치가 전부 안 됐음 | - 수정: } 하나 제거해서 if-else 체인 복원. 이제 메인 스크립트 정상 동작 | - 첫 화면: 대시보드로 복원. v8.14.93에서 탭1로 잘못 바꾼 것 되돌림. 첫 화면은 대시보드(탭4)가 맞음 | - 경고 배경 pointer-events:none, 닫기만 클릭, Drive Guard 끄기 버튼, 낀 모달 정리는 v8.14.93 그대로 유지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.93 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.93 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.14.93 |  ■ 터치 전부 안 됨 + 첫 화면 대시보드 수정 | - 첫 화면: 대시보드 강제 이동(setTab(4)) 제거. 원래 의도대로 첫 화면은 추천/콜찾기(탭1)로 복원 | - 터치 막힘: setTab 안에 있던 Drive Guard 자동복귀 가드를 아예 제거. setTab은 이제 깨끗하게 탭만 바꿈 | - 경고: 배경은 pointer-events:none으로 절대 터치를 안 막고, 닫기 버튼만 pointer-events:auto. 경고가 떠 있어도 다른 버튼 다 눌림 | - 자동이동: 1회만, 반복 setTab 호출 제거. Drive Guard 끄기 버튼 추가 (자동이동·경고 전부 끔, localStorage 저장) | - 낀 모달 정리: 로드 시 modal-open/map-modal-open/a25-pin-open 제거. 낀 모달 때문에 하단바가 display:none이 되어 터치 안 되는 것처럼 보이는 것 방지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.92 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.92 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.14.92 |  ■ Drive Guard 버튼 막힘 수정 | - 원인: 속도 값이 오래돼도 계속 운전 중으로 보고 모든 탭 이동을 즉시 Drive Guard로 강제해서 다른 버튼이 안 눌리는 것처럼 보였음. 경고가 숨겨져도 클릭을 막을 수 있는 구조였음 | - 수정: 속도 신선도 5초만 운전 중으로 봄. 탭 이동은 막지 않고, 이동 후 1.5초 뒤에도 운전 중이면 Drive Guard로 돌아옴. 경고 숨김 상태에서는 클릭을 절대 막지 않음 (pointer-events:none + visibility:hidden) | - 닫기 버튼 하단 잘림 방지, Drive Guard 바인드 중복 방지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.91 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.91 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.14.91 |  ■ Drive Guard 탭 추가 | - 하단 메뉴에서 가로로 길었던 Taxi DJ 한 칸을 둘로 나눠서 왼쪽 Taxi DJ / 오른쪽 Drive Guard | - Drive Guard 탭에 속도 경고 페이지 포함. 기준 10km/h, 기준 아래 10초 유지 시 자동 해제 | - 속도 10km/h 이상이면 Drive Guard 탭으로 자동 이동 + 붉은색 속도계 경고 표시 | - 다른 탭으로 옮겨도 운전 중이면 다시 Drive Guard로 돌아옴. 닫기 누르면 2분간은 안 뜨고, 2분 뒤 운전 중이면 다시 뜸 | - Drive Guard 페이지에는 카카오내비 없음. AI 연동 없음 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.90 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.90 업데이트
+      <textarea class="copy-box-textarea" id="copy-update-log" readonly="">📌 sudataxi-k v8.15.13 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.15.13 |  ■ 경고 화면 다듬기 | - 속도 아래 작은 설명 글씨 삭제 | - 알약 2개(전체운행·대기중) 작게 줄여서 한 줄에 표시 (글자 15→11, 여백 축소, 줄바꿈 금지) | - 경고 큰 글자 44→29로 1/3 축소 | - 경고 화면 사진 5초마다 자동 전환 (사진 2장 이상일 때만. 사진 탭하면 수동으로도 넘김) | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.12 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.12 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.15.13 |  ■ 경고 화면 사진 토글 | - 기존: 경고 화면은 문자안내만 뜸 | - 수정: DriveGuard 탭에 경고 화면 사진 카드 추가. 사진첩에서 내가 고른 사진만(최대 5장) 이 기기 안에 저장됨. 사진첩 전체가 자동으로 뜨지 않음. 경고 화면의 사진으로 보기 버튼을 누르면 사진 ↔ 문자안내로 전환됨. 여러 장이면 경고 화면 사진 탭 시 다음 사진으로. 미리보기 사진 탭하면 그 사진만 삭제 | - 사진은 서버로 안 나가고, 화면용으로 줄여서 저장됨 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.11 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.11 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.15.13 |  ■ 콜검색 속도 구조 개선 (판단 로직·가산점·필터 그대로) | - 기존: 날씨→카카오→도로경로 순차 대기 + 타임아웃 없음 + 승차 중에도 검색 계속 + 중복 연산 겹침이라 연산 중이 오래 걸림 | - 수정: (1) 날씨+카카오 병렬 + 각 3초 타임아웃, (2) 검색마다 runId로 이전 연산 버림, (3) 승차 중엔 새 검색 시작 금지 + 돌던 연산 취소, A25는 저장만 하고 하차 후 1회 반영, (4) A25 Firebase fetch 3초 타임아웃 | - 결과: 승차 중엔 검색 안 돌고, 하차하면 자동 재개. 카드가 먼저 뜨고 느린 호출은 버리고 넘어감 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.10 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.10 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.15.13 |  ■ 대시보드 두 설정 한 줄로 축소 | - 기존: 운행 기준 시간 / 낮밤 자동 전환이 각각 큰 카드로 2줄을 차지하고 설명 텍스트까지 있었음 | - 수정: 두 설정을 한 줄에 나란히 배치하고, 제목·설명 텍스트를 없애고 크기 축소. 운행 기준 시간은 🕒+시간 선택, 낮밤 자동 전환은 🌗+모드 선택+사용 체크만 남김. 시간 직접 지정 시 시간 입력은 그때만 나타남 | - ID·동작은 그대로 (운행 기준 시간, 낮밤 모드/사용/시간 입력 모두 기존 그대로 동작) | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.9 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.9 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.15.9 |  ■ A25 콜카드 즉시 표시 | - 기존: A25 수신 후 날씨/카카오/도로거리 전체 연산이 끝날 때까지 콜카드가 안 떠서, A25 위치가 와도 늦게 반영됨 | - 수정: A25 수신 즉시 직선거리+추정시간으로 콜카드 3장을 먼저 표시. 전체 연산이 끝나면 그 결과로 자연스럽게 교체. A25 이름 해석도 기다리지 않고 캐시된 이름이 있으면 표시 | ■ 버전 표시 8→7로 돌아가던 문제 수정 | - 원인: 헤더를 다시 그리는 함수에 v8.15.7이 하드코딩돼 있어, 로드 직후 8로 바꿔도 헤더 재렌더 시 7로 덮어씌워졌음 | - 수정: 헤더 템플릿의 하드코딩을 BUILD_VERSION으로 교체. 이제 헤더를 다시 그려도 현재 빌드로 유지됨 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.8 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.8 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.15.8 |  ■ Drive Guard 자동 탭 이동 제거 | - 속도 10km/h 이상이어도 탭6으로 강제 이동하지 않고 경고창만 뜸. 경고 해제 시 대시보드로 강제 이동하지 않고 현재 탭 유지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.7 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.7 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.7 |  ■ 경고 문구 5개 리스트 + 2분마다 랜덤 변경 | - 기존: 경고 문구가 1개 고정이라 같은 문구만 계속 떴음 | - 수정: Drive Guard 탭에 경고 문구 5개 입력란 추가. 채운 문구 중 하나가 2분마다 랜덤으로 바뀜. 채운 게 1개면 그 문구만 뜸. 경고가 새로 뜰 때도 랜덤으로 1개 선택. 🎲 지금 다른 문구로 바꾸기 버튼으로 바로 확인 가능. 기존 1개 문구는 자동으로 리스트 1번으로 옮겨짐. 저장은 기존 다중 저장(빌드업해도 유지) 그대로 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.6 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.6 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.6 |  ■ 경고 문구 빌드업해도 유지되게 다중 저장으로 변경 | - 기존: 경고 문구는 localStorage 한 곳에만 저장돼서, 빌드업/저장소 정리 때 날아가면 기본 문구로 돌아갔음 | - 수정: 대시보드 운행기록과 같은 방식 적용 - 저장할 때 localStorage + 세션 + 쿠키(365일) + IndexedDB 네 곳에 동시 저장. 불러올 때는 localStorage가 비어도 세션/쿠키에서 복구하고 localStorage에 다시 채움 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.5 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.5 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.5 |  ■ 가드 탭에 경고 문구 입력란 추가 | - 기존: 빨간 경고 문구(운전 중입니다. 작업은 정차 후에)가 고정이라 바꿀 수 없었음 | - 수정: Drive Guard 탭에 경고 문구 입력란 추가. 입력하면 빨간 경고의 큰 문구가 그대로 바뀌고, 줄바꿈하면 두 줄로 표시됨. 입력 내용은 저장되어 다음에 열어도 유지되고, 기본 문구로 되돌리기 버튼으로 복원 가능 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.4 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.4 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.4 |  ■ 속도 측정 안 됨 긴급 수정 | - 원인: v8.15.3 패치 때 진짜 줄바꿈이 아니라 \n 문자 그대로가 Drive Guard 스크립트에 들어가서 스크립트 전체가 문법 오류로 멈추고 GPS 측정(watchPosition)이 시작도 안 됐음 | - 수정: 잘못 들어간 \n을 진짜 줄바꿈으로 교체하고 스크립트 문법 검사 통과 확인. 경고 중간 운행시간 표시(v8.15.3 기능)는 그대로 유지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.3 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.3 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.3 |  ■ 속도 경고 중간 빈 공간에 운행시간 표시 추가 | - 기존: 빨간 속도 경고에는 속도만 뜨고 전체운행/승차중 시간이 안 보였음 | - 수정: 경고 중간 빈 공간(설명문 아래, 닫기 버튼 위)에 사진과 같은 흰색 알약 2개 추가 - 왼쪽 전체운행, 오른쪽 승차중/대기중 등 현재 상태. 하단바 텍스트를 그대로 복사해서 1초마다 갱신이라 시간 어긋남 없음 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.2 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.2 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.2 |  ■ 속도 경고 꺼지면 대시보드로 복귀 | - 기존: 속도 안내(Drive Guard 경고)가 꺼져도 가드 메뉴(탭6)에 그대로 머물렀음 | - 수정: 기준 아래 10초 유지로 경고가 자동 해제될 때 대시보드(탭4)로 자동 이동. 닫기 버튼·끄기 버튼 동작은 그대로 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.1 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.1 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.1 |  ■ 동선 지도 보기 안 뜸 수정 | - 원인: #map-modal에 인라인 display:none이 박혀 있어 .active(display:flex)가 이기지 못해 지도가 안 떴고, 하단 메뉴만 사라졌음 | - 수정: 열 때 인라인을 display:flex로 풀고, 닫을 때 다시 display:none으로 복원. 동선 0개면 fitBounds 에러 방지 가드 추가 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.0 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.0 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.0 |  ■ Drive Guard 주야간 토글 따라가게 수정 | - 기존: Drive Guard 탭 카드가 #1c1c1e / #fff / #aaa 하드코딩이라 주야간 토글해도 계속 어두웠음 | - 수정: 탭 카드·속도계·작은 글씨를 var(--card-bg) / var(--main-text) / var(--stat-label) / var(--card-border)로 변경. 주야간 토글·자동 테마 모두 따라감. 끄기 버튼도 var(--btn-idle-bg) 등으로 변경 | - 경고 화면은 야간/주간 모두 빨간색(#d7000f) 유지 - 운전 중 경고라서 눈에 띄어야 함 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.94 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.94 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.14.94 |  ■ 터치 전부 안 됨 진짜 원인 수정 | - 원인: 탭6 붙일 때 }를 하나 더 넣어서 setTab 함수가 중간에 끊기고, 그 뒤 else if가 문법 오류가 되어 메인 스크립트 전체가 안 뜸. 그래서 버튼 리스너도 안 붙고, 대시보드로 이동하는 코드도 안 뛰고, 콜지도에 머물면서 터치가 전부 안 됐음 | - 수정: } 하나 제거해서 if-else 체인 복원. 이제 메인 스크립트 정상 동작 | - 첫 화면: 대시보드로 복원. v8.14.93에서 탭1로 잘못 바꾼 것 되돌림. 첫 화면은 대시보드(탭4)가 맞음 | - 경고 배경 pointer-events:none, 닫기만 클릭, Drive Guard 끄기 버튼, 낀 모달 정리는 v8.14.93 그대로 유지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.93 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.93 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.14.93 |  ■ 터치 전부 안 됨 + 첫 화면 대시보드 수정 | - 첫 화면: 대시보드 강제 이동(setTab(4)) 제거. 원래 의도대로 첫 화면은 추천/콜찾기(탭1)로 복원 | - 터치 막힘: setTab 안에 있던 Drive Guard 자동복귀 가드를 아예 제거. setTab은 이제 깨끗하게 탭만 바꿈 | - 경고: 배경은 pointer-events:none으로 절대 터치를 안 막고, 닫기 버튼만 pointer-events:auto. 경고가 떠 있어도 다른 버튼 다 눌림 | - 자동이동: 1회만, 반복 setTab 호출 제거. Drive Guard 끄기 버튼 추가 (자동이동·경고 전부 끔, localStorage 저장) | - 낀 모달 정리: 로드 시 modal-open/map-modal-open/a25-pin-open 제거. 낀 모달 때문에 하단바가 display:none이 되어 터치 안 되는 것처럼 보이는 것 방지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.92 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.92 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.14.92 |  ■ Drive Guard 버튼 막힘 수정 | - 원인: 속도 값이 오래돼도 계속 운전 중으로 보고 모든 탭 이동을 즉시 Drive Guard로 강제해서 다른 버튼이 안 눌리는 것처럼 보였음. 경고가 숨겨져도 클릭을 막을 수 있는 구조였음 | - 수정: 속도 신선도 5초만 운전 중으로 봄. 탭 이동은 막지 않고, 이동 후 1.5초 뒤에도 운전 중이면 Drive Guard로 돌아옴. 경고 숨김 상태에서는 클릭을 절대 막지 않음 (pointer-events:none + visibility:hidden) | - 닫기 버튼 하단 잘림 방지, Drive Guard 바인드 중복 방지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.91 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.91 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.14.91 |  ■ Drive Guard 탭 추가 | - 하단 메뉴에서 가로로 길었던 Taxi DJ 한 칸을 둘로 나눠서 왼쪽 Taxi DJ / 오른쪽 Drive Guard | - Drive Guard 탭에 속도 경고 페이지 포함. 기준 10km/h, 기준 아래 10초 유지 시 자동 해제 | - 속도 10km/h 이상이면 Drive Guard 탭으로 자동 이동 + 붉은색 속도계 경고 표시 | - 다른 탭으로 옮겨도 운전 중이면 다시 Drive Guard로 돌아옴. 닫기 누르면 2분간은 안 뜨고, 2분 뒤 운전 중이면 다시 뜸 | - Drive Guard 페이지에는 카카오내비 없음. AI 연동 없음 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.90 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.90 업데이트
 📅 2026-11-11 · 🔖 빌드 v8.14.90
 
 ■ A25 위치 수신 - center 버려지던 문제 수정
@@ -10456,7 +10469,7 @@ function openCopyBox(){
   if(!panel) return;
   // 최신 버전 정보 갱신
   try{
-    const ver = (typeof BUILD_VERSION !== 'undefined' ? BUILD_VERSION : 'v8.15.11');
+    const ver = (typeof BUILD_VERSION !== 'undefined' ? BUILD_VERSION : 'v8.15.13');
     document.getElementById('copy-build-ver').value = ver;
     document.getElementById('copy-builder-info').value = `[sudataxi-k (${ver}) 작업 맥락 (via Builder-a4u v8.2.7)] 📌 프로젝트(Repo): sudataxi-k 📁 작업 대상 파일: index.html`;
   }catch(e){}
@@ -10538,15 +10551,16 @@ document.addEventListener('keydown', (e)=>{
 <!-- END v8.14.89 카피박스 -->
 
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><div id="driveguard-warn">
+   <img id="dg-warnPhoto" alt="">
   <span class="dg-pill">⚠ 운전 중입니다</span>
   <h1 id="dg-warnTitle">운전 중입니다<br>작업은 정차 후에</h1>
   <div><span class="dg-warn-speed" id="dg-warnSpeed">0</span> <span style="font-size:20px">km/h</span></div>
-  <p class="dg-warn-sub">속도가 기준 아래로 10초 이상 떨어지면<br>이 화면은 자동으로 사라집니다.<br>닫아도 2분 뒤 운전 중이면 다시 뜹니다.</p>
-  <div class="dg-warn-status-row" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px;">
-     <span id="dg-warn-total" style="background:#FFF;color:#000;border:2px solid #000;border-radius:999px;padding:6px 14px;font-size:15px;font-weight:900;white-space:nowrap;">🚗 전체운행 [00:00]</span>
-     <span id="dg-warn-status" style="background:#FFF;color:#000;border:2px solid #000;border-radius:999px;padding:6px 14px;font-size:15px;font-weight:900;white-space:nowrap;">⏸️ 대기중</span>
+    <div class="dg-warn-status-row" style="display:flex;gap:4px;justify-content:center;flex-wrap:nowrap;margin-top:10px;">
+     <span id="dg-warn-total" style="background:#FFF;color:#000;border:1.5px solid #000;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:900;white-space:nowrap;">🚗 전체운행 [00:00]</span>
+     <span id="dg-warn-status" style="background:#FFF;color:#000;border:1.5px solid #000;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:900;white-space:nowrap;">⏸️ 대기중</span>
    </div>
    <div class="dg-actions">
+    <button class="dg-photo-btn" id="dg-photoToggle" type="button">사진으로 보기</button>
     <button class="dg-close-btn" id="dg-closeBtn">닫기 (2분 뒤 다시 뜸)</button>
   </div>
 </div>
@@ -10638,4 +10652,143 @@ document.addEventListener('keydown', (e)=>{
   window.addEventListener('load', function(){ setTimeout(bind, 300); });
 })();
 </script>
+
+<script id="dg-photo-script">
+/* v8.15.13 DG PHOTO: 경고 화면 사진 - 사용자가 고른 사진만 IndexedDB에 저장 (사진첩 자동 접근 없음)
+   - DriveGuard 탭에서 선택 -> 경고 화면 토글: 사진 <-> 문자안내
+   - 사진은 이 기기 안에만 저장됨 (서버 전송 없음). 여러 장이면 경고 화면에서 사진 탭 시 다음 사진으로. */
+(function(){
+  var DB='sudataxi-dg-photos', STORE='photos', KEY='list', MAX=5;
+  var photos=[]; var curIdx=0; var photoMode=false; var photoTimer=null;
+  try{ photoMode = (localStorage.getItem('sudataxi_dg_photo_mode')==='1'); }catch(e){}
+  function openDB(){ return new Promise(function(res, rej){
+    try{
+      var r=indexedDB.open(DB,1);
+      r.onupgradeneeded=function(){ try{ if(!r.result.objectStoreNames.contains(STORE)) r.result.createObjectStore(STORE); }catch(e){} };
+      r.onsuccess=function(){ res(r.result); }; r.onerror=function(){ rej(r.error); };
+    }catch(e){ rej(e); }
+  }); }
+  function loadPhotos(){ return openDB().then(function(db){ return new Promise(function(res){
+    try{
+      var tx=db.transaction(STORE,'readonly'); var st=tx.objectStore(STORE); var g=st.get(KEY);
+      g.onsuccess=function(){ try{ photos = Array.isArray(g.result)?g.result:[]; }catch(e){ photos=[]; } res(photos); };
+      g.onerror=function(){ res([]); };
+    }catch(e){ res([]); }
+  }); }).catch(function(){ return []; }); }
+  function savePhotos(){ return openDB().then(function(db){ return new Promise(function(res){
+    try{
+      var tx=db.transaction(STORE,'readwrite'); tx.objectStore(STORE).put(photos.slice(0,MAX), KEY);
+      tx.oncomplete=function(){ res(true); }; tx.onerror=function(){ res(false); };
+    }catch(e){ res(false); }
+  }); }).catch(function(){ return false; }); }
+  function resizeFile(file){ return new Promise(function(res, rej){
+    try{
+      var url=URL.createObjectURL(file); var img=new Image();
+      img.onload=function(){
+        try{
+          var max=1280, w=img.naturalWidth||img.width, h=img.naturalHeight||img.height;
+          var sc=Math.min(1, max/Math.max(w,h)); var cw=Math.max(1,Math.round(w*sc)), ch=Math.max(1,Math.round(h*sc));
+          var cv=document.createElement('canvas'); cv.width=cw; cv.height=ch;
+          cv.getContext('2d').drawImage(img,0,0,cw,ch); URL.revokeObjectURL(url);
+          res(cv.toDataURL('image/jpeg',0.82));
+        }catch(e){ rej(e); }
+      };
+      img.onerror=function(){ try{ URL.revokeObjectURL(url); }catch(e){} rej(new Error('load fail')); };
+      img.src=url;
+    }catch(e){ rej(e); }
+  }); }
+  function renderPreview(){
+    try{
+      var box=document.getElementById('dg-photoPreview'); var cnt=document.getElementById('dg-photoCount');
+      if(cnt) cnt.textContent = photos.length + '장' + (photos.length? ' (경고 화면 버튼으로 전환)' : '');
+      if(!box) return;
+      if(!photos.length){ box.innerHTML='<div class="dg-small">아직 고른 사진이 없어요. 사진 선택하기를 눌러 사진첩에서 골라주세요.</div>'; return; }
+      box.innerHTML='';
+      photos.forEach(function(p, idx){
+        var im=document.createElement('img');
+        im.src=p.data; im.style.cssText='width:64px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--card-border);cursor:pointer;';
+        im.title='탭하면 이 사진 삭제';
+        im.onclick=function(){ try{ photos.splice(idx,1); if(curIdx>=photos.length) curIdx=0; savePhotos().then(function(){ renderPreview(); applyPhotoMode(); }); }catch(e){} };
+        box.appendChild(im);
+      });
+    }catch(e){}
+  }
+  function stopPhotoTimer(){ try{ if(photoTimer){ clearInterval(photoTimer); photoTimer=null; } }catch(e){} }
+  function startPhotoTimer(){
+    try{
+      stopPhotoTimer();
+      var warn=document.getElementById('driveguard-warn');
+      if(!(photoMode && photos.length>1 && warn && warn.classList.contains('show'))) return;
+      photoTimer=setInterval(function(){
+        try{
+          if(!(photoMode && photos.length>1)) { stopPhotoTimer(); return; }
+          curIdx=(curIdx+1)%photos.length;
+          var img=document.getElementById('dg-warnPhoto');
+          if(img) img.src=photos[curIdx].data;
+        }catch(e){}
+      }, 5000);
+    }catch(e){}
+  }
+  function applyPhotoMode(){
+    try{
+      var warn=document.getElementById('driveguard-warn'); var img=document.getElementById('dg-warnPhoto'); var btn=document.getElementById('dg-photoToggle');
+      if(!warn||!img||!btn) return;
+      if(photoMode && photos.length){
+        warn.classList.add('photo-mode');
+        img.src = photos[curIdx % photos.length].data;
+        btn.textContent='문자안내로 보기';
+      }else{
+        warn.classList.remove('photo-mode');
+        btn.textContent='사진으로 보기';
+      }
+      startPhotoTimer();
+    }catch(e){}
+  }
+  function toast(msg){ try{ if(typeof showToast==='function') showToast(msg); }catch(e){} }
+  function bind(){
+    try{
+      var pick=document.getElementById('dg-photoPick'); var input=document.getElementById('dg-photoInput'); var clearBtn=document.getElementById('dg-photoClear');
+      var toggle=document.getElementById('dg-photoToggle'); var img=document.getElementById('dg-warnPhoto'); var warn=document.getElementById('driveguard-warn');
+      if(pick && input) pick.onclick=function(){ try{ input.click(); }catch(e){} };
+      if(input) input.onchange=function(){
+        try{
+          var files=Array.prototype.slice.call(input.files||[]);
+          if(!files.length) return;
+          if(photos.length+files.length>MAX){ toast('사진은 최대 '+MAX+'장까지만 저장돼요'); files=files.slice(0, Math.max(0, MAX-photos.length)); }
+          var done=0;
+          files.forEach(function(f){
+            resizeFile(f).then(function(dataUrl){
+              photos.push({ id: Date.now()+'_'+Math.random().toString(36).slice(2,7), data: dataUrl });
+              if(++done>=files.length){ savePhotos().then(function(){ renderPreview(); applyPhotoMode(); toast('경고 화면 사진 '+photos.length+'장 저장됨'); }); }
+            }).catch(function(){ if(++done>=files.length){ renderPreview(); } });
+          });
+          input.value='';
+        }catch(e){}
+      };
+      if(clearBtn) clearBtn.onclick=function(){ photos=[]; curIdx=0; savePhotos().then(function(){ renderPreview(); applyPhotoMode(); toast('경고 화면 사진 지움'); }); };
+      if(toggle) toggle.onclick=function(e){
+        try{ if(e){ e.preventDefault(); e.stopPropagation(); } }catch(err){}
+        if(!photos.length){ toast('DriveGuard 탭에서 사진을 먼저 선택해 주세요'); return; }
+        photoMode=!photoMode;
+        try{ localStorage.setItem('sudataxi_dg_photo_mode', photoMode?'1':'0'); }catch(e){}
+        applyPhotoMode();
+      };
+      if(img) img.onclick=function(e){
+        try{ if(e){ e.preventDefault(); e.stopPropagation(); } }catch(err){}
+        if(photos.length>1){ curIdx=(curIdx+1)%photos.length; applyPhotoMode(); }
+      };
+      if(warn){
+        var mo=new MutationObserver(function(){ applyPhotoMode(); });
+        try{ mo.observe(warn, { attributes:true, attributeFilter:['class'] }); }catch(e){}
+      }
+    }catch(e){}
+  }
+  loadPhotos().then(function(){ renderPreview(); applyPhotoMode(); });
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(bind, 300); });
+  else setTimeout(bind, 300);
+  window.addEventListener('load', function(){ setTimeout(bind, 300); });
+  window.__dgPhotoApply = applyPhotoMode;
+})();
+</script>
+
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body></html>
