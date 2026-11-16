@@ -1748,12 +1748,12 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
 #tab6-extras .dg-btn{border:0;border-radius:14px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;width:100%}
 #tab6-extras #dg-offBtn{background:var(--btn-idle-bg) !important;color:var(--btn-idle-text) !important;border:1px solid var(--btn-idle-border) !important}
 #tab6-extras .dg-btn-yellow{background:#FFC800;color:#111}
-#driveguard-warn{position:fixed;inset:0;background:#d7000f;color:#fff;display:none;flex-direction:column;z-index:2147483647;padding:20px;padding-top:env(safe-area-inset-top);padding-bottom:calc(20px + env(safe-area-inset-bottom));pointer-events:none;visibility:hidden;opacity:0}
+#driveguard-warn{position:fixed;inset:0;background:#d7000f;color:#fff;display:none;flex-direction:column;z-index:2147483647;padding:20px;padding-top:env(safe-area-inset-top);padding-bottom:calc(2px + env(safe-area-inset-bottom));pointer-events:none;visibility:hidden;opacity:0}
 #driveguard-warn.show{display:flex;pointer-events:none;visibility:visible;opacity:1}
 #driveguard-warn h1{font-size:29px;line-height:1.1;margin:10px 0 6px;color:#fff}
 #driveguard-warn .dg-warn-speed{font-size:72px;font-weight:900;line-height:1;color:#fff}
 #driveguard-warn .dg-warn-sub{font-size:16px;opacity:.95;line-height:1.5;color:#fff}
-#driveguard-warn .dg-actions{margin-top:auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding-bottom:env(safe-area-inset-bottom)}
+#driveguard-warn .dg-actions{margin-top:auto;margin-bottom:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding-bottom:0}
 #driveguard-warn .dg-warn-btn{border-radius:14px;padding:13px 2px;font-size:14px;font-weight:900;cursor:pointer;pointer-events:auto;position:relative;z-index:2;white-space:nowrap;line-height:1.2;min-width:0;overflow:hidden;text-overflow:ellipsis;text-align:center;height:52px;display:flex;align-items:center;justify-content:center}
 #driveguard-warn #dg-warnPhotoBtn{background:rgba(0,0,0,.55);color:#fff;border:1.5px solid rgba(255,255,255,.85)}
 #driveguard-warn #dg-warnCloseBtn{background:rgba(255,255,255,.85);color:#d7000f;border:0}
@@ -2550,7 +2550,7 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
     <button id="btn-save-restroom" style="display:none !important;">화장실저장</button>
   </div>
   
-  <div class="toast-banner" id="toast-banner" style="position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 12px; padding: 6px 12px; border-radius: 12px; z-index: 300; display: block; box-shadow: rgba(0, 0, 0, 0.6) 0px 3px 12px;">📍 위치 권한 오류</div>
+  <div class="toast-banner" id="toast-banner" style="position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: var(--theme-accent); color: var(--theme-text-on-accent); font-weight: 900; font-size: 12px; padding: 6px 12px; border-radius: 12px; z-index: 300; display: none; box-shadow: rgba(0, 0, 0, 0.6) 0px 3px 12px;">📍 위치 권한 오류</div>
   
   <div class="map-modal-overlay" id="map-modal" style="display: none;">
     <div class="map-modal-content">
