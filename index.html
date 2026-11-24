@@ -187,6 +187,27 @@
 :where(code, pre, kbd, samp) {
   font-family: "Optimistic Mono", ui-monospace, monospace;
 }
+</style><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
 </style>
 
 <style id="frequent-fix-114">
@@ -325,13 +346,13 @@ body.theme-day .fp-cat-select-btn.active{ background:#14B8A6; color:#FFF; border
   const EMBEDDED_DEFAULTS = {
     daily_rev: 0,
     sim_data: {target:4000000, current:0, restDates:[]},
-    version: 'v8.16.38'
+    version: 'v8.17.3'
   };
 </script>
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>sudataxi-k v8.17.2</title>
+  <title>sudataxi-k v8.17.3</title>
 
   <link rel="manifest" href="data:application/json;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwMDAwMDAiLCAiZGVzY3JpcHRpb24iOiAi7JWI7JaRL+q1sO2PrC/snZjsmZUv6rO87LKcIOy9nC/rspTsuZnquIgg7KeA64+EIC0g7IOB7JeF7KeA6rWsIOykkeyLrCB2OC45LjkwIiwgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsICJpY29ucyI6IFt7InB1cnBvc2UiOiAiYW55IG1hc2thYmxlIiwgInNpemVzIjogIjUxMng1MTIiLCAic3JjIjogImh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzM3NzQvMzc3NDA4My5wbmciLCAidHlwZSI6ICJpbWFnZS9wbmcifV0sICJuYW1lIjogIuyImOuLpO2DneyLnEsgdjguOS45MCIsICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsICJzaG9ydF9uYW1lIjogIuyImOuLpO2DneyLnEsiLCAic3RhcnRfdXJsIjogIi4vaW5kZXguaHRtbD92PTguOS45MCIsICJ0aGVtZV9jb2xvciI6ICIjRkZDODAwIiwgInZlcnNpb24iOiAiOC45LjkwIn0=">
   <meta name="theme-color" content="#FFC800">
@@ -1796,7 +1817,7 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
   
   <div class="sticky-top-area" style="padding-bottom: 6px; box-shadow: 0 -20px 0 20px var(--main-bg);">
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 2px;">
-      <div class="header" id="app-header-title" style="margin-bottom: 0px; flex: 1 1 0%; cursor: pointer;" data-copy-bound="1" title="클릭하면 빌드 정보 복사 박스가 열립니다">📅 2026.11.21(토) <span class="build-ver-tag" data-copy-bound="1" style="cursor: pointer;" title="클릭하면 빌드 정보 복사 박스가 열립니다">v8.17.2</span> <span class="holiday-badge" style="background:#FF8C00;">🟡 휴일</span></div>
+      <div class="header" id="app-header-title" style="margin-bottom: 0px; flex: 1 1 0%; cursor: pointer;" data-copy-bound="1" title="클릭하면 빌드 정보 복사 박스가 열립니다">📅 2026.11.24(화) <span class="build-ver-tag" data-copy-bound="1" style="cursor: pointer;" title="클릭하면 빌드 정보 복사 박스가 열립니다">v8.17.3</span> <span class="weekday-badge">🟢 평일</span></div>
       <button id="btn-theme-toggle" onclick="toggleTheme()" class="btn-idle" style="border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 900; cursor: pointer; white-space: nowrap; flex-shrink: 0; border: 1px solid var(--theme-border); color: var(--theme-accent);">🌙 야간</button>
     </div>
   <div id="search-row" style="display: none; gap: 6px; margin-bottom: 2px; align-items: stretch; height: 44px; box-sizing: border-box;">
@@ -1935,7 +1956,7 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
 
   <div id="tab2-extras" style="display: block;">
     <div class="strategy-box">
-      <div class="strategy-title">💡 <span id="strategy-time-title">14시 - 주간 평시 / 새벽 연비 운행 - 상업지구 중심</span></div>
+      <div class="strategy-title">💡 <span id="strategy-time-title">15시 - 주간 평시 / 새벽 연비 운행 - 상업지구 중심</span></div>
       <div class="strategy-content" id="strategy-text">도심 내 단거리 수요가 꾸준합니다. <b>범계 로데오, 평촌 먹자골목, 안양 일번가, 인덕원/산본 상업지구와 과천 지식정보타운 등 업체 밀집지역</b>을 중심으로 순환하며 연비 위주 운행을 하세요. 상업지구가 콜 발생의 핵심입니다.</div>
     </div>
     <div id="strategy-cards-list" class="card-list" style="margin-bottom: 8px;"><div class="card" style="border: 1.5px solid rgb(34, 197, 94); box-shadow: rgba(34, 197, 94, 0.15) 0px 0px 10px;">
@@ -2188,7 +2209,7 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
       <!-- 오늘 실매출 입력 UI -->
       <div class="revenue-box">
         <div class="top-row">
-          <div class="label">💰 오늘 실매출 <span style="font-size:11px; color:#FFC800; font-weight:800;">(일일필요 400,000원)</span></div>
+          <div class="label">💰 오늘 실매출 <span style="font-size:11px; color:#FFC800; font-weight:800;">(일일필요 571,429원)</span></div>
           <div class="input-group">
             <button class="btn-mic" id="btn-mic" title="음성 입력" data-mic-init="1">🎤</button>
             <button class="btn-mic" id="btn-sheet-pull" title="오늘 실매출" onclick="promptFetchDailyRev()" style="background:#0F766E;">☁️</button>
@@ -2203,12 +2224,12 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
 
         <div class="rev-stats-grid">
           <div class="rev-stat-item">
-            <span class="rev-stat-title">목표 400,000원 달성률</span>
+            <span class="rev-stat-title">목표 571,429원 달성률</span>
             <span class="rev-stat-value" id="val-pct">0.0%</span>
           </div>
           <div class="rev-stat-item" style="text-align: right;">
             <span class="rev-stat-title">남은 목표액</span>
-            <span class="rev-stat-value" id="val-remain">400,000 원</span>
+            <span class="rev-stat-value" id="val-remain">571,429 원</span>
           </div>
         </div>
 
@@ -2217,7 +2238,7 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
             <span class="rev-bottom-main">🕒 추가 운행 필요</span>
             <span class="rev-bottom-sub">(시간당 25,000원 기준)</span>
           </div>
-          <div class="rev-bottom-val" id="val-time" style="color: rgb(74, 222, 128);">약 16시간 </div>
+          <div class="rev-bottom-val" id="val-time" style="color: rgb(74, 222, 128);">약 22시간 51분</div>
         </div>
       </div>
     </div>
@@ -2227,7 +2248,7 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
       <div class="backup-title" style="margin-bottom: 4px;">📊 주간 퍼포먼스 (이번 주)</div>
       <div style="font-size: 10px; color: var(--stat-label); text-align: center;">상단: 운행시간 / 막대: 예상매출 / 숫자: 탑승률(KPI)</div>
       <div class="chart-wrapper">
-        <div data-dash-nav-wrap="week"><div class="v8160-dash-nav" style="display:flex;justify-content:space-between;align-items:center;padding:2px 4px 6px;"><button type="button" data-dash-nav="week-prev" aria-label="이전" style="background:transparent;border:0;color:var(--stat-label,#888);font-size:11px;line-height:1;padding:6px 10px;cursor:pointer;opacity:.55">◀</button><span style="flex:1"></span><button type="button" data-dash-nav="week-next" aria-label="다음" style="background: none; border: 0px; color: var(--stat-label,#888); font-size: 11px; line-height: 1; padding: 6px 10px; cursor: pointer; opacity: 0.25;">▶</button></div></div><div class="chart-container" id="weekly-chart" style="display: block;"><div id="weekly-target-info" style="display: block; width: 100%; font-size: 10px; color: rgb(255, 200, 0); text-align: center; margin-bottom: 8px; font-weight: 800; line-height: 1.3;">실재 기준: 일일필요 <span style="color:#FFF;">400,000원</span> (남은 4,000,000원 / 10일)</div><div id="weekly-bars-wrapper" style="display: flex; justify-content: space-between; align-items: flex-end; gap: 2px; width: 100%;">
+        <div data-dash-nav-wrap="week"><div class="v8160-dash-nav" style="display:flex;justify-content:space-between;align-items:center;padding:2px 4px 6px;"><button type="button" data-dash-nav="week-prev" aria-label="이전" style="background:transparent;border:0;color:var(--stat-label,#888);font-size:11px;line-height:1;padding:6px 10px;cursor:pointer;opacity:.55">◀</button><span style="flex:1"></span><button type="button" data-dash-nav="week-next" aria-label="다음" style="background: none; border: 0px; color: var(--stat-label,#888); font-size: 11px; line-height: 1; padding: 6px 10px; cursor: pointer; opacity: 0.25;">▶</button></div></div><div class="chart-container" id="weekly-chart" style="display: block;"><div id="weekly-target-info" style="display: block; width: 100%; font-size: 10px; color: rgb(255, 200, 0); text-align: center; margin-bottom: 8px; font-weight: 800; line-height: 1.3;">실재 기준: 일일필요 <span style="color:#FFF;">571,429원</span> (남은 4,000,000원 / 7일)</div><div id="weekly-bars-wrapper" style="display: flex; justify-content: space-between; align-items: flex-end; gap: 2px; width: 100%;">
           <div class="chart-col" style="flex:1;min-width:0;">
             <div class="chart-time-text">-</div>
             <div class="chart-bar-bg" style="position:relative;">
@@ -2356,7 +2377,7 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
             <span class="chart-label" style="margin-top: 4px; font-size:10px; line-height:1.1;">5주차<br><span style="font-size:8px;color:#888;">23~29일 (5일)</span></span>
           </div>
         <div style="font-size: 11px; color: rgb(163, 163, 163); text-align: center; padding: 10px 0px; font-weight: 800;">기록 없음</div></div>
-      <div id="monthly-target-info" class="monthly-target-info-dup" style="font-size: 9px; color: rgb(163, 163, 163); text-align: center; margin-top: 8px; display: block; width: 100%;">기준: 일일필요 400,000원 × 근무일 (기본 5일, 첫/막주는 일수만큼) / 남은 4,000,000원</div></div>
+      <div id="monthly-target-info" class="monthly-target-info-dup" style="font-size: 9px; color: rgb(163, 163, 163); text-align: center; margin-top: 8px; display: block; width: 100%;">기준: 일일필요 571,429원 × 근무일 (기본 5일, 첫/막주는 일수만큼) / 남은 4,000,000원</div></div>
     </div>
 
     <!-- 요일/시간대별 콜 발생 통계 인사이트 -->
@@ -2399,7 +2420,7 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
       <div class="calc-result-box">
         <div class="calc-result-row">
           <span class="calc-result-label">남은 실제 근무일</span>
-          <span class="calc-result-val"><span id="res-sim-days">10</span> 일</span>
+          <span class="calc-result-val"><span id="res-sim-days">7</span> 일</span>
         </div>
         <div class="calc-result-row">
           <span class="calc-result-label">남은 목표 금액</span>
@@ -2408,11 +2429,11 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
         <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 10px 0;"></div>
         <div class="calc-result-row">
           <span class="calc-result-label" style="color: #FFF;">📌 일일 목표 매출</span>
-          <span class="calc-result-val highlight"><span id="res-sim-daily-target">400,000</span> 원</span>
+          <span class="calc-result-val highlight"><span id="res-sim-daily-target">571,429</span> 원</span>
         </div>
         <div class="calc-result-row" style="margin-bottom: 0;">
           <span class="calc-result-label" style="font-size: 10px;">🕒 필요 운행 시간 (시간당 2.5만)</span>
-          <span class="calc-result-val green"><span id="res-sim-daily-hours" style="color: rgb(74, 222, 128);">약 16시간 0분</span></span>
+          <span class="calc-result-val green"><span id="res-sim-daily-hours" style="color: rgb(74, 222, 128);">약 22시간 51분</span></span>
         </div>
       </div>
     </div>
@@ -2607,14 +2628,14 @@ body.theme-day .bottom-mode-dock .mode-pill#btn-mode5.active{background:var(--th
         <div class="calendar-weekdays">
           <span style="color:#EF4444;">일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span style="color:#3B82F6;">토</span>
         </div>
-        <div class="calendar-grid" id="calendar-grid"><div class="cal-day past">1</div><div class="cal-day past">2</div><div class="cal-day past">3</div><div class="cal-day past">4</div><div class="cal-day past">5</div><div class="cal-day past">6</div><div class="cal-day past">7</div><div class="cal-day past">8</div><div class="cal-day past">9</div><div class="cal-day past">10</div><div class="cal-day past">11</div><div class="cal-day past">12</div><div class="cal-day past">13</div><div class="cal-day past">14</div><div class="cal-day past">15</div><div class="cal-day past">16</div><div class="cal-day past">17</div><div class="cal-day past">18</div><div class="cal-day past">19</div><div class="cal-day past">20</div><div class="cal-day">21</div><div class="cal-day">22</div><div class="cal-day">23</div><div class="cal-day">24</div><div class="cal-day">25</div><div class="cal-day">26</div><div class="cal-day">27</div><div class="cal-day">28</div><div class="cal-day">29</div><div class="cal-day">30</div></div>
+        <div class="calendar-grid" id="calendar-grid"><div class="cal-day past">1</div><div class="cal-day past">2</div><div class="cal-day past">3</div><div class="cal-day past">4</div><div class="cal-day past">5</div><div class="cal-day past">6</div><div class="cal-day past">7</div><div class="cal-day past">8</div><div class="cal-day past">9</div><div class="cal-day past">10</div><div class="cal-day past">11</div><div class="cal-day past">12</div><div class="cal-day past">13</div><div class="cal-day past">14</div><div class="cal-day past">15</div><div class="cal-day past">16</div><div class="cal-day past">17</div><div class="cal-day past">18</div><div class="cal-day past">19</div><div class="cal-day past">20</div><div class="cal-day past">21</div><div class="cal-day past">22</div><div class="cal-day past">23</div><div class="cal-day">24</div><div class="cal-day">25</div><div class="cal-day">26</div><div class="cal-day">27</div><div class="cal-day">28</div><div class="cal-day">29</div><div class="cal-day">30</div></div>
       </div>
     </div>
   </div>
   
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const BUILD_VERSION = 'v8.17.2';
+  const BUILD_VERSION = 'v8.17.3';
   /* v8.14.89 FIX: 헤더/카피박스는 BUILD_VERSION이 유일한 기준. 하드코딩된 옛 버전이 로드 후 덮어쓰지 못하게 강제 동기화. */
   function syncBuildVerTags(){ try{ document.querySelectorAll('.build-ver-tag').forEach(function(el){ el.textContent = BUILD_VERSION; }); var cb=document.getElementById('copy-build-ver'); if(cb) cb.value = BUILD_VERSION; }catch(e){} }
   try{ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', function(){ syncBuildVerTags(); setTimeout(syncBuildVerTags, 800); }); else { syncBuildVerTags(); setTimeout(syncBuildVerTags, 800); } }catch(e){}
@@ -3697,107 +3718,94 @@ function toggleTheme() { applyThemeMode(currentThemeMode === 'day' ? 'night' : '
   }
 
   
-/* v8.17.2 테더링 절약: 시트 전송 스로틀. 1초마다 운행시간 저장은 로컬만, 시트 전송은 자동으로는 10분에 1번까지. 수동 백업(showNotification=true)은 즉시 전송. */
-window._sheetsSyncLast = window._sheetsSyncLast || 0;
-window._sheetsSyncPendingTimer = window._sheetsSyncPendingTimer || null;
-function sheetsSyncAllowed(){
-  try{
-    var now = Date.now();
-    if(now - (window._sheetsSyncLast||0) >= 10*60*1000){ window._sheetsSyncLast = now; return true; }
-    if(!window._sheetsSyncPendingTimer){
-      var wait = 10*60*1000 - (now - (window._sheetsSyncLast||0));
-      window._sheetsSyncPendingTimer = setTimeout(function(){
-        window._sheetsSyncPendingTimer = null; window._sheetsSyncLast = 0;
-        try{ if(typeof syncToGoogleSheets==='function') syncToGoogleSheets(false); }catch(e){}
-      }, wait + 1000);
-    }
-    return false;
-  }catch(e){ return true; }
-}
-
-async function syncToGoogleSheets(showNotification = false) {
-    const url = getGoogleSheetsUrl();
-    if (!url) return;
-    if(!showNotification && typeof sheetsSyncAllowed==='function' && !sheetsSyncAllowed()) return;
-    if(showNotification){ try{ window._sheetsSyncLast = Date.now(); }catch(e){} }
-    try {
-      const dailyRev = parseInt(localStorage.getItem('sudataxi_daily_rev') || '0');
-      const simData = JSON.parse(localStorage.getItem('sudataxi_sim_data') || 'null');
-      const backupData = {
-        type: 'full_backup',
-        call_logs: JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]'),
-        custom_hotspots: JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]'),
-        custom_restrooms: JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]'),
-        penalty_list: JSON.parse(localStorage.getItem('sudataxi_penalty_list') || '[]'),
-        driving_records: JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}'),
-        daily_rev: dailyRev,
-        sim_data: simData,
-        frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
-        theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
-        timestamp: new Date().toISOString(),
-        date_str: new Date().toLocaleDateString('ko-KR'),
-        version: 'v8.16.38'
-      };
-      // v8.9.80: 매출 상세도 함께 전송 (손님탑승처럼 시트에 바로 기록되게)
-      try{
-        const today = new Date();
-        const daysInMonth = new Date(today.getFullYear(), today.getMonth()+1, 0).getDate();
-        const sim = simData || {target:4000000, current:0, restDates:[]};
-        const remain = Math.max(0, (sim.target||0) - (sim.current||0));
-        backupData.revenue_detail = {
-          daily_rev: dailyRev,
-          monthly_target: sim.target||0,
-          monthly_current: sim.current||0,
-          rest_count: (sim.restDates||[]).length,
-          remain_money: remain,
-          work_days_total: daysInMonth
-        };
-      }catch(e){}
-      fetch(url, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(backupData)
-      }).catch(()=>{});
-      if (showNotification) showToast('☁️ 구글 시트로 운행일지 실시간 동기화 완료!');
-    } catch (e) {
-      if (showNotification) showToast('⚠️ 구글 시트 통신 오류');
-    }
-  }
-
-  // v8.9.80: 손님탑승처럼 매출도 개별 로그로 구글시트에 즉시 저장
-  async function syncRevenueLogToSheets(logType) {
-    const url = getGoogleSheetsUrl();
-    if (!url) return;
-    if(typeof sheetsSyncAllowed==='function' && !sheetsSyncAllowed()) return;
-    try{
-      const dailyRev = parseInt(localStorage.getItem('sudataxi_daily_rev') || '0');
-      const simRaw = localStorage.getItem('sudataxi_sim_data');
-      const sim = simRaw ? JSON.parse(simRaw) : {target:4000000, current:0, restDates:[]};
-      const today = new Date();
-      const payload = {
-        type: 'revenue_log',
-        log_type: logType || 'daily_rev',
-        timestamp: today.toISOString(),
-        date_str: today.toLocaleDateString('ko-KR'),
-        time_str: today.toLocaleTimeString('ko-KR'),
-        daily_rev: dailyRev,
-        monthly_target: sim.target||0,
-        monthly_current: sim.current||0,
-        rest_dates: (sim.restDates||[]).join(','),
-        version: 'v8.16.38'
-      };
-      fetch(url, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      }).catch(()=>{});
-    }catch(e){}
-  }
-
-  function executeAutoBackup() {
-    try {
+/* v8.17.3 Apps Script 동시 실행 800회 경고 대응: 모든 시트 호출을 하나의 게이트로 통합.
+     - v8.17.2 스로틀은 window 메모리에만 저장돼서 새로고침/탭마다 초기화됐고, 매출 로그가 별도 실행으로 우회했음.
+     - 이 게이트는 마지막 전송 시각을 localStorage에 저장해서 새로고침/탭이 공유하고, 매출 로그를 별도 실행으로 안 보내고 전체 백업 1건으로 합침.
+     - 자동: 10분에 1번까지, 수동: 5초 간격, 동시에 1건만 실행, 같은 내용 반복 전송 스킵. */
+     window._sheetsSyncLast = window._sheetsSyncLast || 0;
+     window._sheetsSyncPendingTimer = window._sheetsSyncPendingTimer || null;
+     window.__sheetsGate = window.__sheetsGate || { inFlight:false, pendingTimer:null, lastFp:'' };
+     function __sheetsGateNow(){ try{ return Date.now(); }catch(e){ return 0; } }
+     function __sheetsGateLastSent(){ try{ var v=parseInt(localStorage.getItem('sudataxi_sheets_last_sent_at')||'0',10); return isNaN(v)?0:v; }catch(e){ return 0; } }
+     function __sheetsGateMarkSent(){ try{ localStorage.setItem('sudataxi_sheets_last_sent_at', String(Date.now())); }catch(e){} try{ window._sheetsSyncLast = Date.now(); }catch(e){} }
+     function __sheetsGateFp(str){ try{ var h=5381; for(var i=0;i<str.length;i++){ h=((h<<5)+h+str.charCodeAt(i))|0; } return String(str.length)+':'+String(h); }catch(e){ return ''; } }
+     function __sheetsGateCanSend(isManual){ try{ if(window.__sheetsGate && window.__sheetsGate.inFlight) return false; var gap = isManual ? 5000 : 10*60*1000; return (__sheetsGateNow() - __sheetsGateLastSent()) >= gap; }catch(e){ return true; } }
+     function __sheetsGateSchedule(isManual, fn){ try{ if(window.__sheetsGate && window.__sheetsGate.pendingTimer) return; var gap = isManual ? 5000 : 10*60*1000; var wait = Math.max(0, gap - (__sheetsGateNow() - __sheetsGateLastSent())) + 300; if(wait <= 400){ try{ fn(); }catch(e){} return; } window.__sheetsGate.pendingTimer = setTimeout(function(){ window.__sheetsGate.pendingTimer = null; try{ fn(); }catch(e){} }, wait); }catch(e){ try{ fn(); }catch(e2){} } }
+     function __sheetsGateClearInFlight(){ try{ if(window.__sheetsGate) window.__sheetsGate.inFlight = false; }catch(e){} }
+     function __sheetsGateLastGet(){ try{ var v=parseInt(localStorage.getItem('sudataxi_sheets_last_get_at')||'0',10); return isNaN(v)?0:v; }catch(e){ return 0; } }
+     function __sheetsGateMarkGet(){ try{ localStorage.setItem('sudataxi_sheets_last_get_at', String(Date.now())); }catch(e){} }
+     function __sheetsGateGetAllowed(){ try{ return (__sheetsGateNow() - __sheetsGateLastGet()) >= 10000; }catch(e){ return true; } }
+     function sheetsSyncAllowed(){ try{ return __sheetsGateCanSend(false); }catch(e){ return true; } }
+     async function syncToGoogleSheets(showNotification = false) {
+       const url = getGoogleSheetsUrl();
+       if (!url) return;
+       if (window.__sheetsGate && window.__sheetsGate.inFlight) { __sheetsGateSchedule(!!showNotification, function(){ try{ syncToGoogleSheets(showNotification); }catch(e){} }); return; }
+       if (!__sheetsGateCanSend(!!showNotification)) { __sheetsGateSchedule(!!showNotification, function(){ try{ syncToGoogleSheets(showNotification); }catch(e){} }); return; }
+       try {
+         const dailyRev = parseInt(localStorage.getItem('sudataxi_daily_rev') || '0');
+         const simData = JSON.parse(localStorage.getItem('sudataxi_sim_data') || 'null');
+         const backupData = {
+           type: 'full_backup',
+           call_logs: JSON.parse(localStorage.getItem('sudataxi_call_logs') || '[]'),
+           custom_hotspots: JSON.parse(localStorage.getItem('sudataxi_custom_hotspots') || '[]'),
+           custom_restrooms: JSON.parse(localStorage.getItem('sudataxi_custom_restrooms') || '[]'),
+           penalty_list: JSON.parse(localStorage.getItem('sudataxi_penalty_list') || '[]'),
+           driving_records: JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}'),
+           daily_rev: dailyRev,
+           sim_data: simData,
+           frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
+           theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
+           timestamp: new Date().toISOString(),
+           date_str: new Date().toLocaleDateString('ko-KR'),
+           version: 'v8.17.3'
+         };
+         try{
+           const today = new Date();
+           const daysInMonth = new Date(today.getFullYear(), today.getMonth()+1, 0).getDate();
+           const sim = simData || {target:4000000, current:0, restDates:[]};
+           const remain = Math.max(0, (sim.target||0) - (sim.current||0));
+           backupData.revenue_detail = {
+             daily_rev: dailyRev,
+             monthly_target: sim.target||0,
+             monthly_current: sim.current||0,
+             rest_count: (sim.restDates||[]).length,
+             remain_money: remain,
+             work_days_total: daysInMonth
+           };
+         }catch(e){}
+         if (!showNotification) {
+           try{
+             var fpObj = {daily_rev: backupData.daily_rev, sim_data: backupData.sim_data, call_logs: backupData.call_logs, custom_hotspots: backupData.custom_hotspots, custom_restrooms: backupData.custom_restrooms, penalty_list: backupData.penalty_list, driving_records: backupData.driving_records, frequent_presets: backupData.frequent_presets, theme_mode: backupData.theme_mode, revenue_detail: backupData.revenue_detail};
+             var fp = __sheetsGateFp(JSON.stringify(fpObj));
+             var lastFp = '';
+             try{ lastFp = localStorage.getItem('sudataxi_sheets_last_fp')||''; }catch(e){}
+             if (fp && fp === lastFp) return;
+             try{ localStorage.setItem('sudataxi_sheets_last_fp', fp); }catch(e){}
+             if (window.__sheetsGate) window.__sheetsGate.lastFp = fp;
+           }catch(e){}
+         }
+         __sheetsGateMarkSent();
+         if (window.__sheetsGate) window.__sheetsGate.inFlight = true;
+         try{
+           var _p = fetch(url, {
+             method: 'POST',
+             mode: 'no-cors',
+             headers: { 'Content-Type': 'application/json' },
+             body: JSON.stringify(backupData)
+           });
+           if (_p && typeof _p.then === 'function') { _p.then(function(){ setTimeout(__sheetsGateClearInFlight, 500); }).catch(function(){ __sheetsGateClearInFlight(); }); }
+           setTimeout(__sheetsGateClearInFlight, 15000);
+         }catch(e){ __sheetsGateClearInFlight(); }
+         if (showNotification) showToast('☁️ 구글 시트로 운행일지 실시간 동기화 완료!');
+       } catch (e) { __sheetsGateClearInFlight(); if (showNotification) showToast('⚠️ 구글 시트 통신 오류'); }
+     }
+     /* v8.17.3: 매출 로그를 별도 실행으로 안 보냄. 전체 백업에 매출/시뮬레이터가 이미 포함돼 있어서, 전체 백업 1건으로 합침. */
+     async function syncRevenueLogToSheets(logType) {
+       try{ if(typeof syncToGoogleSheets==='function') syncToGoogleSheets(false); }catch(e){}
+     }
+     function __autoBackupShouldRun(){ try{ var now=Date.now(); var g=window.__autoBackupGate || (window.__autoBackupGate={last:0,timer:null}); if(now-g.last<3000){ if(!g.timer){ g.timer=setTimeout(function(){ g.timer=null; g.last=0; try{ if(typeof executeAutoBackup==='function') executeAutoBackup(); }catch(e){} },3200); } return false; } g.last=now; return true; }catch(e){ return true; } }
+     function executeAutoBackup() {
+    if(!__autoBackupShouldRun()) return; try {
       const currentRecords = JSON.parse(localStorage.getItem('sudataxi_driving_records') || '{}');
       const dailyRev = parseInt(localStorage.getItem('sudataxi_daily_rev') || '0');
       const simData = JSON.parse(localStorage.getItem('sudataxi_sim_data') || 'null');
@@ -3817,7 +3825,7 @@ async function syncToGoogleSheets(showNotification = false) {
         frequent_presets: JSON.parse(localStorage.getItem('sudataxi_frequent_presets') || '[]'),
         theme_mode: localStorage.getItem('sudataxi_theme_mode') || 'night',
         timestamp: new Date().toISOString(),
-        version: 'v8.16.38'
+        version: 'v8.17.3'
       };
       
       // auto_backup은 항상 최신으로 갱신 (가벼운 백업) - 다중 저장소
@@ -3865,7 +3873,8 @@ async function syncToGoogleSheets(showNotification = false) {
   async function tryRestoreFromGoogleSheets() {
     const url = typeof getGoogleSheetsUrl==='function' ? getGoogleSheetsUrl() : '';
     if (!url) return false;
-    try {
+         if(!__sheetsGateGetAllowed()){ try{ if(typeof showToast==='function') showToast('☁️ 시트 통신 중, 10초 후 다시 눌러주세요'); }catch(e){} return false; }     __sheetsGateMarkGet();
+try {
       // Apps Script가 GET을 지원하면 최신 데이터를 반환한다고 가정
       const res = await fetch(url + '?action=get&timestamp=' + Date.now(), {
         method: 'GET',
@@ -3918,9 +3927,11 @@ async function syncToGoogleSheets(showNotification = false) {
   function getAutoMonthlyCell(){ try{ const now=new Date(); const yy=String(now.getFullYear()).slice(-2); const mm=now.getMonth()+1; return yy+'년'+mm+'월!G2'; }catch(e){ return '26년10월!G2'; } }
   (function(){ try{ const cur = localStorage.getItem('sudataxi_sheets_url'); if (!cur || cur.trim()==='') { localStorage.setItem('sudataxi_sheets_url', DEFAULT_SHEETS_URL); } }catch(e){} })();
   function getGoogleSheetsUrl(){ try{ const u=localStorage.getItem('sudataxi_sheets_url'); if(u && u.trim()!=='') return u.trim(); }catch(e){} return DEFAULT_SHEETS_URL; }
-  async function fetchDailyRevFromSheets(cellRef){ const url=getGoogleSheetsUrl(); if(!url){ showToast('☁️ URL 없음'); return; } try{ const fUrl=url+'?action=getCell&cell='+encodeURIComponent(cellRef||'B2')+'&t='+Date.now(); const res=await fetch(fUrl,{method:'GET',cache:'no-store'}); const txt=await res.text(); let data=null; try{ data=JSON.parse(txt); }catch(e){ data={raw:txt}; } let val=data&&data.value!==undefined?data.value:null; if(val===null||val===''){ showToast('⚠️ 값 없음 raw:'+txt.slice(0,200)); return; } const num=parseInt(String(val).replace(/[^0-9]/g,''))||0; localStorage.setItem('sudataxi_daily_rev', num.toString()); const el=document.getElementById('input-rev'); if(el) el.value=num.toString(); try{ calculateDailyRevenue(); }catch(e){} showToast('✅ '+num.toLocaleString()); }catch(e){ showToast('⚠️ 읽기 실패:'+e.message); } }
+  async function fetchDailyRevFromSheets(cellRef){ const url=getGoogleSheetsUrl(); if(!url){ showToast('☁️ URL 없음'); return; }  try{ if(!__sheetsGateGetAllowed()){ showToast('☁️ 시트 통신 중, 10초 후 다시 눌러주세요'); return; } __sheetsGateMarkGet(); }catch(e){}
+try{ const fUrl=url+'?action=getCell&cell='+encodeURIComponent(cellRef||'B2')+'&t='+Date.now(); const res=await fetch(fUrl,{method:'GET',cache:'no-store'}); const txt=await res.text(); let data=null; try{ data=JSON.parse(txt); }catch(e){ data={raw:txt}; } let val=data&&data.value!==undefined?data.value:null; if(val===null||val===''){ showToast('⚠️ 값 없음 raw:'+txt.slice(0,200)); return; } const num=parseInt(String(val).replace(/[^0-9]/g,''))||0; localStorage.setItem('sudataxi_daily_rev', num.toString()); const el=document.getElementById('input-rev'); if(el) el.value=num.toString(); try{ calculateDailyRevenue(); }catch(e){} showToast('✅ '+num.toLocaleString()); }catch(e){ showToast('⚠️ 읽기 실패:'+e.message); } }
   function promptFetchDailyRev(){ try{ const last=localStorage.getItem('sudataxi_sheet_cell_daily')||'B2'; const cell=prompt('오늘 실매출 셀:', last); if(cell===null) return; const c=cell.trim(); if(!c) return; localStorage.setItem('sudataxi_sheet_cell_daily', c); fetchDailyRevFromSheets(c); }catch(e){} }
-  async function fetchMonthlyCurrentFromSheets(cellRef){ const url=getGoogleSheetsUrl(); const targetCell=(cellRef||getAutoMonthlyCell()).trim(); if(!targetCell){ showToast('⚠️ 셀 주소 없음'); return; } try{ showToast('☁️ '+targetCell+' 불러오는 중...'); const fUrl=url+'?action=getCell&cell='+encodeURIComponent(targetCell)+'&t='+Date.now(); const res=await fetch(fUrl,{method:'GET',cache:'no-store'}); const txt=await res.text(); let data=null; try{ data=JSON.parse(txt); }catch(e){ showToast('⚠️ JSON 파싱 실패 raw:'+txt.slice(0,300)); return; } if(data && data.error){ showToast('⚠️ 오류: '+data.error+' | 시트목록: '+(data.sheets?data.sheets.join(', '):'없음')); return; } let val=null; if(data && data.value!==undefined && data.value!==null && data.value!=='') val=data.value; else if(data && data.display!==undefined && data.display!==null && data.display!=='') val=data.display; if(val===null||val===''||val===undefined){ showToast('⚠️ '+targetCell+' 값이 비어있음 | raw:'+txt.slice(0,200)); return; } const num=parseInt(String(val).replace(/[^0-9]/g,''))||0; if(num===0 && String(val).trim()!=='0' && String(val).trim()!==''){ showToast('⚠️ 숫자 변환 실패 원본:'+val); return; } let simRaw=null; try{ simRaw=localStorage.getItem('sudataxi_sim_data'); }catch(e){} let sim=null; try{ sim=simRaw?JSON.parse(simRaw):null; }catch(e){} if(!sim) sim={target:4000000, current:0, restDates:[]}; sim.current=num; const json=JSON.stringify(sim); localStorage.setItem('sudataxi_sim_data', json); try{ saveToAllStorages('sudataxi_sim_data', json); }catch(e){} try{ saveToIDB('sudataxi_sim_data', json); }catch(e){} const inp=document.getElementById('input-sim-current'); if(inp) inp.value=num.toString(); try{ calculateSimulatorTargets(); }catch(e){} showToast('✅ '+num.toLocaleString()+'원 ('+targetCell+')'); }catch(e){ showToast('⚠️ 실패: '+e.message); } }
+  async function fetchMonthlyCurrentFromSheets(cellRef){ const url=getGoogleSheetsUrl();  try{ if(!__sheetsGateGetAllowed()){ showToast('☁️ 시트 통신 중, 10초 후 다시 눌러주세요'); return; } __sheetsGateMarkGet(); }catch(e){}
+const targetCell=(cellRef||getAutoMonthlyCell()).trim(); if(!targetCell){ showToast('⚠️ 셀 주소 없음'); return; } try{ showToast('☁️ '+targetCell+' 불러오는 중...'); const fUrl=url+'?action=getCell&cell='+encodeURIComponent(targetCell)+'&t='+Date.now(); const res=await fetch(fUrl,{method:'GET',cache:'no-store'}); const txt=await res.text(); let data=null; try{ data=JSON.parse(txt); }catch(e){ showToast('⚠️ JSON 파싱 실패 raw:'+txt.slice(0,300)); return; } if(data && data.error){ showToast('⚠️ 오류: '+data.error+' | 시트목록: '+(data.sheets?data.sheets.join(', '):'없음')); return; } let val=null; if(data && data.value!==undefined && data.value!==null && data.value!=='') val=data.value; else if(data && data.display!==undefined && data.display!==null && data.display!=='') val=data.display; if(val===null||val===''||val===undefined){ showToast('⚠️ '+targetCell+' 값이 비어있음 | raw:'+txt.slice(0,200)); return; } const num=parseInt(String(val).replace(/[^0-9]/g,''))||0; if(num===0 && String(val).trim()!=='0' && String(val).trim()!==''){ showToast('⚠️ 숫자 변환 실패 원본:'+val); return; } let simRaw=null; try{ simRaw=localStorage.getItem('sudataxi_sim_data'); }catch(e){} let sim=null; try{ sim=simRaw?JSON.parse(simRaw):null; }catch(e){} if(!sim) sim={target:4000000, current:0, restDates:[]}; sim.current=num; const json=JSON.stringify(sim); localStorage.setItem('sudataxi_sim_data', json); try{ saveToAllStorages('sudataxi_sim_data', json); }catch(e){} try{ saveToIDB('sudataxi_sim_data', json); }catch(e){} const inp=document.getElementById('input-sim-current'); if(inp) inp.value=num.toString(); try{ calculateSimulatorTargets(); }catch(e){} showToast('✅ '+num.toLocaleString()+'원 ('+targetCell+')'); }catch(e){ showToast('⚠️ 실패: '+e.message); } }
   function promptFetchMonthlyCurrent(){ try{ const auto=getAutoMonthlyCell(); const last=localStorage.getItem('sudataxi_sheet_cell_monthly')||auto; const cell=prompt('월간 셀 (자동:'+auto+')', last); if(cell===null) return; const c=cell.trim(); if(!c) return; localStorage.setItem('sudataxi_sheet_cell_monthly', c); fetchMonthlyCurrentFromSheets(c); }catch(e){} }
   async function autoFetchMonthlyCurrent(){ const cell=getAutoMonthlyCell(); localStorage.setItem('sudataxi_sheet_cell_monthly', cell); await fetchMonthlyCurrentFromSheets(cell); }
 
@@ -10625,9 +10636,9 @@ body.theme-day .copy-box-input, body.theme-day .copy-box-textarea{ background:#F
   </div>
 
   <div class="copy-box-item">
-    <div class="copy-box-label">📝 업데이트 내용 (v8.16.38)</div>
+    <div class="copy-box-label">📝 업데이트 내용 (v8.17.3)</div>
     <div class="copy-box-row">
-      <textarea class="copy-box-textarea" id="copy-update-log" readonly="">📌 sudataxi-k v8.16.38 업데이트 | 📅 2026-11-14 · 🔖 빌드 v8.16.38 |  ■ 경고 화면 사진 10장 + 사진 바뀌는 간격 바 (5초/10초/15초/20초) | - 사진 최대 5장 -&gt; 10장으로 늘림. 기존 사진은 그대로 유지되고, 추가로 더 고를 수 있음 | - DriveGuard 탭 사진 카드에 간격 바 추가. 누르면 바로 바뀌고, 꺼도 저장돼서 다음에도 그 간격으로 바뀜. 경고 화면이 떠 있을 때도 바로 적용됨 | - 그 외 사진 멈춤 수정(8.15.16), 잠금 후 승차 유지(8.15.17), A25 통계, 속도 경고는 그대로 |  📌 [sudataxi-k v8.16.37 업데이트 - 이전 내역] | 📌 sudataxi-k v8.16.37 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.16.38 |  ■ 아이폰 잠금 후 다시 열면 승차가 하차로 바뀌던 문제 수정 | - 원인: v8.16.35/16에서 재실행 시 승차를 무조건 풀어버림. 아이폰 잠금 -&gt; 사파리가 페이지 다시 읽음 -&gt; 재실행으로 판단 -&gt; 승차 해제됨 | - 수정: 마지막 저장 시각으로 구분. 60분 안 다시 열면 잠깐 잠금으로 보고 승차 유지. 60분 넘게 닫아뒀으면 새 세션으로 보고 빈차로 시작. 승차 중엔 30초마다 저장 시각 갱신해서 잠금 후에도 승차로 인식됨 | - 그 외 사진 기능, A25 통계, 속도 경고, 나머지 기능은 그대로 |  📌 [sudataxi-k v8.16.36 업데이트 - 이전 내역] | 📌 sudataxi-k v8.16.36 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.16.38 |  ■ 사진 기능 멈춤 수정 (사진 기능 자체는 유지) | - 원인: (1) 경고 class가 바뀔 때마다 Observer가 apply를 부르고 apply가 다시 class를 바꿔서 거의 무한 반복. (2) 같은 사진을 매번 src에 다시 넣어 큰 base64를 계속 재디코딩. (3) bind가 2번 돌아 Observer가 2개. (4) 사진 1280px/0.82로 너무 큼 | - 수정: Observer는 경고 show 변화만 보고 100ms로 합침. 같은 사진은 src 재설정 안 함. 타이머 중복 생성 방지. bind 1회만. 사진 저장 크기 960px/0.72로 축소. 경고 안 뜰 땐 src 안 채우고, 사진 모드 해제 시 이미지 해제해서 메모리 반환 | - 그 외 사진 선택·5장·5초 자동 전환·토글·나머지 기능은 그대로 |  📌 [sudataxi-k v8.16.35 업데이트 - 이전 내역] | 📌 sudataxi-k v8.16.35 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.16.38 |  ■ 켤 때마다 최근 위치가 탑승위치로 쌓이고 속도 경고가 안 뜨던 문제 수정 | - 원인 1: 통계 저장 키가 메모리에만 있어서 켤 때마다 날아가, 켜자마자 오는 오래된 A25를 새 콜로 또 저장함. 수정: 통계 키/시간을 localStorage에도 저장 + 10분 넘게 지난 A25 데이터는 통계/카드에 반영 안 함 (목록 표시만) | - 원인 2: 앱 재실행 시 승차중 상태를 그대로 복원해서 켜자마자 승차중으로 잡힘. 수정: 재실행 = 새 세션, 빈차로 시작. 승차중 복원 안 함 | - 원인 3: DriveGuard GPS watch가 권한 오류로 멈추면 watchId가 남아서 다시 측정을 안 함. 수정: 오류 시 watchId 비우고 5초 후 재시도 + 10초마다 재시도 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.16.34 업데이트 - 이전 내역] | 📌 sudataxi-k v8.16.34 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.16.38 |  ■ A25 통계 저장 vs 카드 적용 분리 (잘되던 A25 반영이 끊기던 버그 수정) | - 기존 문제: (1) 같은 데이터는 1회만 적용하는 dataKey가 통계 저장까지 막아서, 같은 5곳이 계속 와도 통계가 안 쌓임. (2) 저장 시간을 A25 원본 시간(찍은 시간)으로 찍어서 신선도 창이 이미 까먹은 채로 쌓임. (3) v8.16.31~13 승차 미룸이 저장까지 건너뛰고도 키를 적용했음으로 찍어서 승차 중 데이터가 영영 안 보임 | - 수정: 통계 저장은 올 때마다 쌓음 (같은 키는 5분 안에 또 안 쌓아 4초 폴링 홍수 방지). 저장 시간 = 도착 시간. 카드 적용은 키가 바뀔 때만 1회. 승차 중엔 통계는 저장하고 카드만 미룸 + 카드 키를 찍지 않음. 하차 후 카드 적용 시 통계 중복 저장 방지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.16.33 업데이트 - 이전 내역] | 📌 sudataxi-k v8.16.33 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.16.38 |  ■ 경고 화면 다듬기 | - 속도 아래 작은 설명 글씨 삭제 | - 알약 2개(전체운행·대기중) 작게 줄여서 한 줄에 표시 (글자 15→11, 여백 축소, 줄바꿈 금지) | - 경고 큰 글자 44→29로 1/3 축소 | - 경고 화면 사진 5초마다 자동 전환 (사진 2장 이상일 때만. 사진 탭하면 수동으로도 넘김) | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.16.32 업데이트 - 이전 내역] | 📌 sudataxi-k v8.16.32 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.16.38 |  ■ 경고 화면 사진 토글 | - 기존: 경고 화면은 문자안내만 뜸 | - 수정: DriveGuard 탭에 경고 화면 사진 카드 추가. 사진첩에서 내가 고른 사진만(최대 5장) 이 기기 안에 저장됨. 사진첩 전체가 자동으로 뜨지 않음. 경고 화면의 사진으로 보기 버튼을 누르면 사진 ↔ 문자안내로 전환됨. 여러 장이면 경고 화면 사진 탭 시 다음 사진으로. 미리보기 사진 탭하면 그 사진만 삭제 | - 사진은 서버로 안 나가고, 화면용으로 줄여서 저장됨 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.16.31 업데이트 - 이전 내역] | 📌 sudataxi-k v8.16.31 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.16.38 |  ■ 콜검색 속도 구조 개선 (판단 로직·가산점·필터 그대로) | - 기존: 날씨→카카오→도로경로 순차 대기 + 타임아웃 없음 + 승차 중에도 검색 계속 + 중복 연산 겹침이라 연산 중이 오래 걸림 | - 수정: (1) 날씨+카카오 병렬 + 각 3초 타임아웃, (2) 검색마다 runId로 이전 연산 버림, (3) 승차 중엔 새 검색 시작 금지 + 돌던 연산 취소, A25는 저장만 하고 하차 후 1회 반영, (4) A25 Firebase fetch 3초 타임아웃 | - 결과: 승차 중엔 검색 안 돌고, 하차하면 자동 재개. 카드가 먼저 뜨고 느린 호출은 버리고 넘어감 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.16.30 업데이트 - 이전 내역] | 📌 sudataxi-k v8.16.30 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.16.38 |  ■ 대시보드 두 설정 한 줄로 축소 | - 기존: 운행 기준 시간 / 낮밤 자동 전환이 각각 큰 카드로 2줄을 차지하고 설명 텍스트까지 있었음 | - 수정: 두 설정을 한 줄에 나란히 배치하고, 제목·설명 텍스트를 없애고 크기 축소. 운행 기준 시간은 🕒+시간 선택, 낮밤 자동 전환은 🌗+모드 선택+사용 체크만 남김. 시간 직접 지정 시 시간 입력은 그때만 나타남 | - ID·동작은 그대로 (운행 기준 시간, 낮밤 모드/사용/시간 입력 모두 기존 그대로 동작) | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.9 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.9 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.15.9 |  ■ A25 콜카드 즉시 표시 | - 기존: A25 수신 후 날씨/카카오/도로거리 전체 연산이 끝날 때까지 콜카드가 안 떠서, A25 위치가 와도 늦게 반영됨 | - 수정: A25 수신 즉시 직선거리+추정시간으로 콜카드 3장을 먼저 표시. 전체 연산이 끝나면 그 결과로 자연스럽게 교체. A25 이름 해석도 기다리지 않고 캐시된 이름이 있으면 표시 | ■ 버전 표시 8→7로 돌아가던 문제 수정 | - 원인: 헤더를 다시 그리는 함수에 v8.15.7이 하드코딩돼 있어, 로드 직후 8로 바꿔도 헤더 재렌더 시 7로 덮어씌워졌음 | - 수정: 헤더 템플릿의 하드코딩을 BUILD_VERSION으로 교체. 이제 헤더를 다시 그려도 현재 빌드로 유지됨 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.8 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.8 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.15.8 |  ■ Drive Guard 자동 탭 이동 제거 | - 속도 10km/h 이상이어도 탭6으로 강제 이동하지 않고 경고창만 뜸. 경고 해제 시 대시보드로 강제 이동하지 않고 현재 탭 유지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.7 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.7 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.7 |  ■ 경고 문구 5개 리스트 + 2분마다 랜덤 변경 | - 기존: 경고 문구가 1개 고정이라 같은 문구만 계속 떴음 | - 수정: Drive Guard 탭에 경고 문구 5개 입력란 추가. 채운 문구 중 하나가 2분마다 랜덤으로 바뀜. 채운 게 1개면 그 문구만 뜸. 경고가 새로 뜰 때도 랜덤으로 1개 선택. 🎲 지금 다른 문구로 바꾸기 버튼으로 바로 확인 가능. 기존 1개 문구는 자동으로 리스트 1번으로 옮겨짐. 저장은 기존 다중 저장(빌드업해도 유지) 그대로 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.6 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.6 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.6 |  ■ 경고 문구 빌드업해도 유지되게 다중 저장으로 변경 | - 기존: 경고 문구는 localStorage 한 곳에만 저장돼서, 빌드업/저장소 정리 때 날아가면 기본 문구로 돌아갔음 | - 수정: 대시보드 운행기록과 같은 방식 적용 - 저장할 때 localStorage + 세션 + 쿠키(365일) + IndexedDB 네 곳에 동시 저장. 불러올 때는 localStorage가 비어도 세션/쿠키에서 복구하고 localStorage에 다시 채움 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.5 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.5 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.5 |  ■ 가드 탭에 경고 문구 입력란 추가 | - 기존: 빨간 경고 문구(운전 중입니다. 작업은 정차 후에)가 고정이라 바꿀 수 없었음 | - 수정: Drive Guard 탭에 경고 문구 입력란 추가. 입력하면 빨간 경고의 큰 문구가 그대로 바뀌고, 줄바꿈하면 두 줄로 표시됨. 입력 내용은 저장되어 다음에 열어도 유지되고, 기본 문구로 되돌리기 버튼으로 복원 가능 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.4 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.4 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.4 |  ■ 속도 측정 안 됨 긴급 수정 | - 원인: v8.15.3 패치 때 진짜 줄바꿈이 아니라 \n 문자 그대로가 Drive Guard 스크립트에 들어가서 스크립트 전체가 문법 오류로 멈추고 GPS 측정(watchPosition)이 시작도 안 됐음 | - 수정: 잘못 들어간 \n을 진짜 줄바꿈으로 교체하고 스크립트 문법 검사 통과 확인. 경고 중간 운행시간 표시(v8.15.3 기능)는 그대로 유지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.3 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.3 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.3 |  ■ 속도 경고 중간 빈 공간에 운행시간 표시 추가 | - 기존: 빨간 속도 경고에는 속도만 뜨고 전체운행/승차중 시간이 안 보였음 | - 수정: 경고 중간 빈 공간(설명문 아래, 닫기 버튼 위)에 사진과 같은 흰색 알약 2개 추가 - 왼쪽 전체운행, 오른쪽 승차중/대기중 등 현재 상태. 하단바 텍스트를 그대로 복사해서 1초마다 갱신이라 시간 어긋남 없음 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.2 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.2 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.2 |  ■ 속도 경고 꺼지면 대시보드로 복귀 | - 기존: 속도 안내(Drive Guard 경고)가 꺼져도 가드 메뉴(탭6)에 그대로 머물렀음 | - 수정: 기준 아래 10초 유지로 경고가 자동 해제될 때 대시보드(탭4)로 자동 이동. 닫기 버튼·끄기 버튼 동작은 그대로 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.16.3 업데이트 - 이전 내역] | 📌 sudataxi-k v8.16.3 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.16.3 |  ■ 동선 지도 보기 안 뜸 수정 | - 원인: #map-modal에 인라인 display:none이 박혀 있어 .active(display:flex)가 이기지 못해 지도가 안 떴고, 하단 메뉴만 사라졌음 | - 수정: 열 때 인라인을 display:flex로 풀고, 닫을 때 다시 display:none으로 복원. 동선 0개면 fitBounds 에러 방지 가드 추가 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.16.3 업데이트 - 이전 내역] | 📌 sudataxi-k v8.16.3 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.16.3 |  ■ Drive Guard 주야간 토글 따라가게 수정 | - 기존: Drive Guard 탭 카드가 #1c1c1e / #fff / #aaa 하드코딩이라 주야간 토글해도 계속 어두웠음 | - 수정: 탭 카드·속도계·작은 글씨를 var(--card-bg) / var(--main-text) / var(--stat-label) / var(--card-border)로 변경. 주야간 토글·자동 테마 모두 따라감. 끄기 버튼도 var(--btn-idle-bg) 등으로 변경 | - 경고 화면은 야간/주간 모두 빨간색(#d7000f) 유지 - 운전 중 경고라서 눈에 띄어야 함 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.94 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.94 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.14.94 |  ■ 터치 전부 안 됨 진짜 원인 수정 | - 원인: 탭6 붙일 때 }를 하나 더 넣어서 setTab 함수가 중간에 끊기고, 그 뒤 else if가 문법 오류가 되어 메인 스크립트 전체가 안 뜸. 그래서 버튼 리스너도 안 붙고, 대시보드로 이동하는 코드도 안 뛰고, 콜지도에 머물면서 터치가 전부 안 됐음 | - 수정: } 하나 제거해서 if-else 체인 복원. 이제 메인 스크립트 정상 동작 | - 첫 화면: 대시보드로 복원. v8.14.93에서 탭1로 잘못 바꾼 것 되돌림. 첫 화면은 대시보드(탭4)가 맞음 | - 경고 배경 pointer-events:none, 닫기만 클릭, Drive Guard 끄기 버튼, 낀 모달 정리는 v8.14.93 그대로 유지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.93 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.93 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.14.93 |  ■ 터치 전부 안 됨 + 첫 화면 대시보드 수정 | - 첫 화면: 대시보드 강제 이동(setTab(4)) 제거. 원래 의도대로 첫 화면은 추천/콜찾기(탭1)로 복원 | - 터치 막힘: setTab 안에 있던 Drive Guard 자동복귀 가드를 아예 제거. setTab은 이제 깨끗하게 탭만 바꿈 | - 경고: 배경은 pointer-events:none으로 절대 터치를 안 막고, 닫기 버튼만 pointer-events:auto. 경고가 떠 있어도 다른 버튼 다 눌림 | - 자동이동: 1회만, 반복 setTab 호출 제거. Drive Guard 끄기 버튼 추가 (자동이동·경고 전부 끔, localStorage 저장) | - 낀 모달 정리: 로드 시 modal-open/map-modal-open/a25-pin-open 제거. 낀 모달 때문에 하단바가 display:none이 되어 터치 안 되는 것처럼 보이는 것 방지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.92 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.92 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.14.92 |  ■ Drive Guard 버튼 막힘 수정 | - 원인: 속도 값이 오래돼도 계속 운전 중으로 보고 모든 탭 이동을 즉시 Drive Guard로 강제해서 다른 버튼이 안 눌리는 것처럼 보였음. 경고가 숨겨져도 클릭을 막을 수 있는 구조였음 | - 수정: 속도 신선도 5초만 운전 중으로 봄. 탭 이동은 막지 않고, 이동 후 1.5초 뒤에도 운전 중이면 Drive Guard로 돌아옴. 경고 숨김 상태에서는 클릭을 절대 막지 않음 (pointer-events:none + visibility:hidden) | - 닫기 버튼 하단 잘림 방지, Drive Guard 바인드 중복 방지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.91 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.91 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.14.91 |  ■ Drive Guard 탭 추가 | - 하단 메뉴에서 가로로 길었던 Taxi DJ 한 칸을 둘로 나눠서 왼쪽 Taxi DJ / 오른쪽 Drive Guard | - Drive Guard 탭에 속도 경고 페이지 포함. 기준 10km/h, 기준 아래 10초 유지 시 자동 해제 | - 속도 10km/h 이상이면 Drive Guard 탭으로 자동 이동 + 붉은색 속도계 경고 표시 | - 다른 탭으로 옮겨도 운전 중이면 다시 Drive Guard로 돌아옴. 닫기 누르면 2분간은 안 뜨고, 2분 뒤 운전 중이면 다시 뜸 | - Drive Guard 페이지에는 카카오내비 없음. AI 연동 없음 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.90 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.90 업데이트
+      <textarea class="copy-box-textarea" id="copy-update-log" readonly="">📌 sudataxi-k v8.17.3 업데이트 | 📅 2026-11-24 · 🔖 빌드 v8.17.3 | ■ Apps Script 동시 실행 800회 경고 대응 - 시트 호출 줄이기 패치 | - 원인: v8.17.2 스로틀은 window 메모리에만 저장돼서 새로고침/탭마다 초기화됐고, 매출 로그가 별도 실행으로 우회했음. 승차 1번에 백업이 2~3번 나가는 구조였음 | - 수정: 모든 시트 호출(전체 백업 + 매출 로그 + GET 복원)을 하나의 게이트로 통합. 자동은 10분에 1번까지, 수동은 5초 간격, 동시에 1건만 실행. 마지막 전송 시각을 localStorage에 저장해서 새로고침/탭이 공유함 | - 수정: 매출 로그를 별도 fetch로 안 보내고 전체 백업 1건으로 합침. 전체 백업에 매출/시뮬레이터가 이미 포함돼 있어서 데이터 누락 없음 | - 수정: 같은 내용 반복 전송 스킵. 바뀐 게 없으면 10분 자동백업도 안 보냄 | - 수정: 로컬 자동백업도 3초 디바운스. 연속 저장 호출은 1번으로 합침 | - 수정: 시트에서 복원/매출 셀 불러오기도 10초 간격 게이트 적용 | - 그 외 기능, 데이터 형식, 시트 주소는 그대로. 서버 코드 변경 없음 | 📌 [sudataxi-k v8.17.2 업데이트 - 이전 내역] | 📌 sudataxi-k v8.16.38 업데이트 | 📅 2026-11-14 · 🔖 빌드 v8.16.38 |  ■ 경고 화면 사진 10장 + 사진 바뀌는 간격 바 (5초/10초/15초/20초) | - 사진 최대 5장 -&gt; 10장으로 늘림. 기존 사진은 그대로 유지되고, 추가로 더 고를 수 있음 | - DriveGuard 탭 사진 카드에 간격 바 추가. 누르면 바로 바뀌고, 꺼도 저장돼서 다음에도 그 간격으로 바뀜. 경고 화면이 떠 있을 때도 바로 적용됨 | - 그 외 사진 멈춤 수정(8.15.16), 잠금 후 승차 유지(8.15.17), A25 통계, 속도 경고는 그대로 |  📌 [sudataxi-k v8.16.37 업데이트 - 이전 내역] | 📌 sudataxi-k v8.16.37 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.16.38 |  ■ 아이폰 잠금 후 다시 열면 승차가 하차로 바뀌던 문제 수정 | - 원인: v8.16.35/16에서 재실행 시 승차를 무조건 풀어버림. 아이폰 잠금 -&gt; 사파리가 페이지 다시 읽음 -&gt; 재실행으로 판단 -&gt; 승차 해제됨 | - 수정: 마지막 저장 시각으로 구분. 60분 안 다시 열면 잠깐 잠금으로 보고 승차 유지. 60분 넘게 닫아뒀으면 새 세션으로 보고 빈차로 시작. 승차 중엔 30초마다 저장 시각 갱신해서 잠금 후에도 승차로 인식됨 | - 그 외 사진 기능, A25 통계, 속도 경고, 나머지 기능은 그대로 |  📌 [sudataxi-k v8.16.36 업데이트 - 이전 내역] | 📌 sudataxi-k v8.16.36 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.16.38 |  ■ 사진 기능 멈춤 수정 (사진 기능 자체는 유지) | - 원인: (1) 경고 class가 바뀔 때마다 Observer가 apply를 부르고 apply가 다시 class를 바꿔서 거의 무한 반복. (2) 같은 사진을 매번 src에 다시 넣어 큰 base64를 계속 재디코딩. (3) bind가 2번 돌아 Observer가 2개. (4) 사진 1280px/0.82로 너무 큼 | - 수정: Observer는 경고 show 변화만 보고 100ms로 합침. 같은 사진은 src 재설정 안 함. 타이머 중복 생성 방지. bind 1회만. 사진 저장 크기 960px/0.72로 축소. 경고 안 뜰 땐 src 안 채우고, 사진 모드 해제 시 이미지 해제해서 메모리 반환 | - 그 외 사진 선택·5장·5초 자동 전환·토글·나머지 기능은 그대로 |  📌 [sudataxi-k v8.16.35 업데이트 - 이전 내역] | 📌 sudataxi-k v8.16.35 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.16.38 |  ■ 켤 때마다 최근 위치가 탑승위치로 쌓이고 속도 경고가 안 뜨던 문제 수정 | - 원인 1: 통계 저장 키가 메모리에만 있어서 켤 때마다 날아가, 켜자마자 오는 오래된 A25를 새 콜로 또 저장함. 수정: 통계 키/시간을 localStorage에도 저장 + 10분 넘게 지난 A25 데이터는 통계/카드에 반영 안 함 (목록 표시만) | - 원인 2: 앱 재실행 시 승차중 상태를 그대로 복원해서 켜자마자 승차중으로 잡힘. 수정: 재실행 = 새 세션, 빈차로 시작. 승차중 복원 안 함 | - 원인 3: DriveGuard GPS watch가 권한 오류로 멈추면 watchId가 남아서 다시 측정을 안 함. 수정: 오류 시 watchId 비우고 5초 후 재시도 + 10초마다 재시도 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.16.34 업데이트 - 이전 내역] | 📌 sudataxi-k v8.16.34 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.16.38 |  ■ A25 통계 저장 vs 카드 적용 분리 (잘되던 A25 반영이 끊기던 버그 수정) | - 기존 문제: (1) 같은 데이터는 1회만 적용하는 dataKey가 통계 저장까지 막아서, 같은 5곳이 계속 와도 통계가 안 쌓임. (2) 저장 시간을 A25 원본 시간(찍은 시간)으로 찍어서 신선도 창이 이미 까먹은 채로 쌓임. (3) v8.16.31~13 승차 미룸이 저장까지 건너뛰고도 키를 적용했음으로 찍어서 승차 중 데이터가 영영 안 보임 | - 수정: 통계 저장은 올 때마다 쌓음 (같은 키는 5분 안에 또 안 쌓아 4초 폴링 홍수 방지). 저장 시간 = 도착 시간. 카드 적용은 키가 바뀔 때만 1회. 승차 중엔 통계는 저장하고 카드만 미룸 + 카드 키를 찍지 않음. 하차 후 카드 적용 시 통계 중복 저장 방지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.16.33 업데이트 - 이전 내역] | 📌 sudataxi-k v8.16.33 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.16.38 |  ■ 경고 화면 다듬기 | - 속도 아래 작은 설명 글씨 삭제 | - 알약 2개(전체운행·대기중) 작게 줄여서 한 줄에 표시 (글자 15→11, 여백 축소, 줄바꿈 금지) | - 경고 큰 글자 44→29로 1/3 축소 | - 경고 화면 사진 5초마다 자동 전환 (사진 2장 이상일 때만. 사진 탭하면 수동으로도 넘김) | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.16.32 업데이트 - 이전 내역] | 📌 sudataxi-k v8.16.32 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.16.38 |  ■ 경고 화면 사진 토글 | - 기존: 경고 화면은 문자안내만 뜸 | - 수정: DriveGuard 탭에 경고 화면 사진 카드 추가. 사진첩에서 내가 고른 사진만(최대 5장) 이 기기 안에 저장됨. 사진첩 전체가 자동으로 뜨지 않음. 경고 화면의 사진으로 보기 버튼을 누르면 사진 ↔ 문자안내로 전환됨. 여러 장이면 경고 화면 사진 탭 시 다음 사진으로. 미리보기 사진 탭하면 그 사진만 삭제 | - 사진은 서버로 안 나가고, 화면용으로 줄여서 저장됨 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.16.31 업데이트 - 이전 내역] | 📌 sudataxi-k v8.16.31 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.16.38 |  ■ 콜검색 속도 구조 개선 (판단 로직·가산점·필터 그대로) | - 기존: 날씨→카카오→도로경로 순차 대기 + 타임아웃 없음 + 승차 중에도 검색 계속 + 중복 연산 겹침이라 연산 중이 오래 걸림 | - 수정: (1) 날씨+카카오 병렬 + 각 3초 타임아웃, (2) 검색마다 runId로 이전 연산 버림, (3) 승차 중엔 새 검색 시작 금지 + 돌던 연산 취소, A25는 저장만 하고 하차 후 1회 반영, (4) A25 Firebase fetch 3초 타임아웃 | - 결과: 승차 중엔 검색 안 돌고, 하차하면 자동 재개. 카드가 먼저 뜨고 느린 호출은 버리고 넘어감 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.16.30 업데이트 - 이전 내역] | 📌 sudataxi-k v8.16.30 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.16.38 |  ■ 대시보드 두 설정 한 줄로 축소 | - 기존: 운행 기준 시간 / 낮밤 자동 전환이 각각 큰 카드로 2줄을 차지하고 설명 텍스트까지 있었음 | - 수정: 두 설정을 한 줄에 나란히 배치하고, 제목·설명 텍스트를 없애고 크기 축소. 운행 기준 시간은 🕒+시간 선택, 낮밤 자동 전환은 🌗+모드 선택+사용 체크만 남김. 시간 직접 지정 시 시간 입력은 그때만 나타남 | - ID·동작은 그대로 (운행 기준 시간, 낮밤 모드/사용/시간 입력 모두 기존 그대로 동작) | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.9 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.9 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.15.9 |  ■ A25 콜카드 즉시 표시 | - 기존: A25 수신 후 날씨/카카오/도로거리 전체 연산이 끝날 때까지 콜카드가 안 떠서, A25 위치가 와도 늦게 반영됨 | - 수정: A25 수신 즉시 직선거리+추정시간으로 콜카드 3장을 먼저 표시. 전체 연산이 끝나면 그 결과로 자연스럽게 교체. A25 이름 해석도 기다리지 않고 캐시된 이름이 있으면 표시 | ■ 버전 표시 8→7로 돌아가던 문제 수정 | - 원인: 헤더를 다시 그리는 함수에 v8.15.7이 하드코딩돼 있어, 로드 직후 8로 바꿔도 헤더 재렌더 시 7로 덮어씌워졌음 | - 수정: 헤더 템플릿의 하드코딩을 BUILD_VERSION으로 교체. 이제 헤더를 다시 그려도 현재 빌드로 유지됨 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.8 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.8 업데이트 | 📅 2026-11-13 · 🔖 빌드 v8.15.8 |  ■ Drive Guard 자동 탭 이동 제거 | - 속도 10km/h 이상이어도 탭6으로 강제 이동하지 않고 경고창만 뜸. 경고 해제 시 대시보드로 강제 이동하지 않고 현재 탭 유지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.7 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.7 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.7 |  ■ 경고 문구 5개 리스트 + 2분마다 랜덤 변경 | - 기존: 경고 문구가 1개 고정이라 같은 문구만 계속 떴음 | - 수정: Drive Guard 탭에 경고 문구 5개 입력란 추가. 채운 문구 중 하나가 2분마다 랜덤으로 바뀜. 채운 게 1개면 그 문구만 뜸. 경고가 새로 뜰 때도 랜덤으로 1개 선택. 🎲 지금 다른 문구로 바꾸기 버튼으로 바로 확인 가능. 기존 1개 문구는 자동으로 리스트 1번으로 옮겨짐. 저장은 기존 다중 저장(빌드업해도 유지) 그대로 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.6 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.6 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.6 |  ■ 경고 문구 빌드업해도 유지되게 다중 저장으로 변경 | - 기존: 경고 문구는 localStorage 한 곳에만 저장돼서, 빌드업/저장소 정리 때 날아가면 기본 문구로 돌아갔음 | - 수정: 대시보드 운행기록과 같은 방식 적용 - 저장할 때 localStorage + 세션 + 쿠키(365일) + IndexedDB 네 곳에 동시 저장. 불러올 때는 localStorage가 비어도 세션/쿠키에서 복구하고 localStorage에 다시 채움 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.5 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.5 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.5 |  ■ 가드 탭에 경고 문구 입력란 추가 | - 기존: 빨간 경고 문구(운전 중입니다. 작업은 정차 후에)가 고정이라 바꿀 수 없었음 | - 수정: Drive Guard 탭에 경고 문구 입력란 추가. 입력하면 빨간 경고의 큰 문구가 그대로 바뀌고, 줄바꿈하면 두 줄로 표시됨. 입력 내용은 저장되어 다음에 열어도 유지되고, 기본 문구로 되돌리기 버튼으로 복원 가능 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.4 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.4 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.4 |  ■ 속도 측정 안 됨 긴급 수정 | - 원인: v8.15.3 패치 때 진짜 줄바꿈이 아니라 \n 문자 그대로가 Drive Guard 스크립트에 들어가서 스크립트 전체가 문법 오류로 멈추고 GPS 측정(watchPosition)이 시작도 안 됐음 | - 수정: 잘못 들어간 \n을 진짜 줄바꿈으로 교체하고 스크립트 문법 검사 통과 확인. 경고 중간 운행시간 표시(v8.15.3 기능)는 그대로 유지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.3 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.3 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.3 |  ■ 속도 경고 중간 빈 공간에 운행시간 표시 추가 | - 기존: 빨간 속도 경고에는 속도만 뜨고 전체운행/승차중 시간이 안 보였음 | - 수정: 경고 중간 빈 공간(설명문 아래, 닫기 버튼 위)에 사진과 같은 흰색 알약 2개 추가 - 왼쪽 전체운행, 오른쪽 승차중/대기중 등 현재 상태. 하단바 텍스트를 그대로 복사해서 1초마다 갱신이라 시간 어긋남 없음 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.15.2 업데이트 - 이전 내역] | 📌 sudataxi-k v8.15.2 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.15.2 |  ■ 속도 경고 꺼지면 대시보드로 복귀 | - 기존: 속도 안내(Drive Guard 경고)가 꺼져도 가드 메뉴(탭6)에 그대로 머물렀음 | - 수정: 기준 아래 10초 유지로 경고가 자동 해제될 때 대시보드(탭4)로 자동 이동. 닫기 버튼·끄기 버튼 동작은 그대로 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.16.3 업데이트 - 이전 내역] | 📌 sudataxi-k v8.16.3 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.16.3 |  ■ 동선 지도 보기 안 뜸 수정 | - 원인: #map-modal에 인라인 display:none이 박혀 있어 .active(display:flex)가 이기지 못해 지도가 안 떴고, 하단 메뉴만 사라졌음 | - 수정: 열 때 인라인을 display:flex로 풀고, 닫을 때 다시 display:none으로 복원. 동선 0개면 fitBounds 에러 방지 가드 추가 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.16.3 업데이트 - 이전 내역] | 📌 sudataxi-k v8.16.3 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.16.3 |  ■ Drive Guard 주야간 토글 따라가게 수정 | - 기존: Drive Guard 탭 카드가 #1c1c1e / #fff / #aaa 하드코딩이라 주야간 토글해도 계속 어두웠음 | - 수정: 탭 카드·속도계·작은 글씨를 var(--card-bg) / var(--main-text) / var(--stat-label) / var(--card-border)로 변경. 주야간 토글·자동 테마 모두 따라감. 끄기 버튼도 var(--btn-idle-bg) 등으로 변경 | - 경고 화면은 야간/주간 모두 빨간색(#d7000f) 유지 - 운전 중 경고라서 눈에 띄어야 함 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.94 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.94 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.14.94 |  ■ 터치 전부 안 됨 진짜 원인 수정 | - 원인: 탭6 붙일 때 }를 하나 더 넣어서 setTab 함수가 중간에 끊기고, 그 뒤 else if가 문법 오류가 되어 메인 스크립트 전체가 안 뜸. 그래서 버튼 리스너도 안 붙고, 대시보드로 이동하는 코드도 안 뛰고, 콜지도에 머물면서 터치가 전부 안 됐음 | - 수정: } 하나 제거해서 if-else 체인 복원. 이제 메인 스크립트 정상 동작 | - 첫 화면: 대시보드로 복원. v8.14.93에서 탭1로 잘못 바꾼 것 되돌림. 첫 화면은 대시보드(탭4)가 맞음 | - 경고 배경 pointer-events:none, 닫기만 클릭, Drive Guard 끄기 버튼, 낀 모달 정리는 v8.14.93 그대로 유지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.93 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.93 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.14.93 |  ■ 터치 전부 안 됨 + 첫 화면 대시보드 수정 | - 첫 화면: 대시보드 강제 이동(setTab(4)) 제거. 원래 의도대로 첫 화면은 추천/콜찾기(탭1)로 복원 | - 터치 막힘: setTab 안에 있던 Drive Guard 자동복귀 가드를 아예 제거. setTab은 이제 깨끗하게 탭만 바꿈 | - 경고: 배경은 pointer-events:none으로 절대 터치를 안 막고, 닫기 버튼만 pointer-events:auto. 경고가 떠 있어도 다른 버튼 다 눌림 | - 자동이동: 1회만, 반복 setTab 호출 제거. Drive Guard 끄기 버튼 추가 (자동이동·경고 전부 끔, localStorage 저장) | - 낀 모달 정리: 로드 시 modal-open/map-modal-open/a25-pin-open 제거. 낀 모달 때문에 하단바가 display:none이 되어 터치 안 되는 것처럼 보이는 것 방지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.92 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.92 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.14.92 |  ■ Drive Guard 버튼 막힘 수정 | - 원인: 속도 값이 오래돼도 계속 운전 중으로 보고 모든 탭 이동을 즉시 Drive Guard로 강제해서 다른 버튼이 안 눌리는 것처럼 보였음. 경고가 숨겨져도 클릭을 막을 수 있는 구조였음 | - 수정: 속도 신선도 5초만 운전 중으로 봄. 탭 이동은 막지 않고, 이동 후 1.5초 뒤에도 운전 중이면 Drive Guard로 돌아옴. 경고 숨김 상태에서는 클릭을 절대 막지 않음 (pointer-events:none + visibility:hidden) | - 닫기 버튼 하단 잘림 방지, Drive Guard 바인드 중복 방지 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.91 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.91 업데이트 | 📅 2026-11-12 · 🔖 빌드 v8.14.91 |  ■ Drive Guard 탭 추가 | - 하단 메뉴에서 가로로 길었던 Taxi DJ 한 칸을 둘로 나눠서 왼쪽 Taxi DJ / 오른쪽 Drive Guard | - Drive Guard 탭에 속도 경고 페이지 포함. 기준 10km/h, 기준 아래 10초 유지 시 자동 해제 | - 속도 10km/h 이상이면 Drive Guard 탭으로 자동 이동 + 붉은색 속도계 경고 표시 | - 다른 탭으로 옮겨도 운전 중이면 다시 Drive Guard로 돌아옴. 닫기 누르면 2분간은 안 뜨고, 2분 뒤 운전 중이면 다시 뜸 | - Drive Guard 페이지에는 카카오내비 없음. AI 연동 없음 | - 그 외 디자인·기능은 건드리지 않음 |  📌 [sudataxi-k v8.14.90 업데이트 - 이전 내역] | 📌 sudataxi-k v8.14.90 업데이트
 📅 2026-11-11 · 🔖 빌드 v8.14.90
 
 ■ A25 위치 수신 - center 버려지던 문제 수정
@@ -11203,4 +11214,4 @@ document.addEventListener('keydown', (e)=>{
 })();
 </script>
 
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body></html>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body></html>
